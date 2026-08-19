@@ -20,3 +20,13 @@ export default defineConfig([
     },
   },
 ])
+
+module.exports = {
+  // ... outras configurações
+  parserOptions: {
+    ecmaVersion: 'latest',
+    sourceType: 'module',
+    project: ['./tsconfig.json', './frontend/tsconfig.json'], // Aponta para os tsconfig do projeto
+    tsconfigRootDir: __dirname, // Define a raiz absoluta do projeto
+  },
+}
