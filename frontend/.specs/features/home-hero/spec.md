@@ -6,10 +6,10 @@ O frontend ainda exibe o template inicial do Vite e não representa a identidade
 
 ## Goals
 
-- [ ] Reproduzir a hero desktop do Figma com fidelidade visual no viewport de referência de `1728 × 1117 px`.
-- [ ] Derivar comportamentos responsivos utilizáveis para desktop, tablet e mobile sem overflow horizontal.
-- [ ] Entregar navegação e miniformulário semanticamente corretos, operáveis por teclado e sem integração externa.
-- [ ] Estabelecer tokens, fontes e componentes reutilizáveis para as próximas seções da landing page.
+- [x] Reproduzir a hero desktop do Figma com fidelidade visual no viewport de referência de `1728 × 1117 px`.
+- [x] Derivar comportamentos responsivos utilizáveis para desktop, tablet e mobile sem overflow horizontal.
+- [x] Entregar navegação e miniformulário semanticamente corretos, operáveis por teclado e sem integração externa.
+- [x] Estabelecer tokens, fontes e componentes reutilizáveis para as próximas seções da landing page.
 
 ## Out of Scope
 
@@ -142,24 +142,24 @@ O frontend ainda exibe o template inicial do Vite e não representa a identidade
 
 | Requirement ID | Story | Phase | Status |
 | --- | --- | --- | --- |
-| HOME-01 | P1: Hero fiel | Tasks | Implementing |
-| HOME-02 | P1: Hero fiel | Tasks | Implementing |
-| HOME-03 | P1: Hero fiel | Tasks | Implementing |
-| HOME-04 | P1: Hero fiel | Tasks | Implementing |
-| HOME-05 | P1: Hero fiel | Tasks | Implementing |
-| HOME-06 | P1: Navegação responsiva | Tasks | Implementing |
-| HOME-07 | P1: Navegação responsiva | Tasks | Implementing |
-| HOME-08 | P1: Navegação responsiva | Tasks | Implementing |
-| HOME-09 | P1: Navegação responsiva | Tasks | Implementing |
-| HOME-10 | P1: Navegação responsiva | Tasks | Implementing |
-| HOME-11 | P1: Miniformulário | Tasks | Implementing |
-| HOME-12 | P1: Miniformulário | Tasks | Implementing |
-| HOME-13 | P1: Miniformulário | Tasks | Implementing |
-| HOME-14 | P1: Miniformulário | Tasks | Implementing |
-| HOME-15 | P2: Acessibilidade e SEO | Tasks | Implementing |
-| HOME-16 | P2: Acessibilidade e SEO | Tasks | Implementing |
-| HOME-17 | P2: Acessibilidade e SEO | Tasks | Implementing |
-| HOME-18 | P2: Acessibilidade e SEO | Tasks | Implementing |
+| HOME-01 | P1: Hero fiel | Tasks | Verified |
+| HOME-02 | P1: Hero fiel | Tasks | Verified |
+| HOME-03 | P1: Hero fiel | Tasks | Verified |
+| HOME-04 | P1: Hero fiel | Tasks | Verified |
+| HOME-05 | P1: Hero fiel | Tasks | Verified |
+| HOME-06 | P1: Navegação responsiva | Tasks | Verified |
+| HOME-07 | P1: Navegação responsiva | Tasks | Verified |
+| HOME-08 | P1: Navegação responsiva | Tasks | Verified |
+| HOME-09 | P1: Navegação responsiva | Tasks | Verified |
+| HOME-10 | P1: Navegação responsiva | Tasks | Verified |
+| HOME-11 | P1: Miniformulário | Tasks | Verified |
+| HOME-12 | P1: Miniformulário | Tasks | Verified |
+| HOME-13 | P1: Miniformulário | Tasks | Verified |
+| HOME-14 | P1: Miniformulário | Tasks | Verified |
+| HOME-15 | P2: Acessibilidade e SEO | Tasks | Verified |
+| HOME-16 | P2: Acessibilidade e SEO | Tasks | Verified |
+| HOME-17 | P2: Acessibilidade e SEO | Tasks | Verified |
+| HOME-18 | P2: Acessibilidade e SEO | Tasks | Verified |
 
 **Coverage:** 18 requisitos, 18 mapeados para o design, 0 não mapeados.
 
@@ -167,8 +167,8 @@ O frontend ainda exibe o template inicial do Vite e não representa a identidade
 
 ## Success Criteria
 
-- [ ] Captura desktop validada contra o screenshot do Figma no viewport de referência.
-- [ ] Nenhum overflow horizontal nos viewports de `320`, `390`, `768`, `1024` e `1728 px`.
-- [ ] Todos os controles utilizáveis por teclado e identificáveis por nome acessível.
-- [ ] Formulário mantém estado local e não produz requisições ou navegação.
-- [ ] `npm run test`, `npm run lint` e `npm run build` passam.
+- [x] Captura desktop validada contra o screenshot do Figma no viewport de referência.
+- [x] Nenhum overflow horizontal nos viewports de `320`, `390`, `768`, `1024` e `1728 px`.
+- [x] Todos os controles utilizáveis por teclado e identificáveis por nome acessível.
+- [x] Formulário mantém estado local e não produz requisições ou navegação.
+- [x] `npm run test`, `npm run lint` e `npm run build` passam.

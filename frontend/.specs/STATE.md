@@ -13,10 +13,10 @@
 ## Handoff
 
 - **Feature**: Home Hero / `.specs/features/home-hero/`
-- **Phase / Task**: Validate / verificação independente
-- **Completed**: planejamento, T1, T2, T3, T4, T5, T6, T7, T8, T9
+- **Phase / Task**: Complete / validação independente PASS
+- **Completed**: planejamento, T1, T2, T3, T4, T5, T6, T7, T8, T9, Verifier e sensor de discriminação
 - **In-progress** (file:line): none
-- **Next step**: executar o Verifier independente e o sensor de discriminação
+- **Next step**: feature pronta para revisão visual do usuário ou próxima seção da landing page
 - **Blockers**: none
-- **Uncommitted files**: arquivos da T9 até o commit atômico
+- **Uncommitted files**: relatório e encerramento da validação até o commit final
 - **Branch**: `feature/home-page`

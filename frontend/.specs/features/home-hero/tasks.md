@@ -9,7 +9,7 @@ Se a skill não puder ser ativada, interromper e informar o usuário. Cada taref
 ---
 
 **Design**: `.specs/features/home-hero/design.md`
-**Status**: Approved
+**Status**: Complete — independently verified PASS
 
 ---
 
