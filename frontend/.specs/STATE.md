@@ -13,10 +13,10 @@
 ## Handoff
 
 - **Feature**: Home Hero / `.specs/features/home-hero/`
-- **Phase / Task**: Phase 1 / T3 — versionar os assets originais do Figma
-- **Completed**: planejamento, T1, T2
+- **Phase / Task**: Phase 2 / T4 — criar ActionButton
+- **Completed**: planejamento, T1, T2, T3
 - **In-progress** (file:line): none
-- **Next step**: implementar T3 e executar o gate Build isolado
+- **Next step**: implementar T4 com testes e executar o gate Build
 - **Blockers**: none
-- **Uncommitted files**: assets iniciais removidos pelo usuário e logo Civix local ainda não versionado
+- **Uncommitted files**: assets iniciais removidos pelo usuário e arquivo-fonte do logo local fora do manifest
 - **Branch**: `feature/home-page`

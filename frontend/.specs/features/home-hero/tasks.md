@@ -134,14 +134,16 @@ T8 -> T9
 
 **Done when**:
 
-- [ ] Os cinco assets do manifest existem localmente com bytes exportados do Figma.
-- [ ] Nenhum asset usa URL MCP temporária no código.
-- [ ] SVGs mantêm `viewBox` e renderizam no tamanho esperado.
-- [ ] Gate Build passa.
+- [x] Os cinco assets do manifest existem localmente com bytes exportados do Figma.
+- [x] Nenhum asset usa URL MCP temporária no código.
+- [x] SVGs mantêm `viewBox` e renderizam no tamanho esperado.
+- [x] Gate Build passa.
 
 **Tests**: build-only
 **Gate**: build
-**Commit**: `assets(home): add Figma hero exports`
+**Commit**: `chore(home): add Figma hero exports`
+
+**Status**: ✅ Complete — cinco assets locais verificados; quatro SVGs preservam `viewBox`; lint e build passaram no worktree isolado.
 
 ### Phase 2: Components
 
