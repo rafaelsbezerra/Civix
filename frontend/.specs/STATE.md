@@ -13,10 +13,10 @@
 ## Handoff
 
 - **Feature**: Home Hero / `.specs/features/home-hero/`
-- **Phase / Task**: Phase 2 / T4 — criar ActionButton
-- **Completed**: planejamento, T1, T2, T3
+- **Phase / Task**: Phase 2 / T5 — criar SiteHeader responsivo
+- **Completed**: planejamento, T1, T2, T3, T4
 - **In-progress** (file:line): none
-- **Next step**: implementar T4 com testes e executar o gate Build
+- **Next step**: implementar T5 com testes de integração e executar o gate Quick
 - **Blockers**: none
-- **Uncommitted files**: assets iniciais removidos pelo usuário e arquivo-fonte do logo local fora do manifest
+- **Uncommitted files**: arquivos da T4 até o commit atômico
 - **Branch**: `feature/home-page`

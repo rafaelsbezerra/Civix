@@ -162,15 +162,17 @@ T8 -> T9
 
 **Done when**:
 
-- [ ] As três variantes reproduzem cores, dimensões e raio do Figma.
-- [ ] Props de âncora são repassadas sem remover nome acessível.
-- [ ] Seta é decorativa e tem `24 × 24 px` quando exibida.
-- [ ] Testes cobrem as três variantes, href, seta e focus class.
-- [ ] Gate Quick passa com pelo menos 5 testes do componente.
+- [x] As três variantes reproduzem cores, dimensões e raio do Figma.
+- [x] Props de âncora são repassadas sem remover nome acessível.
+- [x] Seta é decorativa e tem `24 × 24 px` quando exibida.
+- [x] Testes cobrem as três variantes, href, seta e focus class.
+- [x] Gate Quick passa com pelo menos 5 testes do componente.
 
 **Tests**: unit
 **Gate**: quick
 **Commit**: `feat(home): add action button variants`
+
+**Status**: ✅ Complete — 6 testes unitários passaram e o lint está limpo.
 
 #### T5: Criar SiteHeader responsivo
 
