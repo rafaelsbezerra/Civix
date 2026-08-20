@@ -304,14 +304,16 @@ T8 -> T9
 
 **Done when**:
 
-- [ ] Documento mantém `lang="pt-BR"` e viewport responsivo.
-- [ ] Título é exatamente “Civix”.
-- [ ] Meta description descreve conexão de clientes, serviços e empresas.
-- [ ] Gate Build passa.
+- [x] Documento mantém `lang="pt-BR"` e viewport responsivo.
+- [x] Título é exatamente “Civix”.
+- [x] Meta description descreve conexão de clientes, serviços e empresas.
+- [x] Gate Build passa.
 
 **Tests**: build-only
 **Gate**: build
 **Commit**: `feat(home): add landing metadata`
+
+**Status**: ✅ Complete — metadados verificados e build de produção concluído sem erros.
 
 ---
 
