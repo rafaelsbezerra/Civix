@@ -107,15 +107,17 @@ T8 -> T9
 
 **Done when**:
 
-- [ ] Tokens do design estão declarados com valores exatos.
-- [ ] Inter Variable e Urbanist Variable são servidas pelo bundle.
-- [ ] Paleta clara não muda com `prefers-color-scheme`.
-- [ ] Reset global remove limitações do template Vite.
-- [ ] Gate Build passa.
+- [x] Tokens do design estão declarados com valores exatos.
+- [x] Inter Variable e Urbanist Variable são servidas pelo bundle.
+- [x] Paleta clara não muda com `prefers-color-scheme`.
+- [x] Reset global remove limitações do template Vite.
+- [x] Gate Build passa.
 
 **Tests**: build-only
 **Gate**: build
 **Commit**: `style(home): add Civix design tokens`
+
+**Status**: ✅ Complete — lint e build passaram no worktree isolado; o bundle emitiu as fontes Inter e Urbanist em WOFF2.
 
 #### T3: Versionar os assets originais do Figma
 
