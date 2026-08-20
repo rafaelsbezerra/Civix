@@ -276,16 +276,18 @@ T8 -> T9
 
 **Done when**:
 
-- [ ] A página contém `header`, `nav`, `main`, um único `h1` e âncoras locais.
-- [ ] Nenhum conteúdo do template Vite é renderizado.
-- [ ] Testes cobrem landmarks, h1 único e integração dos componentes.
-- [ ] Capturas nos cinco viewports não apresentam overflow horizontal.
-- [ ] Em `1728 × 1117 px`, elementos-chave permanecem dentro da tolerância de `±2 px`.
-- [ ] Gate Full passa com pelo menos 3 testes de App e todos os testes anteriores.
+- [x] A página contém `header`, `nav`, `main`, um único `h1` e âncoras locais.
+- [x] Nenhum conteúdo do template Vite é renderizado.
+- [x] Testes cobrem landmarks, h1 único e integração dos componentes.
+- [x] Capturas nos cinco viewports não apresentam overflow horizontal.
+- [x] Em `1728 × 1117 px`, elementos-chave permanecem dentro da tolerância de `±2 px`.
+- [x] Gate Full passa com pelo menos 3 testes de App e todos os testes anteriores.
 
 **Tests**: unit + visual
 **Gate**: full
 **Commit**: `feat(home): compose Civix landing hero`
+
+**Status**: ✅ Complete — 32 testes, lint e build passaram; cinco viewports sem overflow; geometria desktop dentro de ±0,5 px e console limpo.
 
 #### T9: Definir metadados básicos da home
 

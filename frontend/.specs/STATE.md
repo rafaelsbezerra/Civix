@@ -13,10 +13,10 @@
 ## Handoff
 
 - **Feature**: Home Hero / `.specs/features/home-hero/`
-- **Phase / Task**: Phase 3 / T8 — compor a primeira tela da home
-- **Completed**: planejamento, T1, T2, T3, T4, T5, T6, T7
+- **Phase / Task**: Phase 3 / T9 — definir metadados básicos da home
+- **Completed**: planejamento, T1, T2, T3, T4, T5, T6, T7, T8
 - **In-progress** (file:line): none
-- **Next step**: implementar T8, validar build e viewports no navegador
+- **Next step**: implementar T9 e executar o gate Build
 - **Blockers**: none
-- **Uncommitted files**: arquivos da T7 até o commit atômico; ajuste local concorrente em `SiteHeader.tsx`
+- **Uncommitted files**: arquivos da T8 até o commit atômico
 - **Branch**: `feature/home-page`

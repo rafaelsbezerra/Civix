@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest'
 import { ActionButton } from './ActionButton'
 
 describe('ActionButton', () => {
-  it('renders the primary variant with the Civix gold treatment', () => {
+  it('renders the primary variant with the Civix navy treatment', () => {
     render(
       <ActionButton href="#busca" variant="primary">
         Começar agora
@@ -13,7 +13,7 @@ describe('ActionButton', () => {
 
     const link = screen.getByRole('link', { name: 'Começar agora' })
     expect(link).toHaveAttribute('href', '#busca')
-    expect(link).toHaveClass('bg-[var(--color-civix-gold)]')
+    expect(link).toHaveClass('bg-[#07192a]')
   })
 
   it('renders the light variant', () => {
@@ -24,7 +24,7 @@ describe('ActionButton', () => {
     )
 
     expect(screen.getByRole('link', { name: 'Saiba mais' })).toHaveClass(
-      'bg-[var(--color-civix-ivory)]',
+      'bg-[#faf9f6]',
     )
   })
 

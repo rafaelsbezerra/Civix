@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 
 import logoCivix from '@/assets/civix/logo-civix.png'
-import { ActionButton } from '@/components/ui/ActionButton'
+import { ActionButton } from '../ui/ActionButton'
 
 export interface NavigationItem {
   href: `#${string}`
@@ -43,7 +43,7 @@ export function SiteHeader({
     <header className="relative z-50 mx-auto flex h-[106px] w-full max-w-[1728px] items-center justify-between px-6 sm:px-10 lg:px-16 xl:px-32">
       <a
         aria-label="Civix — início"
-        className="shrink-0 rounded-sm"
+        className="shrink-0 rounded-sm lg:-translate-y-[5px]"
         href="#home"
       >
         <img
@@ -55,13 +55,13 @@ export function SiteHeader({
         />
       </a>
 
-      <div className="hidden items-center gap-[18px] lg:flex">
-        <nav aria-label="Navegação principal">
-          <ul className="flex items-center gap-8">
+      <div className="hidden items-center gap-[18px] lg:flex lg:-translate-y-1">
+        <nav aria-label="Navegação principal" className="h-[19px]">
+          <ul className="flex h-[19px] items-center gap-[30.48px]">
             {navigationItems.map((item) => (
               <li key={item.href}>
                 <a
-                  className="font-[var(--font-body)] text-[13px] font-normal leading-[19px] text-[var(--color-civix-navy)] transition-colors hover:text-[var(--color-civix-gold)]"
+                  className="font-[var(--font-body)] text-base font-normal leading-[19px] text-[var(--color-civix-navy)] transition-colors hover:text-[var(--color-civix-gold)]"
                   href={item.href}
                 >
                   {item.label}
@@ -70,7 +70,12 @@ export function SiteHeader({
             ))}
           </ul>
         </nav>
-        <ActionButton href="#contato" variant="primary">
+        <ActionButton
+          className="w-[138px] min-w-0 gap-2 px-3"
+          href="#contato"
+          showArrow
+          variant="primary"
+        >
           Contato
         </ActionButton>
       </div>

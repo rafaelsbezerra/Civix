@@ -8,7 +8,7 @@ export function HeroSection() {
   return (
     <section
       aria-labelledby="hero-title"
-      className="px-4 pb-12 sm:px-8 lg:px-16 lg:pb-0"
+      className="px-4 pb-12 sm:px-8 lg:px-16 lg:pb-0 lg:pt-[3px]"
       id="home"
     >
       <div className="relative mx-auto w-full max-w-[1600px] lg:h-[953px]">
@@ -25,22 +25,25 @@ export function HeroSection() {
           <img
             aria-hidden="true"
             alt=""
-            className="absolute -right-20 top-10 w-[260px] opacity-80 sm:right-8 sm:w-[340px] lg:right-[72px] lg:top-[72px] lg:w-[432px]"
+            className="absolute -left-20 -top-24 w-[320px] opacity-80 sm:-left-16 sm:-top-32 sm:w-[432px]"
             src={decorativeShape}
           />
 
-          <div className="relative z-10 px-6 pb-36 pt-16 text-[var(--color-civix-ivory)] sm:px-10 sm:pt-20 lg:px-0 lg:pb-0 lg:pl-[63px] lg:pt-[124px]">
+          <div className="relative z-10 px-6 pb-36 pt-16 text-[var(--color-civix-ivory)] sm:px-10 sm:pt-20 lg:absolute lg:left-[63px] lg:top-[124px] lg:p-0">
             <h1
-              className="max-w-[643px] font-[var(--font-display)] text-[clamp(2.5rem,5vw,4rem)] font-semibold uppercase leading-[1.08] tracking-[-0.02em] lg:leading-[80px]"
+              className="max-w-[643px] font-[var(--font-display)] text-[clamp(2.5rem,5vw,4rem)] font-semibold uppercase leading-[1.08] tracking-[-0.02em] lg:w-[643px] lg:leading-[80px] lg:tracking-[-0.034em]"
               id="hero-title"
             >
-              A TECNOLOGIA QUE CONSTRÓI O FUTURO
+              <span className="lg:block lg:whitespace-nowrap">A TECNOLOGIA QUE</span>{' '}
+              <span className="lg:block lg:whitespace-nowrap lg:tracking-[-0.045em]">
+                CONSTRÓI O FUTURO
+              </span>
             </h1>
-            <p className="mt-6 max-w-[511px] font-[var(--font-body)] text-base font-normal leading-7 text-[var(--color-civix-ivory)]/90 sm:text-lg">
+            <p className="mt-6 max-w-[511px] font-[var(--font-body)] text-base font-normal leading-[normal] text-[var(--color-civix-ivory)]/90 sm:text-lg lg:absolute lg:left-0 lg:top-[152px] lg:mt-0 lg:w-[511px] lg:leading-[20.6667px]">
               A plataforma que conecta pessoas, serviços e soluções para transformar o
-              mercado da construção com inovação, praticidade e confiança.
+              mercado da construção e inovação, praticidade e confiança
             </p>
-            <div className="mt-8 flex flex-wrap gap-[18px]">
+            <div className="mt-8 flex flex-wrap gap-[18px] lg:absolute lg:left-0 lg:top-[252px] lg:mt-0">
               <ActionButton href="#sobre" variant="light">
                 Sobre nós
               </ActionButton>
