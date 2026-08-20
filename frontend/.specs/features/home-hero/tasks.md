@@ -189,16 +189,18 @@ T8 -> T9
 
 **Done when**:
 
-- [ ] Desktop mostra logo, quatro âncoras e CTA nas posições previstas.
-- [ ] Viewports abaixo de 1024 px usam botão com `aria-expanded` e `aria-controls`.
-- [ ] Seleção de âncora e tecla Escape fecham o menu.
-- [ ] Fechamento por Escape devolve foco ao botão.
-- [ ] Testes cobrem desktop, toggle, Escape, seleção e atributos acessíveis.
-- [ ] Gate Quick passa com pelo menos 6 testes do componente.
+- [x] Desktop mostra logo, quatro âncoras e CTA nas posições previstas.
+- [x] Viewports abaixo de 1024 px usam botão com `aria-expanded` e `aria-controls`.
+- [x] Seleção de âncora e tecla Escape fecham o menu.
+- [x] Fechamento por Escape devolve foco ao botão.
+- [x] Testes cobrem desktop, toggle, Escape, seleção e atributos acessíveis.
+- [x] Gate Quick passa com pelo menos 6 testes do componente.
 
 **Tests**: unit
 **Gate**: quick
 **Commit**: `feat(home): add responsive site header`
+
+**Status**: ✅ Complete — 7 testes unitários passaram e o lint está limpo.
 
 #### T6: Criar SearchForm local
 
