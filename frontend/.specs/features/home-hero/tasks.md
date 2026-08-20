@@ -246,16 +246,18 @@ T8 -> T9
 
 **Done when**:
 
-- [ ] Desktop preserva container `1600 × 900 px` no viewport de referência.
-- [ ] Título, texto e CTAs seguem medidas e tipografia do Figma.
-- [ ] Ilustração e forma decorativa usam assets originais e crop responsivo.
-- [ ] Busca sobrepõe a base no desktop e entra no fluxo no mobile.
-- [ ] Testes cobrem heading, copy, CTAs, assets decorativos e formulário composto.
-- [ ] Gate Quick passa com pelo menos 5 testes do componente.
+- [x] Desktop preserva container `1600 × 900 px` no viewport de referência.
+- [x] Título, texto e CTAs seguem medidas e tipografia do Figma.
+- [x] Ilustração e forma decorativa usam assets originais e crop responsivo.
+- [x] Busca sobrepõe a base no desktop e entra no fluxo no mobile.
+- [x] Testes cobrem heading, copy, CTAs, assets decorativos e formulário composto.
+- [x] Gate Quick passa com pelo menos 5 testes do componente.
 
 **Tests**: unit
 **Gate**: quick
 **Commit**: `feat(home): build responsive hero section`
+
+**Status**: ✅ Complete — 6 testes da hero e 28 testes totais passaram; lint limpo.
 
 ### Phase 3: Integration
 
