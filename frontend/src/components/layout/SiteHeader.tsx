@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 
 import logoCivix from '@/assets/civix/logo-civix.png'
-import { ActionButton } from '../ui/ActionButton'
+import { ActionButton } from '@/components/ui/ActionButton'
 
 export interface NavigationItem {
   href: `#${string}`

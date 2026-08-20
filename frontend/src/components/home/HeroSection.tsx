@@ -1,8 +1,7 @@
-import decorativeShape from '@/assets/civix/decorative-shape.svg'
-import heroArtwork from '@/assets/civix/hero-artwork.svg'
-import { ActionButton } from '../ui/ActionButton'
-
-import { SearchForm } from './SearchForm'
+import decorativeShape from '@/assets/civix/decorative-shape.svg';
+import heroArtwork from '@/assets/civix/hero-artwork.svg';
+import { ActionButton } from '@/components/ui/ActionButton';
+import { SearchForm } from './SearchForm';
 
 export function HeroSection() {
   return (
