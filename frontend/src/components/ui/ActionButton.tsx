@@ -36,7 +36,7 @@ export function ActionButton({
 }: ActionButtonProps) {
   return (
     <a
-      className={`inline-flex min-h-11 min-w-[138px] items-center justify-center gap-2.5 rounded-[var(--radius-control)] px-6 font-[var(--font-display)] text-lg font-semibold leading-[19.8px] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-civix-gold)] lg:min-h-[42px] ${variantClasses[variant]} ${className}`.trim()}
+      className={`action-button--${variant} inline-flex min-h-11 min-w-[138px] items-center justify-center gap-2.5 rounded-[var(--radius-control)] px-6 font-[family-name:var(--font-display)] text-lg font-semibold leading-[19.8px] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 lg:min-h-[42px] ${variantClasses[variant]} ${className}`.trim()}
       style={{ ...variantStyles[variant], ...style }}
       {...anchorProps}
     >

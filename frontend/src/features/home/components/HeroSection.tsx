@@ -31,7 +31,7 @@ export function HeroSection() {
 
           <div className="relative z-10 px-6 pb-36 pt-16 text-[var(--color-civix-ivory)] sm:px-10 sm:pt-20 lg:absolute lg:left-[63px] lg:top-[124px] lg:p-0">
             <h1
-              className="max-w-[643px] font-[var(--font-display)] text-[clamp(2.5rem,5vw,4rem)] font-semibold uppercase leading-[1.08] tracking-[-0.02em] lg:w-[643px] lg:leading-[80px] lg:tracking-[-0.034em]"
+              className="max-w-[643px] font-[family-name:var(--font-display)] text-[clamp(2.5rem,5vw,4rem)] font-semibold uppercase leading-[1.08] tracking-[-0.02em] lg:w-[643px] lg:leading-[80px] lg:tracking-[-0.034em]"
               id="hero-title"
             >
               <span className="lg:block lg:whitespace-nowrap">A TECNOLOGIA QUE</span>{' '}
@@ -39,7 +39,7 @@ export function HeroSection() {
                 CONSTRÓI O FUTURO
               </span>
             </h1>
-            <p className="mt-6 max-w-[511px] font-[var(--font-body)] text-base font-normal leading-[normal] text-[var(--color-civix-ivory)]/90 sm:text-lg lg:absolute lg:left-0 lg:top-[152px] lg:mt-0 lg:w-[511px] lg:leading-[20.6667px]">
+            <p className="mt-6 max-w-[511px] font-[family-name:var(--font-body)] text-base font-normal leading-[normal] text-[var(--color-civix-ivory)]/90 sm:text-lg lg:absolute lg:left-0 lg:top-[152px] lg:mt-0 lg:w-[511px] lg:leading-[20.6667px]">
               A plataforma que conecta pessoas, serviços e soluções para transformar o
               mercado da construção e inovação, praticidade e confiança
             </p>

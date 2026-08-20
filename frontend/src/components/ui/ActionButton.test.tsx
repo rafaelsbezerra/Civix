@@ -14,6 +14,7 @@ describe('ActionButton', () => {
     const link = screen.getByRole('link', { name: 'Começar agora' })
     expect(link).toHaveAttribute('href', '#busca')
     expect(link).toHaveClass('bg-[#07192a]')
+    expect(link.className).toContain('font-[family-name:var(--font-display)]')
   })
 
   it('renders the light variant', () => {

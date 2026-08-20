@@ -21,7 +21,7 @@ const emptyValues: SearchFormValues = {
 }
 
 const fieldClasses =
-  'h-[52px] w-full border-0 border-b border-[var(--color-civix-navy)] bg-transparent px-5 pb-5 pt-2 font-[var(--font-display)] text-base font-medium text-[var(--color-civix-navy)] outline-none placeholder:text-[var(--color-civix-navy)] focus:border-[var(--color-civix-gold)]'
+  'h-[52px] w-full border-0 border-b border-[var(--color-civix-navy)] bg-transparent px-5 pb-5 pt-2 font-[family-name:var(--font-display)] text-base font-medium text-[var(--color-civix-navy)] outline-none placeholder:text-[var(--color-civix-navy)] focus:border-[var(--color-civix-gold)]'
 
 export function SearchForm({ initialValues, onSubmit }: SearchFormProps) {
   const [values, setValues] = useState<SearchFormValues>({
@@ -96,7 +96,7 @@ export function SearchForm({ initialValues, onSubmit }: SearchFormProps) {
       </label>
 
       <button
-        className="inline-flex h-[52px] w-full items-center justify-center gap-2 rounded-[var(--radius-control)] bg-[var(--color-civix-navy)] px-6 font-[var(--font-display)] text-lg font-semibold text-[#f8f8f8] transition-colors hover:bg-[#102f4b] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-civix-gold)] md:col-span-2 lg:col-span-1 lg:w-[138px] xl:w-[137.84px]"
+        className="inline-flex h-[52px] w-full items-center justify-center gap-2 rounded-[var(--radius-control)] bg-[var(--color-civix-navy)] px-6 font-[family-name:var(--font-display)] text-lg font-semibold text-[#f8f8f8] transition-colors hover:bg-[#102f4b] focus-visible:outline-2 focus-visible:outline-offset-2 md:col-span-2 lg:col-span-1 lg:w-[138px] xl:w-[137.84px]"
         type="submit"
       >
         <span>Pesquisar</span>

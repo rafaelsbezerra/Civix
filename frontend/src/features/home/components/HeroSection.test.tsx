@@ -7,12 +7,12 @@ describe('HeroSection', () => {
   it('renders the single hero heading from the approved frame', () => {
     render(<HeroSection />)
 
-    expect(
-      screen.getByRole('heading', {
+    const heading = screen.getByRole('heading', {
         level: 1,
         name: 'A TECNOLOGIA QUE CONSTRÓI O FUTURO',
-      }),
-    ).toBeInTheDocument()
+      })
+    expect(heading).toBeInTheDocument()
+    expect(heading.className).toContain('font-[family-name:var(--font-display)]')
   })
 
   it('renders the supporting platform copy', () => {

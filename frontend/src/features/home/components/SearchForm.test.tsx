@@ -9,6 +9,9 @@ describe('SearchForm', () => {
     render(<SearchForm />)
 
     expect(screen.getByLabelText('O que busca?')).toBeInTheDocument()
+    expect(screen.getByLabelText('O que busca?').className).toContain(
+      'font-[family-name:var(--font-display)]',
+    )
     expect(screen.getByLabelText('Região')).toBeInTheDocument()
     expect(screen.getByLabelText('Faixa de preço')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Pesquisar' })).toBeInTheDocument()

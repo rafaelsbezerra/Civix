@@ -43,7 +43,7 @@ export function SiteHeader({
     <header className="relative z-50 mx-auto flex h-[106px] w-full max-w-[1728px] items-center justify-between px-6 sm:px-10 lg:px-16 xl:px-32">
       <a
         aria-label="Civix — início"
-        className="shrink-0 rounded-sm lg:-translate-y-[5px]"
+        className="inline-flex min-h-11 min-w-11 shrink-0 items-center rounded-sm lg:-translate-y-[5px]"
         href="#home"
       >
         <img
@@ -61,7 +61,7 @@ export function SiteHeader({
             {navigationItems.map((item) => (
               <li key={item.href}>
                 <a
-                  className="font-[var(--font-body)] text-base font-normal leading-[19px] text-[var(--color-civix-navy)] transition-colors hover:text-[var(--color-civix-gold)]"
+                  className="font-[family-name:var(--font-body)] text-base font-normal leading-[19px] text-[var(--color-civix-navy)] transition-colors hover:text-[var(--color-civix-gold)]"
                   href={item.href}
                 >
                   {item.label}
@@ -112,7 +112,7 @@ export function SiteHeader({
             {navigationItems.map((item) => (
               <li key={item.href}>
                 <a
-                  className="block rounded-lg px-4 py-3 font-[var(--font-body)] text-sm text-[var(--color-civix-navy)] hover:bg-[var(--color-civix-gold)]/10"
+                  className="block rounded-lg px-4 py-3 font-[family-name:var(--font-body)] text-sm text-[var(--color-civix-navy)] hover:bg-[var(--color-civix-gold)]/10"
                   href={item.href}
                   onClick={() => setIsMenuOpen(false)}
                 >

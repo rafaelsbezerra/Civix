@@ -9,6 +9,9 @@ describe('SiteHeader', () => {
     render(<SiteHeader />)
 
     expect(screen.getByRole('img', { name: 'Civix' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Civix — início' })).toHaveClass(
+      'min-h-11',
+    )
     const desktopNav = screen.getByRole('navigation', {
       name: 'Navegação principal',
     })
