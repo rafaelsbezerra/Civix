@@ -1,8 +1,8 @@
 import { Building2, User, Eye, ArrowRight, EyeOff } from "lucide-react";
 import { useState } from "react";
 
-import civixLogo from '../assets/logoCivix.png';
-import civixLogoDark from '../assets/logoBackground.png';
+import civixLogo from '../../assets/logoCivix.png';
+import civixLogoDark from '../../assets/logoBackground.png';
 
 const AnimatedWave = ({ className = "" }: { className?: string }) => {
   return (
