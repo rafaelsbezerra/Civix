@@ -217,17 +217,19 @@ T8 -> T9
 
 **Done when**:
 
-- [ ] Todos os controles têm labels associados e nomes acessíveis.
-- [ ] Inputs aplicam `maxLength={100}` e mantêm valores locais.
-- [ ] Select contém opções ilustrativas e valor vazio inicial.
-- [ ] Submit chama `preventDefault` e callback opcional sem navegação.
-- [ ] Layout é horizontal, em grade ou empilhado conforme o breakpoint.
-- [ ] Testes cobrem labels, edição, limite, seleção, submit e ausência de reset.
-- [ ] Gate Quick passa com pelo menos 6 testes do componente.
+- [x] Todos os controles têm labels associados e nomes acessíveis.
+- [x] Inputs aplicam `maxLength={100}` e mantêm valores locais.
+- [x] Select contém opções ilustrativas e valor vazio inicial.
+- [x] Submit chama `preventDefault` e callback opcional sem navegação.
+- [x] Layout é horizontal, em grade ou empilhado conforme o breakpoint.
+- [x] Testes cobrem labels, edição, limite, seleção, submit e ausência de reset.
+- [x] Gate Quick passa com pelo menos 6 testes do componente.
 
 **Tests**: unit
 **Gate**: quick
 **Commit**: `feat(home): add local search form`
+
+**Status**: ✅ Complete — 8 testes unitários passaram e o lint está limpo.
 
 #### T7: Criar HeroSection fiel ao frame
 

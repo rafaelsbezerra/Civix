@@ -13,10 +13,10 @@
 ## Handoff
 
 - **Feature**: Home Hero / `.specs/features/home-hero/`
-- **Phase / Task**: Phase 2 / T6 — criar SearchForm local
-- **Completed**: planejamento, T1, T2, T3, T4, T5
+- **Phase / Task**: Phase 2 / T7 — criar HeroSection fiel ao frame
+- **Completed**: planejamento, T1, T2, T3, T4, T5, T6
 - **In-progress** (file:line): none
-- **Next step**: implementar T6 com testes de integração e executar o gate Quick
+- **Next step**: implementar T7 com testes de integração e executar o gate Quick
 - **Blockers**: none
-- **Uncommitted files**: arquivos da T5 até o commit atômico
+- **Uncommitted files**: arquivos da T6 até o commit atômico
 - **Branch**: `feature/home-page`
