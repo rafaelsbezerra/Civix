@@ -1,5 +1,5 @@
 import { SiteHeader } from './components/layout/SiteHeader'
-import { HeroSection } from './features/home/components/HeroSection'
+import { HeroSection } from './components/home/HeroSection'
 
 function App() {
   return (

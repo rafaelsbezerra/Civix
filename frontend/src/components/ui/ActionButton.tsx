@@ -1,4 +1,4 @@
-import type { AnchorHTMLAttributes, CSSProperties, ReactNode } from 'react'
+import type { AnchorHTMLAttributes, ReactNode } from 'react'
 
 import arrowRight from '@/assets/civix/arrow-right.svg'
 
@@ -13,17 +13,11 @@ export interface ActionButtonProps
 
 const variantClasses: Record<ActionButtonVariant, string> = {
   primary:
-    'bg-[#07192a] text-[#faf9f6] hover:bg-[#102f4b]',
+    'bg-[#07192a] text-[#faf9f6] hover:bg-[#001930]',
   light:
-    'bg-[#faf9f6] text-[#07192a] hover:bg-white',
+    'bg-[#faf9f6] text-[#07192a] hover:bg-[#f8f5ec]',
   translucent:
-    'bg-white/10 text-[#faf9f6] backdrop-blur-[2px] hover:bg-white/20',
-}
-
-const variantStyles: Record<ActionButtonVariant, CSSProperties> = {
-  primary: { backgroundColor: '#07192a', color: '#faf9f6' },
-  light: { backgroundColor: '#faf9f6', color: '#07192a' },
-  translucent: { backgroundColor: 'rgba(250, 249, 246, 0.2)', color: '#faf9f6' },
+    'bg-[rgba(250,249,246,0.2)] text-[#faf9f6] backdrop-blur-[2px] hover:bg-[#6d6a6a33]',
 }
 
 export function ActionButton({
@@ -37,7 +31,7 @@ export function ActionButton({
   return (
     <a
       className={`action-button--${variant} inline-flex min-h-11 min-w-[138px] items-center justify-center gap-2.5 rounded-[var(--radius-control)] px-6 font-[family-name:var(--font-display)] text-lg font-semibold leading-[19.8px] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 lg:min-h-[42px] ${variantClasses[variant]} ${className}`.trim()}
-      style={{ ...variantStyles[variant], ...style }}
+      style={style}
       {...anchorProps}
     >
       <span>{children}</span>

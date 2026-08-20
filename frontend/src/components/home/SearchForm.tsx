@@ -96,7 +96,7 @@ export function SearchForm({ initialValues, onSubmit }: SearchFormProps) {
       </label>
 
       <button
-        className="inline-flex h-[52px] w-full items-center justify-center gap-2 rounded-[var(--radius-control)] bg-[var(--color-civix-navy)] px-6 font-[family-name:var(--font-display)] text-lg font-semibold text-[#f8f8f8] transition-colors hover:bg-[#102f4b] focus-visible:outline-2 focus-visible:outline-offset-2 md:col-span-2 lg:col-span-1 lg:w-[138px] xl:w-[137.84px]"
+        className="cursor-pointer inline-flex h-[52px] w-full items-center justify-center gap-2 rounded-[var(--radius-control)] bg-[var(--color-civix-navy)] px-6 font-[family-name:var(--font-display)] text-lg font-semibold text-[#f8f8f8] transition-colors hover:bg-[#001930] focus-visible:outline-2 focus-visible:outline-offset-2 md:col-span-2 lg:col-span-1 lg:w-[138px] xl:w-[137.84px]"
         type="submit"
       >
         <span>Pesquisar</span>

@@ -61,7 +61,7 @@ export function SiteHeader({
             {navigationItems.map((item) => (
               <li key={item.href}>
                 <a
-                  className="font-[family-name:var(--font-body)] text-base font-normal leading-[19px] text-[var(--color-civix-navy)] transition-colors hover:text-[var(--color-civix-gold)]"
+                  className="font-[family-name:var(--font-body)] text-base font-normal leading-[19px] text-[var(--color-civix-navy)] transition-colors hover:text-[#000e1b]"
                   href={item.href}
                 >
                   {item.label}

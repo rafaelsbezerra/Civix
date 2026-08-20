@@ -8,9 +8,9 @@ describe('HeroSection', () => {
     render(<HeroSection />)
 
     const heading = screen.getByRole('heading', {
-        level: 1,
-        name: 'A TECNOLOGIA QUE CONSTRÓI O FUTURO',
-      })
+      level: 1,
+      name: 'A TECNOLOGIA QUE CONSTRÓI O FUTURO',
+    })
     expect(heading).toBeInTheDocument()
     expect(heading.className).toContain('font-[family-name:var(--font-display)]')
   })
@@ -18,9 +18,11 @@ describe('HeroSection', () => {
   it('renders the supporting platform copy', () => {
     render(<HeroSection />)
 
-    expect(
-      screen.getByText(/A plataforma que conecta pessoas, serviços e soluções/i),
-    ).toBeInTheDocument()
+    const subtitle = screen.getByText(
+      /A plataforma que conecta pessoas, serviços e soluções/i,
+    )
+
+    expect(subtitle).toHaveClass('mt-10', 'lg:top-[184px]')
   })
 
   it('renders local anchors for the two hero actions', () => {
@@ -33,6 +35,9 @@ describe('HeroSection', () => {
     expect(screen.getByRole('link', { name: 'Contato' })).toHaveAttribute(
       'href',
       '#contato',
+    )
+    expect(screen.getByRole('link', { name: 'Sobre nós' }).parentElement).toHaveClass(
+      'lg:top-[284px]',
     )
   })
 
