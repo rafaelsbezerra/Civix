@@ -80,15 +80,17 @@ T8 -> T9
 
 **Done when**:
 
-- [ ] Dependências de teste estão fixadas no lockfile.
-- [ ] `npm run test` executa em jsdom sem modo watch.
-- [ ] Setup inclui matchers do jest-dom e cleanup previsível.
-- [ ] Existe um smoke test verde.
-- [ ] Gate Full passa com pelo menos 1 teste.
+- [x] Dependências de teste estão fixadas no lockfile.
+- [x] `npm run test` executa em jsdom sem modo watch.
+- [x] Setup inclui matchers do jest-dom e cleanup previsível.
+- [x] Existe um smoke test verde.
+- [x] Gate Full passa com pelo menos 1 teste.
 
 **Tests**: integration smoke
 **Gate**: full
 **Commit**: `test(home): configure React test environment`
+
+**Status**: ✅ Complete — 1 teste passou; lint e build passaram no worktree isolado da superfície de T1.
 
 #### T2: Definir tokens e tipografia Civix
 

@@ -13,10 +13,10 @@
 ## Handoff
 
 - **Feature**: Home Hero / `.specs/features/home-hero/`
-- **Phase / Task**: Phase 1 / T1 — configurar o ambiente de testes React
-- **Completed**: análise do Figma, inspeção do repositório, decisões de produto, spec, contexto, design e tarefas
+- **Phase / Task**: Phase 1 / T2 — definir tokens e tipografia Civix
+- **Completed**: planejamento, T1
 - **In-progress** (file:line): none
-- **Next step**: implementar T1 e executar o gate Full
+- **Next step**: implementar T2 e executar o gate Build isolado
 - **Blockers**: none
 - **Uncommitted files**: arquivos de `.specs/` desta feature; alterações preexistentes do usuário em `package.json`, `package-lock.json`, `vite.config.ts`, `src/App.css` e `src/index.css`
 - **Branch**: `feature/home-page`
