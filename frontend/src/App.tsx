@@ -1,15 +1,7 @@
-import { SiteHeader } from './components/layout/SiteHeader'
-import { HeroSection } from './components/home/HeroSection'
+import { AppRoutes } from './routes/AppRoute'
 
 function App() {
-  return (
-    <div className="min-h-screen bg-[var(--color-civix-ivory)]">
-      <SiteHeader />
-      <main>
-        <HeroSection />
-      </main>
-    </div>
-  )
+  return <AppRoutes />
 }
 
 export default App

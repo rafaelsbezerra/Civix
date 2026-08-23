@@ -84,7 +84,7 @@ export function SiteHeader({
 
         <ActionButton
           className="w-[138px] min-w-0 gap-2 px-3"
-          href="#login"
+          href="/login"
           variant="primary"
         >
           Login

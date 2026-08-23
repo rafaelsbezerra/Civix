@@ -37,10 +37,11 @@ export function SearchForm({ initialValues, onSubmit }: SearchFormProps) {
   return (
     <form
       aria-label="Pesquisa de serviços"
-      className="grid w-full grid-cols-1 items-end gap-5 md:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_138px] lg:gap-4 xl:grid-cols-[245.38px_245.39px_245.39px_137.84px] xl:gap-[50px]"
+      className="grid w-full grid-cols-1 items-end gap-5 md:grid-cols-2 lg:grid-cols-[repeat(3,minmax(0,1fr))_auto] lg:gap-4 xl:gap-6"
       onSubmit={submitSearch}
       role="search"
     >
+
       <label className="block">
         <span className="sr-only">O que busca?</span>
         <input
@@ -96,7 +97,7 @@ export function SearchForm({ initialValues, onSubmit }: SearchFormProps) {
       </label>
 
       <button
-        className="cursor-pointer inline-flex h-[52px] w-full items-center justify-center gap-2 rounded-[var(--radius-control)] bg-[var(--color-civix-navy)] px-6 font-[family-name:var(--font-display)] text-lg font-semibold text-[#f8f8f8] transition-colors hover:bg-[#001930] focus-visible:outline-2 focus-visible:outline-offset-2 md:col-span-2 lg:col-span-1 lg:w-[138px] xl:w-[137.84px]"
+        className="cursor-pointer inline-flex h-[52px] w-full shrink-0 items-center justify-center gap-2 rounded-[var(--radius-control)] bg-[var(--color-civix-navy)] px-6 font-[family-name:var(--font-display)] text-lg font-semibold text-[#f8f8f8] transition-colors hover:bg-[#001930] focus-visible:outline-2 focus-visible:outline-offset-2 md:col-span-2 lg:col-span-1 lg:w-auto"
         type="submit"
       >
         <span>Pesquisar</span>
