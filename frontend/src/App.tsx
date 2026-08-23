@@ -1,14 +1,7 @@
-import CatalogoEmpresas from './pages/CatalogoEmpresas'
-import PerfilEmpresa from './pages/PerfilEmpresa'
-import './App.css'
+import { AppRoutes } from './routes/AppRoute'
 
 function App() {
-  return (
-    <div className="civix-app">
-      <CatalogoEmpresas />
-      <PerfilEmpresa />
-    </div>
-  )
+  return <AppRoutes />
 }
 
 export default App
