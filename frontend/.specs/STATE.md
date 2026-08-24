@@ -13,10 +13,10 @@
 ## Handoff
 
 - **Feature**: Tela Sobre / `.specs/features/about-page/`
-- **Phase / Task**: Execute / T1
-- **Completed**: spec, design, tarefas aprovadas e download dos exports do Figma
-- **In-progress** (file:line): restauração dos gates determinísticos da branch
-- **Next step**: executar T1 a T6 em ordem, com gate e commit por tarefa
+- **Phase / Task**: Execute / Complete
+- **Completed**: tela Sobre em `/sobre`, responsividade derivada, seis exports locais, testes unitários/browser/build e validação independente PASS 15/15
+- **In-progress** (file:line): none
+- **Next step**: revisão/release da branch; alteração externa em `src/pages/Home.tsx` permanece fora dos commits da feature
 - **Blockers**: none
-- **Uncommitted files**: artefatos de planejamento e assets da tela Sobre
+- **Uncommitted files**: `src/pages/Home.tsx` (alteração externa preservada; não pertence ao trabalho validado)
 - **Branch**: `feature/about-page`

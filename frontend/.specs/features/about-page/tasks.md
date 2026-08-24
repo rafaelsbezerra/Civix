@@ -291,7 +291,7 @@ T5 -> T6 -> T7 -> T8 -> T9
 **Gate**: full
 **Commit**: `test(about): enforce responsive reading order`
 
-**Status**: ✅ Complete — terceiro ciclo de fix aplicado; browser gate verde com ordem estrita e matriz de zoom completa.
+**Status**: ✅ Complete — terceiro ciclo de fix aplicado; release Verifier confirmou 15/15 ACs, 4/4 gates e 2/2 mutantes mortos.
 
 ---
 

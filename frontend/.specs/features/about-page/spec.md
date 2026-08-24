@@ -6,10 +6,10 @@ A navegação já aponta para `/sobre`, mas a rota ainda não existe. A segunda 
 
 ## Goals
 
-- [ ] Reproduzir o frame desktop de `1728 × 760 px` com fidelidade visual.
-- [ ] Expor a tela em `/sobre` sem quebrar as rotas existentes.
-- [ ] Derivar layouts utilizáveis para tablet e mobile sem overflow horizontal.
-- [ ] Manter conteúdo, fontes e assets disponíveis localmente, sem dependências temporárias em runtime.
+- [x] Reproduzir o frame desktop de `1728 × 760 px` com fidelidade visual.
+- [x] Expor a tela em `/sobre` sem quebrar as rotas existentes.
+- [x] Derivar layouts utilizáveis para tablet e mobile sem overflow horizontal.
+- [x] Manter conteúdo, fontes e assets disponíveis localmente, sem dependências temporárias em runtime.
 
 ## Out of Scope
 
@@ -150,21 +150,21 @@ A navegação já aponta para `/sobre`, mas a rota ainda não existe. A segunda 
 
 | Requirement ID | Story | Phase | Status |
 | --- | --- | --- | --- |
-| ABT-01 | P1: Apresentação | Tasks | Implementing |
-| ABT-02 | P1: Apresentação | Tasks | Verified |
-| ABT-03 | P1: Apresentação | Tasks | Verified |
-| ABT-04 | P1: Apresentação | Tasks | Verified |
-| ABT-05 | P1: Apresentação | Tasks | Verified |
-| ABT-06 | P1: Apresentação | Tasks | Verified |
-| ABT-07 | P1: Composição visual | Tasks | Implementing |
-| ABT-08 | P1: Composição visual | Tasks | In Tasks |
-| ABT-09 | P1: Composição visual | Tasks | Implementing |
-| ABT-10 | P1: Composição visual | Tasks | In Tasks |
-| ABT-11 | P1: Composição visual | Tasks | Implementing |
-| ABT-12 | P2: Semântica | Tasks | Verified |
-| ABT-13 | P2: Semântica | Tasks | Implementing |
-| ABT-14 | P2: Semântica | Tasks | Implementing |
-| ABT-15 | P2: Semântica | Tasks | Implementing |
+| ABT-01 | P1: Apresentação | Execute | Verified |
+| ABT-02 | P1: Apresentação | Execute | Verified |
+| ABT-03 | P1: Apresentação | Execute | Verified |
+| ABT-04 | P1: Apresentação | Execute | Verified |
+| ABT-05 | P1: Apresentação | Execute | Verified |
+| ABT-06 | P1: Apresentação | Execute | Verified |
+| ABT-07 | P1: Composição visual | Execute | Verified |
+| ABT-08 | P1: Composição visual | Execute | Verified |
+| ABT-09 | P1: Composição visual | Execute | Verified |
+| ABT-10 | P1: Composição visual | Execute | Verified |
+| ABT-11 | P1: Composição visual | Execute | Verified |
+| ABT-12 | P2: Semântica | Execute | Verified |
+| ABT-13 | P2: Semântica | Execute | Verified |
+| ABT-14 | P2: Semântica | Execute | Verified |
+| ABT-15 | P2: Semântica | Execute | Verified |
 
 **Coverage:** 15 requisitos, 15 mapeados para tarefas, 0 não mapeados.
 
@@ -172,8 +172,8 @@ A navegação já aponta para `/sobre`, mas a rota ainda não existe. A segunda 
 
 ## Success Criteria
 
-- [ ] `/sobre` renderiza o conteúdo completo e um único `h1`.
-- [ ] Captura desktop validada contra o frame `103:1987`.
-- [ ] Nenhum overflow horizontal em `320`, `768`, `1024` e `1728 px`.
-- [ ] Todos os seis assets são locais e decorativos para tecnologia assistiva.
-- [ ] `npm run test`, `npm run lint` e `npm run build` passam.
+- [x] `/sobre` renderiza o conteúdo completo e um único `h1`.
+- [x] Captura desktop validada contra o frame `103:1987`.
+- [x] Nenhum overflow horizontal em `320`, `768`, `1024` e `1728 px`.
+- [x] Todos os seis assets são locais e decorativos para tecnologia assistiva.
+- [x] `npm run test`, `npm run test:e2e`, `npm run lint` e `npm run build` passam.
