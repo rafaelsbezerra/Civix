@@ -46,15 +46,15 @@ describe('AboutVisual', () => {
 
     expect(screen.getByTestId('about-visual')).toHaveClass(
       'h-[330px]',
-      'lg:absolute',
-      'lg:inset-0',
-      'lg:h-[760px]',
+      'min-[1440px]:absolute',
+      'min-[1440px]:inset-0',
+      'min-[1440px]:h-[760px]',
     )
     expect(screen.getByTestId('about-laptop')).toHaveClass(
-      'lg:left-[128px]',
-      'lg:top-[247px]',
-      'lg:h-[477px]',
-      'lg:w-[635px]',
+      'min-[1440px]:left-[128px]',
+      'min-[1440px]:top-[247px]',
+      'min-[1440px]:h-[477px]',
+      'min-[1440px]:w-[635px]',
     )
   })
 })

@@ -5,12 +5,14 @@ import Login from '@/pages/login';
 import CatalogoEmpresas from '@/pages/CatalogoEmpresas';
 import EmpresaProfile from '@/pages/PerfilEmpresa';
 import NotFound from '@/pages/PageError';
+import AboutPage from '@/pages/About';
 
 export const AppRoutes: React.FC = () => (
     <Routes>
         <Route path='/' element={<HomePage />} />
         <Route path="/login" element={<Login />} />
         <Route path='/catalogo' element={<CatalogoEmpresas />} />
+        <Route path='/sobre' element={<AboutPage />} />
         <Route path='/empresas/:companyName' element={<EmpresaProfile />} />
 
         <Route path='*' element={<NotFound />} />

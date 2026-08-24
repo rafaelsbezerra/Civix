@@ -212,15 +212,17 @@ T5 -> T6
 
 **Done when**:
 
-- [ ] `/sobre` renderiza `AboutPage` sem alterar as demais rotas.
-- [ ] Teste de integração cobre a rota com `MemoryRouter`.
-- [ ] Captura `1728 × 760` permanece dentro da tolerância definida.
-- [ ] Viewports `320`, `768`, `1024` e `1728 px` não têm overflow horizontal.
-- [ ] Gate Full e gate Visual passam.
+- [x] `/sobre` renderiza `AboutPage` sem alterar as demais rotas.
+- [x] Teste de integração cobre a rota com `MemoryRouter`.
+- [x] Captura `1728 × 760` permanece dentro da tolerância definida.
+- [x] Viewports `320`, `768`, `1024` e `1728 px` não têm overflow horizontal.
+- [x] Gate Full e gate Visual passam.
 
 **Tests**: integration
 **Gate**: full + visual
 **Commit**: `feat(about): register about route`
+
+**Status**: ✅ Complete — rota integrada; 45 testes, lint e build passaram; geometria desktop conferida e matriz responsiva sem overflow horizontal.
 
 ---
 

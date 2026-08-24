@@ -49,9 +49,9 @@ describe('AboutPrinciples', () => {
 
     const section = screen.getByRole('region', { name: 'Princípios da Civix' })
     expect(section).toHaveClass(
-      'lg:left-[calc(58.333%_-_19px)]',
-      'lg:top-[446px]',
-      'lg:w-[611px]',
+      'min-[1440px]:left-[calc(58.333%_-_19px)]',
+      'min-[1440px]:top-[446px]',
+      'min-[1440px]:w-[611px]',
     )
     expect(screen.getByRole('heading', { name: 'Valor' }).className).toContain(
       'font-[family-name:var(--font-display)]',
