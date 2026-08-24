@@ -129,15 +129,17 @@ T5 -> T6
 
 **Done when**:
 
-- [ ] Os quatro assets visuais são renderizados em containers com proporções explícitas.
-- [ ] A composição preserva rotação e enquadramento do desktop.
-- [ ] O layout reduz em mobile sem ultrapassar a largura disponível.
-- [ ] Testes cobrem assets, atributos decorativos e classes geométricas.
-- [ ] Gate Quick passa.
+- [x] Os quatro assets visuais são renderizados em containers com proporções explícitas.
+- [x] A composição preserva rotação e enquadramento do desktop.
+- [x] O layout reduz em mobile sem ultrapassar a largura disponível.
+- [x] Testes cobrem assets, atributos decorativos e classes geométricas.
+- [x] Gate Quick passa.
 
 **Tests**: unit
 **Gate**: quick
 **Commit**: `feat(about): add notebook visual`
+
+**Status**: ✅ Complete — 3 testes do componente e 35 testes totais passaram.
 
 #### T4: Criar a lista institucional
 
