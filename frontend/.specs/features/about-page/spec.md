@@ -126,17 +126,17 @@ A navegação já aponta para `/sobre`, mas a rota ainda não existe. A segunda 
 | ABT-01 | P1: Apresentação | Tasks | Implementing |
 | ABT-02 | P1: Apresentação | Tasks | In Tasks |
 | ABT-03 | P1: Apresentação | Tasks | In Tasks |
-| ABT-04 | P1: Apresentação | Tasks | In Tasks |
-| ABT-05 | P1: Apresentação | Tasks | In Tasks |
-| ABT-06 | P1: Apresentação | Tasks | In Tasks |
+| ABT-04 | P1: Apresentação | Tasks | Verified |
+| ABT-05 | P1: Apresentação | Tasks | Implementing |
+| ABT-06 | P1: Apresentação | Tasks | Implementing |
 | ABT-07 | P1: Composição visual | Tasks | Implementing |
 | ABT-08 | P1: Composição visual | Tasks | In Tasks |
-| ABT-09 | P1: Composição visual | Tasks | In Tasks |
+| ABT-09 | P1: Composição visual | Tasks | Implementing |
 | ABT-10 | P1: Composição visual | Tasks | In Tasks |
 | ABT-11 | P1: Composição visual | Tasks | Implementing |
-| ABT-12 | P2: Semântica | Tasks | In Tasks |
+| ABT-12 | P2: Semântica | Tasks | Implementing |
 | ABT-13 | P2: Semântica | Tasks | Implementing |
-| ABT-14 | P2: Semântica | Tasks | In Tasks |
+| ABT-14 | P2: Semântica | Tasks | Implementing |
 | ABT-15 | P2: Semântica | Tasks | Implementing |
 
 **Coverage:** 15 requisitos, 15 mapeados para tarefas, 0 não mapeados.

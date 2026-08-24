@@ -156,15 +156,17 @@ T5 -> T6
 
 **Done when**:
 
-- [ ] Os três princípios e descrições aparecem na ordem do Figma.
-- [ ] Os dois divisores originais são decorativos.
-- [ ] Desktop usa alinhamento título/descrição e mobile mantém ordem linear.
-- [ ] Testes cobrem texto, ordem, tipografia e assets.
-- [ ] Gate Quick passa.
+- [x] Os três princípios e descrições aparecem na ordem do Figma.
+- [x] Os dois divisores originais são decorativos.
+- [x] Desktop usa alinhamento título/descrição e mobile mantém ordem linear.
+- [x] Testes cobrem texto, ordem, tipografia e assets.
+- [x] Gate Quick passa.
 
 **Tests**: unit
 **Gate**: quick
 **Commit**: `feat(about): add institutional principles`
+
+**Status**: ✅ Complete — 4 testes do componente, 39 testes totais, lint e build passaram.
 
 ### Phase 3: Integration
 
