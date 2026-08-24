@@ -101,14 +101,16 @@ T5 -> T6
 
 **Done when**:
 
-- [ ] Os seis arquivos do manifest existem com bytes exportados do Figma.
-- [ ] PNGs e SVGs têm formatos válidos e dimensões preservadas.
-- [ ] Nenhuma URL MCP temporária será usada no código.
-- [ ] Gate Build passa.
+- [x] Os seis arquivos do manifest existem com bytes exportados do Figma.
+- [x] PNGs e SVGs têm formatos válidos e dimensões preservadas.
+- [x] Nenhuma URL MCP temporária será usada no código.
+- [x] Gate Build passa.
 
 **Tests**: build-only
 **Gate**: build
 **Commit**: `chore(about): add Figma exports`
+
+**Status**: ✅ Complete — seis exports válidos; dashboard `1024×768`, notebook `4340×2860`; lint e build passaram.
 
 ### Phase 2: Components
 
