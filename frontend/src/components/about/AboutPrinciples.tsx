@@ -41,7 +41,7 @@ export function AboutPrinciples() {
             {principle.title}
           </h2>
           <p
-            className={`mt-2 max-w-[330px] font-[family-name:var(--font-body)] text-xs font-normal leading-[normal] text-[var(--color-civix-navy)]/80 sm:text-right 2xl:absolute 2xl:right-0 2xl:top-0 2xl:mt-0 ${index < 2 ? '2xl:w-[230px]' : '2xl:w-[263px]'}`}
+            className={`mt-2 max-w-[330px] font-[family-name:var(--font-body)] text-xs font-normal leading-[normal] text-[rgba(7,25,42,0.8)] sm:text-right 2xl:absolute 2xl:right-0 2xl:top-0 2xl:mt-0 ${index < 2 ? '2xl:w-[230px]' : '2xl:w-[263px]'}`}
           >
             {principle.description}
           </p>

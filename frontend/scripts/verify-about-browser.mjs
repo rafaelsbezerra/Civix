@@ -92,8 +92,23 @@ async function readLayout(page) {
       introduction: rect('[data-testid="about-introduction"]'),
       laptop: rect('[data-testid="about-laptop"]'),
       marker: rect('[data-testid="about-marker"]'),
+      essentialText: Array.from(
+        document.querySelectorAll(
+          '[data-testid="about-marker"], #about-title, [data-testid="about-introduction"], [aria-label="Princípios da Civix"] h2, [aria-label="Princípios da Civix"] p',
+        ),
+        (element) => ({ label: element.textContent?.trim() ?? '', rectangle: element.getBoundingClientRect().toJSON() }),
+      ),
+      principleItems: Array.from(
+        document.querySelectorAll('[aria-label="Princípios da Civix"] article'),
+        (article) => ({
+          article: article.getBoundingClientRect().toJSON(),
+          description: article.querySelector('p').getBoundingClientRect().toJSON(),
+          heading: article.querySelector('h2').getBoundingClientRect().toJSON(),
+        }),
+      ),
       principles: rect('[aria-label="Princípios da Civix"]'),
       scribble: rect('[data-testid="about-scribble"]'),
+      scrollHeight: document.documentElement.scrollHeight,
       scrollWidth: document.documentElement.scrollWidth,
       visual: rect('[data-testid="about-visual"]'),
     }
@@ -133,42 +148,115 @@ try {
     await stabilize(page, baseUrl)
     const layout = await readLayout(page)
     assert.equal(layout.scrollWidth, layout.clientWidth, `${viewport.width}px overflow`)
-    for (const [name, rectangle] of Object.entries({
-      heading: layout.heading,
-      introduction: layout.introduction,
-      principles: layout.principles,
-    })) {
-      assert.ok(rectangle.left >= -0.5, `${name} clipped left at ${viewport.width}px`)
+    for (const { label, rectangle } of layout.essentialText) {
+      assert.ok(rectangle.left >= -0.5, `${label} clipped left at ${viewport.width}px`)
       assert.ok(
         rectangle.right <= layout.clientWidth + 0.5,
-        `${name} clipped right at ${viewport.width}px`,
+        `${label} clipped right at ${viewport.width}px`,
+      )
+      assert.ok(rectangle.top >= -0.5, `${label} clipped above the document`)
+      assert.ok(
+        rectangle.bottom <= layout.scrollHeight,
+        `${label} clipped below the document`,
       )
     }
     if (viewport.width < 1024) {
-      assert.equal(rectanglesOverlap(layout.marker, layout.heading), false)
-      assert.equal(rectanglesOverlap(layout.introduction, layout.visual), false)
-      assert.equal(rectanglesOverlap(layout.visual, layout.principles), false)
+      const copy = [layout.marker, layout.heading, layout.introduction]
+      for (let index = 0; index < copy.length; index += 1) {
+        for (let compared = index + 1; compared < copy.length; compared += 1) {
+          assert.equal(rectanglesOverlap(copy[index], copy[compared]), false)
+        }
+      }
+      assert.ok(Math.max(...copy.map((rectangle) => rectangle.bottom)) <= layout.visual.top)
+      assert.ok(layout.visual.bottom <= layout.principles.top)
+      for (const [index, item] of layout.principleItems.entries()) {
+        assert.equal(rectanglesOverlap(item.heading, item.description), false)
+        assert.ok(item.heading.top >= item.article.top && item.heading.bottom <= item.article.bottom)
+        assert.ok(
+          item.description.top >= item.article.top && item.description.bottom <= item.article.bottom,
+        )
+        if (index > 0) {
+          assert.ok(layout.principleItems[index - 1].article.bottom <= item.article.top)
+        }
+      }
     }
   }
 
-  await page.setViewportSize({ width: 1728, height: 760 })
+  await page.setViewportSize({ width: 320, height: 900 })
   await stabilize(page, baseUrl)
-  const colors = await page.evaluate(() => {
-    const style = (selector) => {
-      const element = document.querySelector(selector)
-      if (!element) throw new Error(`Missing ${selector}`)
-      return getComputedStyle(element)
-    }
-    return {
-      accent: style('[data-testid="about-marker"] span').color,
-      background: style('[data-testid="about-frame"]').backgroundColor,
-      heading: style('#about-title').color,
-      normal: style('[data-testid="about-introduction"]').color,
+  await page.evaluate(() => {
+    for (const element of document.querySelectorAll(
+      '[data-testid="about-marker"], #about-title, [data-testid="about-introduction"], [aria-label="Princípios da Civix"] h2, [aria-label="Princípios da Civix"] p',
+    )) {
+      const htmlElement = element
+      htmlElement.style.fontSize = `${Number.parseFloat(getComputedStyle(element).fontSize) * 2}px`
+      htmlElement.style.overflowWrap = 'anywhere'
     }
   })
-  assert.ok(contrastRatio(colors.accent, colors.background) >= 4.5, 'accent contrast')
-  assert.ok(contrastRatio(colors.normal, colors.background) >= 4.5, 'normal contrast')
-  assert.ok(contrastRatio(colors.heading, colors.background) >= 3, 'heading contrast')
+  const zoomed = await readLayout(page)
+  assert.equal(zoomed.scrollWidth, zoomed.clientWidth, '200% text overflow')
+  for (const { label, rectangle } of zoomed.essentialText) {
+    assert.ok(rectangle.left >= -0.5, `${label} clipped at 200% text`)
+    assert.ok(rectangle.right <= zoomed.clientWidth + 0.5, `${label} clipped at 200% text`)
+  }
+  assert.ok(
+    Math.max(zoomed.marker.bottom, zoomed.heading.bottom, zoomed.introduction.bottom) <=
+      zoomed.visual.top,
+  )
+  assert.ok(zoomed.visual.bottom <= zoomed.principles.top)
+
+  await page.setViewportSize({ width: 1728, height: 760 })
+  await stabilize(page, baseUrl)
+  const styles = await page.evaluate(() => {
+    const inspect = (selector) => {
+      const elements = Array.from(document.querySelectorAll(selector))
+      if (elements.length === 0) throw new Error(`Missing ${selector}`)
+      return elements.map((element) => {
+        const computed = getComputedStyle(element)
+        return { color: computed.color, fontFamily: computed.fontFamily }
+      })
+    }
+    const root = getComputedStyle(document.documentElement)
+    return {
+      accent: inspect('[data-testid="about-marker"] span:first-child')[0],
+      background: getComputedStyle(document.querySelector('[data-testid="about-frame"]')).backgroundColor,
+      display: inspect('#about-title, [data-testid="about-marker"], [aria-label="Princípios da Civix"] h2'),
+      heading: inspect('#about-title')[0],
+      normal: inspect('[data-testid="about-introduction"], [aria-label="Princípios da Civix"] p'),
+      markerLabel: inspect('[data-testid="about-marker"] span:last-child')[0],
+      principleHeadings: inspect('[aria-label="Princípios da Civix"] h2'),
+      tokens: {
+        accessibleGold: root.getPropertyValue('--color-civix-gold-accessible').trim(),
+        gold: root.getPropertyValue('--color-civix-gold').trim(),
+        ivory: root.getPropertyValue('--color-civix-ivory').trim(),
+        navy: root.getPropertyValue('--color-civix-navy').trim(),
+      },
+    }
+  })
+  assert.deepEqual(styles.tokens, {
+    accessibleGold: '#9a6500',
+    gold: '#d89c28',
+    ivory: '#faf9f6',
+    navy: '#07192a',
+  })
+  assert.equal(styles.background, 'rgb(250, 249, 246)')
+  assert.equal(styles.accent.color, 'rgb(154, 101, 0)')
+  assert.equal(styles.heading.color, 'rgb(7, 25, 42)')
+  assert.equal(styles.markerLabel.color, 'rgb(7, 25, 42)')
+  for (const role of styles.principleHeadings) assert.equal(role.color, 'rgb(7, 25, 42)')
+  for (const role of styles.normal) assert.equal(role.color, 'rgba(7, 25, 42, 0.8)')
+  for (const role of styles.display) assert.match(role.fontFamily, /Urbanist Variable/)
+  for (const role of styles.normal) assert.match(role.fontFamily, /Inter Variable/)
+
+  assert.ok(contrastRatio(styles.accent.color, styles.background) >= 4.5, 'accent contrast')
+  assert.ok(contrastRatio(styles.markerLabel.color, styles.background) >= 4.5, 'marker contrast')
+  for (const [index, role] of styles.principleHeadings.entries()) {
+    assert.ok(contrastRatio(role.color, styles.background) >= 4.5, `principle ${index} contrast`)
+  }
+  for (const [index, role] of styles.normal.entries()) {
+    assert.ok(contrastRatio(role.color, styles.background) >= 4.5, `normal ${index} contrast`)
+  }
+  assert.ok(contrastRatio(styles.heading.color, styles.background) >= 3, 'heading contrast')
 
   const clsPage = await browser.newPage({ viewport: { width: 320, height: 900 } })
   await clsPage.route(/fonts\.(?:googleapis|gstatic)\.com/, (route) => route.abort())

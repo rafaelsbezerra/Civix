@@ -52,7 +52,7 @@ T3 -> T4
 ### Phase 3: Integration
 
 ```text
-T5 -> T6 -> T7
+T5 -> T6 -> T7 -> T8
 ```
 
 ---
@@ -248,6 +248,29 @@ T5 -> T6 -> T7
 
 **Status**: ✅ Complete — 46 testes unitários, 4 grupos de verificações no Chromium, lint, build, manifest local e scanner de URLs passaram no ciclo de fix 1.
 
+#### T8: Completar a cobertura semântica do navegador
+
+**What**: Fechar os cinco gaps restantes do segundo Verifier com assertions computadas para fontes, cores, ordem responsiva, limites de cada texto e contraste de todos os papéis.
+**Where**: `scripts/verify-about-browser.mjs`, `src/pages/About.tsx`, `src/components/about/AboutPrinciples.tsx` e estilos escopados.
+**Depends on**: T7
+**Reuses**: Harness Playwright e tokens canônicos da spec.
+**Requirement**: ABT-05, ABT-06, ABT-09, ABT-10, ABT-14
+
+**Done when**:
+
+- [x] Urbanist e Inter são conferidas via `getComputedStyle` em todos os papéis previstos.
+- [x] Os quatro tokens e as cores renderizadas são comparados aos valores canônicos exatos.
+- [x] Todo texto essencial é enumerado e mantido dentro do documento em `320`, `768`, `1024` e `1728 px`.
+- [x] Abaixo de `1024 px`, todos os blocos textuais e princípios são ordenados e não se sobrepõem.
+- [x] Todos os papéis de texto têm contraste calculado e a ampliação textual de `200%` preserva o fluxo.
+- [x] Gate Full passa; a terceira verificação independente está prevista após o commit.
+
+**Tests**: browser/e2e
+**Gate**: full
+**Commit**: `test(about): complete browser assertions`
+
+**Status**: ✅ Complete — assertions observáveis ampliadas no ciclo de fix 2; browser gate verde.
+
 ---
 
 ## Phase Execution Map
@@ -255,7 +278,7 @@ T5 -> T6 -> T7
 ```text
 Phase 1: T1 -> T2
 Phase 2: T3 -> T4
-Phase 3: T5 -> T6 -> T7
+Phase 3: T5 -> T6 -> T7 -> T8
 ```
 
 As dependências entre fases são T3 após T2 e T5 após T4. O mapa mostra a ordem interna das fases.
@@ -273,6 +296,7 @@ As dependências entre fases são T3 após T2 e T5 após T4. O mapa mostra a ord
 | T5 | Uma composição de página | ✅ Granular |
 | T6 | Uma integração de rota | ✅ Granular |
 | T7 | Um reforço coeso da evidência de validação | ✅ Granular |
+| T8 | Um complemento coeso das assertions observáveis | ✅ Granular |
 
 ---
 
@@ -287,6 +311,7 @@ As dependências entre fases são T3 após T2 e T5 após T4. O mapa mostra a ord
 | T5 | T4, fase anterior | Início da Phase 3 | ✅ Match |
 | T6 | T5 | T5 → T6 | ✅ Match |
 | T7 | T6 | T6 → T7 | ✅ Match |
+| T8 | T7 | T7 → T8 | ✅ Match |
 
 ---
 
@@ -301,6 +326,7 @@ As dependências entre fases são T3 após T2 e T5 após T4. O mapa mostra a ord
 | T5 | Página React | unit | unit | ✅ OK |
 | T6 | Roteamento | integration | integration | ✅ OK |
 | T7 | Browser, assets e build | browser/e2e + build-only | browser/e2e + build-only | ✅ OK |
+| T8 | Browser | browser/e2e | browser/e2e | ✅ OK |
 
 ---
 
@@ -312,16 +338,16 @@ As dependências entre fases são T3 após T2 e T5 após T4. O mapa mostra a ord
 | ABT-02 | T5 |
 | ABT-03 | T5, T7 |
 | ABT-04 | T4, T7 |
-| ABT-05 | T4, T5 |
-| ABT-06 | T4, T5, T7 |
+| ABT-05 | T4, T5, T8 |
+| ABT-06 | T4, T5, T7, T8 |
 | ABT-07 | T2, T3, T7 |
 | ABT-08 | T3, T5, T6, T7 |
-| ABT-09 | T3, T4, T5, T6, T7 |
-| ABT-10 | T3, T5, T6, T7 |
+| ABT-09 | T3, T4, T5, T6, T7, T8 |
+| ABT-10 | T3, T5, T6, T7, T8 |
 | ABT-11 | T2, T3, T7 |
 | ABT-12 | T4, T5 |
 | ABT-13 | T2, T3, T4 |
-| ABT-14 | T4, T5, T7 |
+| ABT-14 | T4, T5, T7, T8 |
 | ABT-15 | T2, T6, T7 |
 
 **Coverage:** 15 de 15 requisitos mapeados; 0 órfãos.
