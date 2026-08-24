@@ -75,14 +75,16 @@ T5 -> T6
 
 **Done when**:
 
-- [ ] O teste customizado do header usa um destino compatível com `/${string}`.
-- [ ] `button.tsx` exporta somente o componente consumido externamente.
-- [ ] O comportamento de produção permanece inalterado.
-- [ ] Gate Build passa.
+- [x] O teste customizado do header usa um destino compatível com `/${string}`.
+- [x] `button.tsx` exporta somente o componente consumido externamente.
+- [x] O comportamento de produção permanece inalterado.
+- [x] Gate Build passa.
 
 **Tests**: build-only
 **Gate**: build
 **Commit**: `fix(frontend): restore quality gates`
+
+**Status**: ✅ Complete — lint e build passaram; nenhuma alteração de comportamento em produção.
 
 #### T2: Versionar os assets da tela Sobre
 
@@ -297,4 +299,3 @@ As dependências entre fases são T3 após T2 e T5 após T4. O mapa mostra a ord
 - Browser local para comparação visual e responsividade.
 
 O usuário autorizou a execução ao confirmar a branch e responder “pode prosseguir com a implementação”.
-

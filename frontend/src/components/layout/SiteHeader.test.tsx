@@ -92,7 +92,7 @@ describe('SiteHeader', () => {
 
   it('accepts a custom navigation collection', () => {
     render(
-      <SiteHeader navigationItems={[{ href: '#servicos', label: 'Serviços' }]} />,
+      <SiteHeader navigationItems={[{ href: '/servicos', label: 'Serviços' }]} />,
     )
 
     const desktopNav = screen.getByRole('navigation', {
@@ -100,7 +100,7 @@ describe('SiteHeader', () => {
     })
     expect(within(desktopNav).getByRole('link', { name: 'Serviços' })).toHaveAttribute(
       'href',
-      '#servicos',
+      '/servicos',
     )
   })
 })

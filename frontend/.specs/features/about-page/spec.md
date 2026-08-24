@@ -123,7 +123,7 @@ A navegação já aponta para `/sobre`, mas a rota ainda não existe. A segunda 
 
 | Requirement ID | Story | Phase | Status |
 | --- | --- | --- | --- |
-| ABT-01 | P1: Apresentação | Tasks | In Tasks |
+| ABT-01 | P1: Apresentação | Tasks | Implementing |
 | ABT-02 | P1: Apresentação | Tasks | In Tasks |
 | ABT-03 | P1: Apresentação | Tasks | In Tasks |
 | ABT-04 | P1: Apresentação | Tasks | In Tasks |
