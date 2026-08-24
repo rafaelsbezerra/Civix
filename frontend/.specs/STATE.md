@@ -12,11 +12,11 @@
 
 ## Handoff
 
-- **Feature**: Home Hero / `.specs/features/home-hero/`
-- **Phase / Task**: Complete / validação independente PASS
-- **Completed**: planejamento, T1, T2, T3, T4, T5, T6, T7, T8, T9, Verifier e sensor de discriminação
-- **In-progress** (file:line): none
-- **Next step**: feature pronta para revisão visual do usuário ou próxima seção da landing page
+- **Feature**: Tela Sobre / `.specs/features/about-page/`
+- **Phase / Task**: Execute / T1
+- **Completed**: spec, design, tarefas aprovadas e download dos exports do Figma
+- **In-progress** (file:line): restauração dos gates determinísticos da branch
+- **Next step**: executar T1 a T6 em ordem, com gate e commit por tarefa
 - **Blockers**: none
-- **Uncommitted files**: relatório e encerramento da validação até o commit final
-- **Branch**: `feature/home-page`
+- **Uncommitted files**: artefatos de planejamento e assets da tela Sobre
+- **Branch**: `feature/about-page`
