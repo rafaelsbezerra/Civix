@@ -124,17 +124,17 @@ A navegação já aponta para `/sobre`, mas a rota ainda não existe. A segunda 
 | Requirement ID | Story | Phase | Status |
 | --- | --- | --- | --- |
 | ABT-01 | P1: Apresentação | Tasks | Implementing |
-| ABT-02 | P1: Apresentação | Tasks | In Tasks |
-| ABT-03 | P1: Apresentação | Tasks | In Tasks |
+| ABT-02 | P1: Apresentação | Tasks | Verified |
+| ABT-03 | P1: Apresentação | Tasks | Verified |
 | ABT-04 | P1: Apresentação | Tasks | Verified |
-| ABT-05 | P1: Apresentação | Tasks | Implementing |
-| ABT-06 | P1: Apresentação | Tasks | Implementing |
+| ABT-05 | P1: Apresentação | Tasks | Verified |
+| ABT-06 | P1: Apresentação | Tasks | Verified |
 | ABT-07 | P1: Composição visual | Tasks | Implementing |
 | ABT-08 | P1: Composição visual | Tasks | In Tasks |
 | ABT-09 | P1: Composição visual | Tasks | Implementing |
 | ABT-10 | P1: Composição visual | Tasks | In Tasks |
 | ABT-11 | P1: Composição visual | Tasks | Implementing |
-| ABT-12 | P2: Semântica | Tasks | Implementing |
+| ABT-12 | P2: Semântica | Tasks | Verified |
 | ABT-13 | P2: Semântica | Tasks | Implementing |
 | ABT-14 | P2: Semântica | Tasks | Implementing |
 | ABT-15 | P2: Semântica | Tasks | Implementing |

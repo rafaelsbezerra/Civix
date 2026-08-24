@@ -185,15 +185,17 @@ T5 -> T6
 
 **Done when**:
 
-- [ ] A página contém `main`, seção nomeada e um único `h1`.
-- [ ] Marcador, título e texto institucional correspondem ao Figma.
-- [ ] Desktop usa o frame de referência; tablet/mobile entram em fluxo vertical.
-- [ ] Testes cobrem landmarks, heading único, copy e composição.
-- [ ] Gate Full passa.
+- [x] A página contém `main`, seção nomeada e um único `h1`.
+- [x] Marcador, título e texto institucional correspondem ao Figma.
+- [x] Desktop usa o frame de referência; tablet/mobile entram em fluxo vertical.
+- [x] Testes cobrem landmarks, heading único, copy e composição.
+- [x] Gate Full passa.
 
 **Tests**: unit
 **Gate**: full
 **Commit**: `feat(about): compose responsive about page`
+
+**Status**: ✅ Complete — 5 testes da página, 44 testes totais, lint e build passaram.
 
 #### T6: Registrar e validar a rota Sobre
 
