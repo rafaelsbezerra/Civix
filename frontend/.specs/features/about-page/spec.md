@@ -31,12 +31,39 @@ A navegação já aponta para `/sobre`, mas a rota ainda não existe. A segunda 
 | Destino | Registrar uma página pública em `/sobre` | O header existente já usa esse destino e a branch é `feature/about-page` | Sim |
 | Chrome global | Não adicionar header ou footer dentro da tela | Esses elementos não aparecem no frame e prejudicariam a fidelidade 1:1 | Sim |
 | Responsividade | Derivar empilhamento para tablet e mobile | O arquivo fornece somente o frame desktop e o usuário já aprovou responsividade derivada | Sim |
-| Breakpoints | Mobile abaixo de `768 px`, tablet de `768 px` a `1023 px`, desktop a partir de `1024 px` | Reutiliza os breakpoints Tailwind do projeto | Sim |
+| Breakpoints | Mobile abaixo de `768 px`, layout adaptativo entre `768 px` e `1535 px`, frame desktop absoluto a partir de `1536 px` | O breakpoint `2xl` preserva o frame de 1728 px sem colisões em tablets e notebooks menores | Sim |
 | Conteúdo | Preservar a redação e a ordem Valor, Visão e Missão | São parte central da hierarquia do frame | Sim |
 | Assets | Versionar os seis exports originais no repositório | URLs do MCP expiram e não podem ser dependência de produção | Sim |
 | Estado e integrações | Página totalmente estática | Não há controles, persistência ou chamadas remotas no frame | Sim |
+| Compatibilidade da branch | Preservar os hovers, espaçamentos e destinos de navegação já aprovados anteriormente | A branch recebida continha regressões contra decisões já confirmadas pelo usuário | Sim |
 
 **Open questions: none** — os defaults seguem o Figma e as decisões já aprovadas para o projeto.
+
+### Canonical content and visual roles
+
+| Element | Canonical value |
+| --- | --- |
+| Marcador | `// Sobre nós` |
+| Introdução | `A Civix nasceu para tornar o atendimento comercial mais inteligente, ágil e eficiente. Unimos inteligência artificial, automação e gestão para ajudar empresas a se relacionarem melhor com seus clientes, identificarem novas oportunidades e transformarem conversas em negócios.` |
+| Valor | `Tecnologia só faz sentido quando gera valor de verdade.` |
+| Visão | `Ser referência em inteligência para atendimento e vendas.` |
+| Missão | `Simplificar o atendimento e potencializar vendas por meio da tecnologia.` |
+
+| Token | Role |
+| --- | --- |
+| `#07192A` | Título, nomes dos princípios e texto normal, com opacidade somente quando o contraste permanecer conforme ABT-14 |
+| `#D89C28` | Dourado original dos ornamentos e exports do Figma |
+| `#9A6500` | Variante acessível do dourado para o marcador de 16 px sobre ivory |
+| `#FAF9F6` | Fundo da tela |
+
+| Asset | SHA-256 |
+| --- | --- |
+| `background-shape.svg` | `9a8d64c6a0aa26d4f2d7847f6e20dce4c511401e0a6c6dee4bb192811011075d` |
+| `dashboard.png` | `602b199ae8608270107fb0ab6057c4c8199eb42d06c688423f415b11c8fc9225` |
+| `emphasis-scribble.svg` | `38c2ad4d9155da1d83c57f92d5245c34994a32c77835f47e29ced1e0ee4d3751` |
+| `macbook-silver.png` | `837cc88cf092c40cb771ba27d45232d3566747200e3bf79d2016205728f2ec18` |
+| `value-divider.svg` | `cd674647784fd76faaf1f5540a1e2415162a3072c05319d48e04474e9bd2b217` |
+| `vision-divider.svg` | `107c1a53e17e1972b966d360fc67a36e74cdee32285fb00c1c1bd05edbe2599b` |
 
 ---
 
@@ -52,10 +79,10 @@ A navegação já aponta para `/sobre`, mas a rota ainda não existe. A segunda 
 
 1. WHEN o visitante acessar `/sobre` THEN the interface SHALL renderizar a tela Sobre sem redirecionamento. (`ABT-01`)
 2. The interface SHALL renderizar um único `h1` com o texto “Transformamos atendimento em oportunidades.”. (`ABT-02`)
-3. The interface SHALL renderizar o marcador “// Sobre nós” e o parágrafo institucional exatamente como definidos no frame. (`ABT-03`)
-4. The interface SHALL renderizar Valor, Visão e Missão nessa ordem, cada um com sua descrição correspondente. (`ABT-04`)
+3. The interface SHALL renderizar o marcador e o parágrafo institucional exatamente como listados em “Canonical content and visual roles”. (`ABT-03`)
+4. The interface SHALL renderizar Valor, Visão e Missão nessa ordem, cada um com a descrição canônica listada nesta spec. (`ABT-04`)
 5. The interface SHALL usar Urbanist para marcador, título e nomes dos princípios, e Inter para os textos de apoio. (`ABT-05`)
-6. The interface SHALL aplicar `#07192A`, `#D89C28` e `#FAF9F6` nos papéis visuais definidos pelo Figma. (`ABT-06`)
+6. The interface SHALL aplicar `#07192A`, `#D89C28`, `#9A6500` e `#FAF9F6` exatamente nos papéis enumerados nesta spec. (`ABT-06`)
 
 **Independent Test**: Abrir `/sobre` e verificar heading, marcador, texto institucional e os três princípios na ordem prevista.
 
@@ -69,11 +96,11 @@ A navegação já aponta para `/sobre`, mas a rota ainda não existe. A segunda 
 
 **Acceptance Criteria**:
 
-1. The interface SHALL usar os seis assets originais exportados do frame para dashboard, notebook, forma decorativa, dois divisores e destaque gráfico. (`ABT-07`)
+1. The interface SHALL usar os seis assets originais cujos nomes e hashes estão fixados no manifest desta spec. (`ABT-07`)
 2. WHEN a tela for capturada em `1728 × 760 px` THEN the interface SHALL manter marcador, título, introdução, composição do notebook e lista institucional com tolerância máxima de `±4 px` para posição e tamanho. (`ABT-08`)
 3. WHEN o viewport tiver largura inferior a `1024 px` THEN the interface SHALL reorganizar conteúdo textual, composição visual e princípios em fluxo vertical sem sobreposição. (`ABT-09`)
 4. WHEN o viewport tiver `320 px` de largura THEN the interface SHALL manter `scrollWidth` igual a `clientWidth` e todo texto essencial dentro da área visível. (`ABT-10`)
-5. WHILE os assets estiverem carregando, the interface SHALL reservar suas proporções para evitar deslocamentos de layout maiores que `0.1` de CLS na tela. (`ABT-11`)
+5. WHILE os assets estiverem carregando com atraso de rede controlado, the interface SHALL reservar suas proporções e manter CLS menor ou igual a `0.1`. (`ABT-11`)
 
 **Independent Test**: Comparar a captura desktop ao Figma e inspecionar viewports de `320`, `768`, `1024` e `1728 px`.
 
@@ -89,7 +116,7 @@ A navegação já aponta para `/sobre`, mas a rota ainda não existe. A segunda 
 
 1. The page SHALL conter um landmark `main`, uma seção nomeada e exatamente um heading de nível 1. (`ABT-12`)
 2. The page SHALL marcar os seis assets visuais com `alt=""` e `aria-hidden="true"`. (`ABT-13`)
-3. The page SHALL manter contraste mínimo de `4.5:1` para textos normais e `3:1` para o título de `48 px`. (`ABT-14`)
+3. The page SHALL manter contraste mínimo de `4.5:1` para o marcador de 16 px e demais textos normais, e `3:1` para o título de `48 px`; o marcador dourado SHALL usar `#9A6500` sobre `#FAF9F6`. (`ABT-14`)
 4. IF o serviço do Figma estiver indisponível em runtime THEN the page SHALL continuar renderizando todos os assets a partir do bundle local. (`ABT-15`)
 
 **Independent Test**: Inspecionar a árvore semântica, atributos das imagens, contraste e URLs emitidas pela build.

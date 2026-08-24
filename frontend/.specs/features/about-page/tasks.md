@@ -21,6 +21,7 @@ Implementar estas tarefas com a skill `tlc-spec-driven`: ativá-la por nome e se
 | Componentes React de apresentação | unit | Conteúdo, ordem, semântica, assets e contratos responsivos atribuídos ao componente | `src/components/**/*.test.tsx` | `npm run test` |
 | Página React | unit | Todos os ACs de conteúdo e landmarks da página | `src/pages/**/*.test.tsx` | `npm run test` |
 | Roteamento | integration | `/sobre` renderiza a página correta; rotas existentes permanecem resolvíveis | `src/**/*.test.tsx` | `npm run test` |
+| Layout no navegador | browser/e2e | Retângulos, fluxo, overflow, CLS e contraste são medidos no Chromium nos viewports da spec | `scripts/verify-about-browser.mjs` | `npm run test:e2e` |
 | Configuração e qualidade | build-only | TypeScript, lint e build passam sem erros determinísticos | arquivos tocados pelo diagnóstico | `npm run lint && npm run build` |
 
 ## Gate Check Commands
@@ -28,7 +29,7 @@ Implementar estas tarefas com a skill `tlc-spec-driven`: ativá-la por nome e se
 | Gate Level | When to Use | Command |
 | --- | --- | --- |
 | Quick | Após componente isolado | `npm run test` |
-| Full | Após página ou rota | `npm run test && npm run lint && npm run build` |
+| Full | Após página ou rota | `npm run test && npm run test:e2e && npm run lint && npm run build` |
 | Build | Após assets ou correções de gate | `npm run lint && npm run build` |
 | Visual | Após integração | Servidor Vite local em `320×900`, `768×1024`, `1024×760` e `1728×760` |
 
@@ -51,7 +52,7 @@ T3 -> T4
 ### Phase 3: Integration
 
 ```text
-T5 -> T6
+T5 -> T6 -> T7
 ```
 
 ---
@@ -62,7 +63,7 @@ T5 -> T6
 
 #### T1: Restaurar os gates determinísticos da branch
 
-**What**: Corrigir o contrato de rota no teste do header e remover o export auxiliar não consumido que viola Fast Refresh.
+**What**: Restaurar o baseline verde da branch e os hovers, espaçamentos e destinos de navegação já aprovados pelo usuário antes da tela Sobre.
 **Where**: `src/components/`
 **Depends on**: None
 **Reuses**: Tipos atuais de `NavigationItem` e uso interno de `buttonVariants`.
@@ -77,7 +78,7 @@ T5 -> T6
 
 - [x] O teste customizado do header usa um destino compatível com `/${string}`.
 - [x] `button.tsx` exporta somente o componente consumido externamente.
-- [x] O comportamento de produção permanece inalterado.
+- [x] O comportamento compartilhado corresponde às alterações já aprovadas pelo usuário e permanece coberto por testes.
 - [x] Gate Build passa.
 
 **Tests**: build-only
@@ -224,6 +225,29 @@ T5 -> T6
 
 **Status**: ✅ Complete — rota integrada; 45 testes, lint e build passaram; geometria desktop conferida e matriz responsiva sem overflow horizontal.
 
+#### T7: Fortalecer a evidência de validação
+
+**What**: Resolver os gaps do primeiro Verifier com testes observáveis de navegador, contraste acessível, identidade dos assets e verificação do bundle local.
+**Where**: `e2e/`, `scripts/`, `src/assets/civix/about/`, configuração de build e spec.
+**Depends on**: T6
+**Reuses**: Geometria do frame, manifest canônico e rota `/sobre`.
+**Requirement**: ABT-03, ABT-04, ABT-06, ABT-07, ABT-08, ABT-09, ABT-10, ABT-11, ABT-14, ABT-15
+
+**Done when**:
+
+- [x] Playwright mede a geometria desktop com tolerância de `±4 px`.
+- [x] Playwright prova ausência de overflow, visibilidade e não sobreposição nos viewports definidos.
+- [x] Playwright mede CLS `<= 0.1` com assets atrasados e todos os contrastes exigidos.
+- [x] Os seis exports são fixados por SHA-256 e aparecem como assets locais no manifest da build.
+- [x] O bundle rejeita URLs remotas de Figma/MCP.
+- [x] Gate Full passa; a re-verificação independente está prevista após o commit.
+
+**Tests**: unit + browser/e2e + build-only
+**Gate**: full
+**Commit**: `test(about): strengthen validation evidence`
+
+**Status**: ✅ Complete — 46 testes unitários, 4 grupos de verificações no Chromium, lint, build, manifest local e scanner de URLs passaram no ciclo de fix 1.
+
 ---
 
 ## Phase Execution Map
@@ -231,7 +255,7 @@ T5 -> T6
 ```text
 Phase 1: T1 -> T2
 Phase 2: T3 -> T4
-Phase 3: T5 -> T6
+Phase 3: T5 -> T6 -> T7
 ```
 
 As dependências entre fases são T3 após T2 e T5 após T4. O mapa mostra a ordem interna das fases.
@@ -248,6 +272,7 @@ As dependências entre fases são T3 após T2 e T5 após T4. O mapa mostra a ord
 | T4 | Um componente de conteúdo | ✅ Granular |
 | T5 | Uma composição de página | ✅ Granular |
 | T6 | Uma integração de rota | ✅ Granular |
+| T7 | Um reforço coeso da evidência de validação | ✅ Granular |
 
 ---
 
@@ -261,6 +286,7 @@ As dependências entre fases são T3 após T2 e T5 após T4. O mapa mostra a ord
 | T4 | T3 | T3 → T4 | ✅ Match |
 | T5 | T4, fase anterior | Início da Phase 3 | ✅ Match |
 | T6 | T5 | T5 → T6 | ✅ Match |
+| T7 | T6 | T6 → T7 | ✅ Match |
 
 ---
 
@@ -274,6 +300,7 @@ As dependências entre fases são T3 após T2 e T5 após T4. O mapa mostra a ord
 | T4 | Componente React | unit | unit | ✅ OK |
 | T5 | Página React | unit | unit | ✅ OK |
 | T6 | Roteamento | integration | integration | ✅ OK |
+| T7 | Browser, assets e build | browser/e2e + build-only | browser/e2e + build-only | ✅ OK |
 
 ---
 
@@ -283,19 +310,19 @@ As dependências entre fases são T3 após T2 e T5 após T4. O mapa mostra a ord
 | --- | --- |
 | ABT-01 | T1, T6 |
 | ABT-02 | T5 |
-| ABT-03 | T5 |
-| ABT-04 | T4 |
+| ABT-03 | T5, T7 |
+| ABT-04 | T4, T7 |
 | ABT-05 | T4, T5 |
-| ABT-06 | T4, T5 |
-| ABT-07 | T2, T3 |
-| ABT-08 | T3, T5, T6 |
-| ABT-09 | T3, T4, T5, T6 |
-| ABT-10 | T3, T5, T6 |
-| ABT-11 | T2, T3 |
+| ABT-06 | T4, T5, T7 |
+| ABT-07 | T2, T3, T7 |
+| ABT-08 | T3, T5, T6, T7 |
+| ABT-09 | T3, T4, T5, T6, T7 |
+| ABT-10 | T3, T5, T6, T7 |
+| ABT-11 | T2, T3, T7 |
 | ABT-12 | T4, T5 |
 | ABT-13 | T2, T3, T4 |
-| ABT-14 | T4, T5 |
-| ABT-15 | T2, T6 |
+| ABT-14 | T4, T5, T7 |
+| ABT-15 | T2, T6, T7 |
 
 **Coverage:** 15 de 15 requisitos mapeados; 0 órfãos.
 

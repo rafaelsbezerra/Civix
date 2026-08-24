@@ -7,20 +7,21 @@ import macbookSilver from '@/assets/civix/about/macbook-silver.png'
 export function AboutVisual() {
   return (
     <div
-      className="pointer-events-none relative mx-auto h-[330px] w-full max-w-[640px] overflow-hidden sm:h-[430px] min-[1440px]:absolute min-[1440px]:inset-0 min-[1440px]:h-[760px] min-[1440px]:max-w-none"
+      className="pointer-events-none relative mx-auto h-[330px] w-full max-w-[640px] overflow-hidden sm:h-[430px] 2xl:absolute 2xl:inset-0 2xl:h-[760px] 2xl:max-w-none"
       data-testid="about-visual"
     >
       <img
         aria-hidden="true"
         alt=""
-        className="absolute -bottom-12 -left-20 w-[280px] rotate-[145.64deg] sm:-bottom-20 sm:-left-24 sm:w-[390px] min-[1440px]:bottom-auto min-[1440px]:left-[-81px] min-[1440px]:top-[382px] min-[1440px]:w-[432px]"
+        className="absolute -bottom-12 -left-20 w-[280px] rotate-[145.64deg] sm:-bottom-20 sm:-left-24 sm:w-[390px] 2xl:bottom-auto 2xl:left-[-81px] 2xl:top-[382px] 2xl:w-[432px]"
+        data-testid="about-background-shape"
         height="432"
         src={backgroundShape}
         width="432"
       />
 
       <div
-        className="absolute left-1/2 top-10 h-[270px] w-[min(92vw,470px)] -translate-x-1/2 sm:top-9 sm:h-[360px] sm:w-[570px] min-[1440px]:left-[128px] min-[1440px]:top-[247px] min-[1440px]:h-[477px] min-[1440px]:w-[635px] min-[1440px]:translate-x-0"
+        className="absolute left-1/2 top-10 h-[270px] w-[min(92vw,470px)] -translate-x-1/2 sm:top-9 sm:h-[360px] sm:w-[570px] 2xl:left-[128px] 2xl:top-[247px] 2xl:h-[477px] 2xl:w-[635px] 2xl:translate-x-0"
         data-testid="about-laptop"
       >
         <img
@@ -51,7 +52,8 @@ export function AboutVisual() {
       <img
         aria-hidden="true"
         alt=""
-        className="absolute right-2 top-2 size-[70px] sm:right-0 sm:top-5 sm:size-[90px] min-[1440px]:left-[672px] min-[1440px]:right-auto min-[1440px]:top-[289px] min-[1440px]:size-[104px]"
+        className="absolute right-2 top-2 size-[70px] sm:right-0 sm:top-5 sm:size-[90px] 2xl:left-[672px] 2xl:right-auto 2xl:top-[289px] 2xl:size-[104px]"
+        data-testid="about-scribble"
         height="104"
         src={emphasisScribble}
         width="104"

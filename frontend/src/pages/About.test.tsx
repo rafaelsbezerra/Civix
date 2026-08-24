@@ -46,13 +46,13 @@ describe('AboutPage', () => {
     const heading = screen.getByRole('heading', { level: 1 })
     const marker = screen.getByTestId('about-marker')
 
-    expect(frame).toHaveClass('min-[1440px]:h-[760px]', 'min-[1440px]:max-w-[1728px]')
-    expect(marker).toHaveClass('min-[1440px]:left-[128px]', 'min-[1440px]:top-[80px]')
+    expect(frame).toHaveClass('2xl:h-[760px]', '2xl:max-w-[1728px]')
+    expect(marker).toHaveClass('2xl:left-[128px]', '2xl:top-[80px]')
     expect(heading).toHaveClass(
-      'min-[1440px]:left-[calc(41.667%+93px)]',
-      'min-[1440px]:top-[80px]',
-      'min-[1440px]:w-[683px]',
-      'min-[1440px]:text-[48px]',
+      '2xl:left-[calc(41.667%+93px)]',
+      '2xl:top-[80px]',
+      '2xl:w-[683px]',
+      '2xl:text-[48px]',
     )
   })
 

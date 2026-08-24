@@ -23,13 +23,13 @@ describe('AboutVisual', () => {
         expect.stringContaining('macbook-silver.png'),
       ]),
     )
-    const inlineVectors = sources
-      .filter((source) => source.startsWith('data:image/svg+xml'))
-      .map((source) => decodeURIComponent(source))
-
-    expect(inlineVectors).toHaveLength(2)
-    expect(inlineVectors.join(' ')).toContain("id='Shape'")
-    expect(inlineVectors.join(' ')).toContain('Abstract--Streamline-Variable-Scribbles')
+    expect(sources).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining('background-shape.svg'),
+        expect.stringContaining('emphasis-scribble.svg'),
+      ]),
+    )
+    expect(sources.every((source) => !/^https?:/i.test(source))).toBe(true)
   })
 
   it('reserves the intrinsic proportions of both raster assets', () => {
@@ -46,15 +46,15 @@ describe('AboutVisual', () => {
 
     expect(screen.getByTestId('about-visual')).toHaveClass(
       'h-[330px]',
-      'min-[1440px]:absolute',
-      'min-[1440px]:inset-0',
-      'min-[1440px]:h-[760px]',
+      '2xl:absolute',
+      '2xl:inset-0',
+      '2xl:h-[760px]',
     )
     expect(screen.getByTestId('about-laptop')).toHaveClass(
-      'min-[1440px]:left-[128px]',
-      'min-[1440px]:top-[247px]',
-      'min-[1440px]:h-[477px]',
-      'min-[1440px]:w-[635px]',
+      '2xl:left-[128px]',
+      '2xl:top-[247px]',
+      '2xl:h-[477px]',
+      '2xl:w-[635px]',
     )
   })
 })

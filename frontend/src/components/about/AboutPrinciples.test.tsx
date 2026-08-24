@@ -42,6 +42,12 @@ describe('AboutPrinciples', () => {
       expect(divider).toHaveAttribute('alt', '')
       expect(divider).toHaveAttribute('aria-hidden', 'true')
     }
+    expect(Array.from(dividers, (divider) => divider.getAttribute('src'))).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining('value-divider.svg'),
+        expect.stringContaining('vision-divider.svg'),
+      ]),
+    )
   })
 
   it('keeps the reference typography and desktop list geometry', () => {
@@ -49,9 +55,9 @@ describe('AboutPrinciples', () => {
 
     const section = screen.getByRole('region', { name: 'Princípios da Civix' })
     expect(section).toHaveClass(
-      'min-[1440px]:left-[calc(58.333%_-_19px)]',
-      'min-[1440px]:top-[446px]',
-      'min-[1440px]:w-[611px]',
+      '2xl:left-[calc(58.333%_-_19px)]',
+      '2xl:top-[446px]',
+      '2xl:w-[611px]',
     )
     expect(screen.getByRole('heading', { name: 'Valor' }).className).toContain(
       'font-[family-name:var(--font-display)]',
