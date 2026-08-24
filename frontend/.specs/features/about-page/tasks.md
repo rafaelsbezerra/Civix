@@ -52,7 +52,7 @@ T3 -> T4
 ### Phase 3: Integration
 
 ```text
-T5 -> T6 -> T7 -> T8
+T5 -> T6 -> T7 -> T8 -> T9
 ```
 
 ---
@@ -271,6 +271,28 @@ T5 -> T6 -> T7 -> T8
 
 **Status**: ✅ Complete — assertions observáveis ampliadas no ciclo de fix 2; browser gate verde.
 
+#### T9: Discriminar ordem responsiva e zoom
+
+**What**: Matar o mutante sobrevivente do terceiro Verifier, tornando o fluxo textual estritamente vertical abaixo de `1024 px` e repetindo toda a matriz de oclusão em zoom textual de `200%`.
+**Where**: `src/pages/About.tsx` e `scripts/verify-about-browser.mjs`.
+**Depends on**: T8
+**Reuses**: Retângulos e helpers do browser gate.
+**Requirement**: ABT-09, ABT-14
+
+**Done when**:
+
+- [x] Marcador, título e introdução obedecem limites adjacentes nessa ordem abaixo de `1024 px`.
+- [x] O layout adaptativo não usa colunas antes do frame desktop `2xl`.
+- [x] Em zoom textual de `200%`, todos os pares de copy e princípios permanecem ordenados, contidos e sem overlap.
+- [x] O mutante que reordena o marcador passa a falhar no browser gate.
+- [x] Gate Full passa; a re-verificação independente final está prevista após o commit.
+
+**Tests**: browser/e2e
+**Gate**: full
+**Commit**: `test(about): enforce responsive reading order`
+
+**Status**: ✅ Complete — terceiro ciclo de fix aplicado; browser gate verde com ordem estrita e matriz de zoom completa.
+
 ---
 
 ## Phase Execution Map
@@ -278,7 +300,7 @@ T5 -> T6 -> T7 -> T8
 ```text
 Phase 1: T1 -> T2
 Phase 2: T3 -> T4
-Phase 3: T5 -> T6 -> T7 -> T8
+Phase 3: T5 -> T6 -> T7 -> T8 -> T9
 ```
 
 As dependências entre fases são T3 após T2 e T5 após T4. O mapa mostra a ordem interna das fases.
@@ -297,6 +319,7 @@ As dependências entre fases são T3 após T2 e T5 após T4. O mapa mostra a ord
 | T6 | Uma integração de rota | ✅ Granular |
 | T7 | Um reforço coeso da evidência de validação | ✅ Granular |
 | T8 | Um complemento coeso das assertions observáveis | ✅ Granular |
+| T9 | Um reforço coeso da ordem responsiva e zoom | ✅ Granular |
 
 ---
 
@@ -312,6 +335,7 @@ As dependências entre fases são T3 após T2 e T5 após T4. O mapa mostra a ord
 | T6 | T5 | T5 → T6 | ✅ Match |
 | T7 | T6 | T6 → T7 | ✅ Match |
 | T8 | T7 | T7 → T8 | ✅ Match |
+| T9 | T8 | T8 → T9 | ✅ Match |
 
 ---
 
@@ -327,6 +351,7 @@ As dependências entre fases são T3 após T2 e T5 após T4. O mapa mostra a ord
 | T6 | Roteamento | integration | integration | ✅ OK |
 | T7 | Browser, assets e build | browser/e2e + build-only | browser/e2e + build-only | ✅ OK |
 | T8 | Browser | browser/e2e | browser/e2e | ✅ OK |
+| T9 | Browser | browser/e2e | browser/e2e | ✅ OK |
 
 ---
 
@@ -342,12 +367,12 @@ As dependências entre fases são T3 após T2 e T5 após T4. O mapa mostra a ord
 | ABT-06 | T4, T5, T7, T8 |
 | ABT-07 | T2, T3, T7 |
 | ABT-08 | T3, T5, T6, T7 |
-| ABT-09 | T3, T4, T5, T6, T7, T8 |
+| ABT-09 | T3, T4, T5, T6, T7, T8, T9 |
 | ABT-10 | T3, T5, T6, T7, T8 |
 | ABT-11 | T2, T3, T7 |
 | ABT-12 | T4, T5 |
 | ABT-13 | T2, T3, T4 |
-| ABT-14 | T4, T5, T7, T8 |
+| ABT-14 | T4, T5, T7, T8, T9 |
 | ABT-15 | T2, T6, T7 |
 
 **Coverage:** 15 de 15 requisitos mapeados; 0 órfãos.

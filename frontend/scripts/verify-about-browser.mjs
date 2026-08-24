@@ -167,6 +167,8 @@ try {
           assert.equal(rectanglesOverlap(copy[index], copy[compared]), false)
         }
       }
+      assert.ok(layout.marker.bottom <= layout.heading.top)
+      assert.ok(layout.heading.bottom <= layout.introduction.top)
       assert.ok(Math.max(...copy.map((rectangle) => rectangle.bottom)) <= layout.visual.top)
       assert.ok(layout.visual.bottom <= layout.principles.top)
       for (const [index, item] of layout.principleItems.entries()) {
@@ -198,12 +200,32 @@ try {
   for (const { label, rectangle } of zoomed.essentialText) {
     assert.ok(rectangle.left >= -0.5, `${label} clipped at 200% text`)
     assert.ok(rectangle.right <= zoomed.clientWidth + 0.5, `${label} clipped at 200% text`)
+    assert.ok(rectangle.top >= -0.5, `${label} clipped at 200% text`)
+    assert.ok(rectangle.bottom <= zoomed.scrollHeight, `${label} clipped at 200% text`)
   }
+  const zoomedCopy = [zoomed.marker, zoomed.heading, zoomed.introduction]
+  for (let index = 0; index < zoomedCopy.length; index += 1) {
+    for (let compared = index + 1; compared < zoomedCopy.length; compared += 1) {
+      assert.equal(rectanglesOverlap(zoomedCopy[index], zoomedCopy[compared]), false)
+    }
+  }
+  assert.ok(zoomed.marker.bottom <= zoomed.heading.top)
+  assert.ok(zoomed.heading.bottom <= zoomed.introduction.top)
   assert.ok(
     Math.max(zoomed.marker.bottom, zoomed.heading.bottom, zoomed.introduction.bottom) <=
       zoomed.visual.top,
   )
   assert.ok(zoomed.visual.bottom <= zoomed.principles.top)
+  for (const [index, item] of zoomed.principleItems.entries()) {
+    assert.equal(rectanglesOverlap(item.heading, item.description), false)
+    assert.ok(item.heading.top >= item.article.top && item.heading.bottom <= item.article.bottom)
+    assert.ok(
+      item.description.top >= item.article.top && item.description.bottom <= item.article.bottom,
+    )
+    if (index > 0) {
+      assert.ok(zoomed.principleItems[index - 1].article.bottom <= item.article.top)
+    }
+  }
 
   await page.setViewportSize({ width: 1728, height: 760 })
   await stabilize(page, baseUrl)
