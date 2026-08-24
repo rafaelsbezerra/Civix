@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Plus, Minus } from 'lucide-react'
-
+import ctaContainer from "@/assets/civix/ctaconhtainer.png"
+import { ActionButton } from '@/components/ui/ActionButton'
 interface FAQItem {
   question: string
   answer: string
@@ -58,14 +59,20 @@ export default function FAQSection() {
   }
 
   return (
-    <section className="w-full bg-[#f8f7f5] py-16 px-4 flex flex-col items-center">
+    <section className="flex w-full flex-col items-center bg-[#f8f7f5] px-4 py-16 sm:px-8 lg:px-16">
       <div className="max-w-3xl w-full">
         {/* Subtítulo e Título */}
         <div className="text-center mb-10">
-          <span className="text-xs font-semibold tracking-wider text-[#d0982b] uppercase">
-            // Perguntas frequentes
-          </span>
-          <h2 className="text-3xl md:text-4xl font-bold text-[#071b2b] mt-3 leading-tight">
+
+          <p
+            className="font-[family-name:var(--font-display)] text-base font-medium leading-[normal] text-[var(--color-civix-navy)]"
+            data-testid="about-marker"
+          >
+            <span className="text-[var(--color-civix-gold-accessible)]">//</span>{' '}
+            <span>Perguntas frequentes</span>
+          </p>
+
+          <h2 className="font-[family-name:var(--font-display)] text-3xl md:text-5xl font-medium text-[#071b2b] mt-3 leading-tight">
             Possui perguntas? <br />
             Nós temos as respostas
           </h2>
@@ -78,11 +85,10 @@ export default function FAQSection() {
             return (
               <div
                 key={index}
-                className={`rounded-xl transition-all duration-300 overflow-hidden ${
-                  isOpen
-                    ? 'bg-[#98a1a8] text-[#071b2b]'
-                    : 'bg-[#eeeeed] hover:bg-[#e7e6e4] text-[#071b2b]'
-                }`}
+                className={`rounded-xl transition-all duration-300 overflow-hidden ${isOpen
+                  ? 'bg-[#98a1a8] text-[#071b2b]'
+                  : 'bg-[#eeeeed] hover:bg-[#e7e6e4] text-[#071b2b]'
+                  }`}
               >
                 <button
                   type="button"
@@ -91,11 +97,10 @@ export default function FAQSection() {
                 >
                   <span>{item.question}</span>
                   <div
-                    className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 transition-colors ${
-                      isOpen
-                        ? 'bg-[#071b2b] text-white'
-                        : 'bg-[#e0dfdc] text-[#071b2b]'
-                    }`}
+                    className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 transition-colors ${isOpen
+                      ? 'bg-[#071b2b] text-white'
+                      : 'bg-[#e0dfdc] text-[#071b2b]'
+                      }`}
                   >
                     {isOpen ? <Minus size={16} /> : <Plus size={16} />}
                   </div>
@@ -111,17 +116,35 @@ export default function FAQSection() {
           })}
         </div>
 
-        {/* Banner CTA Escuro Inferior */}
-        <div className="mt-16 w-full bg-[#071b2b] rounded-2xl p-8 md:p-14 text-center text-white relative overflow-hidden shadow-xl">
-          <h3 className="text-2xl md:text-4xl font-semibold mb-6 max-w-xl mx-auto leading-tight">
+      </div>
+
+      {/* Banner CTA com a mesma largura máxima do Hero */}
+      <div className="relative mx-auto mt-16 flex min-h-[360px] w-full max-w-[1600px] items-center justify-center overflow-hidden rounded-[var(--radius-hero)] sm:min-h-[430px] lg:min-h-[530px]">
+        <img
+          src={ctaContainer}
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 h-full w-full object-cover object-center"
+        />
+
+        <div className="relative z-10 flex w-full flex-col items-center px-6 py-16 text-center text-[var(--color-civix-ivory)] sm:px-12">
+          <h3 className="mx-auto max-w-[1000px] font-[family-name:var(--font-display)] text-[clamp(2rem,5vw,4rem)] font-semibold leading-[1.08] tracking-[-0.02em]">
             Preparado para transformar o atendimento da sua empresa?
           </h3>
-          <button
-            type="button"
-            className="bg-[#d0982b] hover:bg-[#b88320] text-white font-medium py-3 px-10 rounded-lg transition-colors shadow-md"
+          <ActionButton
+            href='#'
+            variant='yellow'
+            className='mt-10'
           >
+
             Contato
-          </button>
+
+          </ActionButton>
+          {/* <button
+            type="button"
+            className="mt-10 rounded-lg bg-[#d0982b] px-10 py-3 font-medium text-white shadow-md transition-colors hover:bg-[#b88320]"
+          >
+          </button> */}
         </div>
       </div>
     </section>

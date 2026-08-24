@@ -45,16 +45,14 @@ export function AboutPrinciples() {
           >
             {principle.description}
           </p>
-          {principle.divider ? (
-            <img
-              aria-hidden="true"
-              alt=""
-              className="mt-5 h-0.5 w-full 2xl:absolute 2xl:left-0 2xl:top-[37px] 2xl:mt-0 2xl:w-[611px]"
-              height={index === 0 ? 2 : 1}
-              src={principle.divider}
-              width="611"
-            />
-          ) : null}
+          <img
+            aria-hidden="true"
+            alt=""
+            className="mt-5 h-0.5 w-full 2xl:absolute 2xl:left-0 2xl:top-[37px] 2xl:mt-0 2xl:w-[611px]"
+            height={index === 0 ? 2 : 1}
+            src={principle.divider}
+            width="611"
+          />
         </article>
       ))}
     </section>

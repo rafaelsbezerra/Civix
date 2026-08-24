@@ -1,7 +1,7 @@
 import backgroundShape from '@/assets/civix/about/background-shape.svg'
-import dashboard from '@/assets/civix/about/dashboard.png'
+// import dashboard from '@/assets/civix/about/dashboard.png'
 import emphasisScribble from '@/assets/civix/about/emphasis-scribble.svg'
-import macbookSilver from '@/assets/civix/about/macbook-silver.png'
+import macbookSilver from '@/assets/civix/about/macbook.png'
 
 /** Composes the decorative notebook artwork from the original Figma exports. */
 export function AboutVisual() {
@@ -27,26 +27,10 @@ export function AboutVisual() {
         <img
           aria-hidden="true"
           alt=""
-          className="absolute left-[3.7%] top-[4.2%] h-[86.3%] w-[92.6%] rotate-[6.84deg] object-fill"
+          className="absolute left-[6.7%] top-[2.2%] h-[86.3%] w-[92.6%] rotate-[1.84deg] object-fill"
           data-testid="about-macbook"
-          height="2860"
           src={macbookSilver}
-          width="4340"
         />
-
-        <div className="absolute left-[9.85%] top-[11.68%] flex h-[81.45%] w-[80.2%] items-center justify-center overflow-visible">
-          <div className="relative h-[86.82%] w-[93.16%] rotate-[6.45deg] overflow-hidden">
-            <img
-              aria-hidden="true"
-              alt=""
-              className="absolute -left-[5.53%] -top-[8.69%] h-[117.07%] w-[110.94%] max-w-none"
-              data-testid="about-dashboard"
-              height="768"
-              src={dashboard}
-              width="1024"
-            />
-          </div>
-        </div>
       </div>
 
       <img
