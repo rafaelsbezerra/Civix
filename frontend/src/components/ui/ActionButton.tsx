@@ -15,9 +15,9 @@ const variantClasses: Record<ActionButtonVariant, string> = {
   primary:
     'bg-[#07192a] text-[#faf9f6] hover:bg-[#001930]',
   light:
-    'bg-[#faf9f6] text-[#07192a] hover:bg-[#f8f5ec]',
+    'bg-[#faf9f6] text-[#07192a] hover:bg-[#07192a] hover:text-[#faf9f6]',
   translucent:
-    'bg-[rgba(250,249,246,0.2)] text-[#faf9f6] backdrop-blur-[2px] hover:bg-[#6d6a6a33]',
+    'bg-[rgba(250,249,246,0.2)] text-[#faf9f6] backdrop-blur-[2px] hover:bg-[#001930]',
 }
 
 export function ActionButton({

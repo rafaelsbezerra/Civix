@@ -3,8 +3,6 @@ import { useEffect, useRef, useState } from 'react'
 import logoCivix from '@/assets/civix/logo-civix.png'
 import { ActionButton } from '@/components/ui/ActionButton'
 
-import { useNavigate } from 'react-router-dom'
-
 export interface NavigationItem {
   href: `/${string}`
   label: string
@@ -26,7 +24,6 @@ export function SiteHeader({
 }: SiteHeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const menuButtonRef = useRef<HTMLButtonElement>(null)
-  const navigate = useNavigate()
 
   useEffect(() => {
     if (!isMenuOpen) return
@@ -144,10 +141,7 @@ export function SiteHeader({
           <ActionButton
             className="mt-3 w-full"
             href="/login"
-            onClick={() => {
-              setIsMenuOpen(false);
-              navigate('/login');
-            }}
+            onClick={() => setIsMenuOpen(false)}
             variant="primary"
           >
             Login
