@@ -101,7 +101,8 @@ export default function Login() {
           <div className="flex-1 flex items-center justify-center px-6">
             <div className="w-full max-w-[clamp(280px,20vw,500px)]">
 
-              <h1 className="text-[clamp(24px,1.5vw,30px)] leading-[1.1] font-semibold text-[#071b2b] text-center mb-[clamp(24px,3vh,45px)]">
+              <h1 id="login-title" 
+              className="font-sans text-[clamp(24px,1.5vw,30px)] leading-[1.1] font-semibold text-[#071b2b] text-center mb-[clamp(18px,2vh,30px)]">
                 Faça login para ter acesso
                 <br />
                 ao sistema
@@ -176,7 +177,7 @@ export default function Login() {
                 <div>
                   <label
                     htmlFor="email"
-                    className="block text-[clamp(7px,0.5vw,11px)] text-[#737373] mb-1.5"
+                    className="block text-[clamp(12px,0.5vw,11px)] text-[#737373] mb-1.5"
                   >
                     Email
                   </label>
@@ -185,14 +186,14 @@ export default function Login() {
                     id="email"
                     type="email"
                     placeholder="seu_email@email.com"
-                    className="w-full h-[clamp(34px,4vh,52px)] rounded-[5px] bg-[#f3f3f3] px-[clamp(10px,0.8vw,16px)] text-[clamp(9px,0.6vw,13px)] text-[#222] placeholder:text-[#777] outline-none focus:ring-1 focus:ring-[#0b2030]"
+                    className="w-full h-[clamp(50px,4vh,52px)] rounded-[5px] bg-[#f3f3f3] px-[clamp(10px,0.8vw,16px)] text-[clamp(14px,0.6vw,13px)] text-[#222] placeholder:text-[#777] outline-none focus:ring-1 focus:ring-[#0b2030]"
                   />
                 </div>
 
                 <div>
                   <label
                     htmlFor="password"
-                    className="block text-[clamp(7px,0.5vw,11px)] text-[#737373] mb-1.5"
+                    className="block text-[clamp(12px,0.5vw,11px)] text-[#737373] mb-1.5"
                   >
                     Senha
                   </label>
@@ -204,7 +205,7 @@ export default function Login() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full h-[clamp(34px,4vh,52px)] rounded-[5px] bg-[#f3f3f3] px-[clamp(10px,0.8vw,16px)] pr-10 text-[clamp(9px,0.6vw,13px)] text-[#222] placeholder:text-[#777] outline-none focus:ring-1 focus:ring-[#0b2030]"
+                      className="w-full h-[clamp(50px,4vh,52px)] rounded-[5px] bg-[#f3f3f3] px-[clamp(10px,0.8vw,16px)] pr-10 text-[clamp(14px,0.6vw,13px)] text-[#222] placeholder:text-[#777] outline-none focus:ring-1 focus:ring-[#0b2030]"
                     />
 
                     <button

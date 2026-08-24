@@ -6,7 +6,7 @@ import { ActionButton } from '@/components/ui/ActionButton'
 import { useNavigate } from 'react-router-dom'
 
 export interface NavigationItem {
-  href: `#${string}`
+  href: `/${string}`
   label: string
 }
 
@@ -15,10 +15,10 @@ export interface SiteHeaderProps {
 }
 
 const defaultNavigationItems: readonly NavigationItem[] = [
-  { href: '#home', label: 'Home' },
-  { href: '#sobre', label: 'Sobre' },
-  { href: '#empresas', label: 'Empresas' },
-  { href: '#planos', label: 'Planos' },
+  { href: '/', label: 'Home' },
+  { href: '/sobre', label: 'Sobre' },
+  { href: '/catalogo', label: 'Empresas' },
+  { href: '/planos', label: 'Planos' },
 ]
 
 export function SiteHeader({

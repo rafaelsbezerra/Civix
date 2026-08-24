@@ -1,9 +1,9 @@
 function ProfileHeader() {
   return (
     <header className="site-header">
-      <a className="brand" href="#perfil" aria-label="Civix inicio">civix<span>.</span></a>
+      <a className="brand" href="/" aria-label="Civix inicio">civix<span>.</span></a>
       <nav className="main-nav" aria-label="Navegacao principal"><a href="#perfil">Inicio</a><a href="#sobre">Sobre</a><a href="#empresas">Empresas</a><a href="#planos">Planos</a></nav>
-      <button className="header-cta" type="button">Entrar no Civix <span aria-hidden="true">-&gt;</span></button>
+     <a href="/login"><button className="header-cta" type="button">Entrar no Civix <span aria-hidden="true">-&gt;</span></button></a>
     </header>
   )
 }

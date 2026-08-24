@@ -1,5 +1,8 @@
 import { SiteHeader } from '@/components/layout/SiteHeader'
 import { HeroSection } from '@/components/home/HeroSection'
+import Footer from '@/components/footer/SiteFooter'
+import CardEmpresas from '@/components/EmpresasCard/CardEmpresas'
+import FAQ from '@/pages/FAQ'
 
 export default function HomePage() {
     return (
@@ -7,6 +10,9 @@ export default function HomePage() {
             <SiteHeader />
             <main>
                 <HeroSection />
+                <CardEmpresas />
+                <FAQ />
+                <Footer />
             </main>
         </div>
     )

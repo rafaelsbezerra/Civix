@@ -1,3 +1,5 @@
+import '@/App.css'
+
 const companies = [
   { name: 'Estrutura Alfa Engenharia', city: 'Sao Paulo, SP', category: 'Engenharia', tone: 'blue' },
   { name: 'Concreto & Cia', city: 'Campinas, SP', category: 'Materiais', tone: 'gold' },
@@ -19,14 +21,14 @@ function BuildingMark() {
 function Header() {
   return (
     <header className="site-header">
-      <a className="brand" href="#catalogo" aria-label="Civix inicio">civix<span>.</span></a>
+      <a className="brand" href="/" aria-label="Civix inicio">civix<span>.</span></a>
       <nav className="main-nav" aria-label="Navegacao principal">
-        <a href="#catalogo">Inicio</a>
-        <a href="#sobre">Sobre</a>
-        <a href="#empresas">Empresas</a>
-        <a href="#planos">Planos</a>
+        <a href="/catalogo">Inicio</a>
+        <a href="/sobre">Sobre</a>
+        <a href="/empresas">Empresas</a>
+        <a href="/planos">Planos</a>
       </nav>
-      <button className="header-cta" type="button">Entrar no Civix <span aria-hidden="true">-&gt;</span></button>
+      <button className="header-cta" type="button"><a href="/login">Entrar no Civix</a> <span aria-hidden="true">-&gt;</span></button>
     </header>
   )
 }
@@ -40,7 +42,7 @@ function Footer() {
         <small>© 2024 Civix. Todos os direitos reservados.</small>
       </div>
       <div className="footer-column"><strong>Empresa</strong><a href="#sobre">Sobre nos</a><a href="#empresas">Parceiros</a><a href="#contato">Contato</a></div>
-      <div className="footer-column"><strong>Recursos</strong><a href="#catalogo">Catalogo</a><a href="#planos">Planos</a><a href="#ajuda">Central de ajuda</a></div>
+      <div className="footer-column"><strong>Recursos</strong><a href="/catalogo">Catalogo</a><a href="#planos">Planos</a><a href="#ajuda">Central de ajuda</a></div>
       <div className="footer-column"><strong>Legal</strong><a href="#privacidade">Privacidade</a><a href="#termos">Termos de uso</a></div>
       <div className="footer-column footer-contact"><strong>Contato</strong><a href="mailto:oi@civix.com.br">oi@civix.com.br</a><span>Sao Paulo, Brasil</span></div>
     </footer>
@@ -74,7 +76,7 @@ export default function CatalogoEmpresas() {
             {companies.map((company) => (
               <article className="company-card" key={company.name}>
                 <div className={`company-art art-${company.tone}`}><span className="category-badge">{company.category}</span><BuildingMark /></div>
-                <div className="company-details"><h3>{company.name}</h3><p><span className="pin">+</span>{company.city}</p><span className="card-link">Ver perfil <span aria-hidden="true">-&gt;</span></span></div>
+                <div className="company-details"><h3>{company.name}</h3><p><span className="pin">+</span>{company.city}</p><span className="card-link"><a href={`/empresas/${company.name.split(' ').join('-')}`}>Ver perfil</a> <span aria-hidden="true">-&gt;</span></span></div>
               </article>
             ))}
           </div>
