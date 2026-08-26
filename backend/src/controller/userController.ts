@@ -1,86 +1,140 @@
-// Lógica das requisições/respostas
+import { Request, Response } from "express";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
+import { pool } from "../config/db";
 
-import { Request, Response } from 'express';
-import jwt from 'jsonwebtoken';
-import bcrypt from 'bcrypt';
-// const User = require('../models/User');
-import users from '../data/user.json';
-
-// Estrutura do usuário para o JSON local
-interface LocalUser {
-    id: string | number;
-    email: string;
-    password?: string;
+interface DbUser {
+  id: string | number;
+  email: string;
+  password_hash?: string;
+  role: "empresa" | "cliente";
+  name?: string;
 }
 
-// Interface para estender o Request do Express com a propriedade userId
 interface AuthenticatedRequest extends Request {
-    userId?: string | number;
+  userId?: string | number;
+  userRole?: string;
 }
 
-export const login = async (req: Request, res: Response): Promise<Response> => {
-    try {
-        const { email, password } = req.body;
+export const login = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    const { email, password, role } = req.body;
 
-        console.log('Email recebido:', email);
-        console.log('Usuários:', users);
-
-        //Validação de entrada
-        if (!email || !password) {
-            return res.status(400).json({ error: 'Email e senha são obrigatórios' });
-        }
-
-
-        //Testando a infra com JSON local, sem banco de dados
-
-        // 1. Busca o usuário no array do JSON (usando a interface LocalUser em vez de any)
-        const user = (users as LocalUser[]).find((u) => u.email === email);
-
-        console.log('Usuário encontrado:', user);
-        if (!user) {
-            return res.status(401).json({ error: 'Credenciais inválidas.' });
-        }
-
-        // 2. Compara a senha enviada com o hash presente no JSON
-        const isPasswordValid = await bcrypt.compare(password, user.password || '');
-        if (!isPasswordValid) {
-            return res.status(401).json({ error: 'Credenciais inválidas.' });
-        }
-
-        //Prepara o payload do token JWT
-        const payload = {
-            id: user.id,
-            email: user.email,
-        };
-
-        //Gerar token JWT
-        const token = jwt.sign(payload, process.env.JWT_SECRET as string, {
-            expiresIn: '1h' // O token expira em 1 hora
-        });
-
-        //Retorna o token para o cliente
-        return res.status(200).json({
-            user: {
-                id: user.id,
-                email: user.email,
-            },
-            token,
-        });
-
-
-    } catch (error) {
-        console.error('Erro no login:', error);
-        return res.status(500).json({ error: 'Erro interno do servidor' });
+    if (!email) {
+      return res.status(400).json({
+        error: "Email é obrigatório",
+      });
     }
+
+    if (role !== "empresa" && role !== "cliente") {
+      return res.status(400).json({
+        error: "Tipo de usuário inválido",
+      });
+    }
+
+    let query: string;
+    let params: string[];
+
+    if (role === "empresa") {
+      if (!password) {
+        return res.status(400).json({
+          error: "Senha é obrigatória para empresas",
+        });
+      }
+
+      query = `
+        SELECT id, name, email, password_hash, role
+        FROM users
+        WHERE email = $1
+        AND role = 'empresa'
+      `;
+
+      params = [email];
+    } else {
+      query = `
+        SELECT id, name, email, role
+        FROM users
+        WHERE email = $1
+        AND role = 'cliente'
+      `;
+
+      params = [email];
+    }
+
+    const { rows } = await pool.query<DbUser>(query, params);
+
+    const user = rows[0];
+
+    if (!user) {
+      return res.status(401).json({
+        error: "Usuário não encontrado.",
+      });
+    }
+
+    if (role === "empresa") {
+      if (!user.password_hash) {
+        return res.status(500).json({
+          error: "Usuário da empresa não possui senha cadastrada.",
+        });
+      }
+
+      const isPasswordValid = await bcrypt.compare(
+        password,
+        user.password_hash
+      );
+
+      if (!isPasswordValid) {
+        return res.status(401).json({
+          error: "Senha incorreta.",
+        });
+      }
+    }
+
+    const payload = {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+    };
+
+    const token = jwt.sign(
+      payload,
+      process.env.JWT_SECRET || "default_secret",
+      {
+        expiresIn: "1h",
+      }
+    );
+
+    return res.status(200).json({
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+      token,
+    });
+  } catch (error) {
+    console.error("Erro no login:", error);
+
+    return res.status(500).json({
+      error: "Erro interno do servidor",
+    });
+  }
 };
 
-export const home = (req: AuthenticatedRequest, res: Response): Response => {
-    //Acessa o ID do usuário decodificado do token JWT
-    const userId = req.userId;
+export const home = (
+  req: AuthenticatedRequest,
+  res: Response
+): Response => {
+  const userId = req.userId;
+  const userRole = req.userRole;
 
-    // Retorna informações sobre o usuário
-    return res.status(200).json({
-        message: 'Acesso permitido à rota home',
-        userId,
-    });
+  return res.status(200).json({
+    message: "Acesso permitido à rota home",
+    userId,
+    userRole,
+  });
 };
