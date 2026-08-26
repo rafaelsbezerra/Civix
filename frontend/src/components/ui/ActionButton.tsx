@@ -1,8 +1,9 @@
 import type { AnchorHTMLAttributes, ReactNode } from 'react'
+import { LogIn } from 'lucide-react'
 
 import arrowRight from '@/assets/civix/arrow-right.svg'
 
-type ActionButtonVariant = 'primary' | 'light' | 'translucent' | 'yellow'
+type ActionButtonVariant = 'primary' | 'light' | 'translucent' | 'yellow' | 'login'
 
 export interface ActionButtonProps
   extends AnchorHTMLAttributes<HTMLAnchorElement> {
@@ -20,6 +21,8 @@ const variantClasses: Record<ActionButtonVariant, string> = {
     'bg-[rgba(250,249,246,0.2)] text-[#faf9f6] backdrop-blur-[2px] hover:bg-[rgba(250,249,246,0.32)]',
   yellow:
     'bg-[#d89c28] text-[#faf9f6] hover:bg-[#b88320]',
+  login:
+    'border border-[#07192a]/50 bg-transparent text-[#07192a] hover:border-[#07192a] hover:bg-[#07192a] hover:text-[#faf9f6]',
 }
 
 export function ActionButton({
@@ -36,6 +39,9 @@ export function ActionButton({
       style={style}
       {...anchorProps}
     >
+      {variant === 'login' ? (
+        <LogIn aria-hidden="true" className="size-5 shrink-0" strokeWidth={1.8} />
+      ) : null}
       <span>{children}</span>
       {showArrow ? (
         <img
