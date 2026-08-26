@@ -131,11 +131,10 @@ button {
 }
 
 .eyebrow {
-  color: var(--amber);
-  font-size: 10px;
+  color: #d89c28;
+  font-size: 12px;
   font-weight: 700;
-  letter-spacing: 2px;
-  margin: 0 0 20px;
+  letter-spacing: 1px;
 }
 
 h1,
@@ -255,9 +254,13 @@ h1 em {
 .catalog-content,
 .about-company {
   margin: 0 auto;
-  max-width: 1200px;
-  padding: 75px clamp(22px, 6vw, 80px) 78px;
+  max-width: 1450px;
+  padding: 5px clamp(22px, 6vw, 80px) 78px;
   text-align: left;
+}
+
+.catalog-page-content {
+  padding-top: 100px;
 }
 
 .results-heading {
@@ -267,8 +270,12 @@ h1 em {
   margin-bottom: 27px;
 }
 
+.companies-section-heading {
+  margin-bottom: 40px;
+}
+
 .dark-eyebrow {
-  color: #b47a10;
+  color: #d89c28;
   margin-bottom: 10px;
 }
 

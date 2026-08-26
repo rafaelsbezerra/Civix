@@ -1,3 +1,5 @@
+import { ActionButton } from '@/components/ui/ActionButton'
+
 const companies = [
     { name: 'Estrutura Alfa Engenharia', city: 'Sao Paulo, SP', category: 'Engenharia', tone: 'blue' },
     { name: 'Concreto & Cia', city: 'Campinas, SP', category: 'Materiais', tone: 'gold' },
@@ -19,7 +21,20 @@ function BuildingMark() {
 export default function CatalogoEmpresas() {
     return (
         <section className="catalog-content" id="empresas">
-            <div className="results-heading"><div><p className="eyebrow dark-eyebrow">EXPLORAR A REDE</p><h2>42 empresas encontradas</h2></div><button className="clear-button" type="button"><a href="/catalogo">Ver catalogo de empresas</a></button></div>
+            <div className="results-heading companies-section-heading">
+                <div>
+                    <p className="font-[family-name:var(--font-display)] text-base font-medium leading-normal text-[var(--color-civix-navy)]">
+                        <span className="text-[var(--color-civix-gold-accessible)]">//</span>{' '}
+                        <span>Empresas</span>
+                    </p>
+                    <h2 className="mt-3 max-w-[760px] font-[family-name:var(--font-display)] text-[clamp(2rem,4vw,3rem)] font-medium leading-[1.1] text-[var(--color-civix-navy)]">
+                        Empresas que constroem o futuro com a gente.
+                    </h2>
+                </div>
+                <ActionButton href="/catalogo" showArrow variant="primary">
+                    Ver todas
+                </ActionButton>
+            </div>
             <div className="company-grid">
                 {companies.map((company) => (
                     <article className="company-card" key={company.name}>
