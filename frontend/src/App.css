@@ -491,6 +491,7 @@ h2 {
   background: white;
   border-radius: 7px;
   bottom: -35px;
+  margin-bottom: 45px;
   box-shadow: 0 14px 25px rgba(5, 15, 25, .25);
   color: var(--ink);
   display: grid;
