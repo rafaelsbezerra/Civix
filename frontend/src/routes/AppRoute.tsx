@@ -5,14 +5,18 @@ import Login from '@/pages/login';
 import CatalogoEmpresas from '@/pages/CatalogoEmpresas';
 import EmpresaProfile from '@/pages/PerfilEmpresa';
 import NotFound from '@/pages/PageError';
+import { PublicSmoothScroll } from '@/components/layout/PublicSmoothScroll';
 
 export const AppRoutes: React.FC = () => (
-    <Routes>
-        <Route path='/' element={<HomePage />} />
-        <Route path="/login" element={<Login />} />
-        <Route path='/catalogo' element={<CatalogoEmpresas />} />
-        <Route path='/empresas/:companyName' element={<EmpresaProfile />} />
+    <>
+        <PublicSmoothScroll />
+        <Routes>
+            <Route path='/' element={<HomePage />} />
+            <Route path="/login" element={<Login />} />
+            <Route path='/catalogo' element={<CatalogoEmpresas />} />
+            <Route path='/empresas/:companyName' element={<EmpresaProfile />} />
 
-        <Route path='*' element={<NotFound />} />
-    </Routes>
+            <Route path='*' element={<NotFound />} />
+        </Routes>
+    </>
 );

@@ -67,6 +67,8 @@
 html {
   scroll-behavior: smooth;
   background: var(--color-civix-ivory);
+  scrollbar-color: var(--color-civix-navy) #dfe3e5;
+  scrollbar-width: thin;
 }
 
 body {
@@ -74,6 +76,24 @@ body {
   margin: 0;
   overflow-x: hidden;
   background: var(--color-civix-ivory);
+}
+
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: #dfe3e5;
+}
+
+::-webkit-scrollbar-thumb {
+  border: 3px solid #dfe3e5;
+  border-radius: 999px;
+  background: var(--color-civix-navy);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #102c43;
 }
 
 button,
