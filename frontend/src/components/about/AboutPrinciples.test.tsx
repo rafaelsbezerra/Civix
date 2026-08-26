@@ -31,13 +31,13 @@ describe('AboutPrinciples', () => {
     ).toBeInTheDocument()
   })
 
-  it('uses two original dividers as decorative images', () => {
+  it('renders a decorative divider below every principle', () => {
     render(<AboutPrinciples />)
 
     const section = screen.getByRole('region', { name: 'Princípios da Civix' })
     const dividers = section.querySelectorAll('img')
 
-    expect(dividers).toHaveLength(2)
+    expect(dividers).toHaveLength(3)
     for (const divider of dividers) {
       expect(divider).toHaveAttribute('alt', '')
       expect(divider).toHaveAttribute('aria-hidden', 'true')

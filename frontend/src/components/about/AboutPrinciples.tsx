@@ -4,7 +4,7 @@ import visionDivider from '@/assets/civix/about/vision-divider.svg'
 interface AboutPrinciple {
   title: 'Valor' | 'Visão' | 'Missão'
   description: string
-  divider?: string
+  divider: string
 }
 
 const principles: readonly AboutPrinciple[] = [
@@ -22,6 +22,7 @@ const principles: readonly AboutPrinciple[] = [
     title: 'Missão',
     description:
       'Simplificar o atendimento e potencializar vendas por meio da tecnologia.',
+    divider: valueDivider,
   },
 ]
 
