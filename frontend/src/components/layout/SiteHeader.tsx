@@ -4,7 +4,7 @@ import logoCivix from '@/assets/civix/logo-civix.png'
 import { ActionButton } from '@/components/ui/ActionButton'
 
 export interface NavigationItem {
-  href: `/${string}`
+  href: `/${string}` | `#${string}`
   label: string
 }
 
@@ -14,9 +14,10 @@ export interface SiteHeaderProps {
 
 const defaultNavigationItems: readonly NavigationItem[] = [
   { href: '/', label: 'Home' },
-  { href: '/sobre', label: 'Sobre' },
-  { href: '/catalogo', label: 'Empresas' },
-  { href: '/planos', label: 'Planos' },
+  { href: '/#sobre', label: 'Sobre' },
+  { href: '/#empresas', label: 'Empresas' },
+  { href: '/#planos', label: 'Planos' },
+  { href: '/#faq', label: 'FAQ' },
 ]
 
 export function SiteHeader({
@@ -44,7 +45,7 @@ export function SiteHeader({
       <a
         aria-label="Civix — início"
         className="inline-flex min-h-11 min-w-11 shrink-0 items-center rounded-sm lg:-translate-y-[5px]"
-        href="#home"
+        href="/"
       >
         <img
           alt="Civix"
@@ -82,7 +83,7 @@ export function SiteHeader({
         <ActionButton
           className="w-[138px] min-w-0 gap-2 px-3"
           href="/login"
-          variant="primary"
+          variant="login"
         >
           Login
         </ActionButton>
@@ -142,7 +143,7 @@ export function SiteHeader({
             className="mt-3 w-full"
             href="/login"
             onClick={() => setIsMenuOpen(false)}
-            variant="primary"
+            variant="login"
           >
             Login
           </ActionButton>

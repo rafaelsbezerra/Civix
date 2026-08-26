@@ -59,7 +59,7 @@ export default function FAQSection() {
   }
 
   return (
-    <section className="flex w-full flex-col items-center bg-[#f8f7f5] px-4 py-16 sm:px-8 lg:px-16">
+    <section className="flex w-full flex-col items-center bg-[#f8f7f5] px-4 py-16 sm:px-8 lg:px-16" id='faq'>
       <div className="max-w-3xl w-full">
         {/* Subtítulo e Título */}
         <div className="text-center mb-10">
@@ -140,11 +140,6 @@ export default function FAQSection() {
             Contato
 
           </ActionButton>
-          {/* <button
-            type="button"
-            className="mt-10 rounded-lg bg-[#d0982b] px-10 py-3 font-medium text-white shadow-md transition-colors hover:bg-[#b88320]"
-          >
-          </button> */}
         </div>
       </div>
     </section>

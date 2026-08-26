@@ -4,7 +4,7 @@ import { AboutVisual } from '@/components/about/AboutVisual'
 /** Renders the public institutional page from Figma frame 103:1987. */
 export default function AboutPage() {
   return (
-    <main className="about-page min-h-screen bg-[var(--color-civix-ivory)]">
+    <main className="about-page min-h-screen bg-[var(--color-civix-ivory)]" id='sobre'>
       <section
         aria-label="Sobre a Civix"
         className="relative mx-auto min-h-screen w-full overflow-hidden bg-[var(--color-civix-ivory)] pb-12 2xl:h-[760px] 2xl:min-h-[760px] 2xl:max-w-[1728px] 2xl:pb-0"
