@@ -1,0 +1,1 @@
+// # Layout HTML do e-mail de boas-vindas

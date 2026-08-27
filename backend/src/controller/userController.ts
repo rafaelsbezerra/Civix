@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
-import { pool } from "../config/db";
+import { db } from "../config/data";
 
 interface DbUser {
   id: string | number;
@@ -64,7 +64,7 @@ export const login = async (
       params = [email];
     }
 
-    const { rows } = await pool.query<DbUser>(query, params);
+    const { rows } = await db.query<DbUser>(query, params);
 
     const user = rows[0];
 
