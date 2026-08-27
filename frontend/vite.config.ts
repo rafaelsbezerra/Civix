@@ -6,6 +6,10 @@ import path from 'path'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwind()],
+  build: {
+    assetsInlineLimit: 0,
+    manifest: true,
+  },
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "./src"),
@@ -15,5 +19,8 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: './src/test/setup.ts',
     css: true,
+    exclude: ['**/node_modules/**', '**/dist/**'],
+    fileParallelism: false,
+    maxWorkers: 1,
   },
 })

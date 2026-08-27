@@ -10,6 +10,7 @@
 :root {
   --color-civix-navy: #07192a;
   --color-civix-gold: #d89c28;
+  --color-civix-gold-accessible: #9a6500;
   --color-civix-ivory: #faf9f6;
   --color-civix-ink: #0e0e10;
   --font-display: 'Urbanist Variable', sans-serif;
@@ -66,6 +67,8 @@
 html {
   scroll-behavior: smooth;
   background: var(--color-civix-ivory);
+  scrollbar-color: var(--color-civix-navy) #dfe3e5;
+  scrollbar-width: thin;
 }
 
 body {
@@ -73,6 +76,24 @@ body {
   margin: 0;
   overflow-x: hidden;
   background: var(--color-civix-ivory);
+}
+
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: #dfe3e5;
+}
+
+::-webkit-scrollbar-thumb {
+  border: 3px solid #dfe3e5;
+  border-radius: 999px;
+  background: var(--color-civix-navy);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #102c43;
 }
 
 button,
@@ -111,6 +132,32 @@ svg {
 
 #root {
   min-height: 100svh;
+}
+
+.about-page h1#about-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(2.25rem, 7vw, 3rem);
+  line-height: 1.1;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.about-page h2 {
+  color: var(--color-civix-navy) !important;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: normal;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+@media (min-width: 1536px) {
+  .about-page h1#about-title {
+    font-size: 48px;
+  }
 }
 
 @theme inline {

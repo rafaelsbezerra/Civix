@@ -14,7 +14,7 @@ describe('ActionButton', () => {
     const link = screen.getByRole('link', { name: 'Começar agora' })
     expect(link).toHaveAttribute('href', '#busca')
     expect(link).toHaveClass('bg-[#07192a]')
-    expect(link).toHaveClass('hover:bg-[#001930]')
+    expect(link).toHaveClass('hover:bg-[#102c43]')
     expect(link.className).toContain('font-[family-name:var(--font-display)]')
   })
 
@@ -27,8 +27,7 @@ describe('ActionButton', () => {
 
     expect(screen.getByRole('link', { name: 'Saiba mais' })).toHaveClass(
       'bg-[#faf9f6]',
-      'hover:bg-[#07192a]',
-      'hover:text-[#faf9f6]',
+      'hover:bg-[#e8e7e3]',
     )
   })
 
@@ -41,8 +40,21 @@ describe('ActionButton', () => {
 
     expect(screen.getByRole('link', { name: 'Fale conosco' })).toHaveClass(
       'bg-[rgba(250,249,246,0.2)]',
-      'hover:bg-[#001930]',
+      'hover:bg-[rgba(250,249,246,0.32)]',
     )
+  })
+
+  it('renders the login variant with a distinct login icon', () => {
+    const { container } = render(
+      <ActionButton href="/login" variant="login">
+        Login
+      </ActionButton>,
+    )
+
+    const link = screen.getByRole('link', { name: 'Login' })
+    expect(link).toHaveAttribute('href', '/login')
+    expect(link).toHaveClass('border-[#07192a]/20', 'bg-transparent')
+    expect(container.querySelector('svg')).toBeInTheDocument()
   })
 
   it('shows a decorative 24px arrow when requested', () => {

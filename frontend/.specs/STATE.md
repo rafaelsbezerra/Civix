@@ -12,11 +12,11 @@
 
 ## Handoff
 
-- **Feature**: Home Hero / `.specs/features/home-hero/`
-- **Phase / Task**: Complete / validação independente PASS
-- **Completed**: planejamento, T1, T2, T3, T4, T5, T6, T7, T8, T9, Verifier e sensor de discriminação
+- **Feature**: Tela Sobre / `.specs/features/about-page/`
+- **Phase / Task**: Execute / Complete
+- **Completed**: tela Sobre em `/sobre`, responsividade derivada, seis exports locais, testes unitários/browser/build e validação independente PASS 15/15
 - **In-progress** (file:line): none
-- **Next step**: feature pronta para revisão visual do usuário ou próxima seção da landing page
+- **Next step**: revisão/release da branch; alteração externa em `src/pages/Home.tsx` permanece fora dos commits da feature
 - **Blockers**: none
-- **Uncommitted files**: relatório e encerramento da validação até o commit final
-- **Branch**: `feature/home-page`
+- **Uncommitted files**: `src/pages/Home.tsx` (alteração externa preservada; não pertence ao trabalho validado)
+- **Branch**: `feature/about-page`

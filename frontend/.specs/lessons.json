@@ -1,0 +1,189 @@
+{
+  "schema": 1,
+  "promote_threshold": 2,
+  "window_days": 45,
+  "quarantine_threshold": 2,
+  "next_id": 11,
+  "lessons": [
+    {
+      "id": "L-001",
+      "key": "spec_precision_gap::embed the full canonical institutional paragraph in the repository spec before asserting exact copy",
+      "text": "Embed the full canonical institutional paragraph in the repository spec before asserting exact copy.",
+      "signal": "spec_precision_gap",
+      "scope": "frontend-ui",
+      "status": "candidate",
+      "features": [
+        "about-page"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "ABT-03 (frontend-ui)"
+      ],
+      "created": "2026-08-24T17:58:23Z",
+      "last_seen": "2026-08-24T17:58:23Z"
+    },
+    {
+      "id": "L-002",
+      "key": "spec_precision_gap::list every canonical principle description in the repository spec before asserting exact copy",
+      "text": "List every canonical principle description in the repository spec before asserting exact copy.",
+      "signal": "spec_precision_gap",
+      "scope": "frontend-ui",
+      "status": "candidate",
+      "features": [
+        "about-page"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "ABT-04 (frontend-ui)"
+      ],
+      "created": "2026-08-24T17:58:23Z",
+      "last_seen": "2026-08-24T17:58:23Z"
+    },
+    {
+      "id": "L-003",
+      "key": "spec_precision_gap::enumerate each palette token semantic role in the spec and assert its computed rendered color",
+      "text": "Enumerate each palette token semantic role in the spec and assert its computed rendered color.",
+      "signal": "spec_precision_gap",
+      "scope": "frontend-ui",
+      "status": "candidate",
+      "features": [
+        "about-page"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "ABT-06 (frontend-ui)"
+      ],
+      "created": "2026-08-24T17:58:24Z",
+      "last_seen": "2026-08-24T17:58:24Z"
+    },
+    {
+      "id": "L-004",
+      "key": "spec_precision_gap::pin design export identities with stable hashes or equivalent repository owned provenance",
+      "text": "Pin design export identities with stable hashes or equivalent repository-owned provenance.",
+      "signal": "spec_precision_gap",
+      "scope": "frontend-ui",
+      "status": "candidate",
+      "features": [
+        "about-page"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "ABT-07 (frontend-ui)"
+      ],
+      "created": "2026-08-24T17:58:24Z",
+      "last_seen": "2026-08-24T17:58:24Z"
+    },
+    {
+      "id": "L-005",
+      "key": "ac_gap::test pixel tolerance requirements with computed rectangles or screenshot diffs not css class strings",
+      "text": "Test pixel tolerance requirements with computed rectangles or screenshot diffs, not CSS class strings.",
+      "signal": "ac_gap",
+      "scope": "frontend-ui",
+      "status": "candidate",
+      "features": [
+        "about-page"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "ABT-08 (frontend-ui)"
+      ],
+      "created": "2026-08-24T17:58:24Z",
+      "last_seen": "2026-08-24T17:58:24Z"
+    },
+    {
+      "id": "L-006",
+      "key": "ac_gap::run responsive layout criteria at their specified viewports and assert element non overlap",
+      "text": "Run responsive layout criteria at their specified viewports and assert element non-overlap.",
+      "signal": "ac_gap",
+      "scope": "frontend-ui",
+      "status": "candidate",
+      "features": [
+        "about-page"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "ABT-09 (frontend-ui)"
+      ],
+      "created": "2026-08-24T17:58:24Z",
+      "last_seen": "2026-08-24T17:58:24Z"
+    },
+    {
+      "id": "L-007",
+      "key": "ac_gap::assert scrollwidth equals clientwidth at every viewport that has a no overflow requirement",
+      "text": "Assert scrollWidth equals clientWidth at every viewport that has a no-overflow requirement.",
+      "signal": "ac_gap",
+      "scope": "frontend-ui",
+      "status": "candidate",
+      "features": [
+        "about-page"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "ABT-10 (frontend-ui)"
+      ],
+      "created": "2026-08-24T17:58:25Z",
+      "last_seen": "2026-08-24T17:58:25Z"
+    },
+    {
+      "id": "L-008",
+      "key": "ac_gap::measure layout shifts while assets load when the spec defines a cls threshold",
+      "text": "Measure layout shifts while assets load when the spec defines a CLS threshold.",
+      "signal": "ac_gap",
+      "scope": "frontend-ui",
+      "status": "candidate",
+      "features": [
+        "about-page"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "ABT-11 (frontend-ui)"
+      ],
+      "created": "2026-08-24T17:58:25Z",
+      "last_seen": "2026-08-24T17:58:25Z"
+    },
+    {
+      "id": "L-009",
+      "key": "ac_gap::calculate contrast for every normal text color and background pair including accent text",
+      "text": "Calculate contrast for every normal-text color and background pair, including accent text.",
+      "signal": "ac_gap",
+      "scope": "frontend-ui",
+      "status": "candidate",
+      "features": [
+        "about-page"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "ABT-14 (frontend-ui)"
+      ],
+      "created": "2026-08-24T17:58:26Z",
+      "last_seen": "2026-08-24T17:58:26Z"
+    },
+    {
+      "id": "L-010",
+      "key": "ac_gap::scan production bundles for forbidden remote urls and assert every required asset resolves locally",
+      "text": "Scan production bundles for forbidden remote URLs and assert every required asset resolves locally.",
+      "signal": "ac_gap",
+      "scope": "frontend-ui",
+      "status": "candidate",
+      "features": [
+        "about-page"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "ABT-15 (frontend-ui)"
+      ],
+      "created": "2026-08-24T17:58:26Z",
+      "last_seen": "2026-08-24T17:58:26Z"
+    }
+  ]
+}

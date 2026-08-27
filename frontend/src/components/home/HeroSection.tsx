@@ -30,19 +30,18 @@ export function HeroSection() {
 
           <div className="relative z-10 px-6 pb-36 pt-16 text-[var(--color-civix-ivory)] sm:px-10 sm:pt-20 lg:absolute lg:left-[63px] lg:top-[124px] lg:p-0">
             <h1
-              className="max-w-[643px] font-[family-name:var(--font-display)] text-[clamp(2.5rem,5vw,4rem)] font-semibold uppercase leading-[1.08] tracking-[-0.02em] lg:w-[663px] lg:leading-[70px] lg:tracking-[-0.034em]"
-              id="hero-title"
+              className="max-w-[643px] font-[family-name:var(--font-display)] text-[clamp(2.5rem,5vw,4rem)] font-semibold uppercase leading-[1.1] tracking-[-0.02em] lg:w-[643px] lg:text-[64px] lg:leading-[80px] lg:tracking-[-0.034em]"
             >
               <span className="lg:block lg:whitespace-nowrap">A TECNOLOGIA QUE</span>{' '}
               <span className="lg:block lg:whitespace-nowrap lg:tracking-[-0.045em]">
                 CONSTRÓI O FUTURO
               </span>
             </h1>
-            <p className="mt-10 max-w-[511px] font-[family-name:var(--font-body)] text-base font-normal leading-[normal] text-[var(--color-civix-ivory)]/90 sm:text-lg lg:absolute lg:left-0 lg:top-[148px] lg:mt-0 lg:w-[511px] lg:leading-[20.6667px]">
+            <p className="mt-10 max-w-[511px] font-[family-name:var(--font-body)] text-base font-normal leading-[normal] text-[var(--color-civix-ivory)]/90 sm:text-lg lg:absolute lg:left-0 lg:top-[124px] lg:mt-0 lg:w-[511px] lg:leading-[20.6667px]">
               A plataforma que conecta pessoas, serviços e soluções para transformar o
               mercado da construção e inovação, praticidade e confiança
             </p>
-            <div className="mt-8 flex flex-wrap gap-[18px] lg:absolute lg:left-0 lg:top-[234px] lg:mt-0">
+            <div className="mt-4 flex flex-wrap gap-[18px] lg:absolute lg:left-0 lg:top-[224px] lg:mt-0">
               <ActionButton href="#sobre" variant="light">
                 Sobre nós
               </ActionButton>
