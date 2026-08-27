@@ -4,7 +4,7 @@
  * Pronto para ser substituído por uma conexão real ao banco de dados
  */
 
-import { Empresa } from '../types/empresa';
+import { Empresa } from '../@types/empresa';
 
 /**
  * Array com dados fictícios de empresas

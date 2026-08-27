@@ -4,7 +4,7 @@
  * Simula chamadas assíncronas que serão substituídas por consultas reais ao banco
  */
 
-import { Empresa, ApiResponse, EmpresasListResponse, EmpresaDetailResponse } from '../types/empresa';
+import { Empresa, ApiResponse, EmpresasListResponse, EmpresaDetailResponse } from '../@types/empresa';
 import { empresasDatabase } from '../data/empresas';
 
 /**
