@@ -3,8 +3,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { fetchEmpresaById } from '@/lib/api';
 import type { Empresa } from '@/lib/api';
 import { SiteHeader } from '@/components/layout/SiteHeader';
-import { SiteFooter } from '@/components/layout/SiteFooter';
+import Footer from '@/components/layout/SiteFooter';
 import { MapPin, Phone, LayoutGrid, Briefcase, ExternalLink, MessageCircle } from 'lucide-react';
+import decorativeShape from "@/assets/civix/decorative-shape.svg";
+import heroArtwork from "@/assets/civix/hero-artwork.svg";
 
 export default function PerfilEmpresa() {
   const { id } = useParams<{ id: string }>();
@@ -44,7 +46,7 @@ export default function PerfilEmpresa() {
         <main className="flex-1 flex justify-center items-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--color-civix-navy)]"></div>
         </main>
-        <SiteFooter />
+        <Footer />
       </div>
     );
   }
@@ -62,7 +64,7 @@ export default function PerfilEmpresa() {
             Voltar ao Catálogo
           </button>
         </main>
-        <SiteFooter />
+        <Footer />
       </div>
     );
   }
@@ -70,85 +72,115 @@ export default function PerfilEmpresa() {
   return (
     <div className="min-h-screen bg-[var(--color-civix-ivory)] flex flex-col font-[family-name:var(--font-body)]">
       <SiteHeader />
-      
+
       <main className="flex-1">
         {/* Profile Hero */}
-        <section className="relative bg-[var(--color-civix-navy)] text-[var(--color-civix-ivory)] pt-20 pb-32 px-6 sm:px-10 lg:px-16 xl:px-32 overflow-hidden">
-          <div className="absolute top-0 right-0 w-full h-full opacity-10 pointer-events-none bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-white via-transparent to-transparent"></div>
-          
-          <div className="relative z-10 max-w-[1728px] mx-auto flex flex-col lg:flex-row gap-12 justify-between">
-            <div className="max-w-3xl">
-              <p className="text-[var(--color-civix-gold)] font-bold tracking-widest text-sm mb-4 flex items-center gap-2">
-                {empresa.verificado && <span className="w-2 h-2 rounded-full bg-[var(--color-civix-gold)] inline-block"></span>}
-                {empresa.verificado ? 'PERFIL VERIFICADO / CIVIX' : 'PERFIL / CIVIX'}
-              </p>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-[family-name:var(--font-display)] font-semibold mb-2">
-                {empresa.nome}
-              </h1>
-              <p className="text-xl md:text-2xl text-[var(--color-civix-ivory)]/70 italic mb-6">
-                {empresa.categoria}
-              </p>
-              <p className="text-lg text-[var(--color-civix-ivory)]/90 mb-10 leading-relaxed">
-                {empresa.descritivo}
-              </p>
-              
-              <div className="flex flex-wrap gap-4">
-                <button
-                  className="bg-[#25D366] hover:bg-[#20bd5a] text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition-colors shadow-lg shadow-[#25D366]/20"
-                  onClick={() => {
-                    if (empresa.whatsapp) {
-                      const telefone = empresa.whatsapp.replace(/[^\d]/g, '');
-                      window.open(`https://wa.me/${telefone}`, '_blank');
-                    }
-                  }}
-                >
-                  <MessageCircle size={20} /> Whatsapp
-                </button>
-                <button
-                  className="bg-transparent border border-[var(--color-civix-ivory)]/30 hover:border-[var(--color-civix-ivory)] text-[var(--color-civix-ivory)] px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition-colors"
-                  onClick={() => {
-                    if (empresa.website) {
-                      window.open(empresa.website, '_blank');
-                    }
-                  }}
-                >
-                  <ExternalLink size={20} /> Visitar site
-                </button>
-              </div>
-            </div>
-            
-            {/* Info Panel Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:w-[500px] shrink-0 h-fit">
-              <div className="bg-white/10 backdrop-blur-md rounded-xl p-5 border border-white/10">
-                <div className="w-10 h-10 rounded-lg bg-[var(--color-civix-gold)]/20 flex items-center justify-center mb-3">
-                  <MapPin className="text-[var(--color-civix-gold)]" size={20} />
+
+        <section className="px-4 pb-12 sm:px-8 lg:px-16">
+          <div
+            className="relative mx-auto w-full max-w-[1600px] overflow-hidden rounded-[var(--radius-hero)] bg-[var(--color-civix-navy)]"
+            data-testid="hero-surface"
+          >
+            <img
+              aria-hidden="true"
+              alt=""
+              className="absolute inset-0 h-full w-full object-cover object-center"
+              height="900"
+              src={heroArtwork}
+              width="1600"
+            />
+            <img
+              aria-hidden="true"
+              alt=""
+              className="absolute -left-20 -top-24 w-[320px] opacity-80 sm:-left-16 sm:-top-32 sm:w-[432px]"
+              height="432"
+              src={decorativeShape}
+              width="432"
+            />
+
+            <div className="relative z-10 flex min-h-[600px] flex-col justify-center gap-12 px-6 py-16 text-[var(--color-civix-ivory)] sm:px-10 lg:flex-row lg:items-start lg:justify-between lg:px-16 lg:py-16 xl:px-24">
+              <div className="min-w-0 max-w-3xl">
+                <p className="mb-4 flex items-center gap-2 text-sm font-bold tracking-widest text-[var(--color-civix-gold)]">
+                  {empresa.verificado ? (
+                    <span
+                      aria-hidden="true"
+                      className="inline-block size-2 rounded-full bg-[var(--color-civix-gold)]"
+                    />
+                  ) : null}
+                  {empresa.verificado ? 'PERFIL VERIFICADO / CIVIX' : 'PERFIL / CIVIX'}
+                </p>
+
+                <h1 className="max-w-[643px] break-words font-[family-name:var(--font-display)] text-[clamp(2.5rem,5vw,4rem)] font-semibold uppercase leading-[1.1] tracking-[-0.02em] lg:leading-[80px] lg:tracking-[-0.034em]">
+                  {empresa.nome}
+                </h1>
+
+                <p className="mt-2 text-xl italic text-[var(--color-civix-ivory)]/70 md:text-2xl">
+                  {empresa.categoria.toUpperCase()}
+                </p>
+                {empresa.descritivo ? (
+                  <p className="mt-5 max-w-2xl text-lg leading-relaxed text-[var(--color-civix-ivory)]/90">
+                    {empresa.descritivo}
+                  </p>
+                ) : null}
+
+                <div className="mt-10 flex flex-wrap gap-4">
+                  {empresa.website ? (
+                    <a
+                      className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-[var(--color-civix-ivory)]/30 bg-transparent px-6 py-3 font-semibold text-[var(--color-civix-ivory)] transition-colors hover:border-[var(--color-civix-ivory)] hover:bg-white/10"
+                      href={empresa.website}
+                      rel="noreferrer"
+                      target="_blank"
+                    >
+                      <ExternalLink aria-hidden="true" size={20} />
+                      Visitar site
+                    </a>
+                  ) : null}
+                  {empresa.whatsapp ? (
+                    <a
+                      className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-[#1FBC59] px-6 py-3 font-semibold text-white shadow-lg transition-colors hover:bg-[#20bd5a]"
+                      href={`https://wa.me/${empresa.whatsapp.replace(/[^\d]/g, '')}`}
+                      rel="noreferrer"
+                      target="_blank"
+                    >
+                      <MessageCircle aria-hidden="true" size={20} />
+                      WhatsApp
+                    </a>
+                  ) : null}
                 </div>
-                <p className="text-xs text-[var(--color-civix-ivory)]/60 font-semibold tracking-wider uppercase mb-1">Localização</p>
-                <p className="text-base font-medium">{empresa.cidade}, {empresa.estado}</p>
               </div>
-              
-              <div className="bg-white/10 backdrop-blur-md rounded-xl p-5 border border-white/10">
-                <div className="w-10 h-10 rounded-lg bg-[var(--color-civix-gold)]/20 flex items-center justify-center mb-3">
-                  <Phone className="text-[var(--color-civix-gold)]" size={20} />
+
+              <div className="grid h-fit w-full shrink-0 grid-cols-1 gap-4 sm:grid-cols-2 lg:w-[500px]">
+                <div className="rounded-xl border border-[#425466] bg-[#faf9f6] p-5 text-[var(--color-civix-navy)]">
+                  <div className="mb-3 flex size-10 items-center justify-center rounded-lg bg-[#f3e6c9]">
+                    <MapPin aria-hidden="true" className="text-[var(--color-civix-gold)]" size={20} />
+                  </div>
+                  <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-[#5f6b75]">Localização</p>
+                  <p className="break-words text-base font-medium">{empresa.cidade}, {empresa.estado}</p>
                 </div>
-                <p className="text-xs text-[var(--color-civix-ivory)]/60 font-semibold tracking-wider uppercase mb-1">Telefone</p>
-                <p className="text-base font-medium">{empresa.telefone || 'Não informado'}</p>
-              </div>
-              
-              <div className="bg-white/10 backdrop-blur-md rounded-xl p-5 border border-white/10">
-                <div className="w-10 h-10 rounded-lg bg-[var(--color-civix-gold)]/20 flex items-center justify-center mb-3">
-                  <LayoutGrid className="text-[var(--color-civix-gold)]" size={20} />
+
+                <div className="rounded-xl border border-[#dfe3e5] bg-[#faf9f6] p-5 text-[var(--color-civix-navy)]">
+                  <div className="mb-3 flex size-10 items-center justify-center rounded-lg bg-[#f3e6c9]">
+                    <Phone aria-hidden="true" className="text-[var(--color-civix-gold)]" size={20} />
+                  </div>
+                  <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-[#5f6b75]">Telefone</p>
+                  <p className="break-words text-base font-medium">{empresa.telefone || 'Não informado'}</p>
                 </div>
-                <p className="text-xs text-[var(--color-civix-ivory)]/60 font-semibold tracking-wider uppercase mb-1">Segmento</p>
-                <p className="text-base font-medium">{empresa.categoria}</p>
-              </div>
-              
-              <div className="bg-white/10 backdrop-blur-md rounded-xl p-5 border border-white/10">
-                <div className="w-10 h-10 rounded-lg bg-[var(--color-civix-gold)]/20 flex items-center justify-center mb-3">
-                  <Briefcase className="text-[var(--color-civix-gold)]" size={20} />
+
+                <div className="rounded-xl border border-[#dfe3e5] bg-[#faf9f6] p-5 text-[var(--color-civix-navy)]">
+                  <div className="mb-3 flex size-10 items-center justify-center rounded-lg bg-[#f3e6c9]">
+                    <LayoutGrid aria-hidden="true" className="text-[var(--color-civix-gold)]" size={20} />
+                  </div>
+                  <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-[#5f6b75]">Segmento</p>
+                  <p className="break-words text-base font-medium">{empresa.categoria}</p>
                 </div>
-                <p className="text-xs text-[var(--color-civix-ivory)]/60 font-semibold tracking-wider uppercase mb-1">Porte</p>
-                <p className="text-base font-medium capitalize">{empresa.tamanho}</p>
+
+                <div className="rounded-xl border border-[#dfe3e5] bg-[#faf9f6] p-5 text-[var(--color-civix-navy)]">
+                  <div className="mb-3 flex size-10 items-center justify-center rounded-lg bg-[#f3e6c9]">
+                    <Briefcase aria-hidden="true" className="text-[var(--color-civix-gold)]" size={20} />
+                  </div>
+                  <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-[#5f6b75]">Porte</p>
+                  <p className="text-base font-medium capitalize">{empresa.tamanho}</p>
+                </div>
               </div>
             </div>
           </div>
@@ -179,7 +211,7 @@ export default function PerfilEmpresa() {
         </section>
       </main>
 
-      <SiteFooter />
+      <Footer />
     </div>
   )
 }

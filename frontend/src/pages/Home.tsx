@@ -1,6 +1,6 @@
 import { SiteHeader } from '@/components/layout/SiteHeader'
 import { HeroSection } from '@/components/home/HeroSection'
-import Footer from '@/components/footer/SiteFooter'
+import Footer from '@/components/layout/SiteFooter'
 import CardEmpresas from '@/components/EmpresasCard/CardEmpresas'
 import FAQ from '@/pages/FAQ'
 import AboutPage from './About'
