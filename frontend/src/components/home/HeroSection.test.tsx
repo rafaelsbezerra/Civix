@@ -47,9 +47,9 @@ describe('HeroSection', () => {
     const decorativeImages = heroSurface.querySelectorAll('img[aria-hidden="true"]')
 
     expect(decorativeImages).toHaveLength(2)
-    for (const image of decorativeImages) {
+    decorativeImages.forEach((image) => {
       expect(image).toHaveAttribute('alt', '')
-    }
+    })
   })
 
   it('composes the local search form', () => {

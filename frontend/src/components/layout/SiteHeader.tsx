@@ -6,7 +6,7 @@ import { ActionButton } from '@/components/ui/ActionButton'
 import { useNavigate } from 'react-router-dom'
 
 export interface NavigationItem {
-  href: `#${string}`
+  href: string
   label: string
 }
 
@@ -15,10 +15,10 @@ export interface SiteHeaderProps {
 }
 
 const defaultNavigationItems: readonly NavigationItem[] = [
-  { href: '#home', label: 'Home' },
-  { href: '#sobre', label: 'Sobre' },
-  { href: '#empresas', label: 'Empresas' },
-  { href: '#planos', label: 'Planos' },
+  { href: '/', label: 'Home' },
+  { href: '/#sobre', label: 'Sobre' },
+  { href: '/catalogo', label: 'Empresas' },
+  { href: '/#planos', label: 'Planos' },
 ]
 
 export function SiteHeader({
@@ -47,7 +47,7 @@ export function SiteHeader({
       <a
         aria-label="Civix — início"
         className="inline-flex min-h-11 min-w-11 shrink-0 items-center rounded-sm lg:-translate-y-[5px]"
-        href="#home"
+        href="/"
       >
         <img
           alt="Civix"
@@ -75,7 +75,7 @@ export function SiteHeader({
         </nav>
         <ActionButton
           className="w-[138px] min-w-0 gap-2 px-3"
-          href="#contato"
+          href="/#contato"
           showArrow
           variant="primary"
         >
@@ -134,7 +134,7 @@ export function SiteHeader({
           </ul>
           <ActionButton
             className="mt-3 w-full"
-            href="#contato"
+            href="/#contato"
             onClick={() => setIsMenuOpen(false)}
             variant="primary"
           >

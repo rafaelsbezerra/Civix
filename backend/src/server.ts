@@ -4,6 +4,7 @@ import 'dotenv/config';
 
 // Importação das rotas
 import authRoutes from './routes/userRoute.ts';
+import empresaRoutes from './routes/empresaRoute.ts';
 // import userRoutes from './routes/userRoutes'; // Descomente quando criar outras rotas
 
 const app = express();
@@ -32,6 +33,7 @@ app.get('/', (req: Request, res: Response) => {
 // app.use('/api/auth', authRoutes);
 
 app.use('/api/users', authRoutes);
+app.use('/api/empresas', empresaRoutes);
 
 // ===================================
 // Inicialização do Servidor
