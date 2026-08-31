@@ -1,7 +1,7 @@
 // # Rota: POST /api/auth/first-access
 
 import { Router } from 'express';
-import { firstAccessController } from '../controller/auth.controller';
+import { firstAccessController } from '../controller/auth.controller.js';
 
 const authRouter = Router();
 

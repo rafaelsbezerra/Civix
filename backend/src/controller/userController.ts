@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
-import { db } from "../config/data";
+import { db } from "../config/data.js";
 
 interface DbUser {
   id: string | number;

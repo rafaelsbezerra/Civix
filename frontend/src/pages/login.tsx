@@ -147,59 +147,64 @@ export default function Login() {
     }
   };
 
-const handleSubmit = async (e: FormEvent) => {
-  e.preventDefault();
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
 
-  setError(null);
+    setError(null);
 
-  if (!email) {
-    setError("Por favor, informe seu email.");
-    return;
-  }
-
-  if (role === "empresa" && !password) {
-    setError("Por favor, informe sua senha.");
-    return;
-  }
-
-  try {
-    setIsLoading(true);
-
-    console.log("Enviando login:", {
-      email,
-      role,
-      password: role === "empresa" ? password : "(não enviado)",
-    });
-
-    const response = await api.post("/api/users/login", {
-      email,
-      password: role === "empresa" ? password : undefined,
-      role,
-    });
-
-    console.log("Resposta do servidor:", response.data);
-
-    localStorage.setItem("token", response.data.token);
-
-    if (role === "empresa") {
-      navigate("/dashboard-empresa");
-    } else {
-      navigate("/");
+    if (!email) {
+      setError("Por favor, informe seu email.");
+      return;
     }
-  } catch (err: any) {
-    console.error("ERRO COMPLETO:", err);
-    console.error("RESPOSTA DO SERVIDOR:", err.response?.data);
-    console.error("STATUS:", err.response?.status);
-    console.error("URL:", err.config?.url);
 
-    setError(
-      err.response?.data?.error ||
-        "Ocorreu um erro ao realizar o login. Tente novamente."
-    );
-  } finally {
-    setIsLoading(false);
-  }
-};
+    if (role === "empresa" && !password) {
+      setError("Por favor, informe sua senha.");
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+
+      console.log("Enviando login:", {
+        email,
+        role,
+        password: role === "empresa" ? password : "(não enviado)",
+      });
+
+      const response = await api.post("/api/users/login", {
+        email,
+        password: role === "empresa" ? password : undefined,
+        role,
+      });
+
+      console.log("Resposta do servidor:", response.data);
+
+      localStorage.setItem("token", response.data.token);
+
+      if (role === "empresa") {
+        navigate("/dashboard-empresa");
+      } else {
+        navigate("/");
+      }
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        console.error("ERRO COMPLETO:", err);
+        console.error("RESPOSTA DO SERVIDOR:", err.response?.data);
+        console.error("STATUS:", err.response?.status);
+        console.error("URL:", err.config?.url);
+
+        setError(
+          err.response?.data?.error ||
+          "Ocorreu um erro ao realizar o login. Tente novamente."
+        );
+      } else {
+        console.error("Erro inesperado:", err);
+        setError("Ocorreu um erro ao realizar o login. Tente novamente.");
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <main className="w-full min-h-screen bg-[#202020] overflow-hidden">
@@ -244,11 +249,10 @@ const handleSubmit = async (e: FormEvent) => {
                 <button
                   type="button"
                   onClick={() => handleRoleChange("empresa")}
-                  className={`w-full h-[clamp(70px,2vh,72px)] rounded-[6px] transition flex items-center px-[clamp(12px,1vw,20px)] text-left border ${
-                    role === "empresa"
+                  className={`w-full h-[clamp(70px,2vh,72px)] rounded-[6px] transition flex items-center px-[clamp(12px,1vw,20px)] text-left border ${role === "empresa"
                       ? "bg-[#d0d0d0] border-[#b5b5b5]"
                       : "bg-[#dedede] border-transparent hover:bg-[#d5d5d5]"
-                  }`}
+                    }`}
                 >
                   <div className="w-[clamp(30px,2.2vw,42px)] h-[clamp(30px,2.2vw,42px)] rounded-[5px] flex items-center justify-center mr-[clamp(10px,0.8vw,16px)] shrink-0 bg-[#c0c0c0]">
                     <Building2
@@ -274,11 +278,10 @@ const handleSubmit = async (e: FormEvent) => {
                 <button
                   type="button"
                   onClick={() => handleRoleChange("cliente")}
-                  className={`w-full h-[clamp(70px,5vh,72px)] rounded-[6px] transition flex items-center px-[clamp(12px,1vw,20px)] text-left border ${
-                    role === "cliente"
+                  className={`w-full h-[clamp(70px,5vh,72px)] rounded-[6px] transition flex items-center px-[clamp(12px,1vw,20px)] text-left border ${role === "cliente"
                       ? "bg-[#d0d0d0] border-[#b5b5b5]"
                       : "bg-[#dedede] border-transparent hover:bg-[#d5d5d5]"
-                  }`}
+                    }`}
                 >
                   <div className="w-[clamp(30px,2.2vw,42px)] h-[clamp(30px,2.2vw,42px)] rounded-[5px] flex items-center justify-center mr-[clamp(10px,0.8vw,16px)] shrink-0 bg-[#c0c0c0]">
                     <User

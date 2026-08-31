@@ -1,7 +1,7 @@
 // # Rota: POST /api/admin/invite
 
 import { Router } from 'express'
-import { inviteUserController } from '../controller/admin.controller'
+import { inviteUserController } from '../controller/admin.controller.js'
 
 const adminRouter = Router();
 

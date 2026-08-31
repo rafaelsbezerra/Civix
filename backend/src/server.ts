@@ -6,8 +6,8 @@ import cors from "cors";
 import helmet from "helmet";
 
 // Importação das rotas
-import authRoutes from './routes/userRoute.ts';
-import empresaRoutes from './routes/empresaRoute.ts';
+import authRoutes from './routes/userRoute.js';
+import empresaRoutes from './routes/empresaRoute.js';
 
 const app = express();
 

@@ -12,7 +12,7 @@ import {
   getEmpresasByEstado,
   getEmpresasByTamanho,
   searchEmpresas,
-} from '../services/empresaService';
+} from '../services/empresaService.js';
 
 const router = Router();
 
@@ -38,31 +38,44 @@ router.get('/', async (req: Request, res: Response) => {
 });
 
 /**
- * GET /api/empresas/:id
- * Retorna os detalhes de uma empresa específica
+ * GET /api/empresas/verificadas/todas
+ * Retorna apenas empresas verificadas
  */
-router.get('/:id', async (req: Request, res: Response) => {
+router.get('/verificadas/todas', async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const response = await getEmpresasVerificadas();
 
-    if (!id || id.trim() === '') {
-      return res.status(400).json({
-        success: false,
-        error: 'ID da empresa é obrigatório',
-      });
-    }
-
-    const response = await getEmpresaById(id);
-
-    if (response.success) {
-      return res.status(200).json(response);
-    } else {
-      return res.status(404).json(response);
-    }
+    return res.status(200).json(response);
   } catch (error) {
     return res.status(500).json({
       success: false,
-      error: 'Erro interno do servidor ao buscar empresa',
+      error: 'Erro interno do servidor ao buscar empresas verificadas',
+    });
+  }
+});
+
+/**
+ * GET /api/empresas/buscar/query?q=termo
+ * Busca empresas pelo nome (busca parcial)
+ */
+router.get('/buscar/query', async (req: Request, res: Response) => {
+  try {
+    const { q } = req.query;
+
+    if (!q || typeof q !== 'string' || q.trim() === '') {
+      return res.status(400).json({
+        success: false,
+        error: 'Termo de busca é obrigatório',
+      });
+    }
+
+    const response = await searchEmpresas(q);
+
+    return res.status(200).json(response);
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      error: 'Erro interno do servidor ao buscar empresas',
     });
   }
 });
@@ -73,7 +86,7 @@ router.get('/:id', async (req: Request, res: Response) => {
  */
 router.get('/categoria/:categoria', async (req: Request, res: Response) => {
   try {
-    const { categoria } = req.params;
+    const { categoria } = req.params as { categoria: string };
 
     if (!categoria || categoria.trim() === '') {
       return res.status(400).json({
@@ -94,29 +107,12 @@ router.get('/categoria/:categoria', async (req: Request, res: Response) => {
 });
 
 /**
- * GET /api/empresas/verificadas/todas
- * Retorna apenas empresas verificadas
- */
-router.get('/verificadas/todas', async (req: Request, res: Response) => {
-  try {
-    const response = await getEmpresasVerificadas();
-
-    return res.status(200).json(response);
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      error: 'Erro interno do servidor ao buscar empresas verificadas',
-    });
-  }
-});
-
-/**
  * GET /api/empresas/estado/:estado
  * Retorna empresas filtradas por estado
  */
 router.get('/estado/:estado', async (req: Request, res: Response) => {
   try {
-    const { estado } = req.params;
+    const { estado } = req.params as { estado: string };
 
     if (!estado || estado.trim() === '') {
       return res.status(400).json({
@@ -165,27 +161,32 @@ router.get('/tamanho/:tamanho', async (req: Request, res: Response) => {
 });
 
 /**
- * GET /api/empresas/buscar?q=termo
- * Busca empresas pelo nome (busca parcial)
+ * GET /api/empresas/:id
+ * Retorna os detalhes de uma empresa específica por ID
+ * NOTA: Esta rota genérica DEVE ficar no final do arquivo!
  */
-router.get('/buscar/query', async (req: Request, res: Response) => {
+router.get('/:id', async (req: Request, res: Response) => {
   try {
-    const { q } = req.query;
+    const { id } = req.params as { id: string };
 
-    if (!q || typeof q !== 'string' || q.trim() === '') {
+    if (!id || id.trim() === '') {
       return res.status(400).json({
         success: false,
-        error: 'Termo de busca é obrigatório',
+        error: 'ID da empresa é obrigatório',
       });
     }
 
-    const response = await searchEmpresas(q);
+    const response = await getEmpresaById(id);
 
-    return res.status(200).json(response);
+    if (response.success) {
+      return res.status(200).json(response);
+    } else {
+      return res.status(404).json(response);
+    }
   } catch (error) {
     return res.status(500).json({
       success: false,
-      error: 'Erro interno do servidor ao buscar empresas',
+      error: 'Erro interno do servidor ao buscar empresa',
     });
   }
 });

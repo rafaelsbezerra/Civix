@@ -15,7 +15,7 @@ export default function FirstAccess() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  
+
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -63,8 +63,9 @@ export default function FirstAccess() {
         navigate("/login");
       }, 2500);
 
-    } catch (err: any) {
-      setError(err.message || "Ocorreu um erro ao processar sua solicitação.");
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "Ocorreu um erro ao processar sua solicitação.";
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

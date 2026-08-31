@@ -5,7 +5,7 @@
  */
 
 import { Empresa, ApiResponse, EmpresasListResponse, EmpresaDetailResponse } from '../@types/empresa';
-import { empresasDatabase } from '../data/empresas';
+import { empresasDatabase } from '../data/empresas.js';
 
 /**
  * Simula uma API call com delay (imita latência de rede)

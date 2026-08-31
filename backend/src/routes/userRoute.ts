@@ -1,8 +1,8 @@
 //Definição das rotas/endpoints
 
 import express, { Request, Response, Router } from 'express';
-import { login, home }  from '../controller/userController.ts';
-import authMiddleware from '../middlewares/auth.ts';
+import { login, home }  from '../controller/userController.js';
+import authMiddleware from '../middlewares/auth.js';
 
 const router: Router = express.Router();
 
