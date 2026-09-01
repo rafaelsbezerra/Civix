@@ -3,6 +3,12 @@ import { useState, type FormEvent } from 'react'
 import arrowRight from '@/assets/civix/arrow-right.svg'
 import selectChevron from '@/assets/civix/select-chevron.svg'
 
+export interface SearchFormFilters {
+  termo?: string
+  categoria?: string
+  estado?: string
+}
+
 export interface SearchFormValues {
   priceRange: string
   query: string
@@ -12,6 +18,7 @@ export interface SearchFormValues {
 export interface SearchFormProps {
   initialValues?: Partial<SearchFormValues>
   onSubmit?: (values: SearchFormValues) => void
+  onSearch?: (filters: SearchFormFilters) => void | Promise<void>
 }
 
 const emptyValues: SearchFormValues = {
@@ -23,7 +30,7 @@ const emptyValues: SearchFormValues = {
 const fieldClasses =
   'h-[52px] w-full border-0 border-b border-[var(--color-civix-navy)] bg-transparent px-5 pb-5 pt-2 font-[family-name:var(--font-display)] text-base font-medium text-[var(--color-civix-navy)] outline-none placeholder:text-[var(--color-civix-navy)] focus:border-[var(--color-civix-gold)]'
 
-export function SearchForm({ initialValues, onSubmit }: SearchFormProps) {
+export function SearchForm({ initialValues, onSubmit, onSearch }: SearchFormProps) {
   const [values, setValues] = useState<SearchFormValues>({
     ...emptyValues,
     ...initialValues,
@@ -31,7 +38,16 @@ export function SearchForm({ initialValues, onSubmit }: SearchFormProps) {
 
   const submitSearch = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+    
+    // Dispara a callback legada, se existir
     onSubmit?.(values)
+
+    // Dispara a nova callback tratada para filtros de busca da API
+    onSearch?.({
+      termo: values.query,
+      estado: values.region,
+      categoria: values.priceRange, // Ou campo referente à categoria se alterar o select
+    })
   }
 
   return (
@@ -41,7 +57,6 @@ export function SearchForm({ initialValues, onSubmit }: SearchFormProps) {
       onSubmit={submitSearch}
       role="search"
     >
-
       <label className="block">
         <span className="sr-only">O que busca?</span>
         <input
@@ -66,7 +81,7 @@ export function SearchForm({ initialValues, onSubmit }: SearchFormProps) {
           onChange={(event) =>
             setValues((current) => ({ ...current, region: event.target.value }))
           }
-          placeholder="Região"
+          placeholder="Região / UF"
           type="text"
           value={values.region}
         />

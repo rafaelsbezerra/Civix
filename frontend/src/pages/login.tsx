@@ -16,7 +16,7 @@ import civixLogo from "../assets/civix/logoCivix.png";
 import civixLogoDark from "../assets/civix/logoBackground.png";
 
 const api = axios.create({
-  baseURL: "http://localhost:3000",
+baseURL: import.meta.env.VITE_API_URL || "http://localhost:3000",
 });
 
 const AnimatedWave = ({ className = "" }: { className?: string }) => {
@@ -171,7 +171,7 @@ export default function Login() {
         password: role === "empresa" ? password : "(não enviado)",
       });
 
-      const response = await api.post("/api/users/login", {
+      const response = await api.post("api/v1/users/login", {
         email,
         password: role === "empresa" ? password : undefined,
         role,
