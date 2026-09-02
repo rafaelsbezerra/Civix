@@ -6,6 +6,14 @@ import path from 'path'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwind()],
+server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000', // URL do seu backend Express
+        changeOrigin: true,
+      },
+    },
+  },
   build: {
     assetsInlineLimit: 0,
     manifest: true,

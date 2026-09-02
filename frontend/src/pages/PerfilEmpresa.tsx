@@ -69,13 +69,19 @@ export default function PerfilEmpresa() {
     );
   }
 
+  // Suporte a ambos os formatos de propriedade (snake_case do PG ou camelCase da API)
+  const textoDescricaoDetalhada = 
+    (empresa as unknown as { descricao_detalhada?: string }).descricao_detalhada || 
+    (empresa as unknown as { descricaoDetalhada?: string }).descricaoDetalhada || 
+    empresa.descricao || 
+    '';
+
   return (
     <div className="min-h-screen bg-[var(--color-civix-ivory)] flex flex-col font-[family-name:var(--font-body)]">
       <SiteHeader />
 
       <main className="flex-1">
         {/* Profile Hero */}
-
         <section className="px-4 pb-12 sm:px-8 lg:px-16">
           <div
             className="relative mx-auto w-full max-w-[1600px] overflow-hidden rounded-[var(--radius-hero)] bg-[var(--color-civix-navy)]"
@@ -115,7 +121,7 @@ export default function PerfilEmpresa() {
                 </h1>
 
                 <p className="mt-2 text-xl italic text-[var(--color-civix-ivory)]/70 md:text-2xl">
-                  {empresa.categoria.toUpperCase()}
+                  {empresa.categoria?.toUpperCase()}
                 </p>
                 {empresa.descritivo ? (
                   <p className="mt-5 max-w-2xl text-lg leading-relaxed text-[var(--color-civix-ivory)]/90">
@@ -194,7 +200,7 @@ export default function PerfilEmpresa() {
               Quem é {empresa.nome}?
             </h2>
             <div className="prose prose-lg max-w-none text-gray-600 leading-relaxed">
-              {empresa.descricaoDetalhada.split('\n').map((paragraph, index) => (
+              {textoDescricaoDetalhada.split('\n').map((paragraph: string, index: number) => (
                 <p key={index} className="mb-4">{paragraph}</p>
               ))}
             </div>
@@ -213,5 +219,5 @@ export default function PerfilEmpresa() {
 
       <Footer />
     </div>
-  )
+  );
 }

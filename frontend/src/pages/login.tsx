@@ -16,7 +16,7 @@ import civixLogo from "../assets/civix/logoCivix.png";
 import civixLogoDark from "../assets/civix/logoBackground.png";
 
 const api = axios.create({
-baseURL: import.meta.env.VITE_API_URL || "http://localhost:3000",
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:3000",
 });
 
 const AnimatedWave = ({ className = "" }: { className?: string }) => {
@@ -165,19 +165,11 @@ export default function Login() {
     try {
       setIsLoading(true);
 
-      console.log("Enviando login:", {
-        email,
-        role,
-        password: role === "empresa" ? password : "(não enviado)",
-      });
-
       const response = await api.post("api/v1/users/login", {
         email,
         password: role === "empresa" ? password : undefined,
         role,
       });
-
-      console.log("Resposta do servidor:", response.data);
 
       localStorage.setItem("token", response.data.token);
 
@@ -188,17 +180,11 @@ export default function Login() {
       }
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
-        console.error("ERRO COMPLETO:", err);
-        console.error("RESPOSTA DO SERVIDOR:", err.response?.data);
-        console.error("STATUS:", err.response?.status);
-        console.error("URL:", err.config?.url);
-
         setError(
           err.response?.data?.error ||
           "Ocorreu um erro ao realizar o login. Tente novamente."
         );
       } else {
-        console.error("Erro inesperado:", err);
         setError("Ocorreu um erro ao realizar o login. Tente novamente.");
       }
     } finally {
@@ -249,10 +235,11 @@ export default function Login() {
                 <button
                   type="button"
                   onClick={() => handleRoleChange("empresa")}
-                  className={`w-full h-[clamp(70px,2vh,72px)] rounded-[6px] transition flex items-center px-[clamp(12px,1vw,20px)] text-left border ${role === "empresa"
+                  className={`w-full h-[clamp(70px,2vh,72px)] rounded-[6px] transition flex items-center px-[clamp(12px,1vw,20px)] text-left border ${
+                    role === "empresa"
                       ? "bg-[#d0d0d0] border-[#b5b5b5]"
                       : "bg-[#dedede] border-transparent hover:bg-[#d5d5d5]"
-                    }`}
+                  }`}
                 >
                   <div className="w-[clamp(30px,2.2vw,42px)] h-[clamp(30px,2.2vw,42px)] rounded-[5px] flex items-center justify-center mr-[clamp(10px,0.8vw,16px)] shrink-0 bg-[#c0c0c0]">
                     <Building2
@@ -278,10 +265,11 @@ export default function Login() {
                 <button
                   type="button"
                   onClick={() => handleRoleChange("cliente")}
-                  className={`w-full h-[clamp(70px,5vh,72px)] rounded-[6px] transition flex items-center px-[clamp(12px,1vw,20px)] text-left border ${role === "cliente"
+                  className={`w-full h-[clamp(70px,5vh,72px)] rounded-[6px] transition flex items-center px-[clamp(12px,1vw,20px)] text-left border ${
+                    role === "cliente"
                       ? "bg-[#d0d0d0] border-[#b5b5b5]"
                       : "bg-[#dedede] border-transparent hover:bg-[#d5d5d5]"
-                    }`}
+                  }`}
                 >
                   <div className="w-[clamp(30px,2.2vw,42px)] h-[clamp(30px,2.2vw,42px)] rounded-[5px] flex items-center justify-center mr-[clamp(10px,0.8vw,16px)] shrink-0 bg-[#c0c0c0]">
                     <User
@@ -335,12 +323,23 @@ export default function Login() {
 
                 {role === "empresa" && (
                   <div>
-                    <label
-                      htmlFor="password"
-                      className="block text-[clamp(12px,0.5vw,11px)] text-[#737373] mb-1.5"
-                    >
-                      Senha
-                    </label>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label
+                        htmlFor="password"
+                        className="block text-[clamp(12px,0.5vw,11px)] text-[#737373]"
+                      >
+                        Senha
+                      </label>
+
+                      {/* Link de Esqueceu a senha */}
+                      <button
+                        type="button"
+                        onClick={() => navigate("/esqueci-senha")}
+                        className="text-[clamp(11px,0.45vw,10px)] font-semibold text-[#061c2c] hover:underline"
+                      >
+                        Esqueceu sua senha?
+                      </button>
+                    </div>
 
                     <div className="relative">
                       <input

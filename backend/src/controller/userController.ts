@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import crypto from "crypto";
 import { db } from "../config/data.js";
 
 interface DbUser {
@@ -11,11 +12,6 @@ interface DbUser {
   name?: string;
 }
 
-interface AuthenticatedRequest extends Request {
-  userId?: string | number;
-  userRole?: string;
-}
-
 export const login = async (
   req: Request,
   res: Response
@@ -24,15 +20,11 @@ export const login = async (
     const { email, password, role } = req.body;
 
     if (!email) {
-      return res.status(400).json({
-        error: "Email é obrigatório",
-      });
+      return res.status(400).json({ error: "Email é obrigatório" });
     }
 
     if (role !== "empresa" && role !== "cliente") {
-      return res.status(400).json({
-        error: "Tipo de usuário inválido",
-      });
+      return res.status(400).json({ error: "Tipo de usuário inválido" });
     }
 
     let query: string;
@@ -40,38 +32,29 @@ export const login = async (
 
     if (role === "empresa") {
       if (!password) {
-        return res.status(400).json({
-          error: "Senha é obrigatória para empresas",
-        });
+        return res.status(400).json({ error: "Senha é obrigatória para empresas" });
       }
 
       query = `
         SELECT id, name, email, password_hash, role
         FROM users
-        WHERE email = $1
-        AND role = 'empresa'
+        WHERE email = $1 AND role = 'empresa'
       `;
-
       params = [email];
     } else {
       query = `
         SELECT id, name, email, role
         FROM users
-        WHERE email = $1
-        AND role = 'cliente'
+        WHERE email = $1 AND role = 'cliente'
       `;
-
       params = [email];
     }
 
     const { rows } = await db.query<DbUser>(query, params);
-
     const user = rows[0];
 
     if (!user) {
-      return res.status(401).json({
-        error: "Usuário não encontrado.",
-      });
+      return res.status(401).json({ error: "Usuário não encontrado." });
     }
 
     if (role === "empresa") {
@@ -81,16 +64,17 @@ export const login = async (
         });
       }
 
-      const isPasswordValid = await bcrypt.compare(
-        password,
-        user.password_hash
-      );
+      const isPasswordValid = await bcrypt.compare(password, user.password_hash);
 
       if (!isPasswordValid) {
-        return res.status(401).json({
-          error: "Senha incorreta.",
-        });
+        return res.status(401).json({ error: "Senha incorreta." });
       }
+    }
+
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+      console.error("CRITICAL: JWT_SECRET não informada nas variáveis de ambiente.");
+      return res.status(500).json({ error: "Erro interno do servidor." });
     }
 
     const payload = {
@@ -99,13 +83,7 @@ export const login = async (
       role: user.role,
     };
 
-    const token = jwt.sign(
-      payload,
-      process.env.JWT_SECRET || "default_secret",
-      {
-        expiresIn: "1h",
-      }
-    );
+    const token = jwt.sign(payload, secret, { expiresIn: "1h" });
 
     return res.status(200).json({
       user: {
@@ -118,15 +96,112 @@ export const login = async (
     });
   } catch (error) {
     console.error("Erro no login:", error);
+    return res.status(500).json({ error: "Erro interno do servidor" });
+  }
+};
 
-    return res.status(500).json({
-      error: "Erro interno do servidor",
+// POST /api/auth/forgot-password
+export const forgotPassword = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: "E-mail é obrigatório." });
+    }
+
+    // 1. Busca usuário na tabela utilizando PG Query
+    const queryUser = `SELECT id, name, email FROM users WHERE email = $1`;
+    const { rows } = await db.query<DbUser>(queryUser, [email]);
+    const user = rows[0];
+
+    // Por segurança, retorna 200 mesmo se o usuário não for encontrado
+    // (evita ataques de enumeração de e-mails)
+    if (!user) {
+      return res.status(200).json({
+        message: "Se o e-mail existir no sistema, as instruções serão enviadas.",
+      });
+    }
+
+    // 2. Gera token seguro e data de expiração (1 hora)
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    const expiresAt = new Date(Date.now() + 3600000); // 1 hora a partir de agora
+
+    // 3. Salva o token no banco de dados
+    const updateQuery = `
+      UPDATE users 
+      SET reset_password_token = $1, reset_password_expires = $2
+      WHERE id = $3
+    `;
+    await db.query(updateQuery, [resetToken, expiresAt, user.id]);
+
+    const resetUrl = `${process.env.FRONTEND_URL || "http://localhost:5173"}/redefinir-senha?token=${resetToken}`;
+
+    // TODO: Chamar serviço de e-mail (ex: nodemailer ou resend)
+    // await sendResetPasswordEmail(user.email, resetUrl);
+    console.log(`[DEV ONLY] Link de redefinição para ${user.email}: ${resetUrl}`);
+
+    return res.status(200).json({
+      message: "Se o e-mail existir no sistema, as instruções serão enviadas.",
     });
+  } catch (error) {
+    console.error("Erro em forgotPassword:", error);
+    return res.status(500).json({ error: "Erro interno do servidor." });
+  }
+};
+
+// POST /api/auth/reset-password
+export const resetPassword = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    const { token, password } = req.body;
+
+    if (!token || !password) {
+      return res.status(400).json({ error: "Token e nova senha são obrigatórios." });
+    }
+
+    if (password.length < 8) {
+      return res.status(400).json({ error: "A senha deve ter no mínimo 8 caracteres." });
+    }
+
+    // 1. Busca o usuário com token válido e não expirado
+    const query = `
+      SELECT id 
+      FROM users 
+      WHERE reset_password_token = $1 
+      AND reset_password_expires > NOW()
+    `;
+    const { rows } = await db.query(query, [token]);
+    const user = rows[0];
+
+    if (!user) {
+      return res.status(400).json({ error: "Token inválido ou expirado." });
+    }
+
+    // 2. Criptografa a nova senha
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    // 3. Atualiza a senha e limpa os campos de token
+    const updateQuery = `
+      UPDATE users 
+      SET password_hash = $1, reset_password_token = NULL, reset_password_expires = NULL 
+      WHERE id = $2
+    `;
+    await db.query(updateQuery, [user.id]);
+
+    return res.status(200).json({ message: "Senha redefinida com sucesso." });
+  } catch (error) {
+    console.error("Erro em resetPassword:", error);
+    return res.status(500).json({ error: "Erro interno do servidor." });
   }
 };
 
 export const home = (
-  req: AuthenticatedRequest,
+  req: Request,
   res: Response
 ): Response => {
   const userId = req.userId;

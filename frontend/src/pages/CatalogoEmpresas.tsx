@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   fetchEmpresas, 
@@ -30,8 +30,8 @@ export default function CatalogoEmpresas() {
   const [isFiltered, setIsFiltered] = useState(false);
   const navigate = useNavigate();
 
-  // Função centralizada para carregar empresas (todas ou filtradas)
-  const loadEmpresas = async () => {
+  // Função para carregar todas as empresas (usada ao recarregar/limpar filtros)
+  const loadEmpresas = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -44,10 +44,36 @@ export default function CatalogoEmpresas() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
+  // Efeito de busca inicial na montagem do componente
   useEffect(() => {
-    loadEmpresas();
+    let active = true;
+
+    async function loadInitialData() {
+      try {
+        const data = await fetchEmpresas();
+        if (active) {
+          setEmpresas(data);
+          setError(null);
+        }
+      } catch (err) {
+        console.error('Erro ao carregar empresas:', err);
+        if (active) {
+          setError('Erro ao carregar empresas. Tente novamente mais tarde.');
+        }
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadInitialData();
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   // Callback executado quando o usuário submete o formulário de busca

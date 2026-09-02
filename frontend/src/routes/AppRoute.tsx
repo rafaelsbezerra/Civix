@@ -7,6 +7,7 @@ import PerfilEmpresa from '@/pages/PerfilEmpresa';
 import NotFound from '@/pages/PageError';
 import { PublicSmoothScroll } from '@/components/layout/PublicSmoothScroll';
 import FirstAccess from '@/pages/FirstAccess';
+import ForgotPassword from '@/pages/ForgotPassword';
 
 export const AppRoutes: React.FC = () => (
     <>
@@ -17,6 +18,8 @@ export const AppRoutes: React.FC = () => (
             <Route path="/catalogo" element={<CatalogoEmpresas />} />
             <Route path="/empresa/:id" element={<PerfilEmpresa />} />
             <Route path="/primeiro-acesso" element={<FirstAccess />} />
+            <Route path="/primeiro-acesso/:token" element={<FirstAccess />} />
+            <Route path="/esqueci-senha" element={<ForgotPassword />} />
 
 
             <Route path='*' element={<NotFound />} />

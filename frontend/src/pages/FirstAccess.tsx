@@ -1,17 +1,21 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { Eye, EyeOff, CheckCircle2, AlertCircle, Lock } from "lucide-react";
+import { Eye, EyeOff, CheckCircle2, AlertCircle, Lock, Loader2 } from "lucide-react";
 
-// Substitua pelo caminho do logo do Civix no seu projeto
 import civixLogo from "../assets/civix/logoCivix.png";
 
 export default function FirstAccess() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  // Pega o token diretamente dos parâmetros da URL
   const token = searchParams.get("token");
 
+  // Estados de Validação do Token
+  const [isValidatingToken, setIsValidatingToken] = useState(true);
+  const [isTokenValid, setIsTokenValid] = useState(false);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+
+  // Estados do Formulário
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -20,24 +24,48 @@ export default function FirstAccess() {
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  // Regras de validação em tempo real
+  const hasMinLength = password.length >= 8;
+  const passwordsMatch = password.length > 0 && password === confirmPassword;
+  const isFormValid = hasMinLength && passwordsMatch;
+
+  // 1. Valida o token assim que o componente carrega
+  useEffect(() => {
+    const validateToken = async () => {
+      if (!token) {
+        setError("Token de convite ausente no link.");
+        setIsValidatingToken(false);
+        return;
+      }
+
+      try {
+        const response = await fetch(`http://localhost:3000/api/auth/validate-token?token=${token}`);
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "Este link de convite é inválido ou já expirou.");
+        }
+
+        setUserEmail(data.email);
+        setIsTokenValid(true);
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : "Erro ao validar o convite.";
+        setError(message);
+        setIsTokenValid(false);
+      } finally {
+        setIsValidatingToken(false);
+      }
+    };
+
+    validateToken();
+  }, [token]);
+
+  // 2. Envio da nova senha
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
-    if (!token) {
-      setError("Token de convite ausente ou inválido.");
-      return;
-    }
-
-    if (password.length < 8) {
-      setError("A senha deve conter no mínimo 8 caracteres.");
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setError("As senhas não coincidem.");
-      return;
-    }
+    if (!isFormValid || !token) return;
 
     try {
       setLoading(true);
@@ -58,11 +86,9 @@ export default function FirstAccess() {
 
       setSuccess(true);
 
-      // Redireciona para o login após 2.5 segundos
       setTimeout(() => {
         navigate("/login");
       }, 2500);
-
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : "Ocorreu um erro ao processar sua solicitação.";
       setError(errorMessage);
@@ -71,21 +97,33 @@ export default function FirstAccess() {
     }
   };
 
-  // Estado 1: Link sem token
-  if (!token) {
+  // Tela de Carregamento da Validação Inicial
+  if (isValidatingToken) {
+    return (
+      <main className="w-full min-h-screen bg-[#faf9f7] flex items-center justify-center p-6">
+        <div className="flex flex-col items-center gap-3 text-[#071b2b]">
+          <Loader2 className="w-8 h-8 animate-spin text-[#061c2c]" />
+          <p className="text-xs font-medium">Validando seu convite de acesso...</p>
+        </div>
+      </main>
+    );
+  }
+
+  // Estado: Token ausente ou inválido/expirado
+  if (!isTokenValid) {
     return (
       <main className="w-full min-h-screen bg-[#faf9f7] flex items-center justify-center p-6">
         <div className="bg-white p-8 rounded-xl shadow-md border border-gray-100 max-w-md w-full text-center">
           <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-[#071b2b] mb-2">Link Inválido</h2>
+          <h2 className="text-xl font-bold text-[#071b2b] mb-2">Convite Indisponível</h2>
           <p className="text-xs text-[#626262] leading-relaxed mb-6">
-            O token de ativação não foi encontrado no link. Por favor, solicite um novo e-mail de convite ao administrador do sistema.
+            {error || "O token de ativação é inválido ou expirou. Solicite um novo convite ao administrador."}
           </p>
           <button
-            onClick={() => navigate("/")}
+            onClick={() => navigate("/login")}
             className="w-full py-2.5 rounded bg-[#061c2c] text-white text-xs font-semibold hover:bg-[#0b293d] transition"
           >
-            Voltar para a Home
+            Ir para a Tela de Login
           </button>
         </div>
       </main>
@@ -120,7 +158,11 @@ export default function FirstAccess() {
                   Primeiro Acesso
                 </h1>
                 <p className="text-xs text-[#737373]">
-                  Defina sua senha de acesso para ativar sua conta no Civix
+                  {userEmail ? (
+                    <>Defina a senha para <strong>{userEmail}</strong></>
+                  ) : (
+                    "Defina sua senha de acesso para ativar sua conta no Civix"
+                  )}
                 </p>
               </div>
 
@@ -175,10 +217,10 @@ export default function FirstAccess() {
                 <div className="p-3 bg-[#faf9f7] rounded-lg border border-gray-100 text-[11px] text-[#737373] space-y-1">
                   <p className="font-medium text-[#071b2b]">Sua senha deve conter:</p>
                   <ul className="list-disc list-inside space-y-0.5">
-                    <li className={password.length >= 8 ? "text-emerald-600 font-medium" : ""}>
+                    <li className={hasMinLength ? "text-emerald-600 font-medium" : ""}>
                       Pelo menos 8 caracteres
                     </li>
-                    <li className={password && password === confirmPassword ? "text-emerald-600 font-medium" : ""}>
+                    <li className={passwordsMatch ? "text-emerald-600 font-medium" : ""}>
                       Confirmação coincidente
                     </li>
                   </ul>
@@ -187,11 +229,14 @@ export default function FirstAccess() {
                 {/* Botão de Envio */}
                 <button
                   type="submit"
-                  disabled={loading}
-                  className="w-full h-11 rounded-lg bg-[#061c2c] hover:bg-[#0b293d] transition text-white font-medium text-xs flex items-center justify-center gap-2 disabled:opacity-50"
+                  disabled={loading || !isFormValid}
+                  className="w-full h-11 rounded-lg bg-[#061c2c] hover:bg-[#0b293d] transition text-white font-medium text-xs flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? (
-                    "Cadastrando senha..."
+                    <div className="flex items-center gap-2">
+                      <Loader2 size={14} className="animate-spin" />
+                      Cadastrando senha...
+                    </div>
                   ) : (
                     <>
                       <Lock size={14} />
