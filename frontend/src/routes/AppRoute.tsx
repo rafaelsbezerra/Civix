@@ -8,6 +8,7 @@ import NotFound from '@/pages/PageError';
 import { PublicSmoothScroll } from '@/components/layout/PublicSmoothScroll';
 import FirstAccess from '@/pages/FirstAccess';
 import ForgotPassword from '@/pages/ForgotPassword';
+import ResetPassword from '@/pages/ResetPassword';
 
 export const AppRoutes: React.FC = () => (
     <>
@@ -20,6 +21,7 @@ export const AppRoutes: React.FC = () => (
             <Route path="/primeiro-acesso" element={<FirstAccess />} />
             <Route path="/primeiro-acesso/:token" element={<FirstAccess />} />
             <Route path="/esqueci-senha" element={<ForgotPassword />} />
+            <Route path="/redefinir-senha" element={<ResetPassword />} />
 
 
             <Route path='*' element={<NotFound />} />

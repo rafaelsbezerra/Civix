@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
 import { db } from "../config/data.js";
+import { sendResetPasswordEmail } from "../services/mail.service.js";
 
 interface DbUser {
   id: string | number;
@@ -127,6 +128,7 @@ export const forgotPassword = async (
 
     // 2. Gera token seguro e data de expiração (1 hora)
     const resetToken = crypto.randomBytes(32).toString("hex");
+    const resetTokenHash = crypto.createHash("sha256").update(resetToken).digest("hex");
     const expiresAt = new Date(Date.now() + 3600000); // 1 hora a partir de agora
 
     // 3. Salva o token no banco de dados
@@ -135,13 +137,12 @@ export const forgotPassword = async (
       SET reset_password_token = $1, reset_password_expires = $2
       WHERE id = $3
     `;
-    await db.query(updateQuery, [resetToken, expiresAt, user.id]);
+    await db.query(updateQuery, [resetTokenHash, expiresAt, user.id]);
 
-    const resetUrl = `${process.env.FRONTEND_URL || "http://localhost:5173"}/redefinir-senha?token=${resetToken}`;
+    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+    const resetUrl = `${frontendUrl.replace(/\/$/, "")}/redefinir-senha?token=${encodeURIComponent(resetToken)}`;
 
-    // TODO: Chamar serviço de e-mail (ex: nodemailer ou resend)
-    // await sendResetPasswordEmail(user.email, resetUrl);
-    console.log(`[DEV ONLY] Link de redefinição para ${user.email}: ${resetUrl}`);
+    await sendResetPasswordEmail({ email: user.email, resetUrl });
 
     return res.status(200).json({
       message: "Se o e-mail existir no sistema, as instruções serão enviadas.",
@@ -175,7 +176,8 @@ export const resetPassword = async (
       WHERE reset_password_token = $1 
       AND reset_password_expires > NOW()
     `;
-    const { rows } = await db.query(query, [token]);
+    const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+    const { rows } = await db.query(query, [tokenHash]);
     const user = rows[0];
 
     if (!user) {
@@ -191,7 +193,7 @@ export const resetPassword = async (
       SET password_hash = $1, reset_password_token = NULL, reset_password_expires = NULL 
       WHERE id = $2
     `;
-    await db.query(updateQuery, [user.id]);
+    await db.query(updateQuery, [passwordHash, user.id]);
 
     return res.status(200).json({ message: "Senha redefinida com sucesso." });
   } catch (error) {

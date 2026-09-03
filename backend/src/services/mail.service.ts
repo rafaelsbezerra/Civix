@@ -1,9 +1,27 @@
-// # Função genérica de envio: sendInviteEmail(email, token)
+// # Funções de envio de e-mail transacional
 
 import { Resend } from 'resend';
 
 // Inicializa o SDK do Resend com a chave do arquivo .env
-const resend = new Resend(process.env.RESEND_API_KEY);
+function getResendClient() {
+  const apiKey = process.env.RESEND_API_KEY;
+
+  if (!apiKey) {
+    throw new Error('RESEND_API_KEY não está configurada.');
+  }
+
+  return new Resend(apiKey);
+}
+
+function getMailFrom() {
+  const mailFrom = process.env.MAIL_FROM;
+
+  if (!mailFrom) {
+    throw new Error('MAIL_FROM não está configurada.');
+  }
+
+  return mailFrom;
+}
 
 interface SendInviteParams {
   email: string;
@@ -18,8 +36,8 @@ export async function sendInviteEmail({ email, role, token }: SendInviteParams) 
   const roleText = role === 'empresa' ? 'Organização/Empresa' : 'Cliente/Usuário';
 
   try {
-    const data = await resend.emails.send({
-      from: 'Civix <nao-responda@seudominio.com>',
+    const result = await getResendClient().emails.send({
+      from: getMailFrom(),
       to: [email],
       subject: 'Bem-vindo ao Civix - Ativação de Conta',
       html: `
@@ -62,9 +80,42 @@ export async function sendInviteEmail({ email, role, token }: SendInviteParams) 
       `,
     });
 
-    return { success: true, data };
+    if (result.error) {
+      throw new Error(result.error.message);
+    }
+
+    return { success: true, data: result.data };
   } catch (error) {
     console.error('Erro ao enviar e-mail:', error);
     throw new Error('Falha no envio do e-mail de convite.');
+  }
+}
+
+interface SendResetPasswordParams {
+  email: string;
+  resetUrl: string;
+}
+
+export async function sendResetPasswordEmail({ email, resetUrl }: SendResetPasswordParams) {
+  try {
+    const result = await getResendClient().emails.send({
+      from: getMailFrom(),
+      to: [email],
+      subject: 'Civix - Redefinição de senha',
+      html: `
+        <p>Recebemos uma solicitação para redefinir sua senha.</p>
+        <p><a href="${resetUrl}">Redefinir minha senha</a></p>
+        <p>Este link é válido por 1 hora e só pode ser usado uma vez.</p>
+      `,
+    });
+
+    if (result.error) {
+      throw new Error(result.error.message);
+    }
+
+    return { success: true, data: result.data };
+  } catch (error) {
+    console.error('Erro ao enviar e-mail de redefinição:', error);
+    throw new Error('Falha no envio do e-mail de redefinição.');
   }
 }
