@@ -9,6 +9,7 @@ import { PublicSmoothScroll } from '@/components/layout/PublicSmoothScroll';
 import FirstAccess from '@/pages/FirstAccess';
 import ForgotPassword from '@/pages/ForgotPassword';
 import ResetPassword from '@/pages/ResetPassword';
+import Plans from '@/pages/Plans';
 
 export const AppRoutes: React.FC = () => (
     <>
@@ -22,6 +23,7 @@ export const AppRoutes: React.FC = () => (
             <Route path="/primeiro-acesso/:token" element={<FirstAccess />} />
             <Route path="/esqueci-senha" element={<ForgotPassword />} />
             <Route path="/redefinir-senha" element={<ResetPassword />} />
+            <Route path="/planos" element={<Plans />} />
 
 
             <Route path='*' element={<NotFound />} />
