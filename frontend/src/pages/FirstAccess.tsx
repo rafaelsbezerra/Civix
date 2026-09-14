@@ -39,7 +39,7 @@ export default function FirstAccess() {
       }
 
       try {
-        const response = await fetch(`http://localhost:3000/api/auth/validate-token?token=${token}`);
+        const response = await fetch(`http://localhost:3000/api/v1/auth/validate-token?token=${token}`);
         const data = await response.json();
 
         if (!response.ok) {
@@ -70,7 +70,7 @@ export default function FirstAccess() {
     try {
       setLoading(true);
 
-      const response = await fetch("http://localhost:3000/api/auth/first-access", {
+      const response = await fetch("http://localhost:3000/api/v1/auth/first-access", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

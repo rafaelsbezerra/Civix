@@ -1,7 +1,7 @@
 import "dotenv/config";
 import express, { Request, Response } from "express";
 import cookieParser from "cookie-parser";
-import compression from "compression"
+import compression from "compression";
 import cors from "cors";
 import helmet from "helmet";
 
@@ -13,11 +13,20 @@ const app = express();
 
 const PORT = process.env.PORT ?? 3000;
 
+// Configuração explícita de CORS
+app.use(cors({
+  origin: true, // Permite a origem da requisição (Vite/React em dev)
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+}));
+
 app.use(express.json());
 app.use(cookieParser());
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
 app.use(compression());
-app.use(cors());
 
 app.get("/", (_req: Request, res: Response) => {
   return res.json({

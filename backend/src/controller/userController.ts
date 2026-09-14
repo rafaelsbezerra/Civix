@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
 import { db } from "../config/data.js";
+import { sendForgotPasswordEmail } from "../services/mail.service.js";
 
 interface DbUser {
   id: string | number;
@@ -32,7 +33,9 @@ export const login = async (
 
     if (role === "empresa") {
       if (!password) {
-        return res.status(400).json({ error: "Senha é obrigatória para empresas" });
+        return res.status(400).json({
+          error: "Senha é obrigatória para empresas",
+        });
       }
 
       query = `
@@ -54,7 +57,9 @@ export const login = async (
     const user = rows[0];
 
     if (!user) {
-      return res.status(401).json({ error: "Usuário não encontrado." });
+      return res.status(401).json({
+        error: "Usuário não encontrado.",
+      });
     }
 
     if (role === "empresa") {
@@ -64,17 +69,28 @@ export const login = async (
         });
       }
 
-      const isPasswordValid = await bcrypt.compare(password, user.password_hash);
+      const isPasswordValid = await bcrypt.compare(
+        password,
+        user.password_hash
+      );
 
       if (!isPasswordValid) {
-        return res.status(401).json({ error: "Senha incorreta." });
+        return res.status(401).json({
+          error: "Senha incorreta.",
+        });
       }
     }
 
     const secret = process.env.JWT_SECRET;
+
     if (!secret) {
-      console.error("CRITICAL: JWT_SECRET não informada nas variáveis de ambiente.");
-      return res.status(500).json({ error: "Erro interno do servidor." });
+      console.error(
+        "CRITICAL: JWT_SECRET não informada nas variáveis de ambiente."
+      );
+
+      return res.status(500).json({
+        error: "Erro interno do servidor.",
+      });
     }
 
     const payload = {
@@ -83,7 +99,9 @@ export const login = async (
       role: user.role,
     };
 
-    const token = jwt.sign(payload, secret, { expiresIn: "1h" });
+    const token = jwt.sign(payload, secret, {
+      expiresIn: "1h",
+    });
 
     return res.status(200).json({
       user: {
@@ -96,7 +114,10 @@ export const login = async (
     });
   } catch (error) {
     console.error("Erro no login:", error);
-    return res.status(500).json({ error: "Erro interno do servidor" });
+
+    return res.status(500).json({
+      error: "Erro interno do servidor",
+    });
   }
 };
 
@@ -117,31 +138,35 @@ export const forgotPassword = async (
     const { rows } = await db.query<DbUser>(queryUser, [email]);
     const user = rows[0];
 
-    // Por segurança, retorna 200 mesmo se o usuário não for encontrado
-    // (evita ataques de enumeração de e-mails)
     if (!user) {
+      console.log(`[FORGOT PASSWORD] E-mail ${email} não encontrado no banco.`);
       return res.status(200).json({
         message: "Se o e-mail existir no sistema, as instruções serão enviadas.",
       });
     }
 
-    // 2. Gera token seguro e data de expiração (1 hora)
+    // 2. Gera token seguro em hexadecimal
     const resetToken = crypto.randomBytes(32).toString("hex");
-    const expiresAt = new Date(Date.now() + 3600000); // 1 hora a partir de agora
 
-    // 3. Salva o token no banco de dados
+    // 3. Salva o token no banco definindo expiração via SQL (NOW() + 1 hora em UTC)
     const updateQuery = `
       UPDATE users 
-      SET reset_password_token = $1, reset_password_expires = $2
-      WHERE id = $3
+      SET reset_password_token = $1, 
+          reset_password_expires = NOW() + INTERVAL '1 hour'
+      WHERE id = $2
     `;
-    await db.query(updateQuery, [resetToken, expiresAt, user.id]);
+    await db.query(updateQuery, [resetToken, user.id]);
 
-    const resetUrl = `${process.env.FRONTEND_URL || "http://localhost:5173"}/redefinir-senha?token=${resetToken}`;
-
-    // TODO: Chamar serviço de e-mail (ex: nodemailer ou resend)
-    // await sendResetPasswordEmail(user.email, resetUrl);
-    console.log(`[DEV ONLY] Link de redefinição para ${user.email}: ${resetUrl}`);
+    // 4. Dispara o e-mail via Brevo API
+    try {
+      await sendForgotPasswordEmail({
+        email: user.email,
+        token: resetToken,
+      });
+      console.log(`[FORGOT PASSWORD] E-mail enviado com sucesso via Brevo para ${user.email}`);
+    } catch (emailError) {
+      console.error("Erro ao disparar e-mail via Brevo:", emailError);
+    }
 
     return res.status(200).json({
       message: "Se o e-mail existir no sistema, as instruções serão enviadas.",
@@ -160,46 +185,78 @@ export const resetPassword = async (
   try {
     const { token, password } = req.body;
 
-    if (!token || !password) {
-      return res.status(400).json({ error: "Token e nova senha são obrigatórios." });
+    if (typeof token !== "string" || typeof password !== "string") {
+      return res.status(400).json({
+        error: "Token e nova senha são obrigatórios.",
+      });
     }
 
     if (password.length < 8) {
-      return res.status(400).json({ error: "A senha deve ter no mínimo 8 caracteres." });
+      return res.status(400).json({
+        error: "A senha deve ter no mínimo 8 caracteres.",
+      });
     }
 
-    // 1. Busca o usuário com token válido e não expirado
+    // 1. Busca o usuário apenas pelo token (sem filtro NOW() na query)
     const query = `
-      SELECT id 
-      FROM users 
-      WHERE reset_password_token = $1 
-      AND reset_password_expires > NOW()
+      SELECT id, reset_password_expires
+      FROM users
+      WHERE reset_password_token = $1
     `;
-    const { rows } = await db.query(query, [token]);
+
+    const { rows } = await db.query<{ id: string | number; reset_password_expires: Date | string }>(
+      query,
+      [token]
+    );
+
     const user = rows[0];
 
+    // Se o token não existir na coluna reset_password_token
     if (!user) {
-      return res.status(400).json({ error: "Token inválido ou expirado." });
+      console.warn(`[RESET PASSWORD] Token não localizado na tabela users: ${token}`);
+      return res.status(400).json({
+        error: "Token inválido ou expirado.",
+      });
     }
 
-    // 2. Criptografa a nova senha
+    // 2. Valida se a data atual ultrapassou a expiração no Node.js
+    if (user.reset_password_expires) {
+      const expiresAt = new Date(user.reset_password_expires);
+      const now = new Date();
+
+      if (expiresAt < now) {
+        console.warn(`[RESET PASSWORD] Token expirou. Expirava em: ${expiresAt.toISOString()}, Atual: ${now.toISOString()}`);
+        return res.status(400).json({
+          error: "Token expirado. Solicite um novo link de recuperação.",
+        });
+      }
+    }
+
+    // 3. Criptografa a nova senha
     const passwordHash = await bcrypt.hash(password, 10);
 
-    // 3. Atualiza a senha e limpa os campos de token
+    // 4. Atualiza a senha e limpa o token
     const updateQuery = `
-      UPDATE users 
-      SET password_hash = $1, reset_password_token = NULL, reset_password_expires = NULL 
+      UPDATE users
+      SET password_hash = $1,
+          reset_password_token = NULL,
+          reset_password_expires = NULL
       WHERE id = $2
     `;
-    await db.query(updateQuery, [user.id]);
 
-    return res.status(200).json({ message: "Senha redefinida com sucesso." });
+    await db.query(updateQuery, [passwordHash, user.id]);
+
+    return res.status(200).json({
+      message: "Senha redefinida com sucesso.",
+    });
   } catch (error) {
     console.error("Erro em resetPassword:", error);
-    return res.status(500).json({ error: "Erro interno do servidor." });
+
+    return res.status(500).json({
+      error: "Erro interno do servidor.",
+    });
   }
 };
-
 export const home = (
   req: Request,
   res: Response
