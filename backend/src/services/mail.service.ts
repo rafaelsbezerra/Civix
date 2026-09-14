@@ -119,3 +119,10 @@ export async function sendResetPasswordEmail({ email, resetUrl }: SendResetPassw
     throw new Error('Falha no envio do e-mail de redefinição.');
   }
 }
+
+export async function sendForgotPasswordEmail({ email, token }: { email: string; token: string }) {
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+  const resetUrl = `${frontendUrl.replace(/\/$/, '')}/redefinir-senha?token=${encodeURIComponent(token)}`;
+
+  return sendResetPasswordEmail({ email, resetUrl });
+}

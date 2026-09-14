@@ -4,7 +4,7 @@ import authMiddleware from '../middlewares/auth.js';
 
 const router: Router = Router();
 
-// Rota pública de login
+// Rota pública de login (/api/v1/users/login)
 router.post('/login', login);
 
 // Rotas públicas de recuperação de senha
@@ -15,11 +15,11 @@ router.post(['/reset-password', '/redefinir-senha'], resetPassword);
 router.get('/profile', authMiddleware, (req: Request, res: Response) => {
   return res.json({
     message: 'Acesso permitido à rota protegida',
-    userId: req.userId, // Acessado diretamente graças à tipagem estendida do Express
+    userId: req.userId,
   });
 });
 
-// Rota protegida home
+// Rota protegida home (/api/v1/users/home)
 router.post('/home', authMiddleware, home);
 
 export default router;

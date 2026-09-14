@@ -29,7 +29,7 @@ export default function ForgotPassword() {
     try {
       setLoading(true);
 
-      await api.post("/api/v1/users/forgot-password", { email });
+      await api.post("/api/v1/users/esqueci-senha", { email });
 
       setSubmitted(true);
     } catch (err: unknown) {
