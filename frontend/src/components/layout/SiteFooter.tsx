@@ -22,9 +22,9 @@ function Footer() {
         <small>© 2026 Civix. Todos os direitos reservados.</small>
       </div>
       <div className="footer-column"><strong>Empresa</strong><a href="#sobre">Sobre nos</a><a href="#empresas">Parceiros</a><a href="#contato">Contato</a></div>
-      <div className="footer-column"><strong>Recursos</strong><a href="/catalogo">Catalogo</a><a href="#planos">Planos</a><a href="#ajuda">Central de ajuda</a></div>
-      <div className="footer-column"><strong>Legal</strong><a href="#privacidade">Privacidade</a><a href="#termos">Termos de uso</a></div>
-      <div className="footer-column footer-contact"><strong>Contato</strong><a href="mailto:oi@civix.com.br">oi@civix.com.br</a><span>Sao Paulo, Brasil</span></div>
+      <div className="footer-column"><strong>Recursos</strong><a href="/catalogo">Catalogo</a><a href="#planos">Planos</a><a href="/central-de-ajuda">Central de ajuda</a></div>
+      <div className="footer-column"><strong>Legal</strong><a href="/politica-de-privacidade">Privacidade</a><a href="/termos-de-uso">Termos de uso</a></div>
+      <div className="footer-column footer-contact"><strong>Contato</strong><a href="mailto:oi@civix.com.br">oi@civix.com.br</a><span>Aracaju, Brasil</span></div>
     </footer>
   )
 }

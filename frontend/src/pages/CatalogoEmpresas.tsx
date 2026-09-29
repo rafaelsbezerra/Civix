@@ -1,10 +1,10 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  fetchEmpresas, 
-  searchEmpresas, 
-  fetchEmpresasByCategoria, 
-  fetchEmpresasByEstado 
+import {
+  fetchEmpresas,
+  searchEmpresas,
+  fetchEmpresasByCategoria,
+  fetchEmpresasByEstado
 } from '@/lib/api';
 import type { Empresa } from '@/lib/api';
 import { SiteHeader } from '@/components/layout/SiteHeader';
@@ -180,7 +180,7 @@ export default function CatalogoEmpresas() {
               </h2>
             </div>
             {isFiltered && (
-              <button 
+              <button
                 onClick={handleClearFilters}
                 className="text-gray-500 hover:text-[var(--color-civix-navy)] font-medium text-sm transition-colors mt-4 md:mt-0 flex items-center gap-1 cursor-pointer"
               >
@@ -228,13 +228,12 @@ export default function CatalogoEmpresas() {
                   className="group bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col h-full"
                 >
                   {/* Card Header Pattern/Color */}
-                  <div className={`h-32 p-6 flex flex-col justify-between relative overflow-hidden bg-gradient-to-br ${
-                    empresa.tone === 'blue' ? 'from-blue-50 to-blue-100' :
-                    empresa.tone === 'green' ? 'from-green-50 to-green-100' :
-                    empresa.tone === 'orange' ? 'from-orange-50 to-orange-100' :
-                    empresa.tone === 'purple' ? 'from-purple-50 to-purple-100' :
-                    'from-gray-50 to-gray-100'
-                  }`}>
+                  <div className={`h-32 p-6 flex flex-col justify-between relative overflow-hidden bg-gradient-to-br ${empresa.tone === 'blue' ? 'from-blue-50 to-blue-100' :
+                      empresa.tone === 'green' ? 'from-green-50 to-green-100' :
+                        empresa.tone === 'orange' ? 'from-orange-50 to-orange-100' :
+                          empresa.tone === 'purple' ? 'from-purple-50 to-purple-100' :
+                            'from-gray-50 to-gray-100'
+                    }`}>
                     <div className="absolute right-0 bottom-0 opacity-10 translate-x-4 translate-y-4">
                       <BuildingMark />
                     </div>
