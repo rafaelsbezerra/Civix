@@ -1,7 +1,6 @@
 # Usuários e contratos de persistência
 
-Estado: refatoração solicitada. Implementação das decisões abaixo
-**Aguardando resposta**. Documentação anterior ao código.
+Estado: escopo confirmado em 2026-10-10. Documentação anterior ao código.
 
 ## Escopo confirmado
 
@@ -39,3 +38,8 @@ Estado: refatoração solicitada. Implementação das decisões abaixo
 - Tarefas separadas em branches/worktrees e reunidas na integração.
 
 Nenhuma nova dependência, tabela ou migration está autorizada por esta tarefa.
+## Entrega dos contratos de persistência
+
+Interfaces UserRepository/CompanyRepository/PlanRepository criadas e
+verificadas com TypeScript isolado. Sem implementação ou uso pelos services.
+Plan/PlanRow extraídos com reexports de compatibilidade. Queries preservadas.
