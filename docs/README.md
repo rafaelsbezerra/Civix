@@ -1,11 +1,13 @@
 # Documentação do Civix
 
-Baseline revisada em 2026-10-09: `staging`, commit
-`5db3c5bb1a2400c687093b94b82440c7a6040764`.
-A referência remota foi conferida com `git ls-remote` e coincide com a local.
-A baseline documental foi commitada. A base de padrões está sendo entregue em branches com PRs para `staging`; sua adoção nos fluxos atuais será posterior.
-A revisão e os links para fontes de código e specs se referem ao commit
-da `staging` acima.
+A revisão inicial de 2026-10-09 foi feita na staging 5db3c5b e permanece
+como histórico. A atualização de 2026-10-10 distingue staging e2b3d8b,
+a adoção HTTP implementada no PR #14 e o tooling Prisma 7 entregue no PR #8.
+Os links de código refletem a branch de integração, sem alegar que todos
+os PRs já foram incorporados.
+
+Consulte a [revisão de pendências das specs](revisao-pendencias-specs.md):
+itens concluídos, partes pendentes, entregas em PR e divergências do frontend.
 
 ## Guia de leitura
 
@@ -35,7 +37,8 @@ designs, tarefas e relatórios foram confrontados com o código atual.
 Relatórios antigos de PASS não validam a união atual das features.
 
 Nesta documentação, **atual** significa observado no código;
-**previsto** significa descrito pelas fontes; **pendente** significa que
-não existe decisão suficiente. Sugestões para a próxima fase não constituem
-contratos aprovados. Na revisão inicial de 2026-10-09, nenhuma implementação, migration ou configuração de
-infraestrutura foi alterada. A base posterior e suas verificações estão em [padrões do backend](padroes-backend.md).
+**previsto** significa descrito pelas fontes; **pendente** indica implementação,
+verificação ou decisão ainda necessária. Quando faltar aprovação, registra-se
+**Aguardando resposta**. Não presumir que toda pendência é uma pergunta ainda aberta.
+Sugestões para a próxima fase não constituem contratos aprovados.
+A auditoria das specs é documental; não altera implementação, migrations ou infraestrutura.

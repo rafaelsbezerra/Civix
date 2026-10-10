@@ -1,81 +1,49 @@
-# Avaliação inicial do Prisma
+# Avaliação do Prisma e decisão vigente
 
-Data: 2026-10-09. Somente análise; nenhuma dependência atualizada.
-Estado histórico: Prisma 8 foi avaliado; a decisão atual é Prisma 7.10.0 com SQL nativo (ver última seção).
-Na avaliação inicial, versão instalável e compatibilidade ainda precisavam ser verificadas.
+Análise inicial: 2026-10-09. Status revisado em 2026-10-10.
 
-## Situação do projeto
+## Decisão atual
 
-Manifesto e lockfile misturam Prisma CLI 6 com client/adapter 7.
-O schema não possui models e não há uso de PrismaClient na aplicação.
-As consultas atuais usam SQL/Neon. Atualizar pacotes não converte essas
-consultas nem cria automaticamente um modelo canônico.
-TypeScript está em modo strict; não existe versão de Node fixada no backend.
+Prisma 7 com migrations SQL nativas e reversão por nova migration inversa.
+CLI/client/adapter fixados em 7.10.0 na branch codex/prisma7-foundation,
+entregue nos PRs #7/#8 e integrado à staging pelo PR #7 em eea5f1d.
+Tooling presente na referência 7b976d7 e nesta baseline. Não existe nova decisão sobre Prisma 8 aguardando resposta.
 
-## Compatibilidade com o pedido
+O PR registra validate, geração de cliente e diffs SQL de criação/inversão
+com fixture isolada, sem banco. O schema comercial permanece vazio; atualizar
+pacotes não converte as consultas SQL/Neon nem define o modelo canônico.
 
-A [documentação do Prisma 8](https://www.prisma.io/docs/orm/migrations/how-migrations-work)
-descreve migrations TypeScript e um fluxo novo de contrato, planejamento e
-execução. Algumas capacidades de migrations ainda são indicadas como
-iniciais; não há squash nem dry run em shadow database.
+## Histórico da decisão
 
-A [API de migrations](https://www.prisma.io/docs/orm/reference/migration-api)
-usa classes com operações em `migration.ts`, compiladas em `ops.json`.
-Isso atende à escrita em TypeScript, mas não é uma API de funções `up/down`.
+Inicialmente foram avaliadas migrations TypeScript e reversão do Prisma 8.
+O usuário aceitou migration inversa no lugar de funções up/down, mas decidiu
+aguardar versão estável após a avaliação de releases candidates. Depois
+confirmou banco criado do zero, nome users e dependências na versão 7, e
+escolheu explicitamente Prisma 7 com SQL nativo. Essa última decisão
+substitui a opção Prisma 8 e o bloqueio por espera de versão estável.
 
-Segundo a [documentação de reversão](https://www.prisma.io/docs/orm/migrations/rollbacks-and-recovery),
-o Prisma 8 não possui `migrate down` ou arquivos down. A reversão adiciona
-uma nova migration ao histórico. Portanto, atualização por si só não atende
-à exigência literal de `up` e `down` no mesmo script.
+O histórico explica as alternativas; não autoriza instalar Prisma 8/RC ou
+adotar um runner TS paralelo. Prisma Migrate é o mecanismo aprovado.
 
-O [guia de atualização PostgreSQL](https://www.prisma.io/docs/guides/upgrade-prisma-orm/postgresql)
-exige Node 22.18+ (na linha 24, 24.11+) e TypeScript 5.9+; a atualização
-altera configuração, cliente e ownership de migrations. O guia parte de
-uma aplicação Prisma 7 funcional, diferente da situação deste projeto.
+## Compatibilidade e verificação registrada
 
-## Alternativas para decisão
+O checkout atual fixa CLI/client/adapter em 7.10.0. O bloqueio anterior de
+TypeScript pela configuração Prisma/CLI 6 é histórico; o tooling alinhado
+passou no TypeScript completo. Checks isolados foram registrados na adoção HTTP.
+Não há runtime Node fixado no projeto; confirmar runtime local/CI antes
+quando essa configuração entrar no escopo de implementação.
 
-1. Adotar Prisma 8 com migrations TS nativas e reversão por nova migration.
-   Exige aprovação para substituir o requisito literal de `up/down` e
-   avaliar runtime, configuração, novo cliente e maturidade do fluxo.
-2. Manter a exigência literal de `up/down`: escolher runner TS separado,
-   com Prisma para acesso/modelo conforme versão aprovada. Exige garantir
-   um único histórico de schema e verificar sincronização dos modelos.
+Os três testes de tooling não executam SQL nem demonstram inicialização,
+falha, recuperação ou reversão em PostgreSQL. Nenhuma migration foi aplicada.
+Esta auditoria não reexecutou esses testes nem instalou dependências.
 
-Recomendação condicionada: se `up/down` for obrigatório, avaliar a alternativa
-2; se a intenção for reversão versionada, avaliar a alternativa 1. Nenhuma
-alternativa foi escolhida pelo agente. O usuário escolheu a alternativa 1,
-aceitando reversão por nova migration em vez de funções `up/down`.
+## Pendências reais
 
-## Verificação antes de executar
+- Definir campos, relações e restrições do schema e destino dos SQL de planos.
+- Discutir comandos operacionais após a implementação, como pedido pelo usuário.
+- Testar aplicação/reaplicação/status/falha/recuperação e inversa em PostgreSQL
+  temporário autorizado; avaliar transações e preservação de dados por mudança.
 
-- Confirmar versão alvo e runtime local/CI; alinhar dependências e lockfile.
-- Definir modelo mínimo e confirmar se há banco/histórico aplicado.
-- Testar geração/tipagem sem banco; testar aplicação, falha e recuperação em
-  PostgreSQL temporário. Não declarar compatibilidade só por documentação.
-- Registrar runner único, comandos, política de reversão e destino dos SQL.
-
-Não houve instalação de pacotes, conexão de banco ou prova de execução.
-
-## Decisão histórica de versão
-
-Aguardar Prisma 8 estável. As versões RC consultadas não serão instaladas.
-A opção Prisma 8/migration inversa permanece aprovada para futura adoção.
-
-## Decisões de 2026-10-10
-
-Prisma principal 7, banco criado do zero e nome canônico `users` confirmados.
-Isso substitui a espera pelo Prisma 8 estável. Campo/vínculos de usuários não
-foram definidos apenas pela escolha do nome.
-
-Pergunta histórica, respondida na seção seguinte: fixar CLI/client/adapter exatamente em 7.10.0 e usar
-SQL versionado nativo do Prisma Migrate, ou manter TypeScript com runner separado?
-Comandos `npm run migrations:apply`, `migrations:show` e `migrations:rollback`
-são propostas do usuário para discussão após a implementação, não scripts
-existentes. A política de reversão foi posteriormente aprovada conforme seção seguinte.
-
-## Decisão de formato e reversão
-
-Prisma 7 com SQL nativo confirmado. CLI/client/adapter serão fixados em 7.10.0.
-Migration concluída é revertida por nova migration inversa; falhas exigem
-recuperação/reconciliação separadas. Isso substitui as alternativas anteriores.
+Referências: [spec atual](spec.md),
+[Prisma 7 Migrate](https://docs.prisma.io/docs/orm/v7/prisma-migrate),
+[recuperação de falhas](https://www.prisma.io/docs/orm/v7/prisma-migrate/workflows/patching-and-hotfixing).

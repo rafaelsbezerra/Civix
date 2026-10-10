@@ -1,5 +1,9 @@
 # Tela Sobre Civix — Especificação
 
+> **Auditoria de estado — 2026-10-10:** este documento preserva decisões, checkboxes e resultados históricos. A vigência dos requisitos antigos está **Aguardando resposta**. Não restaurar layout, reabrir escopo ou declarar gates atuais aprovados sem confirmação e evidência.
+> AppRoute não registra /sobre; About aparece dentro da Home. dashboard.png e macbook-silver.png do manifest histórico não existem no checkout; AboutVisual usa macbook.png e não renderiza dashboard. Não foi decidido restaurar a composição original ou aceitar essas divergências.
+> Revisão consolidada: [pendências das specs](../../../../docs/revisao-pendencias-specs.md).
+
 ## Problem Statement
 
 A navegação já aponta para `/sobre`, mas a rota ainda não existe. A segunda tela deve traduzir o frame `103:1987` do Figma em uma página institucional responsiva, acessível e independente de backend, preservando a mensagem, a composição visual e os assets originais da Civix.

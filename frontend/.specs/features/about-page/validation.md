@@ -1,8 +1,12 @@
 # About Page Validation
 
-## Validation: PASS ✅
+> **Auditoria de estado — 2026-10-10:** este documento preserva decisões, checkboxes e resultados históricos. A vigência dos requisitos antigos está **Aguardando resposta**. Não restaurar layout, reabrir escopo ou declarar gates atuais aprovados sem confirmação e evidência.
+> AppRoute não registra /sobre; About aparece dentro da Home. dashboard.png e macbook-silver.png do manifest histórico não existem no checkout; AboutVisual usa macbook.png e não renderiza dashboard. Não foi decidido restaurar a composição original ou aceitar essas divergências.
+> Revisão consolidada: [pendências das specs](../../../../docs/revisao-pendencias-specs.md).
 
-**Date**: 2026-08-24  
+## Validação histórica: PASS ✅
+
+**Historical date**: 2026-08-24
 **Spec**: `.specs/features/about-page/spec.md`  
 **Diff range**: `009eab0..c7a20e2`  
 **Branch**: `feature/about-page`  

@@ -11,8 +11,8 @@ provedores ou arquitetura novos.
 | DEC-02 | Identidade | Autenticação própria, Auth0 ou Neon Auth? Qual comprovação de acesso cliente? |
 | DEC-03 | Papéis | Mapear superadmin, admin empresa, vendedor e cliente para permissões explícitas |
 | DEC-04 | Tenant | Vínculos usuário/empresa, contexto autenticado, filtros SQL, IA e acesso público |
-| DEC-05 | Persistência | SQL/Prisma, schema canônico, migrations completas e compatibilidade do banco existente |
-| DEC-06 | API | Envelope, erros/status, paginação, ordenação, filtros, DTOs, IDs, dinheiro, datas e versionamento |
+| DEC-05 | Persistência | Prisma 7/SQL nativo/inversa, PostgreSQL novo e nome users confirmados; campos/vínculos/restrições, baseline e SQL antigos pendentes; tooling integrado via PR #7 |
+| DEC-06 | API | Envelope, erro/status, enum e limites/meta de paginação confirmados; faltam abrangência/consultas paginadas, frontend e serialização/validação geral |
 | DEC-07 | Onboarding | Convite, primeiro acesso, reenvio, reset, expiração, uso único, sessão e revogação |
 | DEC-08 | Planos/vendas | Plano por empresa ou usuário, mensalidade/setup, venda automática/manual, exclusão, cobrança e limites |
 | DEC-09 | Trial | Regra de sete dias, campos, bloqueio e conversão ao plano |
@@ -21,7 +21,7 @@ provedores ou arquitetura novos.
 | DEC-12 | Integrações | Banco direto pelo n8n ou API; API key/HMAC; integração com sistemas existentes |
 | DEC-13 | Assets | Armazenamento de fotos, upload, R2 ou alternativa e limites |
 | DEC-14 | Operação | Hospedagem, ambientes, CI/CD, migrations, backups/restore, observabilidade e segredos |
-| DEC-15 | Convenções | Idioma do código, arquivos, nomes, módulos e ownership dos manifests |
+| DEC-15 | Convenções | Confirmadas: inglês, arquivos domínio.papel.ts, erros/comentários em português, pastas por função e handlers independentes; aplicação completa em auth/admin permanece parcial |
 | DEC-16 | Escala | Cache, volume por empresa, latência, disponibilidade, RPO/RTO e retenção |
 | DEC-17 | Dashboards | Funcionalidades/rotas por perfil e definição das métricas |
 
@@ -41,8 +41,8 @@ comentários/erros em português e controllers com funções independentes.
 1. Especificar e corrigir a integração existente: URLs, rotas, casing,
    configuração frontend, assets e coerência dos fluxos de acesso.
 2. Definir modelo de dados, identidade, papéis e isolamento tenant antes
-   de criar entidades operacionais. Especificar migração do banco existente.
-3. Aprovar contratos de API e convenções; registrar schemas/OpenAPI e
+   de criar entidades operacionais. Planejar baseline de banco novo, conforme confirmado pelo usuário.
+3. Aplicar as decisões de API/convenções já confirmadas; registrar schemas/OpenAPI e
    migração coordenada de consumidores, com testes de integração.
 4. Consolidar instalação, scripts e gates da staging; definir ambientes,
    deploy, secrets, migrations, observabilidade e recuperação.
@@ -59,11 +59,13 @@ critérios de aceite verificáveis; testes pertinentes; plano de rollout e
 atualização dos documentos afetados. Registrar decisões e alternativas
 em ADRs apenas quando forem aprovadas.
 
-Esta fase termina com a baseline documental. A implementação dos itens
-acima pertence à próxima fase solicitada pelo usuário.
+A baseline documental e as extrações já foram entregues; a adoção HTTP está
+implementada em PR. Consulte a [auditoria das specs](revisao-pendencias-specs.md)
+para distinguir tarefas restantes de decisões já aprovadas.
+
 
 ## Decisões posteriores — 2026-10-10
 
-DEC-05: nome canônico users e banco criado do zero confirmados.
-Prisma CLI/client/adapter estão fixados em 7.10.0 com migrations SQL nativas. Estes pontos não
-aguardam confirmação; campos/vínculos mínimos continuam pendentes.
+DEC-05: users e banco criado do zero confirmados. CLI/client/adapter Prisma
+fixados em 7.10.0 com migrations SQL nativas; tooling integrado à staging
+via PR #7. Campos e vínculos do schema continuam aguardando confirmação.

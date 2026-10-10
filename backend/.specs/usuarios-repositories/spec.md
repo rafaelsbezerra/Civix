@@ -1,77 +1,54 @@
 # Usuários e contratos de persistência
 
-Estado: escopo confirmado em 2026-10-10. Documentação anterior ao código.
+Estado: escopo de extração/interfaces implementado e integrado em staging
+na referência e2b3d8b. A adoção HTTP posterior está na baseline auditada/PR #14;
+as respostas legadas abaixo preservadas inicialmente são histórico.
 
-## Escopo confirmado
+## Escopo e decisões confirmadas
 
-- Usuários: nomes user.routes.ts/user.controller.ts/user.service.ts;
-  entidades/DTOs separados dos controllers, seguindo pastas por função.
+- Refatorar userController/userRoute em user.routes.ts/user.controller.ts/
+  user.service.ts; separar entidade/DTO e manter pastas por função.
 - Controllers com handlers independentes e imports diretos do service.
-- Interfaces de persistência dos módulos em backend/src/repositories,
-  com métodos de domínio, como UserRepository.getById.
-- Services existentes com acesso ao banco: empresas e planos; envio de
-  e-mail não constitui repositório de persistência.
-- Preservar contratos HTTP e regras existentes. Não corrigir schema,
-  tabelas users/user ou regras de autenticação incidentalmente.
-- Sempre perguntar caso exista dúvida e registrar decisão pendente.
+- Repositories somente interfaces de usuários, empresas e planos. Manter
+  SQL nos services; implementação e adoção são tarefas futuras.
+- Não criar repository para envio de e-mail ou módulos comerciais ausentes.
+- Extração inicial manteve auth/admin, frontend, schema e regras intactos.
+  A adoção posterior altera envelopes/erros de auth/admin sem novo schema.
+- Sempre perguntar diante de dúvidas e registrar decisões pendentes.
 
-## Decisões confirmadas
+## Tarefas e evidências
 
-1. Somente interfaces em repositories; implementações futuras. SQL atual
-   permanece nos services, sem runner, adapter ou factories novos.
-2. Refatorar somente userController/userRoute; auth/admin e convite/primeiro
-   acesso permanecem intactos.
-3. Interfaces para usuários, empresas e planos. Não criar contrato de
-   persistência para envio de e-mail ou para módulos comerciais ausentes.
+- [x] USR-01: Separar routes/controller/service de usuários.
+  user.routes.ts preserva URLs/aliases/middleware; controller concentra HTTP,
+  service concentra SQL, bcrypt, JWT, reset token/hash e envio de e-mail.
+- [x] USR-02: Separar User/PublicUser/inputs/resultados e tipos de planos.
+  entities/user.entity.ts, user.auth.dto.ts, entities/plan.entity.ts e
+  interfaces/plan.row.ts; saída PublicUser não inclui hash/senha.
+- [x] REP-01: Criar UserRepository/CompanyRepository/PlanRepository.
+  repositories/*.repository.ts: métodos de domínio, ausência undefined;
+  assignPlan retorna boolean. Sem implementação ou consumo nos services.
+- [x] USR-03: Verificar fluxos preservados e documentar extração.
+  Login empresa bcrypt/cliente atual/JWT 1h, recuperação sem enumeração,
+  token aleatório/hash/expiração e reset bcrypt10; persistência/e-mail
+  simulados em tests/user.routes.test.ts, documentos de arquitetura/padrões.
+- [ ] REP-02: Implementar/consumir repositories em etapa posterior.
+  Adiado explicitamente; não integra o aceite da extração atual.
 
-## Critérios de aceite
+## HTTP histórico e adoção posterior
 
-- Controller sem SQL ou regras de autenticação; service sem Express.
-- Interfaces tipadas sem senha/hash/token nas respostas públicas.
-- Routes preservam URLs, aliases, middleware e status existentes.
-- Login empresa com bcrypt, login cliente atual, JWT 1h e payload preservados.
-- Recuperação sem enumeração, token aleatório/hash/expiração e reset bcrypt10
-  mantidos; testes isolam banco e e-mail, sem chamadas externas.
-- Empresas/planos preservam consultas parametrizadas e respostas atuais.
-- Specs e documentação principal atualizadas; verificações reportam o
-  bloqueio preexistente Prisma CLI6/configuração7 separadamente.
-- Tarefas separadas em branches/worktrees e reunidas na integração.
+A extração preservou respostas/status existentes e não adotou os envelopes.
+Depois, [a adoção HTTP](../adocao-http/spec.md) substituiu resultados com
+reason/switch por dados ou AppError e aplicou data/meta nos controllers.
+Esse código está na baseline auditada e no PR #14; não presumir seu merge.
+A divergência users/user permanece até a etapa de schema aprovada.
 
-Nenhuma nova dependência, tabela ou migration está autorizada por esta tarefa.
+## Verificação registrada e entrega
 
-## Implementação por tarefa
+Extração: 27 testes (14 contratos, 4 empresas, 9 usuários) e tipagem isolada
+aprovados. Comandos: test:users, test:foundation, typecheck:foundation.
+A adoção posterior registra 36 testes. O tooling Prisma 7 integrado corrigiu o bloqueio histórico do TypeScript completo. Auditoria não repetiu esses checks.
+Nenhum banco remoto, envio real, migration ou verificação frontend.
 
-- Interfaces UserRepository/CompanyRepository/PlanRepository preparadas, sem
-  implementação ou uso nos services. Busca ausente usa undefined, conforme
-  rows[0]; atribuição de plano usa boolean, conforme rowCount === 1.
-- User e tipos de Plan extraídos; PublicUser/entradas/resultados de login
-  definidos em user.auth.dto.ts, sem colocar Express nos services.
-- user.routes.ts registra handlers de user.controller.ts; user.service.ts
-  concentra SQL, bcrypt, JWT, geração/hash/expiração de token e envio de e-mail.
-- Controller valida entrada e traduz resultados para as respostas legadas;
-  profile/home saíram das rotas e continuam protegidos pelo mesmo middleware.
-- Auth/admin, frontend, schema, SQL de empresas e queries de planos intactos.
-
-A estrutura não é CRUD novo nem adoção dos envelopes HTTP da base. As
-interfaces não substituem o acesso SQL antes da implementação posterior.
-
-## Verificação
-
-27 testes passaram (14 contratos, 4 empresas, 9 usuários), com banco e e-mail
-simulados. Tipagem isolada de src/servidor/interfaces/testes passou. Comandos
-reproduzíveis em backend: test:users, test:foundation, typecheck:foundation.
-Typecheck completo ainda falha em prisma.config.ts por CLI6/configuração7.
-Nenhum teste em banco remoto, envio real, migration ou verificação frontend.
-
-## Integração
-
-Tarefas em codex/repository-contracts e codex/user-layers, reunidas em
-codex/users-persistence-integration. Os PRs têm staging como destino e
-compartilham a baseline documental e as correções anteriores. A integração
-é a entrega conjunta; não requer merge individual duplicado dos mesmos commits.
-
-## Entrega dos contratos de persistência
-
-Interfaces UserRepository/CompanyRepository/PlanRepository criadas e
-verificadas com TypeScript isolado. Sem implementação ou uso pelos services.
-Plan/PlanRow extraídos com reexports de compatibilidade. Queries preservadas.
+Branches codex/repository-contracts e codex/user-layers foram reunidas em
+codex/users-persistence-integration, ancestral da staging de referência.
+As interfaces não substituem SQL nem comprovam persistência durável.

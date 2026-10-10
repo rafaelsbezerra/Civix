@@ -1,6 +1,6 @@
 # Extração de tipos de auth
 
-Estado: implementado, com tipagem verificada.
+Estado: implementado, com tipagem verificada; entregue no PR #12 e presente na baseline codex/http-adoption-integration. Merge em staging não presumido.
 
 ## Escopo
 
@@ -14,6 +14,6 @@ Estado: implementado, com tipagem verificada.
 
 `tsc -p tsconfig.foundation.json` passou com as dependências já instaladas.
 Não houve instalação, mudança de schema ou execução de consultas SQL.
-A adoção dos contratos HTTP será realizada separadamente na integração.
+A adoção dos contratos HTTP foi implementada separadamente no PR #14, presente nesta baseline; frontend posterior.
 
 Documentação principal: [tipos de auth](../../../docs/auth-types.md).

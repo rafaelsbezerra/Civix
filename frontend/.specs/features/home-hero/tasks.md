@@ -1,5 +1,9 @@
 # Hero da Home Civix — Tarefas
 
+> **Auditoria de estado — 2026-10-10:** este documento preserva decisões, checkboxes e resultados históricos. A vigência dos requisitos antigos está **Aguardando resposta**. Não restaurar layout, reabrir escopo ou declarar gates atuais aprovados sem confirmação e evidência.
+> Componentes atuais estão em src/components/home. Home incorpora About com outro main/h1; header usa destinos de aplicação, incluindo /planos sem rota registrada. As verificações originais de âncoras locais, semântica única e geometria não constituem validação atual.
+> Revisão consolidada: [pendências das specs](../../../../docs/revisao-pendencias-specs.md).
+
 ## Execution Protocol (MANDATORY -- do not skip)
 
 Implementar estas tarefas com a skill `tlc-spec-driven`: ativá-la por nome e seguir seu fluxo Execute e suas Critical Rules. Não procurar os arquivos da skill por um caminho fixo durante a execução.
@@ -9,7 +13,7 @@ Se a skill não puder ser ativada, interromper e informar o usuário. Cada taref
 ---
 
 **Design**: `.specs/features/home-hero/design.md`
-**Status**: Complete — independently verified PASS
+**Status**: conclusão histórica; estado atual auditado abaixo, requisitos vigentes Aguardando resposta
 
 ---
 
@@ -205,7 +209,7 @@ T8 -> T9
 #### T6: Criar SearchForm local
 
 **What**: Implementar os dois inputs, select e submit com estado local e sem efeitos externos.
-**Where**: `src/features/home/components/SearchForm.tsx`
+**Where**: `src/components/home/SearchForm.tsx`
 **Depends on**: T5
 **Reuses**: Tokens, assets de seta/chevron e frame `Search`.
 **Requirement**: HOME-07, HOME-08, HOME-10, HOME-11, HOME-12, HOME-13, HOME-14, HOME-15
@@ -234,7 +238,7 @@ T8 -> T9
 #### T7: Criar HeroSection fiel ao frame
 
 **What**: Compor copy, ilustração, CTAs e SearchForm no container visual responsivo.
-**Where**: `src/features/home/components/HeroSection.tsx`
+**Where**: `src/components/home/HeroSection.tsx`
 **Depends on**: T6
 **Reuses**: `ActionButton`, `SearchForm`, tokens e assets locais.
 **Requirement**: HOME-01, HOME-02, HOME-04, HOME-05, HOME-07, HOME-08, HOME-18
@@ -413,3 +417,22 @@ As dependências entre fases são T4 após T3 e T8 após T7. O mapa exibe soment
 - `browser:control-in-app-browser`: capturas e inspeção dos cinco viewports.
 
 O usuário deve confirmar estas ferramentas junto com a aprovação das tarefas antes do Execute.
+
+## Estado atual observado em leitura
+
+Os checkboxes acima permanecem como registro da entrega histórica; não comprovam
+o estado atual. Divergência não autoriza retorno ao layout anterior ou tarefa nova.
+
+| Tarefa / requisito | Estado atual | Evidência e limite |
+| --- | --- | --- |
+| T1–T4 / HOME-02/03/04 | Implementação preservada | Runner/setup, tokens/fontes, assets locais e ActionButton presentes; execução atual dos gates não realizada. |
+| T5 / HOME-06 | Implementação preservada | Menu responsivo, atributos ARIA, Escape e retorno de foco no código; não houve interação em navegador nesta auditoria. |
+| T6 / HOME-11/13/14 | Implementação preservada | Labels, estado local, opções e maxLength=100. Hero não fornece callbacks externos; validação dinâmica não executada. |
+| T7 / HOME-01/05 | Implementação presente; validação atual pendente | Hero/CTAs/ilustrações presentes; fidelidade geométrica e responsividade não foram medidas agora. |
+| T5/T8 / HOME-09/15 | Divergente do requisito histórico | Header usa destinos de aplicação; Home incorpora About com outro main/h1. Confirmar requisitos vigentes antes de alterar. |
+| T9 / HOME-17 | Implementação preservada | index.html possui lang pt-BR, viewport, título Civix e descrição. Build atual não executado. |
+| HOME-07/08/10/16 / gates T1–T9 | Validação atual não executada | Overflow, geometria, interação, foco/contraste, testes, lint e build exigem evidência da versão atual. |
+
+Nenhuma suíte, build, lint, navegador ou comparação visual foi executada nesta
+auditoria. Não há dist, relatórios Playwright ou capturas locais nesta worktree
+para reaproveitar como evidência atual. Critérios visuais permanecem não verificados.

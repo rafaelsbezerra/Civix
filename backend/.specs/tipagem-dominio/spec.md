@@ -1,66 +1,58 @@
 # Entidades, interfaces e DTOs
 
-Estado: planejamento; **Aguardando resposta** para BE-04/05/06/09/10.
+Estado: extrações existentes e interfaces de repositories implementadas;
+modelo canônico, validação abrangente e persistência operacional posteriores.
+Idioma, arquivos, pastas e interfaces úteis já foram confirmados (BE-04/05/06).
+BE-09/10 permanecem parcialmente pendentes; não pedir novamente decisões feitas.
 
-## Problema e escopo
+## Escopo e requisitos
 
-`Empresa` e wrappers HTTP estão no service; `Plan`/`PlanRow` também.
-Tipos de usuário aparecem nos controllers. Linhas SQL são usadas como
-contrato público, embora frontend espere nomes diferentes.
+Separar tipos úteis dos controllers/services, sem inventar modelos de leads,
+conversas, vendas ou dashboards. Os tipos atuais descrevem consultas observadas;
+não representam aprovação de campos, vínculos e invariantes de um novo schema.
 
-Criar arquivos próprios para modelos, entradas/saídas e interfaces dos
-módulos existentes. Não inventar entidades completas de leads, conversas,
-vendas ou dashboards ainda não especificados.
-
-## Requisitos
-
-- TYP-01: Entidades expressam identidade e invariantes aprovadas do domínio;
-  não dependem do Express, de envelopes HTTP ou do cliente de banco.
-- TYP-02: DTOs definem dados de entrada/saída; tipos de persistência definem
-  linhas/modelos do adapter. Mappers explicitam diferenças de nomes e null.
-- TYP-03: Inputs externos recebem validação em runtime; uma asserção de
-  TypeScript não comprova validade de ID, enum ou payload.
-- TYP-04: Interfaces de acesso aos dados, se aprovadas, têm implementação
-  controlada para testes sem banco. Ela não representa persistência durável.
-- TYP-05: Evitar `any`, casts para esconder diferenças e duplicação de tipos
-  canônicos. Usar `unknown` para erros não classificados e estreitar tipos.
+- Entidades não dependem de Express, envelopes HTTP ou cliente de banco.
+- DTOs descrevem entradas/saídas; tipos de persistência descrevem linhas SQL.
+- Validação runtime é necessária quando aprovada: casts não validam payloads.
+- Interfaces de repositories expressam métodos de domínio. Implementações
+  e adapters foram explicitamente adiados; não criar interface para tudo.
+- Evitar any e casts para ocultar diferenças; estreitar erros com unknown.
 
 ## Tarefas e aceite
 
-Nesta etapa, criar tipos/interfaces/DTOs separados e mappers testáveis.
-Empresas pode consumir os tipos extraídos, mantendo seu contrato atual.
-Não alterar outros services/controllers existentes. Migração dos consumidores
-e modelo canônico de identidade permanecem para a adoção posterior.
+- [ ] TYP-01: Aprovar modelo mínimo canônico e invariantes.
+  Parcial: PostgreSQL novo e nome users confirmados; campos obrigatórios,
+  IDs/datas, vínculos, enums completos e restrições: **Aguardando resposta**.
+- [ ] TYP-02: Completar extração de tipos úteis dos módulos existentes.
+  Parcial: empresas/usuários/planos/auth extraídos; admin mantém UserRow local.
+- [x] TYP-02-A: Extrair entidades/DTOs/linhas de empresas, usuários e planos.
+  Evidência: entities/{company,user,plan}.entity.ts, user.auth.dto.ts,
+  interfaces/plan.row.ts. PublicUser não expõe password_hash; o token do
+  login é campo separado e intencional do contrato de autenticação.
+- [x] TYP-02-B: Extrair payload de convite e linhas SQL de auth.
+  Evidência: dtos/auth.invite.dto.ts, interfaces/auth.user.row.ts e imports
+  tipados do controller; entregue no PR #12 e presente na baseline auditada.
+- [ ] TYP-02-C: Separar os tipos úteis ainda locais de admin, quando sua
+  refatoração for autorizada; não criar interfaces sem necessidade.
+- [x] TYP-03: Criar interfaces de persistência dos módulos implementados.
+  Evidência: repositories/{user,company,plan}.repository.ts, já em staging.
+  O adapter de teste sugerido originalmente foi retirado do escopo atual
+  pela decisão explícita de criar somente interfaces. Implementação/adoção
+  futura não deve ser confundida com conclusão da persistência operacional.
+- [ ] TYP-04: Completar mapeamento e validação canônica aprovados.
+  Parcial: plan.service.ts possui toPlan/parseFeatures/parseLimits; guards
+  atuais validam alguns campos. Política geral camelCase/snake_case,
+  null/ausente, datas, enums e schemas runtime: **Aguardando resposta**.
+- [x] TYP-05: Documentar os tipos e responsabilidades extraídos.
+  Evidência: docs/arquitetura.md, docs/padroes-backend.md, docs/auth-types.md
+  e spec usuarios-repositories. Atualizar novamente quando o modelo mudar.
 
-- [ ] TYP-01: Aprovar modelo mínimo de empresas, planos e identidade.
-  Aceite: campos, obrigatoriedade, enums, IDs/datas, vínculos e invariantes
-  registrados; `user`/`users` resolvido antes de definir baseline de banco.
-- [ ] TYP-02: Extrair entidades, DTOs e tipos de persistência para arquivos.
-  Aceite: services/controllers consomem tipos próprios; saída pública não
-  expõe senha/hash/token ou campos internos de usuário.
-- [ ] TYP-03: Criar interfaces e adapter de teste, se BE-06 aprovado.
-  Aceite: service testável sem conexão; comportamento de vazio, ausência e
-  falha simulada coerente com os contratos HTTP.
-- [ ] TYP-04: Implementar mapeamento e validação aprovados.
-  Aceite: nomes camelCase/snake_case, null/ausente, datas e enums são tratados
-  explicitamente; entradas inválidas falham antes de executar o caso de uso.
-- [x] TYP-05 (extração de empresas): Atualizar documentação de modelo e arquitetura.
-  Aceite: exemplos distinguem entidade, DTO e persistência sem burocracia.
+## Verificação e limites
 
-Verificação futura: typecheck; testes de mappers, validação e invariantes
-aprovadas. Não criar testes para getters sem comportamento relevante.
+Company mantém nomes legados e consulta db.query<Company>; não há mapper
+camelCase do catálogo ou invariantes novas. O DTO de resposta legado de
+empresas foi removido na adoção HTTP e substituído pelo contrato compartilhado.
+CompanyQuery foi removida; testes simulam o pool, sem adapter novo.
 
-## Extração de empresas nesta fase
-
-Extraídos `entities/company.entity.ts`, `dtos/company.response.dto.ts` e
-tipagem direta de `db.query<Company>`, sem interface intermediária de query. Company descreve o modelo observado e
-preserva nomes de campos legados; não representa schema aprovado nem
-introduz invariantes novas. Os wrappers foram renomeados para resultados
-legados e mantêm formato público. A interface CompanyQuery foi removida; testes simulam o pool existente
-sem criar um contrato de consulta artificial ou antecipar BE-06.
-
-TYP-02 está concluída somente para empresas. TYP-01/03/04 e a extração
-dos outros domínios continuam pendentes. Não há mapper camelCase nem
-novas validações no catálogo; adotar esses padrões seria alteração de
-comportamento, reservada para a próxima etapa. Documentação de arquitetura
-e diagnóstico atualizada (TYP-05 para esta extração).
+A implementação registrou testes/typecheck isolados das extrações e adoção.
+Esta auditoria não executou novamente checks nem validou um schema no banco.
