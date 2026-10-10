@@ -1,6 +1,6 @@
 # Contratos HTTP
 
-Estado: planejamento; envelopes e parâmetros/limites da paginação aprovados.
+Estado: base de contratos implementada; não registrada nos fluxos existentes.
 Detalhes HTTP abaixo aprovados; catálogo de erros e detalhes de BE-10
 **Aguardando resposta** no [registro](../STATE.md).
 
@@ -65,18 +65,18 @@ HTTP-05 atualiza a documentação principal já nesta implementação.
 - [ ] HTTP-01: Aprovar schemas, exemplos e catálogo de erros/status.
   Aceite: exemplos para sucesso, criação, validação, 401/403/404/409/500,
   lista vazia e resposta sem corpo; registrar exceções necessárias.
-- [ ] HTTP-02: Criar tipos/utilitários e tratamento central de erros.
+- [x] HTTP-02: Criar tipos/utilitários e tratamento central de erros.
   Aceite: falha inesperada produz 500 sanitizado; falha esperada preserva
   status/código; rota desconhecida segue o contrato; logs omitem segredos.
-- [ ] HTTP-03: Implementar entrada e saída da paginação.
+- [x] HTTP-03: Implementar entrada e saída da paginação.
   Aceite: testar limites aprovados, entradas inválidas, vazio, última página,
   além do fim, contagem com filtros e desempate de registros equivalentes.
 - [ ] HTTP-04 (próxima etapa): Adequar endpoints existentes e seus consumidores.
   Aceite: inventário endpoint → consumidor; nenhuma falha SQL vira 200/404;
   frontend trata sucesso, erro e metadados sem depender dos envelopes antigos.
-- [ ] HTTP-05: Atualizar `docs/api.md` e decisões com exemplos definitivos.
+- [x] HTTP-05: Atualizar `docs/api.md` e decisões com exemplos definitivos.
   Aceite: documentação coincide com os contratos e verificações executadas.
 
 Verificação futura: testes de contrato/integracão HTTP sem banco remoto,
 usando dependências controladas, mais typecheck dos consumidores afetados.
-Nenhum teste executado ou implementação iniciada nesta entrega.
+Verificado: 14 testes passaram e typecheck dos contratos passou. Aplicação HTTP isolada usada nos testes; server.ts e consumidores legados não alterados. Ordenação, contagem filtrada e lista além do fim no banco serão verificadas na adoção; os helpers validam parâmetros/metadados, sem executar consultas.

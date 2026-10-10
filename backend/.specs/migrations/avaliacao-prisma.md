@@ -56,3 +56,8 @@ aceitando reversão por nova migration em vez de funções `up/down`.
 - Registrar runner único, comandos, política de reversão e destino dos SQL.
 
 Não houve instalação de pacotes, conexão de banco ou prova de execução.
+
+## Decisão final de versão
+
+Aguardar Prisma 8 estável. As versões RC consultadas não serão instaladas.
+A opção Prisma 8/migration inversa permanece aprovada para futura adoção.

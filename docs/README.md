@@ -3,7 +3,7 @@
 Baseline revisada em 2026-10-09: `staging`, commit
 `5db3c5bb1a2400c687093b94b82440c7a6040764`.
 A referência remota foi conferida com `git ls-remote` e coincide com a local.
-Os documentos estão na branch `staging` como alterações locais, sem commit.
+A baseline documental foi commitada. A base de padrões está sendo entregue em branches com PRs para `staging`; sua adoção nos fluxos atuais será posterior.
 A revisão e os links para fontes de código e specs se referem ao commit
 da `staging` acima.
 
