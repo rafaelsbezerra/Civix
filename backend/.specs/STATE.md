@@ -4,7 +4,8 @@
 
 - Commit documental antes da implementação; tarefas em branches/worktrees,
   integração das dependências e PRs para `staging` (substitui sem commit).
-- Implementar a base sem adotá-la nos fluxos atuais; atualizar docs sempre.
+- A base inicial sem adoção é histórica. Adoção de erro/sucesso em todos os
+  endpoints backend agora aprovada; frontend explicitamente adiado.
 - Criar specs simples no backend, agrupadas por assunto.
 - Padronizar erros, respostas e paginação.
 - Seguir routes → controller → service; adequar o módulo de empresas.
@@ -36,12 +37,12 @@ As propostas abaixo não são contratos aprovados.
 | ID | Decisão | Proposta para discussão | Estado |
 | --- | --- | --- | --- |
 | BE-01 | Sucesso e adoção | Envelope, frontend, 201/204 e manutenção de /api/v1 aprovados | Confirmado |
-| BE-02 | Erro | status/message em produção; diagnóstico sanitizado fora de produção aprovado; catálogo específico futuro | Confirmado |
+| BE-02 | Erro | status/message em produção; diagnóstico sanitizado fora; enum ErrorCode e handler global aprovados | Confirmado |
 | BE-03 | Paginação | Parâmetros, limites, meta, vazio, além do fim e ordem nome/ID aprovados; campos extras de ordenação e abrangência pendentes | Parcialmente confirmado |
 | BE-04 | Idioma e arquivos | Identificadores em inglês; arquivos domínio.papel.ts; comentários/erros em português; controller com funções independentes | Confirmado |
 | BE-05 | Pastas | Manter pastas globais por função; nomes de novas pastas transversais pendentes | Parcialmente confirmado |
-| BE-06 | Persistência desacoplada | Interface de repositório e adapter em memória para testes; SQL no adapter | Aguardando resposta |
-| BE-07 | Migrations | Prisma 7 SQL nativo e migration inversa aprovados; integração do tooling pendente neste checkout | Confirmado |
+| BE-06 | Persistência desacoplada | Repositories somente interfaces; SQL atual nos services; implementações futuras | Confirmado |
+| BE-07 | Migrations | Prisma 7 SQL nativo e migration inversa aprovados; tooling 7.10.0 integrado; schema e execução no banco pendentes | Confirmado |
 | BE-08 | Banco e baseline | PostgreSQL e banco criado do zero confirmados; baseline depende do schema | Confirmado |
 | BE-09 | Modelo canônico | Nome canônico users confirmado; campos, vínculos e restrições pendentes | Parcialmente confirmado |
 | BE-10 | Padrões adicionais | Validação, serialização, filtros/ordenação, requestId/logs e configuração | Aguardando resposta |
@@ -54,19 +55,21 @@ BE-10 é sugestão de escopo, ainda não aprovada.
 
 ## Estado da entrega
 
-Specs atualizadas para implementação da base passiva. Base HTTP e extração de empresas implementadas; adoção permanece pendente. Nenhum banco
-provisionado ou migration executada. Contratos continuam sem adoção nesta baseline;
-o alinhamento de dependências Prisma é o incremento desta branch.
+Base HTTP e extrações implementadas; adoção de erro/sucesso aprovada e
+implementada e verificada nesta tarefa. Frontend, paginação e repositories operacionais
+continuam posteriores. Nenhum banco/migration/dependência alterado nesta adoção.
 O código possui consultas SQL/Neon; sua presença não comprova banco pronto.
 
 ## Respostas posteriores à criação das specs
 
 - Produção retorna exatamente status/message; fora de produção permite
-  diagnóstico sanitizado. A base HTTP está implementada sem ativação nas rotas.
+  diagnóstico sanitizado. A restrição inicial sem ativação foi substituída
+  pela adoção HTTP de todos os endpoints backend.
 - Empresas: extração de camadas/tipos autorizada, sem mudar contratos atuais.
 - Prisma 7/SQL nativo substituiu a decisão anterior de aguardar Prisma 8.
-  Tooling preparado nesta branch com CLI/client/adapter 7.10.0; schema definitivo, baseline e aplicação de migrations continuam pendentes.
-- Adoção de contratos e frontend pertence à etapa seguinte.
+  Tooling 7.10.0 integrado da staging; schema definitivo, baseline e execução de migrations permanecem pendentes.
+- Contratos de erro/sucesso agora são adotados no backend. Frontend fica
+  para a etapa seguinte por decisão explícita; paginação não foi aplicada.
 
 ## Convenções confirmadas após os merges — 2026-10-10
 
@@ -75,13 +78,11 @@ português, identificadores/códigos em inglês. Controller com funções soltas
 importando service diretamente. Sem abstração CompanyQuery; interfaces apenas
 para contratos úteis. Correção local na staging, sem commit/PR/worktree nesta
 tarefa, conforme instrução explícita. O alvo de migrations é Prisma 7/SQL
-nativo; esta branch fixa CLI/client/adapter em 7.10.0 e preserva os ajustes atuais
-da staging. O merge remoto permanece a cargo do usuário.
+nativo; CLI/client/adapter estão fixados em 7.10.0.
 
-## Resolução dos PRs #7/#8 — 2026-10-10
+## Adoção HTTP — 2026-10-10
 
-Staging e2b3d8b integrada às branches existentes, preservando nomes, src/shared,
-camadas de usuários e interfaces de repositories. CLI/client/adapter 7.10.0,
-test:prisma e testes offline permanecem como incremento. Schema sem models e
-SQL de planos preservados; nenhum banco acessado ou migration aplicada.
-Os PRs continuam abertos para merge pelo usuário.
+AppError e ErrorCode substituem reason/switch; erros inesperados usam 500
+com causa preservada. JSON de sucesso contém data/meta, sem success/plan/plans
+duplicados. Auth/admin preservam regras; admin segue desmontado. Ver
+[spec de adoção](adocao-http/spec.md). 36 testes e typechecks isolados passaram; o bloqueio do typecheck completo por CLI 6 é histórico e foi corrigido pela base Prisma 7.

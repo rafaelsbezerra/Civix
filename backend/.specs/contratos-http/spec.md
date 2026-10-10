@@ -1,6 +1,7 @@
 # Contratos HTTP
 
-Estado: base de contratos implementada; não registrada nos fluxos existentes.
+Estado: base implementada; adoção de erro/sucesso autorizada em todos os
+endpoints backend na [spec de adoção](../adocao-http/spec.md). Paginação não aplicada.
 Detalhes HTTP abaixo aprovados; catálogo de erros e detalhes de BE-10
 **Aguardando resposta** no [registro](../STATE.md).
 
@@ -58,8 +59,9 @@ Não transformar indiscriminadamente toda exceção em 400 ou 404.
 
 ## Tarefas e aceite
 
-Escopo atual: criar/exportar contratos, serializers e handlers, sem conectar
-ao servidor atual. HTTP-04 é adoção futura; testes usam aplicações isoladas.
+Escopo inicial histórico: criar/exportar base sem conectar ao servidor.
+Escopo atual: HTTP-04 adota erro/sucesso no backend; frontend está adiado.
+Testes usam aplicações isoladas; paginação permanece sem aplicação ao banco.
 HTTP-05 atualiza a documentação principal já nesta implementação.
 
 - [ ] HTTP-01: Aprovar schemas, exemplos e catálogo de erros/status.
@@ -71,7 +73,7 @@ HTTP-05 atualiza a documentação principal já nesta implementação.
 - [x] HTTP-03: Implementar entrada e saída da paginação.
   Aceite: testar limites aprovados, entradas inválidas, vazio, última página,
   além do fim, contagem com filtros e desempate de registros equivalentes.
-- [ ] HTTP-04 (próxima etapa): Adequar endpoints existentes e seus consumidores.
+- [ ] HTTP-04: Adoção backend em andamento; consumidores frontend adiados.
   Aceite: inventário endpoint → consumidor; nenhuma falha SQL vira 200/404;
   frontend trata sucesso, erro e metadados sem depender dos envelopes antigos.
 - [x] HTTP-05: Atualizar `docs/api.md` e decisões com exemplos definitivos.
@@ -79,4 +81,9 @@ HTTP-05 atualiza a documentação principal já nesta implementação.
 
 Verificação futura: testes de contrato/integracão HTTP sem banco remoto,
 usando dependências controladas, mais typecheck dos consumidores afetados.
-Verificado: 14 testes passaram e typecheck dos contratos passou. Aplicação HTTP isolada usada nos testes; server.ts e consumidores legados não alterados. Ordenação, contagem filtrada e lista além do fim no banco serão verificadas na adoção; os helpers validam parâmetros/metadados, sem executar consultas.
+Histórico da base inicial: 14 testes passaram e typecheck dos contratos passou. Aplicação HTTP isolada usada nos testes; server.ts e consumidores legados não alterados. Ordenação, contagem filtrada e lista além do fim no banco serão verificadas na adoção; os helpers validam parâmetros/metadados, sem executar consultas.
+
+Adoção atual: ErrorCode centralizado e handler global após routers/404.
+Exceções/cause chegam ao serializer; produção status/message, demais
+ambientes stack/details/code sanitizados. Verificação atual na entrega;
+os 14 testes registrados acima referem-se à base inicial.

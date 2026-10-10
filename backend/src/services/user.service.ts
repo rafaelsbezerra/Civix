@@ -1,3 +1,5 @@
+import { AppError } from '../shared/errors/app.error.js';
+import { ErrorCode } from '../shared/errors/error.code.js';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import crypto from 'node:crypto';
@@ -7,7 +9,13 @@ import type { User } from '../entities/user.entity.js';
 import type { LoginInput, LoginResult, PasswordResetInput } from '../dtos/user.auth.dto.js';
 
 export async function login({ email, role, password }: LoginInput): Promise<LoginResult> {
-  if (role === 'empresa' && !password) return { success: false, reason: 'passwordRequired' };
+  if (role === 'empresa' && !password) {
+    throw new AppError({
+      status: 400,
+      code: ErrorCode.VALIDATION_ERROR,
+      message: 'Senha é obrigatória para empresas',
+    });
+  }
 
   const query = role === 'empresa' ? `
         SELECT id, name, email, password_hash, role
@@ -22,36 +30,71 @@ export async function login({ email, role, password }: LoginInput): Promise<Logi
 
   const user = rows[0];
 
-  if (!user) return { success: false, reason: 'userNotFound' };
+  if (!user) {
+    throw new AppError({
+      status: 401,
+      code: ErrorCode.UNAUTHORIZED,
+      message: 'Usuário não encontrado.',
+    });
+  }
 
   if (role === 'empresa') {
-    if (!user.password_hash) return { success: false, reason: 'passwordHashMissing' };
+    if (!user.password_hash) {
+      throw new AppError({
+        status: 500,
+        code: ErrorCode.INTERNAL_ERROR,
+        message: 'Erro interno do servidor',
+        details: { message: 'Usuário da empresa não possui senha cadastrada.' },
+      });
+    }
 
-    if (!password) return { success: false, reason: 'passwordRequired' };
+    if (!password) {
+      throw new AppError({
+        status: 400,
+        code: ErrorCode.VALIDATION_ERROR,
+        message: 'Senha é obrigatória para empresas',
+      });
+    }
 
-    if (!await bcrypt.compare(password, user.password_hash)) return { success: false, reason: 'invalidPassword' };
+    if (!await bcrypt.compare(password, user.password_hash)) {
+      throw new AppError({
+        status: 401,
+        code: ErrorCode.UNAUTHORIZED,
+        message: 'Senha incorreta.',
+      });
+    }
   }
 
   const secret = process.env.JWT_SECRET;
 
   if (!secret) {
-    console.error('ERRO CRÍTICO: JWT_SECRET não informada nas variáveis de ambiente.');
-    return { success: false, reason: 'jwtSecretMissing' };
+    throw new AppError({
+      status: 500,
+      code: ErrorCode.INTERNAL_ERROR,
+      message: 'Erro interno do servidor',
+      details: { message: 'JWT_SECRET não informada nas variáveis de ambiente.' },
+    });
   }
 
   const payload = { id: user.id, email: user.email, role: user.role };
 
   const token = jwt.sign(payload, secret, { expiresIn: '1h' });
 
-  return { success: true, user: { id: user.id, name: user.name, email: user.email, role: user.role }, token };
+  return {
+    user: { id: user.id, name: user.name, email: user.email, role: user.role },
+    token,
+  };
 }
 
 export async function forgotPassword(email: string): Promise<void> {
   const { rows } = await db.query<Pick<User, 'id' | 'name' | 'email'>>('SELECT id, name, email FROM users WHERE email = $1', [email]);
 
   const user = rows[0];
+
   // Não revelar se o endereço está cadastrado.
-  if (!user) return;
+  if (!user) {
+    return;
+  }
 
   const resetToken = crypto.randomBytes(32).toString('hex');
 
@@ -72,7 +115,7 @@ export async function forgotPassword(email: string): Promise<void> {
   await mailService.sendResetPasswordEmail({ email: user.email, resetUrl });
 }
 
-export async function resetPassword({ token, password }: PasswordResetInput): Promise<boolean> {
+export async function resetPassword({ token, password }: PasswordResetInput): Promise<void> {
   const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
 
   const { rows } = await db.query<Pick<User, 'id'>>(`
@@ -84,7 +127,13 @@ export async function resetPassword({ token, password }: PasswordResetInput): Pr
 
   const user = rows[0];
 
-  if (!user) return false;
+  if (!user) {
+    throw new AppError({
+      status: 400,
+      code: ErrorCode.VALIDATION_ERROR,
+      message: 'Token inválido ou expirado.',
+    });
+  }
 
   const passwordHash = await bcrypt.hash(password, 10);
 
@@ -94,5 +143,4 @@ export async function resetPassword({ token, password }: PasswordResetInput): Pr
       WHERE id = $2
     `, [passwordHash, user.id]);
 
-  return true;
 }

@@ -3,7 +3,7 @@
 Estado: tooling implementado nesta branch e alinhado à staging e2b3d8b.
 CLI/client/adapter fixados em 7.10.0; SQL nativo, banco novo PostgreSQL e
 nome canônico users confirmados. Schema comercial e aplicação no banco
-continuam pendentes. Os PRs #7/#8 permanecem abertos para merge pelo usuário.
+continuam pendentes. O tooling foi integrado à staging pelo merge do PR #7 (eea5f1d), também presente em 7b976d7.
 
 ## Decisões e limites
 
@@ -32,8 +32,8 @@ contra banco remoto ou produção.
 - [x] MIG-03-A: Preparar dependências/configuração e provas offline.
   Manifesto/lockfile fixam 7.10.0; test:prisma verifica validate/generate,
   SQL de criação/inversão e versões. Sem modelos comerciais ou banco real.
-- [ ] MIG-03-B: Integrar esta entrega à staging remota.
-  Conflitos resolvidos nas branches existentes dos PRs #7/#8; merge é do usuário.
+- [x] MIG-03-B: Integrar esta entrega à staging remota.
+  Tooling integrado via PR #7 em eea5f1d; schema e execução de migrations continuam pendentes.
 - [ ] MIG-03-C: Discutir/implementar comandos operacionais.
   migrations:apply/show/rollback são propostas para discussão posterior;
   não estão disponíveis nem representam rollback automático nesta base.

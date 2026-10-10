@@ -1,6 +1,6 @@
 # Adoção dos contratos HTTP e tipos de auth
 
-Estado: aprovado em 2026-10-10. Documentação antes da implementação.
+Estado: implementado e verificado em 2026-10-10; documentação base registrada antes do código.
 
 ## Escopo e decisões
 
@@ -23,10 +23,12 @@ Estado: aprovado em 2026-10-10. Documentação antes da implementação.
 ## Critérios de aceite
 
 1. Auth controller sem interfaces locais; imports tipados resolvem.
-2. Sucesso JSON retorna somente data/meta; criação usa201, semcorpo204.
-3. AppError atravessa handlers Express5 e middleware; 404 global registrado
+2. Sucesso JSON retorna somente data/meta; criação usa 201; resposta sem corpo usa 204.
+3. AppError atravessa handlers Express 5 e middleware; 404 global registrado
    depois dos routers, error handler por último. Não perder causa/stack.
-4. Falha SQL de empresas usa500, nunca200/404; ausência usa404.
+   JSON inválido retorna 400; corpo acima do limite retorna 413, ambos
+   classificados como VALIDATION_ERROR.
+4. Falha SQL de empresas usa 500, nunca 200/404; ausência usa 404.
 5. Login não possui reason nem switch; service retorna dados ou lança erro.
 6. Validar contratos, usuários, empresas, auth, planos e middleware, com
    mocks de persistência/e-mail; production sem stack e staging com stack.
@@ -39,3 +41,13 @@ lib/api.ts exige success; login lê token no topo; FirstAccess lê email no
 corpo de sucesso. Login/ForgotPassword/ResetPassword/FirstAccess leem error,
 que será message. Catálogo/perfil/planos dependem de lib/api.ts. Adaptação
 necessária antes de considerar frontend integrado ao novo backend.
+
+## Verificação da adoção — 2026-10-10
+
+Executado pela tarefa de implementação: npm run test:foundation passou com
+36 testes; npm run typecheck:foundation e npm run typecheck:contracts passaram.
+Suíte isolada cobre contratos, usuários, empresas, auth, planos, middleware,
+404, JSON inválido (400) e corpo acima do limite (413), com persistência/e-mail
+simulados. Produção omite diagnóstico; staging preserva stack/cause sanitizados.
+Na entrega original, o typecheck completo estava bloqueado por TS2353 em prisma.config.ts (CLI 6/configuração 7); o tooling Prisma 7 integrado da staging corrigiu esse bloqueio. Não houve banco remoto, envio real
+de e-mail, migration, dependência nova ou adaptação frontend.

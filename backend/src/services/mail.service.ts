@@ -1,3 +1,5 @@
+import { AppError } from '../shared/errors/app.error.js';
+import { ErrorCode } from '../shared/errors/error.code.js';
 // # Funções de envio de e-mail transacional
 
 import { Resend } from 'resend';
@@ -86,8 +88,13 @@ export async function sendInviteEmail({ email, role, token }: SendInviteParams) 
 
     return { success: true, data: result.data };
   } catch (error) {
-    console.error('Erro ao enviar e-mail:', error);
-    throw new Error('Falha no envio do e-mail de convite.');
+    throw new AppError({
+      status: 500,
+      code: ErrorCode.INTERNAL_ERROR,
+      message: 'Erro interno do servidor',
+      details: { message: 'Falha no envio do e-mail de convite.' },
+      cause: error,
+    });
   }
 }
 
@@ -115,8 +122,13 @@ export async function sendResetPasswordEmail({ email, resetUrl }: SendResetPassw
 
     return { success: true, data: result.data };
   } catch (error) {
-    console.error('Erro ao enviar e-mail de redefinição:', error);
-    throw new Error('Falha no envio do e-mail de redefinição.');
+    throw new AppError({
+      status: 500,
+      code: ErrorCode.INTERNAL_ERROR,
+      message: 'Erro interno do servidor',
+      details: { message: 'Falha no envio do e-mail de redefinição.' },
+      cause: error,
+    });
   }
 }
 

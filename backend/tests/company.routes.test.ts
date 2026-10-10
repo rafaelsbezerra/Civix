@@ -4,6 +4,7 @@ import test, { type TestContext } from 'node:test';
 import { db } from '../src/shared/config/data.js';
 import companyRoutes from '../src/routes/company.routes.js';
 import express from 'express';
+import { createErrorHandler, createNotFoundHandler } from '../src/middlewares/error.handler.js';
 import type { Company } from '../src/entities/company.entity.js';
 
 const company: Company = {
@@ -16,6 +17,8 @@ async function withCatalog(t: TestContext, query: (text: string, values?: string
   t.mock.method(db, 'query', query);
   const app = express();
   app.use('/api/v1/empresas', companyRoutes);
+  app.use(createNotFoundHandler());
+  app.use(createErrorHandler({ environment: 'production' }));
   const server = app.listen(0, '127.0.0.1');
   try {
     await once(server, 'listening');
@@ -40,10 +43,10 @@ test('Endpoints do catálogo preservam respostas, ordem das rotas e consultas pa
       ['/tamanho/media', 'SELECT * FROM "empresas" WHERE tamanho = $1', ['media'], '1 empresas medias encontradas'],
       ['/catalog-id', 'SELECT * FROM "empresas" WHERE id = $1', ['catalog-id'], 'Empresa carregada com sucesso'],
     ] as const;
-    for (const [path, query, values, message] of cases) {
+    for (const [path, query, values] of cases) {
       const response = await fetch(url + path);
       assert.equal(response.status, 200);
-      assert.deepEqual(await response.json(), { success: true, data: path === '/catalog-id' ? company : [company], message });
+      assert.deepEqual(await response.json(), { data: path === '/catalog-id' ? company : [company] });
       assert.deepEqual(calls.at(-1), { query, values });
     }
   });
@@ -63,7 +66,7 @@ test('Entradas inválidas falham antes de consultar o banco', async t => {
     ]) {
       const response = await fetch(url + path);
       assert.equal(response.status, 400);
-      assert.deepEqual(await response.json(), { success: false, error: message });
+      assert.deepEqual(await response.json(), { status: 400, message });
     }
     assert.equal(calls, 0);
   });
@@ -73,28 +76,19 @@ test('Listas vazias e empresas ausentes mantêm as respostas existentes', async 
   await withCatalog(t, async () => { return { rows: [] }; }, async url => {
     const list = await fetch(url);
     assert.equal(list.status, 200);
-    assert.deepEqual(await list.json(), { success: true, data: [], message: 'Empresas carregadas com sucesso' });
+    assert.deepEqual(await list.json(), { data: [] });
     const detail = await fetch(url + '/missing');
     assert.equal(detail.status, 404);
-    assert.deepEqual(await detail.json(), { success: false, error: 'Empresa com ID missing não encontrada' });
+    assert.deepEqual(await detail.json(), { status: 404, message: 'Empresa com ID missing não encontrada' });
   });
 });
 
-test('Falhas no banco mantêm os status legados até a adoção coordenada dos contratos', async t => {
-  t.mock.method(console, 'error', () => {});
+test('Falhas SQL em todos os endpoints do catálogo retornam 500 sem detalhes em produção', async t => {
   await withCatalog(t, async () => { throw new Error('Falha simulada no banco de dados'); }, async url => {
-    for (const [path, status, message] of [
-      ['', 500, 'Erro ao buscar empresas no banco de dados'],
-      ['/catalog-id', 404, 'Erro ao buscar empresa no banco de dados'],
-      ['/verificadas/todas', 200, 'Erro ao buscar empresas verificadas'],
-      ['/buscar?q=Obras', 200, 'Erro ao buscar empresas no banco de dados'],
-      ['/categoria/Obras', 200, 'Erro ao buscar empresas por categoria'],
-      ['/estado/CE', 200, 'Erro ao buscar empresas por estado'],
-      ['/tamanho/media', 200, 'Erro ao buscar empresas por tamanho'],
-    ] as const) {
+    for (const path of ['', '/catalog-id', '/verificadas/todas', '/buscar?q=Obras', '/categoria/Obras', '/estado/CE', '/tamanho/media']) {
       const response = await fetch(url + path);
-      assert.equal(response.status, status);
-      assert.deepEqual(await response.json(), { success: false, error: message });
+      assert.equal(response.status, 500);
+      assert.deepEqual(await response.json(), { status: 500, message: 'Erro interno do servidor' });
     }
   });
 });
