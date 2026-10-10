@@ -38,6 +38,7 @@ Estado: escopo confirmado em 2026-10-10. Documentação anterior ao código.
 - Tarefas separadas em branches/worktrees e reunidas na integração.
 
 Nenhuma nova dependência, tabela ou migration está autorizada por esta tarefa.
+
 ## Implementação por tarefa
 
 - Interfaces UserRepository/CompanyRepository/PlanRepository preparadas, sem
@@ -61,3 +62,9 @@ simulados. Tipagem isolada de src/servidor/interfaces/testes passou. Comandos
 reproduzíveis em backend: test:users, test:foundation, typecheck:foundation.
 Typecheck completo ainda falha em prisma.config.ts por CLI6/configuração7.
 Nenhum teste em banco remoto, envio real, migration ou verificação frontend.
+
+## Entrega dos contratos de persistência
+
+Interfaces UserRepository/CompanyRepository/PlanRepository criadas e
+verificadas com TypeScript isolado. Sem implementação ou uso pelos services.
+Plan/PlanRow extraídos com reexports de compatibilidade. Queries preservadas.
