@@ -2,7 +2,7 @@
 
 SDD leve + DDD leve: tarefas pequenas, evidências de implementação e decisões
 explícitas. Auditoria de status em 2026-10-10 na baseline
-codex/http-adoption-integration; staging de referência e2b3d8b.
+codex/http-adoption-integration; staging de referência atualizada para 7b976d7.
 Checkbox marcado significa escopo implementado ou decisão confirmada,
 conforme a evidência do item. Entrega em PR não significa merge em staging.
 
@@ -13,7 +13,7 @@ conforme a evidência do item. Entrega em PR não significa merge em staging.
 | [Contratos HTTP](contratos-http/spec.md) | Base/helpers integrados; backend com erro/sucesso na baseline/PR #14 | Frontend, aplicação SQL da paginação, abrangência/filtros |
 | [Estrutura](estrutura-modulos/spec.md) | Convenções, empresas, usuários/planos e tipos auth | SQL/regras de auth/admin para services; tipos úteis locais de admin |
 | [Tipagem](tipagem-dominio/spec.md) | Entidades/DTOs existentes, linhas auth/plan e três interfaces de repositories | Modelo canônico, validação/serialização abrangentes; implementação posterior da persistência |
-| [Migrations](migrations/spec.md) | Prisma 7/SQL/inversa aprovados; tooling no PR #8/48eb252 | Integração, schema/baseline, comandos a discutir, ciclo em PostgreSQL |
+| [Migrations](migrations/spec.md) | Prisma 7/SQL/inversa aprovados; tooling integrado via PR #7/eea5f1d | Schema/baseline, comandos a discutir, ciclo em PostgreSQL |
 | [Usuários/repositories](usuarios-repositories/spec.md) | Extração/interfaces integradas em staging | Implementação/adoção dos repositories em outra etapa |
 | [Tipos auth](adocao-http/auth-types.md) | Extração entregue no PR #12 e presente na baseline | Não equivale a auth.service.ts |
 | [Adoção HTTP](adocao-http/spec.md) | Backend implementado/verificado no PR #14 | Merge em staging não presumido; frontend posterior |

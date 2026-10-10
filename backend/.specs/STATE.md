@@ -1,7 +1,7 @@
 # Decisões e estado do backend
 
 Auditoria documental: 2026-10-10. Baseline auditada:
-codex/http-adoption-integration; staging de referência: e2b3d8b.
+codex/http-adoption-integration; staging de referência atualizada para 7b976d7.
 Implementado em uma branch/PR não significa integrado em staging.
 
 ## Decisões confirmadas
@@ -37,7 +37,7 @@ Implementado em uma branch/PR não significa integrado em staging.
 | BE-04 | Idioma/arquivos | Confirmado: domínio.papel.ts, código em inglês, erros/comentários em português, funções independentes |
 | BE-05 | Pastas | Confirmado: pastas por função, shared e repositories atuais; nenhuma escolha de src/modules pendente |
 | BE-06 | Persistência | Confirmado: repositories somente interfaces; SQL atual preservado; implementações/adoção posteriores |
-| BE-07 | Migrations | Confirmado: Prisma 7, SQL nativo e inversa; tooling PR #8 implementado separadamente, integração pendente |
+| BE-07 | Migrations | Confirmado: Prisma 7, SQL nativo e inversa; tooling 7.10.0 integrado via PR #7/eea5f1d; schema e banco pendentes |
 | BE-08 | Banco/baseline | Banco PostgreSQL do zero confirmado; baseline depende do schema e do destino dos SQL de planos |
 | BE-09 | Identidade/schema | users confirmado; campos, vínculos, restrições e correção do uso user/users aguardam resposta |
 | BE-10 | Padrões adicionais | Sanitização/enum/diagnóstico aprovados e implementados; requestId opcional no contexto. Validação abrangente, serialização, filtros, geração de requestId/logs e configuração aguardam resposta |
@@ -51,13 +51,12 @@ Implementado em uma branch/PR não significa integrado em staging.
 - Adoção HTTP: [PR #14](https://github.com/rafaelsbe/Civix/pull/14), implementado
   na baseline: app.ts, AppError/ErrorCode, todos endpoints, handlers 404/erro,
   testes isolados. Ainda não presumir merge desse PR em staging.
-- Tooling: [PR #8](https://github.com/rafaelsbe/Civix/pull/8), commit 48eb252,
-  branch codex/prisma7-foundation; CLI/client/adapter 7.10.0 e três testes
-  offline. Não integrado nesta baseline; ela ainda mistura CLI 6 e client 7.
+- Tooling: entregue nos PRs #7/#8 e integrado à staging pelo PR #7 (eea5f1d).
+  CLI/client/adapter 7.10.0 e três testes offline presentes nesta baseline.
 
-Adoção HTTP registrou 36 testes e typechecks isolados aprovados. Typecheck
-completo nesta baseline continua bloqueado pelo Prisma preexistente; no
-worktree do tooling passou. Auditoria de status não reexecutou esses checks.
+Adoção HTTP registrou 36 testes e typechecks isolados aprovados. O bloqueio
+do typecheck completo por CLI 6 é histórico e foi corrigido pelo tooling
+Prisma 7 integrado. Auditoria de status não reexecutou esses checks.
 
 ## Pendências reais
 

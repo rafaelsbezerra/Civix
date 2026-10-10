@@ -1,9 +1,8 @@
 # Migrations — Prisma 7 e SQL nativo
 
-Estado: mecanismo aprovado; tooling implementado separadamente no
-[PR #8](https://github.com/rafaelsbe/Civix/pull/8), commit 48eb252 da branch
-codex/prisma7-foundation. Não está integrado na baseline auditada nem na
-staging de referência e2b3d8b: CLI ainda 6, client/adapter ainda 7 neste código.
+Estado: mecanismo aprovado; tooling integrado à staging via PR #7 (eea5f1d),
+presente na referência 7b976d7 e nesta baseline. CLI/client/adapter fixados
+em 7.10.0; schema comercial e execução no banco continuam pendentes.
 Schema comercial e execução em PostgreSQL permanecem pendentes.
 
 ## Decisões confirmadas
@@ -42,13 +41,13 @@ Banco vazio deve ser criado com chaves, vínculos, índices e restrições aprov
   preservação/substituição dos SQL atuais de planos antes da nova baseline.
 - [ ] MIG-03: Configurar scripts, runner, histórico e ambiente completos.
   Parcial: dependências/configuração e provas offline entregues no PR #8;
-  comandos operacionais, integração e comportamento em banco pendentes.
+  comandos operacionais e comportamento em banco pendentes.
 - [x] MIG-03-A: Preparar dependências/configuração e provas isoladas.
-  Concluído no PR #8, não integrado aqui. Manifesto/lockfile fixam 7.10.0;
+  Concluído nos PRs #7/#8 e integrado à staging via eea5f1d. Manifesto/lockfile fixam 7.10.0;
   test:prisma possui três testes de validate/generate/SQL criação-inversa.
   A entrega registrou TypeScript completo aprovado em seu próprio worktree.
-- [ ] MIG-03-B: Integrar tooling do PR #8 à staging atual, resolvendo
-  diferenças de arquivos/scripts sem reintroduzir padrões antigos.
+- [x] MIG-03-B: Integrar tooling à staging atual.
+  Integrado via PR #7 em eea5f1d, preservando caminhos e scripts atuais.
 - [ ] MIG-03-C: Discutir e implementar comandos operacionais aprovados.
   migrations:apply, migrations:show e migrations:rollback foram propostos
   pelo usuário para discussão posterior; não estão implementados/aprovados

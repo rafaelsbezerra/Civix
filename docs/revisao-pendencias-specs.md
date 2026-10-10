@@ -1,8 +1,10 @@
 # Revisão das pendências das specs
 
-Auditoria documental em 2026-10-10. Referências: staging `e2b3d8b`,
+Auditoria documental em 2026-10-10. Referências originais: staging `e2b3d8b`,
 integração HTTP `ee74823` ([PR #14](https://github.com/rafaelsbe/Civix/pull/14))
 e tooling Prisma `48eb252` ([PR #8](https://github.com/rafaelsbe/Civix/pull/8)).
+Atualização após merges: staging 7b976d7 incorpora tooling Prisma via PR #7
+(ea5f1d) e tipos de auth via PR #12. Os estados abaixo refletem essa integração.
 A revisão compara specs, código, configurações e evidências das entregas;
 não executa implementação, banco, migrations, frontend ou novos testes.
 
@@ -18,14 +20,14 @@ execução no banco. Os estados abaixo distinguem essas situações.
 | Entidades Company/User/Plan, PlanRow e DTOs de usuário | entities/, interfaces/plan.row.ts, dtos/user.auth.dto.ts | Em staging |
 | Interfaces UserRepository/CompanyRepository/PlanRepository | src/repositories/*.repository.ts; sem implementação | Em staging |
 | Contratos de erro, sucesso e helpers de paginação | src/shared/contracts e src/shared/errors | Base em staging |
-| Tipos de auth separados do controller | auth.invite.dto.ts e auth.user.row.ts | Implementado nos PRs #12/#14 |
+| Tipos de auth separados do controller | auth.invite.dto.ts e auth.user.row.ts | Integrado em staging via PR #12 |
 | Adoção de AppError/ErrorCode e sucesso em todos os endpoints backend | app.ts, controllers, middleware e services; sem reason/switch | Implementado nos PRs #13/#14 |
 | Diagnóstico sanitizado fora de produção; produção status/message | error.contract.ts; handler global e parser 400/413 | Implementado nos PRs #13/#14 |
-| Alinhamento Prisma CLI/client/adapter 7.10.0 e verificação offline | package/lockfile/config e prisma-tooling.test.mjs em 48eb252 | Implementado no PR #8, não integrado nesta baseline |
+| Alinhamento Prisma CLI/client/adapter 7.10.0 e verificação offline | package/lockfile/config e prisma.tooling.test.mjs | Integrado em staging via PR #7/eea5f1d |
 
 O PR #14 contém o resultado combinado de #12/#13; não exige reaplicar seus
-mesmos commits. A integração do PR #8 precisa preservar os scripts atuais
-de testes e os caminhos src/shared, atualizados depois daquela entrega.
+mesmos commits. A resolução preserva os scripts atuais de testes e os caminhos
+src/shared, além do tooling Prisma já integrado à staging.
 
 ## Pendências reais do backend
 
@@ -36,7 +38,7 @@ de testes e os caminhos src/shared, atualizados depois daquela entrega.
 | Camadas auth/admin | Retirar SQL/regras dos controllers para services; extrair tipo local restante de admin | O escopo de extração anterior cobria apenas user; não há autorização de implementação nesta auditoria |
 | Persistência | Implementar repositories e adotá-los nos services | Somente interfaces foram aprovadas/entregues nesta fase |
 | Modelo e tipagem | Definir campos, vínculos, restrições, invariantes e serialização/validação canônicas | Nome users confirmado; schema completo ainda não definido |
-| Migrations | Integrar tooling #8; decidir destino dos SQL antigos, criar schema/baseline e comandos operacionais | PostgreSQL novo, Prisma 7 SQL nativo e migration inversa já confirmados |
+| Migrations | Decidir destino dos SQL antigos, criar schema/baseline e comandos operacionais | PostgreSQL novo, Prisma 7 SQL nativo e migration inversa já confirmados |
 | Prova em PostgreSQL | Aplicação do zero, reaplicação, status, falha e recuperação/inversa em banco temporário | Testes offline não comprovam esse ciclo |
 | Padrões adicionais | Validação geral de inputs, datas/IDs/null, filtros e configuração; política operacional de logs/requestId | Diagnóstico sanitizado e requestId opcional já existem; novos padrões aguardam definição |
 
@@ -46,10 +48,9 @@ A reversão não recupera automaticamente dados removidos; a política de cada
 migration e sua prova de recuperação continuam necessárias.
 
 A adoção HTTP foi verificada na entrega: 36 testes aprovados,
-typecheck:foundation e typecheck:contracts aprovados. Typecheck completo
-encontra TS2353 preexistente em prisma.config.ts, decorrente da CLI 6 ainda
-presente nesta baseline. Não atribuir essa limitação a uma task de erro/sucesso
-que já foi concluída.
+typecheck:foundation e typecheck:contracts aprovados. O TS2353 causado pela
+CLI 6 era uma limitação da entrega original; foi corrigido pela integração
+do tooling Prisma 7 e não representa uma tarefa de erro/sucesso pendente.
 
 ## Frontend: implementação preservada e divergências
 

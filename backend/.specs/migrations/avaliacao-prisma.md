@@ -6,9 +6,8 @@ Análise inicial: 2026-10-09. Status revisado em 2026-10-10.
 
 Prisma 7 com migrations SQL nativas e reversão por nova migration inversa.
 CLI/client/adapter fixados em 7.10.0 na branch codex/prisma7-foundation,
-commit 48eb252, entregue no [PR #8](https://github.com/rafaelsbe/Civix/pull/8).
-Tooling implementado separadamente, ainda não integrado à baseline auditada
-ou staging e2b3d8b. Não existe nova decisão sobre Prisma 8 aguardando resposta.
+entregue nos PRs #7/#8 e integrado à staging pelo PR #7 em eea5f1d.
+Tooling presente na referência 7b976d7 e nesta baseline. Não existe nova decisão sobre Prisma 8 aguardando resposta.
 
 O PR registra validate, geração de cliente e diffs SQL de criação/inversão
 com fixture isolada, sem banco. O schema comercial permanece vazio; atualizar
@@ -28,10 +27,9 @@ adotar um runner TS paralelo. Prisma Migrate é o mecanismo aprovado.
 
 ## Compatibilidade e verificação registrada
 
-O checkout atual ainda declara CLI ^6.12.0 e client/adapter ^7.10.0. O
-TypeScript completo nele permanece bloqueado pela configuração Prisma;
-checks isolados do backend foram registrados na adoção HTTP. No worktree
-do PR #8, as versões exatas foram alinhadas e o TypeScript completo passou.
+O checkout atual fixa CLI/client/adapter em 7.10.0. O bloqueio anterior de
+TypeScript pela configuração Prisma/CLI 6 é histórico; o tooling alinhado
+passou no TypeScript completo. Checks isolados foram registrados na adoção HTTP.
 Não há runtime Node fixado no projeto; confirmar runtime local/CI antes
 quando essa configuração entrar no escopo de implementação.
 
@@ -41,7 +39,6 @@ Esta auditoria não reexecutou esses testes nem instalou dependências.
 
 ## Pendências reais
 
-- Integrar o tooling mantendo as convenções e scripts atuais.
 - Definir campos, relações e restrições do schema e destino dos SQL de planos.
 - Discutir comandos operacionais após a implementação, como pedido pelo usuário.
 - Testar aplicação/reaplicação/status/falha/recuperação e inversa em PostgreSQL

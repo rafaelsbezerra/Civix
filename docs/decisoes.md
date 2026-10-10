@@ -62,3 +62,10 @@ em ADRs apenas quando forem aprovadas.
 A baseline documental e as extrações já foram entregues; a adoção HTTP está
 implementada em PR. Consulte a [auditoria das specs](revisao-pendencias-specs.md)
 para distinguir tarefas restantes de decisões já aprovadas.
+
+
+## Decisões posteriores — 2026-10-10
+
+DEC-05: users e banco criado do zero confirmados. CLI/client/adapter Prisma
+fixados em 7.10.0 com migrations SQL nativas; tooling integrado à staging
+via PR #7. Campos e vínculos do schema continuam aguardando confirmação.

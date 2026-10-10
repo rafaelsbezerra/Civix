@@ -59,7 +59,7 @@ Fontes: [middleware](../backend/src/middlewares/auth.ts),
 
 Existem três manifests/lockfiles sem workspaces declarados, versões
 diferentes de ferramentas e dependências de backend no frontend.
-Prisma CLI 6 e client/adapter 7 estão desalinhados. A estrutura mistura
+O desalinhamento anterior entre Prisma CLI 6 e client/adapter 7 foi corrigido; os três pacotes estão fixados em 7.10.0. A estrutura mistura
 userRoute, empresaRoute, auth.routes e controllers com camelCase e pontos.
 Português/inglês e formatos de campos variam entre os domínios.
 
@@ -97,7 +97,7 @@ adiado e seus consumidores ainda exigem envelopes antigos (ver api.md).
 Nenhuma tabela/migration foi criada.
 
 Os quatro testes HTTP locais passaram com persistência simulada. O
-typecheck completo permanece bloqueado pela configuração Prisma existente
+typecheck completo estava bloqueado, na extração inicial, pela configuração Prisma existente
 (`datasource` incompatível com o PrismaConfig instalado); a checagem
 isolada dos arquivos de empresas e seus testes passou.
 

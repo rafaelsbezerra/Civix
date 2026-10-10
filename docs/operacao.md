@@ -108,8 +108,7 @@ quando recebido pelo contexto, sem geração automática nesta etapa.
 Nenhuma dependência, tabela ou migration foi alterada por esta adoção.
 Repositories são interfaces apenas; SQL permanece nos services. Frontend
 não foi adaptado: executar ambos não comprova compatibilidade dos envelopes.
-Os 27 testes acima são históricos; a suíte ampliada atual passou com 36 testes. Typecheck completo ainda depende da integração
-Prisma CLI 7/configuração, fora desta tarefa.
+Os 27 testes acima são históricos; a suíte ampliada atual passou com 36 testes. O bloqueio anterior do typecheck completo foi corrigido pela integração do tooling Prisma 7.
 
 
 ## Verificação da adoção — 2026-10-10
@@ -119,6 +118,21 @@ Executado pela tarefa de implementação: npm run test:foundation passou com
 Suíte isolada cobre contratos, usuários, empresas, auth, planos, middleware,
 404, JSON inválido (400) e corpo acima do limite (413), com persistência/e-mail
 simulados. Produção omite diagnóstico; staging preserva stack/cause sanitizados.
-Typecheck completo continua bloqueado exclusivamente pelo TS2353 preexistente
-em prisma.config.ts (CLI 6/configuração 7). Não houve banco remoto, envio real
+Na entrega original, o typecheck completo estava bloqueado por TS2353 em prisma.config.ts (CLI 6/configuração 7); esse bloqueio foi corrigido pelo tooling Prisma 7 integrado posteriormente. Não houve banco remoto, envio real
 de e-mail, migration, dependência nova ou adaptação frontend.
+
+## Tooling Prisma 7 e resolução de conflitos — 2026-10-10
+
+Os PRs #7/#8 incorporam staging e2b3d8b sem reintroduzir nomes/camadas antigas.
+CLI/client/adapter permanecem fixados em 7.10.0. test:foundation mantém
+contratos, empresas e usuários; test:prisma executa três verificações offline
+em tests/prisma.tooling.test.mjs (validate/generate, SQL de criação/inversão e pins).
+A incompatibilidade de tipos CLI6/configuração7 descrita acima é histórica:
+essa branch alinha os pacotes. Verificações desta resolução: 27 testes de foundation e três testes offline
+Prisma aprovados; typecheck:foundation, typecheck:contracts e TypeScript
+completo passaram. Os registros anteriores permanecem históricos.
+
+Schema comercial, baseline completa, comandos migrations:apply/show/rollback
+e ciclo em PostgreSQL continuam pendentes. SQL de planos não foi alterado.
+Não executar migrations automaticamente nem contra produção/remoto.
+Os PRs permanecem abertos; esta resolução não realiza merge em staging.
