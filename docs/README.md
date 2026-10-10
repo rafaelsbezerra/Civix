@@ -37,5 +37,5 @@ Relatórios antigos de PASS não validam a união atual das features.
 Nesta documentação, **atual** significa observado no código;
 **previsto** significa descrito pelas fontes; **pendente** significa que
 não existe decisão suficiente. Sugestões para a próxima fase não constituem
-contratos aprovados. Nenhuma implementação, migration ou configuração de
-infraestrutura foi alterada nesta fase.
+contratos aprovados. Na revisão inicial de 2026-10-09, nenhuma implementação, migration ou configuração de
+infraestrutura foi alterada. A base posterior e suas verificações estão em [padrões do backend](padroes-backend.md).

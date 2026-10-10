@@ -9,12 +9,13 @@
     "test:contracts": "node --import tsx --test tests/contracts.test.ts",
     "typecheck:contracts": "tsc -p tsconfig.contracts.json",
     "test:foundation": "node --import tsx --test tests/contracts.test.ts tests/company-routes.test.ts",
-    "typecheck:foundation": "tsc -p tsconfig.foundation.json"
+    "typecheck:foundation": "tsc -p tsconfig.foundation.json",
+    "test:prisma": "node --test tests/prisma-tooling.test.mjs"
   },
   "dependencies": {
     "@getbrevo/brevo": "^6.0.3",
-    "@prisma/adapter-pg": "^7.10.0",
-    "@prisma/client": "^7.10.0",
+    "@prisma/adapter-pg": "7.10.0",
+    "@prisma/client": "7.10.0",
     "bcrypt": "^6.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -45,7 +46,7 @@
     "@types/pg": "^8.23.1",
     "globals": "^17.7.0",
     "jsdom": "^29.1.1",
-    "prisma": "^6.12.0",
+    "prisma": "7.10.0",
     "tsx": "^4.23.12",
     "typescript": "~6.0.2"
   }

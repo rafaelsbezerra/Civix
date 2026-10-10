@@ -17,8 +17,7 @@ já retornado pelos endpoints atuais, documentados em [api.md](api.md).
 
 Código em inglês, kebab-case e pastas por função. Cadeia
 routes → controller → service; entidades/interfaces/DTOs em arquivos próprios.
-Prisma 8 com migrations TypeScript e reversão por migration inversa aprovado;
-o schema de identidade e empresas ainda depende de definição.
+Decisão atual: Prisma 7, banco novo e users. SQL nativo aprovado; campos/relacionamentos ainda dependem de confirmação.
 Empresas será reorganizado por camadas e tipos preservando suas respostas
 atuais. Outros módulos e frontend não adotam os contratos nesta etapa.
 
@@ -29,7 +28,7 @@ dependências reunidas em branch de integração. PRs para `staging`, com o que,
 como, por quê, verificações, próximos passos e SQL quando houver nova tabela.
 
 Specs e decisões: [backend/.specs](../backend/.specs/README.md).
-Implementação e testes ainda pendentes neste commit documental.
+A baseline documental precedeu a implementação descrita abaixo.
 
 ## Implementação da base HTTP
 
@@ -65,7 +64,7 @@ Não houve teste em banco ou alteração de contratos do frontend.
 
 ## Prisma e próximos passos
 
-O usuário decidiu aguardar Prisma 8 estável. O registry consultado nesta revisão
+Decisão histórica anterior, substituída em 2026-10-10: aguardar Prisma 8 estável. O registry consultado nesta revisão
 publicou CLI 8.0.0-rc.22 e runtime PostgreSQL 8.0.0-rc.17. Não instalar RC nem
 alterar configuração/schema/migrations SQL enquanto aguarda. Não existe
 monitoramento automático de release.
@@ -84,6 +83,34 @@ Não foram feitos merges na staging remota.
 
 Executar em backend: `npm run test:foundation` e
 `npm run typecheck:foundation`. Integração: 18 testes passaram; typecheck dos
-arquivos novos/empresas passou. O typecheck completo legado ainda falha na
+arquivos novos/empresas passou. Antes do alinhamento com Prisma 7, o typecheck completo falhava na
 configuração Prisma incompatível; nenhuma aprovação global de build/lint é
 alegada. Nenhuma migration aplicada e nenhuma tabela nova nesta entrega.
+
+## Decisão atual de persistência — 2026-10-10
+
+Prisma 7 substitui a escolha de Prisma 8. Migrations serão pensadas para um
+banco novo PostgreSQL; `users` é o nome canônico. Já está aprovado o
+formato SQL nativo; campos/relacionamentos continuam pendentes.
+A decisão foi commitada antes da atualização de pacotes; o schema permanece sem models.
+Os comandos migrations:apply/show/rollback são propostas para discussão
+posterior, não comandos disponíveis neste momento.
+
+## Política atual aprovada — Prisma 7
+
+Migrations SQL gerenciadas pelo Prisma Migrate. Para reverter uma migration
+concluída, criar uma nova inversa; para migration falha, inspecionar/recuperar
+o banco e reconciliar o histórico. SQL executado diretamente não atualiza
+o histórico; marcar rolled-back não reverte o banco sozinho.
+
+PRs devem ter título/descrição/mensagens em português. Schema comercial
+permanece pendente e os comandos apply/show/rollback serão definidos depois.
+
+## Tooling Prisma 7 implementado
+
+CLI/client/adapter fixados em 7.10.0, usando configuração existente e SQL
+nativo. Três testes isolados validam cliente, SQL de criação/inversão e pins.
+TypeScript completo passou após o alinhamento; os 18 testes da base passaram.
+Nenhuma migration comercial foi criada ou executada. O ciclo em PostgreSQL,
+o schema e comandos operacionais permanecem pendentes. Ver [operação](operacao.md)
+para comandos, limitações e avisos da auditoria de dependências.
