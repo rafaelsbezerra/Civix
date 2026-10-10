@@ -12,7 +12,7 @@ provedores ou arquitetura novos.
 | DEC-03 | Papéis | Mapear superadmin, admin empresa, vendedor e cliente para permissões explícitas |
 | DEC-04 | Tenant | Vínculos usuário/empresa, contexto autenticado, filtros SQL, IA e acesso público |
 | DEC-05 | Persistência | Prisma 7/SQL nativo/inversa, PostgreSQL novo e nome users confirmados; campos/vínculos/restrições, baseline e SQL antigos pendentes; tooling integrado via PR #7 |
-| DEC-06 | API | Envelope, erro/status, enum e limites/meta de paginação confirmados; faltam abrangência/consultas paginadas, frontend e serialização/validação geral |
+| DEC-06 | API | Envelope, erro/status e enum backend integrados; faltam frontend e serialização/validação geral. Paginação somente quando necessário, fora das pendências atuais |
 | DEC-07 | Onboarding | Convite, primeiro acesso, reenvio, reset, expiração, uso único, sessão e revogação |
 | DEC-08 | Planos/vendas | Plano por empresa ou usuário, mensalidade/setup, venda automática/manual, exclusão, cobrança e limites |
 | DEC-09 | Trial | Regra de sete dias, campos, bloqueio e conversão ao plano |
@@ -42,8 +42,9 @@ comentários/erros em português e controllers com funções independentes.
    configuração frontend, assets e coerência dos fluxos de acesso.
 2. Definir modelo de dados, identidade, papéis e isolamento tenant antes
    de criar entidades operacionais. Planejar baseline de banco novo, conforme confirmado pelo usuário.
-3. Aplicar as decisões de API/convenções já confirmadas; registrar schemas/OpenAPI e
-   migração coordenada de consumidores, com testes de integração.
+3. Adaptar consumidores frontend aos contratos já adotados no backend e
+   completar a separação de auth/admin em services. Schemas/OpenAPI exigem
+   definição de escopo; verificar compatibilidade dos consumidores.
 4. Consolidar instalação, scripts e gates da staging; definir ambientes,
    deploy, secrets, migrations, observabilidade e recuperação.
 5. Especificar módulos de empresa/usuários/equipes, planos/vendas/trial e
@@ -59,10 +60,17 @@ critérios de aceite verificáveis; testes pertinentes; plano de rollout e
 atualização dos documentos afetados. Registrar decisões e alternativas
 em ADRs apenas quando forem aprovadas.
 
-A baseline documental e as extrações já foram entregues; a adoção HTTP está
-implementada em PR. Consulte a [auditoria das specs](revisao-pendencias-specs.md)
+A baseline documental, as extrações, o tooling Prisma 7 e a adoção HTTP já
+estão integrados em staging bedb73a. Consulte a [auditoria das specs](revisao-pendencias-specs.md)
 para distinguir tarefas restantes de decisões já aprovadas.
 
+
+## Evoluções fora das pendências atuais
+
+Decisão do usuário em 2026-10-10: usar paginação somente quando necessário;
+implementar e consumir repositories em etapa futura. A base existente fica
+preservada; nenhuma dessas adoções bloqueia a etapa atual. Sua definição
+será retomada na tarefa correspondente, sem marcar implementação como concluída.
 
 ## Decisões posteriores — 2026-10-10
 

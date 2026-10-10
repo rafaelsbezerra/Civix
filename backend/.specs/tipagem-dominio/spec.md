@@ -1,7 +1,8 @@
 # Entidades, interfaces e DTOs
 
 Estado: extrações existentes e interfaces de repositories implementadas;
-modelo canônico, validação abrangente e persistência operacional posteriores.
+modelo canônico e validação abrangente permanecem pendentes. Implementação
+e adoção de repositories ficam fora das pendências atuais, para etapa futura.
 Idioma, arquivos, pastas e interfaces úteis já foram confirmados (BE-04/05/06).
 BE-09/10 permanecem parcialmente pendentes; não pedir novamente decisões feitas.
 
@@ -31,7 +32,7 @@ não representam aprovação de campos, vínculos e invariantes de um novo schem
   login é campo separado e intencional do contrato de autenticação.
 - [x] TYP-02-B: Extrair payload de convite e linhas SQL de auth.
   Evidência: dtos/auth.invite.dto.ts, interfaces/auth.user.row.ts e imports
-  tipados do controller; entregue no PR #12 e presente na baseline auditada.
+  tipados do controller; integrado em staging via PR #12, presente em bedb73a.
 - [ ] TYP-02-C: Separar os tipos úteis ainda locais de admin, quando sua
   refatoração for autorizada; não criar interfaces sem necessidade.
 - [x] TYP-03: Criar interfaces de persistência dos módulos implementados.

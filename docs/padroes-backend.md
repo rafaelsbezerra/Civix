@@ -1,8 +1,10 @@
 # Base de padrões do backend
 
 A base reutilizável de erro e sucesso agora é adotada nos endpoints backend.
-Paginação permanece como helper, sem aplicação às queries. Frontend fica
-para a próxima etapa; envelopes em [api.md](api.md).
+Paginação permanece como helper e será adotada somente quando necessário.
+Repositories têm interfaces prontas; implementação/uso ficam para uma etapa
+futura. Ambos estão fora das pendências atuais. Frontend consumidor continua
+pendente; envelopes em [api.md](api.md).
 
 ## Contratos aprovados
 
@@ -69,7 +71,7 @@ Não houve teste em banco ou alteração de contratos do frontend.
 O alvo aprovado é Prisma 7/SQL nativo com migration inversa. Este checkout
 fixa CLI/client/adapter em 7.10.0; tooling integrado da staging.
 Schema comercial e baseline de banco vazio continuam pendentes.
-Próximos passos: frontend, queries paginadas/ordenadas e schema canônico.
+Pendências atuais: frontend consumidor, camadas de auth/admin, schema canônico, baseline e prova de migrations em PostgreSQL.
 
 ## Histórico da extração: usuários e repositories
 
@@ -124,8 +126,9 @@ retorna 500 com causa preservada; ausência retorna 404. Auth usa tipos
 extraídos em dtos/auth.invite.dto.ts e interfaces/auth.user.row.ts.
 
 A restrição inicial sem adoção é histórica. Não duplicar success, plan ou
-plans no envelope. Implementações dos repositories e paginação seguem
-posteriores; incompatibilidades do frontend constam em api.md.
+plans no envelope. A adoção backend já está integrada em staging bedb73a.
+Repositories ficam para uma etapa futura e paginação somente sob demanda,
+fora das pendências atuais; incompatibilidades do frontend constam em api.md.
 
 
 ## Verificação da adoção — 2026-10-10

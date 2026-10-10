@@ -1,8 +1,8 @@
 # Usuários e contratos de persistência
 
 Estado: escopo de extração/interfaces implementado e integrado em staging
-na referência e2b3d8b. A adoção HTTP posterior está na baseline auditada/PR #14;
-as respostas legadas abaixo preservadas inicialmente são histórico.
+na referência atual bedb73a. A adoção HTTP também está integrada pelos
+PRs #13/#14; respostas legadas preservadas na extração inicial são histórico.
 
 ## Escopo e decisões confirmadas
 
@@ -31,15 +31,19 @@ as respostas legadas abaixo preservadas inicialmente são histórico.
   Login empresa bcrypt/cliente atual/JWT 1h, recuperação sem enumeração,
   token aleatório/hash/expiração e reset bcrypt10; persistência/e-mail
   simulados em tests/user.routes.test.ts, documentos de arquitetura/padrões.
-- [ ] REP-02: Implementar/consumir repositories em etapa posterior.
-  Adiado explicitamente; não integra o aceite da extração atual.
+
+## Evolução futura — fora das pendências atuais
+
+**REP-02:** implementar e consumir repositories apenas em etapa futura,
+conforme decisão do usuário. As interfaces existentes são preservadas; SQL
+continua nos services. Essa adoção não está concluída nem integra o aceite atual.
 
 ## HTTP histórico e adoção posterior
 
 A extração preservou respostas/status existentes e não adotou os envelopes.
 Depois, [a adoção HTTP](../adocao-http/spec.md) substituiu resultados com
 reason/switch por dados ou AppError e aplicou data/meta nos controllers.
-Esse código está na baseline auditada e no PR #14; não presumir seu merge.
+Esse código está integrado em staging via PRs #13/#14, referência bedb73a.
 A divergência users/user permanece até a etapa de schema aprovada.
 
 ## Verificação registrada e entrega

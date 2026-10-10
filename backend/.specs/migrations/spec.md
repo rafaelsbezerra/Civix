@@ -1,9 +1,8 @@
 # Migrations — Prisma 7 e SQL nativo
 
 Estado: mecanismo aprovado; tooling integrado à staging via PR #7 (eea5f1d),
-presente na referência 7b976d7 e nesta baseline. CLI/client/adapter fixados
-em 7.10.0; schema comercial e execução no banco continuam pendentes.
-Schema comercial e execução em PostgreSQL permanecem pendentes.
+presente na staging atual bedb73a. CLI/client/adapter fixados em 7.10.0;
+schema comercial e execução em PostgreSQL permanecem pendentes.
 
 ## Decisões confirmadas
 

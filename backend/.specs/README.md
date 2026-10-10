@@ -1,8 +1,8 @@
 # Specs do backend
 
 SDD leve + DDD leve: tarefas pequenas, evidências de implementação e decisões
-explícitas. Auditoria de status em 2026-10-10 na baseline
-codex/http-adoption-integration; staging de referência atualizada para 7b976d7.
+explícitas. Revisão de status em 2026-10-10 na staging `bedb73a`, após os
+merges da base Prisma 7, tipos de auth, adoção HTTP e auditoria documental.
 Checkbox marcado significa escopo implementado ou decisão confirmada,
 conforme a evidência do item. Entrega em PR não significa merge em staging.
 
@@ -10,18 +10,25 @@ conforme a evidência do item. Entrega em PR não significa merge em staging.
 
 | Grupo | Implementado | Pendências reais |
 | --- | --- | --- |
-| [Contratos HTTP](contratos-http/spec.md) | Base/helpers integrados; backend com erro/sucesso na baseline/PR #14 | Frontend, aplicação SQL da paginação, abrangência/filtros |
+| [Contratos HTTP](contratos-http/spec.md) | Base/helpers e erro/sucesso backend integrados em staging | Frontend consumidor |
 | [Estrutura](estrutura-modulos/spec.md) | Convenções, empresas, usuários/planos e tipos auth | SQL/regras de auth/admin para services; tipos úteis locais de admin |
-| [Tipagem](tipagem-dominio/spec.md) | Entidades/DTOs existentes, linhas auth/plan e três interfaces de repositories | Modelo canônico, validação/serialização abrangentes; implementação posterior da persistência |
+| [Tipagem](tipagem-dominio/spec.md) | Entidades/DTOs existentes, linhas auth/plan e três interfaces de repositories | Modelo canônico e validação/serialização abrangentes |
 | [Migrations](migrations/spec.md) | Prisma 7/SQL/inversa aprovados; tooling integrado via PR #7/eea5f1d | Schema/baseline, comandos a discutir, ciclo em PostgreSQL |
-| [Usuários/repositories](usuarios-repositories/spec.md) | Extração/interfaces integradas em staging | Implementação/adoção dos repositories em outra etapa |
-| [Tipos auth](adocao-http/auth-types.md) | Extração entregue no PR #12 e presente na baseline | Não equivale a auth.service.ts |
-| [Adoção HTTP](adocao-http/spec.md) | Backend implementado/verificado no PR #14 | Merge em staging não presumido; frontend posterior |
+| [Usuários/repositories](usuarios-repositories/spec.md) | Extração/interfaces integradas em staging | Nenhuma neste grupo; repositories fora das pendências atuais |
+| [Tipos auth](adocao-http/auth-types.md) | Extração integrada em staging via PR #12 | Não equivale a auth.service.ts |
+| [Adoção HTTP](adocao-http/spec.md) | Backend integrado via PRs #13/#14 | Frontend consumidor |
 
 Consultar [STATE.md](STATE.md) para decisões atuais e históricas superadas.
 Prisma 8/TS e espera de versão estável não são pendências atuais: o usuário
 confirmou Prisma 7/SQL nativo. Nome users e banco criado do zero confirmados;
 campos, vínculos e restrições do schema ainda aguardam resposta.
+
+## Evoluções fora das pendências atuais
+
+Paginação será adotada somente quando necessário (HTTP-03-A). Implementação
+e consumo de repositories ficam para uma etapa futura (REP-02). Contratos,
+helpers e interfaces existentes permanecem disponíveis; os itens não foram
+marcados como concluídos. Ver o [relatório consolidado](../../docs/revisao-pendencias-specs.md).
 
 ## Como trabalhar
 

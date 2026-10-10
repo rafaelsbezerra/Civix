@@ -1,6 +1,6 @@
 # Extração de tipos de auth
 
-Estado: implementado, com tipagem verificada; entregue no PR #12 e presente na baseline codex/http-adoption-integration. Merge em staging não presumido.
+Estado: implementado, com tipagem verificada e integrado em staging via PR #12; presente na referência bedb73a.
 
 ## Escopo
 
@@ -14,6 +14,6 @@ Estado: implementado, com tipagem verificada; entregue no PR #12 e presente na b
 
 `tsc -p tsconfig.foundation.json` passou com as dependências já instaladas.
 Não houve instalação, mudança de schema ou execução de consultas SQL.
-A adoção dos contratos HTTP foi implementada separadamente no PR #14, presente nesta baseline; frontend posterior.
+A adoção dos contratos HTTP também foi integrada via PRs #13/#14; frontend consumidor permanece pendente.
 
 Documentação principal: [tipos de auth](../../../docs/auth-types.md).

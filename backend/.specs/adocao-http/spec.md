@@ -1,6 +1,7 @@
 # Adoção dos contratos HTTP e tipos de auth
 
-Estado: implementado e verificado em 2026-10-10 na baseline codex/http-adoption-integration, entregue no [PR #14](https://github.com/rafaelsbe/Civix/pull/14). Não presumir merge em staging e2b3d8b. Documentação base registrada antes do código.
+Estado: implementado, verificado na entrega e integrado em staging via PRs
+#13/#14, referência bedb73a. Documentação base registrada antes do código.
 
 ## Escopo e decisões
 

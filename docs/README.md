@@ -1,13 +1,13 @@
 # Documentação do Civix
 
 A revisão inicial de 2026-10-09 foi feita na staging 5db3c5b e permanece
-como histórico. A atualização de 2026-10-10 distingue staging e2b3d8b,
-a adoção HTTP implementada no PR #14 e o tooling Prisma 7 entregue no PR #8.
-Os links de código refletem a branch de integração, sem alegar que todos
-os PRs já foram incorporados.
+como histórico. A atualização de 2026-10-10 reflete staging bedb73a, que já
+incorpora base Prisma 7, tipos de auth, adoção HTTP e auditoria documental.
+Paginação será usada somente quando necessário; repositories operacionais
+ficam para uma etapa futura. Ambos estão fora das pendências atuais.
 
 Consulte a [revisão de pendências das specs](revisao-pendencias-specs.md):
-itens concluídos, partes pendentes, entregas em PR e divergências do frontend.
+itens integrados, pendências atuais, evoluções futuras e divergências do frontend.
 
 ## Guia de leitura
 

@@ -82,17 +82,18 @@ browser e consultas ao banco não foram executados. Os achados são
 estáticos; não se afirma aprovação de execução ou disponibilidade do
 produto. Relatórios históricos de PASS foram lidos apenas como fontes.
 
-## Validação da extração de usuários e repositories
+## Validação histórica da extração de usuários e repositories
 
 No backend, npm run test:users verifica login, recuperação, reset e rotas
 protegidas com persistência/e-mail simulados. npm run test:foundation reúne
 contratos, empresas e usuários: 27 testes passaram.
 npm run typecheck:foundation cobre src, servidor, interfaces e esses testes
-sem incluir prisma.config.ts, cuja incompatibilidade CLI6/configuração7
-continua preexistente. Nenhuma dependência nova ou acesso externo.
+sem incluir prisma.config.ts. Na extração inicial, CLI6/configuração7 ainda
+causava incompatibilidade; esse bloqueio foi corrigido pelo tooling Prisma 7.
+Nenhuma dependência nova ou acesso externo naquela extração.
 
 Interfaces de repositories não são implementações; a aplicação mantém SQL
-nos services até a próxima etapa. Nenhuma migration aplicada nesta tarefa.
+nos services até a etapa futura de repositories. Nenhuma migration aplicada nesta tarefa.
 
 ## Execução da adoção HTTP
 
@@ -135,7 +136,7 @@ completo passaram. Os registros anteriores permanecem históricos.
 Schema comercial, baseline completa, comandos migrations:apply/show/rollback
 e ciclo em PostgreSQL continuam pendentes. SQL de planos não foi alterado.
 Não executar migrations automaticamente nem contra produção/remoto.
-Os PRs permanecem abertos; esta resolução não realiza merge em staging.
+Na resolução original, os PRs ficaram abertos para merge pelo usuário. O tooling já entrou em staging via PR #7 (eea5f1d).
 
 
 ## Verificação da resolução dos PRs #13/#14/#15 — 2026-10-10
@@ -147,5 +148,16 @@ dependências 7.10.0 já instaladas: test:foundation (36 testes), test:prisma
 (--noEmit) passaram. Os arquivos executáveis, testes e configuração são
 iguais nas três branches; suas diferenças são documentais. Nenhum pacote
 foi instalado, banco real acessado, e-mail enviado ou migration aplicada.
-O frontend permanece para a etapa posterior. Os merges dos PRs ficam a
-cargo do usuário.
+Na resolução original, os merges ficaram a cargo do usuário. Posteriormente,
+PR #13 foi integrado em 8548c2b e PR #14 em bedb73a. A adoção backend e a
+revisão documental já estão na staging atual; frontend consumidor permanece
+pendente. Não é necessário reaplicar os commits compartilhados do PR #15.
+
+## Escopo documental atual — 2026-10-10
+
+Paginação será usada somente quando necessário; implementação e consumo de
+repositories ficam para uma etapa futura. Ambos estão fora das pendências
+atuais. Frontend, camadas de auth/admin, schema/baseline, comandos operacionais
+e prova de migrations em PostgreSQL permanecem no relatório de pendências.
+Esta atualização altera apenas Markdown; não reexecuta testes, build ou
+migrations e não altera as evidências históricas de execução.

@@ -18,6 +18,13 @@
 - **Status**: active
 - **Pendente**: definição dos requisitos vigentes de navegação, rota, assets e composição — **Aguardando resposta**.
 
+## Referência atual
+
+Adoção backend e auditoria documental integradas em staging bedb73a, em
+2026-10-10. Adaptação dos consumidores frontend continua pendente. Paginação
+será adotada somente quando necessário; repositories ficam para etapa futura,
+fora das pendências atuais. Ver o [relatório consolidado](../../docs/revisao-pendencias-specs.md).
+
 ## Handoff atual — auditoria de 2026-10-10
 
 - **Feature**: home-hero e about-page.

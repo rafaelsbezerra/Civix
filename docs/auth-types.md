@@ -13,9 +13,10 @@ criam tabelas, não definem um novo schema e não validam valores em execução.
 A validação do token continua consultando `users`; primeiro acesso continua
 consultando `"user"`. Essa divergência permanece para a etapa de schema.
 
-A extração preserva as rotas, consultas, regras e respostas do controller.
-A adoção dos envelopes HTTP e de AppError pertence à tarefa de integração
+A extração inicial preservou rotas, consultas, regras e respostas. A adoção
+posterior de envelopes HTTP e AppError já está integrada em staging bedb73a,
 [documentada na spec de adoção](../backend/.specs/adocao-http/spec.md).
+SQL/regras ainda estão no controller; sua extração para service é pendente.
 
 Verificação: `tsc -p tsconfig.foundation.json` executado no backend sem erros,
 utilizando as dependências locais existentes. Nenhuma dependência foi

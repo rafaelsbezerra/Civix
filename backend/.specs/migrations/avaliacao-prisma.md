@@ -7,7 +7,7 @@ Análise inicial: 2026-10-09. Status revisado em 2026-10-10.
 Prisma 7 com migrations SQL nativas e reversão por nova migration inversa.
 CLI/client/adapter fixados em 7.10.0 na branch codex/prisma7-foundation,
 entregue nos PRs #7/#8 e integrado à staging pelo PR #7 em eea5f1d.
-Tooling presente na referência 7b976d7 e nesta baseline. Não existe nova decisão sobre Prisma 8 aguardando resposta.
+Tooling presente na staging atual bedb73a. Não existe nova decisão sobre Prisma 8 aguardando resposta.
 
 O PR registra validate, geração de cliente e diffs SQL de criação/inversão
 com fixture isolada, sem banco. O schema comercial permanece vazio; atualizar

@@ -53,6 +53,7 @@ services utilizam o pool atual. Interfaces não precisam existir para tudo.
 
 A correção local de empresas inicialmente foi feita sem commit por instrução
 específica; depois o usuário autorizou o commit. Essa exceção é histórica.
-A adoção de AppError/sucesso foi entregue no PR #14 e está na baseline desta
-auditoria, sem presumir merge. Frontend e repositories operacionais ficam
-posteriores. Testes usam persistência simulada, sem banco real.
+A adoção de AppError/sucesso está integrada em staging pelos PRs #13/#14,
+referência bedb73a. Frontend consumidor permanece pendente. Repositories
+operacionais ficam fora das pendências atuais, para uma etapa futura.
+Testes da entrega usam persistência simulada, sem banco real.

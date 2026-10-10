@@ -28,7 +28,7 @@ Após a extração, usam controller com funções independentes e SQL no service
 rota → controller → service, com mapeamento explícito do DTO.
 Erros e respostas usam a camada compartilhada em src/shared. Validação e
 autorização ainda exigem alinhamento gradual; paginação está disponível
-somente em helpers, sem consultas paginadas.
+somente em helpers, com adoção apenas quando necessária, fora das pendências atuais.
 
 | Domínio | Estado |
 | --- | --- |
@@ -118,8 +118,9 @@ Plan/PlanRow foram extraídos sem alterar consultas ou mapeamento. Atribuição
 de plano ao usuário pertence ao contrato UserRepository.
 
 Usuários segue routes → controller → service com handlers independentes,
-entity/DTO separados e SQL no service até implementar repositories. As
-rotas/aliases e os efeitos de login/recuperação/reset são preservados.
+entity/DTO separados e SQL no service. Implementação e uso de repositories
+ficam em etapa futura, fora das pendências atuais. Rotas/aliases e os efeitos
+de login/recuperação/reset são preservados.
 Auth/admin mantêm seus controllers originais e a divergência users/user.
 
 ## Adoção dos contratos compartilhados
@@ -129,4 +130,6 @@ encaminha rejeições para o handler global, registrado após routers e 404.
 ErrorCode/AppError vivem em shared/errors; sucesso/serialização em
 shared/contracts; configuração em shared/config. Tipos de auth foram
 extraídos para DTO/interface; regras de convite/primeiro acesso permanecem.
-Repositories não são consumidos e nenhum schema/paginação foi adotado.
+Essa adoção está integrada em staging bedb73a. Repositories não são consumidos;
+seu uso fica em etapa futura. Paginação será adotada somente quando necessário.
+Schema e baseline continuam pendentes; não há aplicação comprovada no banco.

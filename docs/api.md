@@ -101,5 +101,8 @@ Persistem diferenças snake_case/camelCase e URLs anteriormente documentadas.
 
 A extração anterior preservou envelopes legados. Esta adoção substitui essa
 restrição em usuários, auth/admin, empresas, planos, root e middleware.
-Repositories seguem interfaces apenas; paginação e schema permanecem para
-etapas posteriores. Verificação desta adoção: 36 testes e typechecks isolados aprovados; detalhes em operacao.md.
+Repositories seguem interfaces apenas; implementação/uso ficam em etapa futura,
+fora das pendências atuais. Paginação será adotada somente quando necessário;
+schema continua pendente. A adoção HTTP está integrada em staging bedb73a.
+Verificação da entrega: 36 testes e typechecks isolados aprovados; detalhes
+em operacao.md. Esta atualização documental não reexecuta esses checks.
