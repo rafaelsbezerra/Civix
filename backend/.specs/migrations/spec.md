@@ -68,3 +68,11 @@ Preservar histórico SQL atual sem reexecutar ou apagar.
 
 Não declarar sucesso apenas por typecheck: a execução precisa de banco
 temporário. Até existir essa evidência, registrar validação como pendente.
+
+## Decisão sobre a versão publicada
+
+O usuário decidiu aguardar uma versão estável do Prisma 8. Consulta ao registry:
+prisma latest 8.0.0-rc.22; @prisma/orm-postgres latest 8.0.0-rc.17.
+Nenhum pacote RC instalado. MIG-01/03 e testes específicos do novo tooling
+ficam pendentes dessa condição; schema e aplicação real dependem também
+BE-08/09. Não marcar migrations como implementadas apenas pela documentação.

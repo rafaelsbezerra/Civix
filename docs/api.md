@@ -72,3 +72,11 @@ paginação e ordenação, idioma/casing dos DTOs, identificadores, dinheiro,
 datas/fuso, filtros combináveis, versionamento e política de compatibilidade.
 Depois registrar OpenAPI/schemas, migração dos consumidores e testes de
 contrato. Nenhum envelope novo foi escolhido nesta revisão.
+
+## Base nova ainda não adotada
+
+Os contratos novos estão implementados e descritos em
+[padroes-backend.md](padroes-backend.md), mas os endpoints acima ainda retornam
+os envelopes legados. A base exportada possui serialização de erros por
+ambiente, respostas tipadas e validação/metadados de paginação. Nenhum handler
+foi registrado no bootstrap nesta etapa.

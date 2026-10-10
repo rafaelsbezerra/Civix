@@ -12,8 +12,7 @@
 - Usar scripts executáveis de migration no lugar de arquivos SQL isolados.
 - Usar SDD leve + DDD leve e subagentes para tarefas secundárias.
 - Perguntar antes de decidir; registrar pendências nos documentos.
-- Sucesso `{ data, meta? }` e erro
-  `{ error: { code, message, details? }, requestId }`.
+- Sucesso `{ data, meta? }`; erro `{ status, message }` em produção e diagnóstico adicional fora de produção.
 - Paginação `page`/`pageSize`, base 1, padrão 20, máximo 100, total e
   ordenação estável; adaptação coordenada dos consumidores frontend.
 - Código em inglês; manter pastas por função, como routes/controllers/services.
@@ -58,3 +57,12 @@ BE-10 é sugestão de escopo, ainda não aprovada.
 Specs atualizadas para implementação da base passiva. Nenhuma tarefa de implementação concluída. Nenhum banco
 provisionado, migration executada, dependência alterada ou contrato aplicado.
 O código possui consultas SQL/Neon; sua presença não comprova banco pronto.
+
+## Respostas posteriores à criação das specs
+
+- Produção retorna exatamente status/message; fora de produção permite
+  diagnóstico sanitizado. A base HTTP está implementada sem ativação nas rotas.
+- Empresas: extração de camadas/tipos autorizada, sem mudar contratos atuais.
+- Prisma 8: aguardar versão estável; não instalar release candidate. Tooling,
+  schema definitivo, baseline e migrations de tabelas ficam pendentes.
+- Adoção de contratos e frontend pertence à etapa seguinte.
