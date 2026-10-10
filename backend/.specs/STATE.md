@@ -41,7 +41,7 @@ As propostas abaixo não são contratos aprovados.
 | BE-04 | Idioma e arquivos | Inglês aprovado; kebab-case, sufixos e estilo funcional/classes pendentes | Parcialmente confirmado |
 | BE-05 | Pastas | Manter pastas globais por função; nomes de novas pastas transversais pendentes | Parcialmente confirmado |
 | BE-06 | Persistência desacoplada | Interface de repositório e adapter em memória para testes; SQL no adapter | Aguardando resposta |
-| BE-07 | Migrations | Prisma 8 TS e migration inversa aprovados; versão publicada e configuração a verificar | Parcialmente confirmado |
+| BE-07 | Migrations | Prisma 8 TS e migration inversa aprovados; aguardar versão estável, sem RC | Aguardando versão estável |
 | BE-08 | Banco e baseline | PostgreSQL confirmado; existência de dados e baseline por confirmar | Parcialmente confirmado |
 | BE-09 | Modelo canônico | Resolver `users` versus `user`, identidade versus empresa, campos e vínculos mínimos | Aguardando resposta |
 | BE-10 | Padrões adicionais | Validação, serialização, filtros/ordenação, requestId/logs e configuração | Aguardando resposta |
@@ -54,8 +54,7 @@ BE-10 é sugestão de escopo, ainda não aprovada.
 
 ## Estado da entrega
 
-Specs atualizadas para implementação da base passiva. Nenhuma tarefa de implementação concluída. Nenhum banco
-provisionado, migration executada, dependência alterada ou contrato aplicado.
+Base HTTP e extração estrutural de empresas implementadas em branches separadas e reunidas na branch de integração. Foram verificados 18 testes e typecheck da base. Nenhum banco provisionado, migration aplicada ou dependência Prisma atualizada.
 O código possui consultas SQL/Neon; sua presença não comprova banco pronto.
 
 ## Respostas posteriores à criação das specs

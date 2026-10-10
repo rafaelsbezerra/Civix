@@ -1,0 +1,8 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": { "noEmit": true },
+  "include": [
+    "src/contracts/**/*.ts", "src/errors/**/*.ts", "src/middlewares/error-handler.ts",
+    "src/routes/company-routes.ts", "tests/contracts.test.ts", "tests/company-routes.test.ts"
+  ]
+}

@@ -80,3 +80,10 @@ Não há node_modules nos diretórios das aplicações. Testes, lint, build,
 browser e consultas ao banco não foram executados. Os achados são
 estáticos; não se afirma aprovação de execução ou disponibilidade do
 produto. Relatórios históricos de PASS foram lidos apenas como fontes.
+
+## Verificação conjunta da base
+
+Contratos e extração de empresas foram reunidos em branch de integração.
+`npm run test:foundation` verificou 18 testes; `npm run typecheck:foundation`
+passou no escopo implementado. Os novos handlers continuam desconectados do
+bootstrap. Frontend e demais módulos mantidos; Prisma 8 aguarda versão estável.

@@ -73,3 +73,17 @@ monitoramento automático de release.
 Na adoção posterior: conectar handlers no servidor, migrar envelopes/controllers
 consumidores, implementar queries paginadas com filtros e ordenação estável,
 adaptar frontend e definir schema canônico antes das migrations.
+
+## Integração verificada
+
+Branches das tarefas: `codex/backend-contracts` e `codex/companies-layers`.
+Reunião: `codex/backend-foundation-integration`. Os PRs usam `staging` como
+base. A branch de integração inclui também a baseline documental; os PRs
+individuais compartilham essa base e servem para revisão por assunto.
+Não foram feitos merges na staging remota.
+
+Executar em backend: `npm run test:foundation` e
+`npm run typecheck:foundation`. Integração: 18 testes passaram; typecheck dos
+arquivos novos/empresas passou. O typecheck completo legado ainda falha na
+configuração Prisma incompatível; nenhuma aprovação global de build/lint é
+alegada. Nenhuma migration aplicada e nenhuma tabela nova nesta entrega.

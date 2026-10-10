@@ -15,7 +15,7 @@ Atualizar a documentação principal em cada tarefa.
 
 As [decisões](STATE.md) distinguem instruções confirmadas de propostas.
 Itens com **Aguardando resposta** não autorizam escolha ou implementação.
-Todas as tarefas começam pendentes; checkbox marcado exige evidência.
+Checkbox marcado exige evidência. Base HTTP e extração de empresas têm implementação e testes; adoção e migrations permanecem pendentes.
 
 ## Como trabalhar
 
@@ -31,8 +31,7 @@ modelos de negócio dos contratos HTTP e da persistência, e explicitar as
 interfaces necessárias. Não exige microserviços, CQRS, event sourcing ou
 uma camada de abstração sem necessidade concreta.
 
-Implementação atual: contratos reutilizáveis, estrutura e tipos separados,
-infraestrutura de migrations. Não registrar novos handlers no servidor,
+Implementação atual: contratos reutilizáveis, estrutura e tipos separados. Infraestrutura de migrations aguarda Prisma 8 estável. Não registrar novos handlers no servidor,
 alterar rotas existentes, trocar consultas ou adaptar o frontend agora.
 Exceção aprovada: reorganizar empresas por camadas e extrair tipos, mantendo
 seu contrato atual. Demais módulos e consumers serão a próxima etapa.
