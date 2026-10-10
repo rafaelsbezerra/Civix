@@ -1,4 +1,3 @@
-/** Existing catalog fields; wire/database names are preserved in this phase. */
 export interface Company {
   id: string;
   nome: string;

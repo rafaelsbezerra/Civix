@@ -22,8 +22,8 @@ comportamentos demonstrados pela implementação atual.
 
 O servidor monta routers de usuários, primeiro acesso, empresas e planos.
 Usuários concentram login e recuperação de senha no controller;
-primeiro acesso possui controller próprio. Empresas executam handlers
-diretamente nas rotas, com acesso SQL no service. Planos usam
+primeiro acesso possui controller próprio. Na baseline inicial, empresas executavam handlers diretamente nas rotas.
+Após a extração, usam controller com funções independentes e SQL no service. Planos usam
 rota → controller → service, com mapeamento explícito do DTO.
 Não há arquitetura modular uniforme nem camada compartilhada de validação,
 erros, autorização, DTOs ou paginação.
@@ -54,7 +54,7 @@ adicionam `users.plan_id` somente se `users` já existir. Não criam `users`,
 | `empresas` | categoria, cnpj, descricao_detalhada, verificado, tamanho, status e contatos | Notion usa segmento_id, plano_id, slug, media_preco, welcome_message e is_active |
 | `plans` | BIGSERIAL, slug, price, billing_period, features/limits JSONB, flags e ordem | Notion usa UUID e separa preço único e mensalidade |
 
-Fontes: [company-service](../backend/src/services/company-service.ts),
+Fontes: [company.service](../backend/src/services/company.service.ts),
 [plan.service](../backend/src/services/plan.service.ts),
 [controllers](../backend/src/controller/userController.ts) e
 [migration inicial](../backend/prisma/migrations/20260914210000_create_plans/migration.sql).
@@ -81,20 +81,20 @@ precedência, em vez de combinar os filtros.
 ## Reorganização de empresas implementada
 
 O catálogo mantém `/api/v1/empresas` e seus sete endpoints.
-[company-routes](../backend/src/routes/company-routes.ts) registra handlers;
-[company-controller](../backend/src/controllers/company-controller.ts) valida
+[company.routes](../backend/src/routes/company.routes.ts) registra handlers;
+[company.controller](../backend/src/controller/company.controller.ts) valida
 entradas e define status/JSON; o service mantém consultas parametrizadas e
 resultados legados. O servidor mudou apenas o import/nome do router.
 
-[Company](../backend/src/entities/company.ts) descreve os campos existentes
+[Company](../backend/src/entities/company.entity.ts) descreve os campos existentes
 sem novas invariantes: os nomes portugueses e snake_case são preservados
 para compatibilidade com as linhas SQL e respostas atuais.
-[CompanyListResult/CompanyDetailResult](../backend/src/dtos/company-response.ts)
+[CompanyListResult/CompanyDetailResult](../backend/src/dtos/company.response.dto.ts)
 são resultados legados, sem adoção dos contratos compartilhados novos.
-A interface [CompanyQuery](../backend/src/interfaces/company-query.ts) injeta
-a consulta usada nos testes; não define um repositório de domínio nem
-substitui o Pool Neon em produção. O SQL permanece no service enquanto
-a decisão de adapter/repositório aguarda resposta.
+O service usa diretamente o Pool Neon com `db.query<Company>`. Os testes
+simulam `db.query`; não há interface CompanyQuery ou factory de controller.
+O controller importa o service diretamente e exporta handlers independentes.
+O SQL permanece no service enquanto a decisão de repositório aguarda resposta.
 
 Exemplo de fluxo: GET `/api/v1/empresas/categoria/Obras` → controller
 valida categoria não vazia → service consulta por LOWER com parâmetro →

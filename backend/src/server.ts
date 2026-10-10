@@ -8,7 +8,7 @@ import helmet from "helmet";
 // Importação das rotas
 import authRoutes from './routes/userRoute.js';
 import firstAccessRoutes from './routes/auth.routes.js';
-import companyRoutes from './routes/company-routes.js';
+import companyRoutes from './routes/company.routes.js';
 import planRoutes from './routes/plan.routes.js';
 
 const app = express();

@@ -15,7 +15,8 @@ já retornado pelos endpoints atuais, documentados em [api.md](api.md).
 
 ## Estrutura e persistência
 
-Código em inglês, kebab-case e pastas por função. Cadeia
+Identificadores em inglês; arquivos domínio.papel.ts e pastas por função.
+Comentários e mensagens de erro em português. Cadeia
 routes → controller → service; entidades/interfaces/DTOs em arquivos próprios.
 Prisma 8 com migrations TypeScript e reversão por migration inversa aprovado;
 o schema de identidade e empresas ainda depende de definição.
@@ -34,7 +35,7 @@ Implementação e testes ainda pendentes neste commit documental.
 ## Implementação da base HTTP
 
 Disponível em `backend/src/contracts/{error,response,pagination}.contract.ts`,
-`backend/src/errors/app-error.ts` e `backend/src/middlewares/error-handler.ts`.
+`backend/src/errors/app.error.ts` e `backend/src/middlewares/error.handler.ts`.
 Esses arquivos não são importados pelo servidor atual.
 
 - `createSuccessResponse` gera `{ data }` ou `{ data, meta }`.
@@ -73,3 +74,26 @@ monitoramento automático de release.
 Na adoção posterior: conectar handlers no servidor, migrar envelopes/controllers
 consumidores, implementar queries paginadas com filtros e ordenação estável,
 adaptar frontend e definir schema canônico antes das migrations.
+
+## Próxima refatoração: usuários e repositories
+
+Interfaces de persistência por módulo ficarão em backend/src/repositories.
+Somente interfaces de repositories foram aprovadas; implementações ficam
+para depois. Refatorar apenas userController/userRoute; primeiro acesso e
+convites permanecem intactos. SQL permanece nos services atuais. Ver
+[spec](../backend/.specs/usuarios-repositories/spec.md).
+Sempre perguntar diante de dúvida antes de implementar a parte afetada.
+
+
+## Interfaces de persistência preparadas
+
+Disponíveis em repositories/{user,company,plan}.repository.ts. São apenas
+interfaces; não são importadas pelos services nem possuem implementações.
+SQL continua nos services durante esta etapa. Não há interface query
+genérica nem novas factories. Busca sem resultado usa undefined, como
+rows[0] nas consultas atuais; atribuição de plano retorna boolean.
+
+User descreve campos observados internamente; password_hash é dado de
+persistência, nunca parte da resposta de login. Plan e PlanRow foram
+extraídos para entities/plan.entity.ts e interfaces/plan.row.ts; exports
+de tipos do service preservados para compatibilidade. Nenhuma query mudou.

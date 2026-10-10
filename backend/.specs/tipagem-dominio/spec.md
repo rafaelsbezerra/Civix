@@ -52,12 +52,12 @@ aprovadas. Não criar testes para getters sem comportamento relevante.
 
 ## Extração de empresas nesta fase
 
-Extraídos `entities/company.ts`, `dtos/company-response.ts` e
-`interfaces/company-query.ts`. Company descreve o modelo observado e
+Extraídos `entities/company.entity.ts`, `dtos/company.response.dto.ts` e
+tipagem direta de `db.query<Company>`, sem interface intermediária de query. Company descreve o modelo observado e
 preserva nomes de campos legados; não representa schema aprovado nem
 introduz invariantes novas. Os wrappers foram renomeados para resultados
-legados e mantêm formato público. CompanyQuery é a dependência mínima
-de consulta, com fake exclusivo dos testes; não antecipa BE-06.
+legados e mantêm formato público. A interface CompanyQuery foi removida; testes simulam o pool existente
+sem criar um contrato de consulta artificial ou antecipar BE-06.
 
 TYP-02 está concluída somente para empresas. TYP-01/03/04 e a extração
 dos outros domínios continuam pendentes. Não há mapper camelCase nem

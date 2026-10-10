@@ -1,8 +1,8 @@
 import type { ErrorRequestHandler, RequestHandler } from 'express';
 import { serializeError, type ErrorContext } from '../contracts/error.contract.js';
-import { AppError } from '../errors/app-error.js';
+import { AppError } from '../errors/app.error.js';
 
-// Exported foundation only: not registered on the existing server.
+// Base exportada sem registro no servidor existente.
 export function createErrorHandler(context: ErrorContext = {}): ErrorRequestHandler {
   return (error: unknown, _request, response, next) => {
     if (response.headersSent) { next(error); return; }

@@ -16,8 +16,8 @@
 - Paginação `page`/`pageSize`, base 1, padrão 20, máximo 100, total e
   ordenação estável; adaptação coordenada dos consumidores frontend.
 - Código em inglês; manter pastas por função, como routes/controllers/services.
-- Prisma 8 com migrations TypeScript nativas e reversão por migration inversa
-  aprovado; substitui exigência literal de funções `up`/`down`.
+- Prisma 7 com SQL nativo e reversão por nova migration inversa aprovado;
+  substitui a decisão histórica por Prisma 8 e funções `up`/`down`.
 - Erros em produção: `{ status, message }`. Fora de produção, acrescentar
   `code`, `details`, `requestId` e `stack`, sanitizando credenciais.
 - Exceção: reorganizar empresas em route/controller/service/entity/interface,
@@ -38,12 +38,12 @@ As propostas abaixo não são contratos aprovados.
 | BE-01 | Sucesso e adoção | Envelope, frontend, 201/204 e manutenção de /api/v1 aprovados | Confirmado |
 | BE-02 | Erro | status/message em produção; diagnóstico sanitizado fora de produção aprovado; catálogo específico futuro | Confirmado |
 | BE-03 | Paginação | Parâmetros, limites, meta, vazio, além do fim e ordem nome/ID aprovados; campos extras de ordenação e abrangência pendentes | Parcialmente confirmado |
-| BE-04 | Idioma e arquivos | Inglês aprovado; kebab-case, sufixos e estilo funcional/classes pendentes | Parcialmente confirmado |
+| BE-04 | Idioma e arquivos | Identificadores em inglês; arquivos domínio.papel.ts; comentários/erros em português; controller com funções independentes | Confirmado |
 | BE-05 | Pastas | Manter pastas globais por função; nomes de novas pastas transversais pendentes | Parcialmente confirmado |
 | BE-06 | Persistência desacoplada | Interface de repositório e adapter em memória para testes; SQL no adapter | Aguardando resposta |
-| BE-07 | Migrations | Prisma 8 TS e migration inversa aprovados; versão publicada e configuração a verificar | Parcialmente confirmado |
-| BE-08 | Banco e baseline | PostgreSQL confirmado; existência de dados e baseline por confirmar | Parcialmente confirmado |
-| BE-09 | Modelo canônico | Resolver `users` versus `user`, identidade versus empresa, campos e vínculos mínimos | Aguardando resposta |
+| BE-07 | Migrations | Prisma 7 SQL nativo e migration inversa aprovados; integração do tooling pendente neste checkout | Confirmado |
+| BE-08 | Banco e baseline | PostgreSQL e banco criado do zero confirmados; baseline depende do schema | Confirmado |
+| BE-09 | Modelo canônico | Nome canônico users confirmado; campos, vínculos e restrições pendentes | Parcialmente confirmado |
 | BE-10 | Padrões adicionais | Validação, serialização, filtros/ordenação, requestId/logs e configuração | Aguardando resposta |
 
 Respostas iniciais registradas acima. Questões adicionais foram apresentadas
@@ -54,7 +54,7 @@ BE-10 é sugestão de escopo, ainda não aprovada.
 
 ## Estado da entrega
 
-Specs atualizadas para implementação da base passiva. Nenhuma tarefa de implementação concluída. Nenhum banco
+Specs atualizadas para implementação da base passiva. Base HTTP e extração de empresas implementadas; adoção permanece pendente. Nenhum banco
 provisionado, migration executada, dependência alterada ou contrato aplicado.
 O código possui consultas SQL/Neon; sua presença não comprova banco pronto.
 
@@ -63,6 +63,16 @@ O código possui consultas SQL/Neon; sua presença não comprova banco pronto.
 - Produção retorna exatamente status/message; fora de produção permite
   diagnóstico sanitizado. A base HTTP está implementada sem ativação nas rotas.
 - Empresas: extração de camadas/tipos autorizada, sem mudar contratos atuais.
-- Prisma 8: aguardar versão estável; não instalar release candidate. Tooling,
-  schema definitivo, baseline e migrations de tabelas ficam pendentes.
+- Prisma 7/SQL nativo substituiu a decisão anterior de aguardar Prisma 8.
+  Integração do tooling, schema definitivo, baseline e migrations ficam pendentes neste checkout.
 - Adoção de contratos e frontend pertence à etapa seguinte.
+
+## Convenções confirmadas após os merges — 2026-10-10
+
+Arquivos domínio.papel.ts, nunca camelCase/PascalCase; comentários e erros em
+português, identificadores/códigos em inglês. Controller com funções soltas,
+importando service diretamente. Sem abstração CompanyQuery; interfaces apenas
+para contratos úteis. Correção local na staging, sem commit/PR/worktree nesta
+tarefa, conforme instrução explícita. O alvo de migrations é Prisma 7/SQL
+nativo; a instalação atual desta staging ainda tem CLI 6 até a integração
+da tarefa de tooling.

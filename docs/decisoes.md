@@ -32,9 +32,9 @@ explícita antes de expandir os módulos.
 
 As convenções já escritas no Notion são Conventional Commits, PascalCase
 para classes/interfaces/types, camelCase para funções/variáveis,
-UPPER_SNAKE_CASE para constantes globais e kebab-case no backend.
-O idioma está explicitamente pendente. Não há política local AGENTS.md
-ou CONTRIBUTING.md encontrada na árvore revisada.
+UPPER_SNAKE_CASE para constantes globais. A regra local posterior registrada
+no AGENTS.md usa arquivos domínio.papel.ts, identificadores em inglês,
+comentários/erros em português e controllers com funções independentes.
 
 ## Sequência sugerida
 

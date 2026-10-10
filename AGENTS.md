@@ -12,7 +12,7 @@
 *   **Back:** Node, Express, TypeScript
 *   **Front:** React + Vite + TypeScript + React Router + shadcn/ui + Tailwind CSS
 *   **Banco de dados:** PostgreSQL
-*   **Persistence:** Existing code uses SQL through Neon/PostgreSQL. Prisma dependencies are present, but its schema has no models and the application does not use PrismaClient. Prisma 8 with TypeScript migrations and inverse migrations is approved for future adoption; it has not been implemented.
+*   **Persistence:** Existing code uses SQL through Neon/PostgreSQL. Prisma dependencies are present, but its schema has no models and the application does not use PrismaClient. The current approved target is Prisma 7 with native SQL migrations and reversal through a new inverse migration. Check the current manifest/lockfile: this staging checkout still mixes CLI 6 and client/adapter 7 until the tooling task is integrated.
 *   **Libs:** Zod in the backend; Axios, shadcn/ui and Lucide React in the frontend. Check each package manifest before assuming a library is installed.
 *   **Hospedagem:** a definir depois do MVP
 *   **Gerenciador de pacote:** npm, as reflected by the current package-lock.json files; no Yarn 4 configuration is present.
@@ -28,8 +28,11 @@
 - Functions and variables: camelCase, such as `getMonthlySummary`.
 - Classes, interfaces, and types: PascalCase, such as `TransactionRepository`.
 - Global constants: UPPER_SNAKE_CASE, such as `MAX_PAGE_SIZE`.
-- Backend files and folders: kebab-case, such as `create-transaction.use-case.ts`.
+- Backend files: use lowercase domain/responsibility names separated by dots, such as `company.service.ts`, `company.controller.ts`, `company.routes.ts` and `company.entity.ts`. Never use camelCase/PascalCase filenames or join the domain and responsibility with a hyphen. Preserve existing folders by function; controllers use the existing `src/controller/` directory.
 - Keep backend folders organized by function (routes, controllers, services, entities, interfaces and DTOs), with routes → controller → service. Keep HTTP handling in controllers and business rules in services. Existing modules still require gradual alignment.
+- Persistence interfaces for each implemented module belong in `backend/src/repositories`, with domain methods such as `UserRepository.getById`; do not replace these contracts with a generic SQL query interface. Current decision: this folder contains interfaces only; implementations will be created later. Existing services keep their SQL until that separate implementation phase.
+- Export controller handlers as independent functions. Import the service directly (for example, `import * as companyService`) and call `companyService.method()`. Do not introduce controller/router/service factories as the default pattern.
+- Write error messages, diagnostic placeholder text and code comments in Brazilian Portuguese. Keep identifiers and machine-readable error codes in English.
 - On the frontend, adhere to existing conventions and framework-mandated naming.
 - Use real project examples and explicitly detail relevant validations, return values, and errors.
 - Do not present an example as functional without verifying the related contracts and code.
@@ -65,7 +68,7 @@
 
 ## Ask First
 
-- If you have any questions about the task, ask before executing the affected part.
+- Caso exista qualquer dúvida sobre a tarefa, sempre faça perguntas antes de implementar a parte afetada. Registre decisões pendentes na spec como **Aguardando resposta**; não presuma aprovação.
 - Ask before installing dependencies, changing the schema, or making any other critical change.
 
 ## Commands and Verification
@@ -80,15 +83,15 @@
 
 **Illustrative code style example (not a verified project API contract):**
 ```typescript
-// ✅ Good - descriptive names, proper error handling
+// ✅ Bom: nomes descritivos e tratamento de erros
 async function fetchUserById(id: string): Promise<User> {
-  if (!id) throw new Error('User ID required');
+  if (!id) throw new Error('O ID do usuário é obrigatório');
   
   const response = await api.get(`/users/${id}`);
   return response.data;
 }
 
-// ❌ Bad - vague names, no error handling
+// ❌ Ruim: nomes vagos e ausência de tratamento de erros
 async function get(x) {
   return await api.get('/users/' + x).data;
 }
@@ -96,10 +99,11 @@ async function get(x) {
 
 ## Pull request rules
 
+- Write PR titles, descriptions and messages in Brazilian Portuguese.
 - In every PR, explain what was changed, how it was implemented, and why.
 - After that explanation, indicate the next steps; state when none are needed.
 - When a change needs a new table, create a versioned migration and include
-  the resulting SQL in the PR description. For Prisma 8 TypeScript migrations,
+  the resulting SQL in the PR description. When a migration is authored in TypeScript,
   include the SQL preview produced by the migration tooling and link the
   migration source. Do not replace the migration with SQL pasted only in a PR.
 - Report relevant verification and any checks that were not performed.
