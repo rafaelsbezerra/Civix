@@ -17,8 +17,7 @@ já retornado pelos endpoints atuais, documentados em [api.md](api.md).
 
 Código em inglês, kebab-case e pastas por função. Cadeia
 routes → controller → service; entidades/interfaces/DTOs em arquivos próprios.
-Prisma 8 com migrations TypeScript e reversão por migration inversa aprovado;
-o schema de identidade e empresas ainda depende de definição.
+Decisão atual: Prisma 7, banco novo e users. Formato das migrations e campos/relacionamentos ainda dependem de confirmação.
 Empresas será reorganizado por camadas e tipos preservando suas respostas
 atuais. Outros módulos e frontend não adotam os contratos nesta etapa.
 
@@ -65,7 +64,7 @@ Não houve teste em banco ou alteração de contratos do frontend.
 
 ## Prisma e próximos passos
 
-O usuário decidiu aguardar Prisma 8 estável. O registry consultado nesta revisão
+Decisão histórica anterior, substituída em 2026-10-10: aguardar Prisma 8 estável. O registry consultado nesta revisão
 publicou CLI 8.0.0-rc.22 e runtime PostgreSQL 8.0.0-rc.17. Não instalar RC nem
 alterar configuração/schema/migrations SQL enquanto aguarda. Não existe
 monitoramento automático de release.
@@ -87,3 +86,12 @@ Executar em backend: `npm run test:foundation` e
 arquivos novos/empresas passou. O typecheck completo legado ainda falha na
 configuração Prisma incompatível; nenhuma aprovação global de build/lint é
 alegada. Nenhuma migration aplicada e nenhuma tabela nova nesta entrega.
+
+## Decisão atual de persistência — 2026-10-10
+
+Prisma 7 substitui a escolha de Prisma 8. Migrations serão pensadas para um
+banco novo PostgreSQL; `users` é o nome canônico. Ainda falta confirmar o
+formato SQL nativo ou runner TypeScript e definir campos/relacionamentos.
+Não houve atualização de pacotes ou schema por essa decisão documental.
+Os comandos migrations:apply/show/rollback são propostas para discussão
+posterior, não comandos disponíveis neste momento.

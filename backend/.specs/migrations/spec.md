@@ -1,8 +1,6 @@
 # Migrations executáveis
 
-Estado: Prisma 8 com migrations TypeScript nativas e migration inversa
-aprovado. Configuração passiva nesta etapa; baseline e modelo canônico
-**Aguardando resposta** (BE-08/09). Não aplicar migrations ao banco remoto.
+Estado: Prisma 7, PostgreSQL e banco criado do zero confirmados. Nome canônico `users`. Campos/vínculos e formato das migrations **Aguardando resposta**. Não aplicar ao banco remoto.
 
 ## Problema e escopo
 
@@ -19,7 +17,7 @@ As versões declaradas no projeto (CLI 6 e client 7) precisam ser alinhadas.
 O [fluxo documentado do Prisma 7](https://docs.prisma.io/docs/orm/v7/prisma-migrate)
 usa migrations SQL; a [documentação atual](https://www.prisma.io/docs/orm/migrations/how-migrations-work)
 descreve outra geração do fluxo. Não presumir compatibilidade entre versões.
-Após avaliação, o usuário aprovou Prisma 8 e reversão por migration inversa.
+A decisão atual é Prisma 7; a aprovação anterior de Prisma 8 foi substituída. Confirmar SQL nativo versus runner TypeScript antes da implementação.
 A [avaliação inicial](avaliacao-prisma.md) registra os resultados e a decisão
 ainda necessária. Um único mecanismo deve
 ser responsável por aplicar e registrar cada migration.
@@ -69,10 +67,6 @@ Preservar histórico SQL atual sem reexecutar ou apagar.
 Não declarar sucesso apenas por typecheck: a execução precisa de banco
 temporário. Até existir essa evidência, registrar validação como pendente.
 
-## Decisão sobre a versão publicada
+## Decisões atuais
 
-O usuário decidiu aguardar uma versão estável do Prisma 8. Consulta ao registry:
-prisma latest 8.0.0-rc.22; @prisma/orm-postgres latest 8.0.0-rc.17.
-Nenhum pacote RC instalado. MIG-01/03 e testes específicos do novo tooling
-ficam pendentes dessa condição; schema e aplicação real dependem também
-BE-08/09. Não marcar migrations como implementadas apenas pela documentação.
+Usar Prisma 7 e banco criado do zero; nome canônico users. A proposta é fixar CLI/client/adapter em 7.10.0. Formato SQL nativo versus runner TS **Aguardando resposta**. Campos e relações do schema continuam pendentes. Comandos migrations:apply/show/rollback serão discutidos após a implementação; ainda não existem.

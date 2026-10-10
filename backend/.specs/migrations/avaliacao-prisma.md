@@ -61,3 +61,15 @@ Não houve instalação de pacotes, conexão de banco ou prova de execução.
 
 Aguardar Prisma 8 estável. As versões RC consultadas não serão instaladas.
 A opção Prisma 8/migration inversa permanece aprovada para futura adoção.
+
+## Decisões de 2026-10-10
+
+Prisma principal 7, banco criado do zero e nome canônico `users` confirmados.
+Isso substitui a espera pelo Prisma 8 estável. Campo/vínculos de usuários não
+foram definidos apenas pela escolha do nome.
+
+**Aguardando resposta:** fixar CLI/client/adapter exatamente em 7.10.0 e usar
+SQL versionado nativo do Prisma Migrate, ou manter TypeScript com runner separado?
+Comandos `npm run migrations:apply`, `migrations:show` e `migrations:rollback`
+são propostas do usuário para discussão após a implementação, não scripts
+existentes nem política de rollback já aprovada.

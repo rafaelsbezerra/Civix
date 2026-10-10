@@ -16,8 +16,7 @@
 - Paginação `page`/`pageSize`, base 1, padrão 20, máximo 100, total e
   ordenação estável; adaptação coordenada dos consumidores frontend.
 - Código em inglês; manter pastas por função, como routes/controllers/services.
-- Prisma 8 com migrations TypeScript nativas e reversão por migration inversa
-  aprovado; substitui exigência literal de funções `up`/`down`.
+- Prisma na versão principal 7, substituindo a decisão anterior por Prisma 8. Formato das migrations e versão exata aguardam confirmação.
 - Erros em produção: `{ status, message }`. Fora de produção, acrescentar
   `code`, `details`, `requestId` e `stack`, sanitizando credenciais.
 - Exceção: reorganizar empresas em route/controller/service/entity/interface,
@@ -41,9 +40,9 @@ As propostas abaixo não são contratos aprovados.
 | BE-04 | Idioma e arquivos | Inglês aprovado; kebab-case, sufixos e estilo funcional/classes pendentes | Parcialmente confirmado |
 | BE-05 | Pastas | Manter pastas globais por função; nomes de novas pastas transversais pendentes | Parcialmente confirmado |
 | BE-06 | Persistência desacoplada | Interface de repositório e adapter em memória para testes; SQL no adapter | Aguardando resposta |
-| BE-07 | Migrations | Prisma 8 TS e migration inversa aprovados; aguardar versão estável, sem RC | Aguardando versão estável |
-| BE-08 | Banco e baseline | PostgreSQL confirmado; existência de dados e baseline por confirmar | Parcialmente confirmado |
-| BE-09 | Modelo canônico | Resolver `users` versus `user`, identidade versus empresa, campos e vínculos mínimos | Aguardando resposta |
+| BE-07 | Migrations | Fixar Prisma 7; proposta 7.10.0 e SQL nativo aguardando confirmação | Parcialmente confirmado |
+| BE-08 | Banco e baseline | PostgreSQL, migrations para banco criado do zero | Confirmado |
+| BE-09 | Modelo canônico | Nome canônico users confirmado; campos, relações e restrições pendentes | Parcialmente confirmado |
 | BE-10 | Padrões adicionais | Validação, serialização, filtros/ordenação, requestId/logs e configuração | Aguardando resposta |
 
 Respostas iniciais registradas acima. Questões adicionais foram apresentadas
@@ -62,6 +61,5 @@ O código possui consultas SQL/Neon; sua presença não comprova banco pronto.
 - Produção retorna exatamente status/message; fora de produção permite
   diagnóstico sanitizado. A base HTTP está implementada sem ativação nas rotas.
 - Empresas: extração de camadas/tipos autorizada, sem mudar contratos atuais.
-- Prisma 8: aguardar versão estável; não instalar release candidate. Tooling,
-  schema definitivo, baseline e migrations de tabelas ficam pendentes.
+- Decisão posterior: usar Prisma 7 e users; baseline para banco novo. Formato das migrations e schema definitivo pendentes.
 - Adoção de contratos e frontend pertence à etapa seguinte.
