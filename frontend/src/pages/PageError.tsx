@@ -1,5 +1,6 @@
 import { ArrowLeft, ArrowRight, Headphones } from "lucide-react";
 import laptop404 from "../assets/civix/404_page.png";
+import logoCivix from '@/assets/civix/logo-civix.png'
 
 export default function NotFound() {
   return (
@@ -7,13 +8,19 @@ export default function NotFound() {
       <div className="relative mx-auto flex min-h-screen w-full max-w-[1600px] flex-col px-8 py-8 sm:px-12 lg:px-16">
 
         <header className="flex items-center">
-          <div className="flex items-center gap-2 text-[24px] font-semibold tracking-[-0.03em]">
-            <div className="flex items-center gap-[3px]">
-              <span className="block h-6 w-[5px] -skew-x-[20deg] bg-[#f5b51b]" />
-              <span className="block h-6 w-[5px] -skew-x-[20deg] bg-[#102846]" />
-            </div>
-            <span>Civix</span>
-          </div>
+          <a
+            aria-label="Civix — início"
+            className="inline-flex min-h-11 min-w-11 shrink-0 items-center rounded-sm lg:-translate-y-[5px]"
+            href="/"
+          >
+            <img
+              alt="Civix"
+              className="h-8 w-[99px] object-contain"
+              height="32"
+              src={logoCivix}
+              width="99"
+            />
+          </a>
         </header>
 
         <section className="relative flex flex-1 items-center">
