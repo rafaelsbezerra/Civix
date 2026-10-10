@@ -95,3 +95,13 @@ formato SQL nativo ou runner TypeScript e definir campos/relacionamentos.
 Não houve atualização de pacotes ou schema por essa decisão documental.
 Os comandos migrations:apply/show/rollback são propostas para discussão
 posterior, não comandos disponíveis neste momento.
+
+## Política atual aprovada — Prisma 7
+
+Migrations SQL gerenciadas pelo Prisma Migrate. Para reverter uma migration
+concluída, criar uma nova inversa; para migration falha, inspecionar/recuperar
+o banco e reconciliar o histórico. SQL executado diretamente não atualiza
+o histórico; marcar rolled-back não reverte o banco sozinho.
+
+PRs devem ter título/descrição/mensagens em português. Schema comercial
+permanece pendente e os comandos apply/show/rollback serão definidos depois.

@@ -12,7 +12,7 @@
 *   **Back:** Node, Express, TypeScript
 *   **Front:** React + Vite + TypeScript + React Router + shadcn/ui + Tailwind CSS
 *   **Banco de dados:** PostgreSQL
-*   **Persistence:** Existing code uses SQL through Neon/PostgreSQL. Prisma dependencies are present, but its schema has no models and the application does not use PrismaClient. The current decision is Prisma 7, a new database and canonical users naming. Migration format and detailed schema still require confirmation; this has not been implemented.
+*   **Persistence:** Existing code uses SQL through Neon/PostgreSQL. Prisma dependencies are present, but its schema has no models and the application does not use PrismaClient. The current decision is Prisma 7, a new database and canonical users naming. Native SQL migrations managed by Prisma Migrate are approved. Detailed schema is still pending; no commercial database has been initialized.
 *   **Libs:** Zod in the backend; Axios, shadcn/ui and Lucide React in the frontend. Check each package manifest before assuming a library is installed.
 *   **Hospedagem:** a definir depois do MVP
 *   **Gerenciador de pacote:** npm, as reflected by the current package-lock.json files; no Yarn 4 configuration is present.
@@ -96,6 +96,7 @@ async function get(x) {
 
 ## Pull request rules
 
+- Write PR titles, descriptions and review messages in Brazilian Portuguese; keep code identifiers unchanged.
 - In every PR, explain what was changed, how it was implemented, and why.
 - After that explanation, indicate the next steps; state when none are needed.
 - When a change needs a new table, create a versioned migration and include

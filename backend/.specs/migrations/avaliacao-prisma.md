@@ -73,3 +73,9 @@ SQL versionado nativo do Prisma Migrate, ou manter TypeScript com runner separad
 Comandos `npm run migrations:apply`, `migrations:show` e `migrations:rollback`
 são propostas do usuário para discussão após a implementação, não scripts
 existentes nem política de rollback já aprovada.
+
+## Decisão de formato e reversão
+
+Prisma 7 com SQL nativo confirmado. CLI/client/adapter serão fixados em 7.10.0.
+Migration concluída é revertida por nova migration inversa; falhas exigem
+recuperação/reconciliação separadas. Isso substitui as alternativas anteriores.

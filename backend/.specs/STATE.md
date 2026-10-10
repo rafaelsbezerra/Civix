@@ -16,7 +16,7 @@
 - Paginação `page`/`pageSize`, base 1, padrão 20, máximo 100, total e
   ordenação estável; adaptação coordenada dos consumidores frontend.
 - Código em inglês; manter pastas por função, como routes/controllers/services.
-- Prisma na versão principal 7, substituindo a decisão anterior por Prisma 8. Formato das migrations e versão exata aguardam confirmação.
+- Prisma na versão principal 7, substituindo a decisão anterior por Prisma 8. Migrations SQL nativas do Prisma Migrate aprovadas; fixar CLI/client/adapter em 7.10.0.
 - Erros em produção: `{ status, message }`. Fora de produção, acrescentar
   `code`, `details`, `requestId` e `stack`, sanitizando credenciais.
 - Exceção: reorganizar empresas em route/controller/service/entity/interface,
@@ -40,7 +40,7 @@ As propostas abaixo não são contratos aprovados.
 | BE-04 | Idioma e arquivos | Inglês aprovado; kebab-case, sufixos e estilo funcional/classes pendentes | Parcialmente confirmado |
 | BE-05 | Pastas | Manter pastas globais por função; nomes de novas pastas transversais pendentes | Parcialmente confirmado |
 | BE-06 | Persistência desacoplada | Interface de repositório e adapter em memória para testes; SQL no adapter | Aguardando resposta |
-| BE-07 | Migrations | Fixar Prisma 7; proposta 7.10.0 e SQL nativo aguardando confirmação | Parcialmente confirmado |
+| BE-07 | Migrations | Prisma 7.10.0 SQL nativo; sucesso revertido por migration inversa, falha por recuperação explícita | Confirmado |
 | BE-08 | Banco e baseline | PostgreSQL, migrations para banco criado do zero | Confirmado |
 | BE-09 | Modelo canônico | Nome canônico users confirmado; campos, relações e restrições pendentes | Parcialmente confirmado |
 | BE-10 | Padrões adicionais | Validação, serialização, filtros/ordenação, requestId/logs e configuração | Aguardando resposta |

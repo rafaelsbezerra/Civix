@@ -1,6 +1,6 @@
 # Migrations executáveis
 
-Estado: Prisma 7, PostgreSQL e banco criado do zero confirmados. Nome canônico `users`. Campos/vínculos e formato das migrations **Aguardando resposta**. Não aplicar ao banco remoto.
+Estado: Prisma 7, PostgreSQL e banco criado do zero confirmados. Nome canônico `users`. Formato SQL nativo aprovado; campos/vínculos **Aguardando resposta**. Não aplicar ao banco remoto.
 
 ## Problema e escopo
 
@@ -17,7 +17,7 @@ As versões declaradas no projeto (CLI 6 e client 7) precisam ser alinhadas.
 O [fluxo documentado do Prisma 7](https://docs.prisma.io/docs/orm/v7/prisma-migrate)
 usa migrations SQL; a [documentação atual](https://www.prisma.io/docs/orm/migrations/how-migrations-work)
 descreve outra geração do fluxo. Não presumir compatibilidade entre versões.
-A decisão atual é Prisma 7; a aprovação anterior de Prisma 8 foi substituída. Confirmar SQL nativo versus runner TypeScript antes da implementação.
+A decisão atual é Prisma 7; a aprovação anterior de Prisma 8 foi substituída. SQL nativo com Prisma Migrate confirmado; nenhum runner paralelo.
 A [avaliação inicial](avaliacao-prisma.md) registra os resultados e a decisão
 ainda necessária. Um único mecanismo deve
 ser responsável por aplicar e registrar cada migration.
@@ -69,4 +69,22 @@ temporário. Até existir essa evidência, registrar validação como pendente.
 
 ## Decisões atuais
 
-Usar Prisma 7 e banco criado do zero; nome canônico users. A proposta é fixar CLI/client/adapter em 7.10.0. Formato SQL nativo versus runner TS **Aguardando resposta**. Campos e relações do schema continuam pendentes. Comandos migrations:apply/show/rollback serão discutidos após a implementação; ainda não existem.
+Usar Prisma 7 e banco criado do zero; nome canônico users. A proposta é fixar CLI/client/adapter em 7.10.0. SQL nativo confirmado. Campos e relações do schema continuam pendentes. Comandos migrations:apply/show/rollback serão discutidos após a implementação; ainda não existem.
+
+## Política aprovada de migrations
+
+Prisma 7 com SQL nativo. Versões exatas propostas e adotadas nesta base:
+CLI/client/adapter 7.10.0, sem ranges. Banco novo; tabela canônica users.
+
+- Migration concluída: alterar schema para o estado desejado e gerar uma nova
+  migration inversa. Não editar/apagar histórico aplicado nem usar resolve
+  como se fosse desfazer SQL de uma migration concluída.
+- Migration falha: inspecionar o estado, aplicar SQL de recuperação quando
+  necessário e só então registrar rolled-back com migrate resolve.
+- db execute não registra uma migration; resolve não desfaz SQL sozinho.
+- Dados removidos exigem preservação/backup; rollback de schema não os restaura.
+
+Nesta entrega: fixar pacotes, validar configuração e testar geração de SQL
+com fixture isolada. Sem tabela comercial, banco remoto ou aplicação de
+migrations. Schema completo e comandos npm de apply/show/rollback ficam
+para a etapa posterior conforme combinado.
