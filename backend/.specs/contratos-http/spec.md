@@ -70,6 +70,5 @@ incluindo `/api/v1` e as rotas auth sob `/api/auth`.
 
 Base inicial: 14 testes de contrato. Adoção PR #14: 36 testes isolados e
 checks typecheck:foundation/typecheck:contracts aprovados pela implementação.
-Typecheck completo segue bloqueado por Prisma CLI 6/configuração 7 nesta
-baseline. Nenhum banco remoto, envio real de e-mail ou teste frontend.
+O bloqueio histórico do TypeScript completo por CLI 6/configuração 7 foi corrigido pelo tooling Prisma 7 integrado. Nenhum banco remoto, envio real de e-mail ou teste frontend.
 A auditoria de status não reexecutou os testes.

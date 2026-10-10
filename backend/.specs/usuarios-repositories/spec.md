@@ -46,8 +46,7 @@ A divergência users/user permanece até a etapa de schema aprovada.
 
 Extração: 27 testes (14 contratos, 4 empresas, 9 usuários) e tipagem isolada
 aprovados. Comandos: test:users, test:foundation, typecheck:foundation.
-A adoção posterior registra 36 testes. Typecheck completo desta baseline
-mantém o bloqueio Prisma CLI6/configuração7. Auditoria não repetiu esses checks.
+A adoção posterior registra 36 testes. O tooling Prisma 7 integrado corrigiu o bloqueio histórico do TypeScript completo. Auditoria não repetiu esses checks.
 Nenhum banco remoto, envio real, migration ou verificação frontend.
 
 Branches codex/repository-contracts e codex/user-layers foram reunidas em

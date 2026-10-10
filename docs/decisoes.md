@@ -11,7 +11,7 @@ provedores ou arquitetura novos.
 | DEC-02 | Identidade | Autenticação própria, Auth0 ou Neon Auth? Qual comprovação de acesso cliente? |
 | DEC-03 | Papéis | Mapear superadmin, admin empresa, vendedor e cliente para permissões explícitas |
 | DEC-04 | Tenant | Vínculos usuário/empresa, contexto autenticado, filtros SQL, IA e acesso público |
-| DEC-05 | Persistência | Prisma 7/SQL nativo/inversa, PostgreSQL novo e nome users confirmados; campos/vínculos/restrições, baseline, SQL antigos e integração do tooling ainda pendentes |
+| DEC-05 | Persistência | Prisma 7/SQL nativo/inversa, PostgreSQL novo e nome users confirmados; campos/vínculos/restrições, baseline e SQL antigos pendentes; tooling integrado via PR #7 |
 | DEC-06 | API | Envelope, erro/status, enum e limites/meta de paginação confirmados; faltam abrangência/consultas paginadas, frontend e serialização/validação geral |
 | DEC-07 | Onboarding | Convite, primeiro acesso, reenvio, reset, expiração, uso único, sessão e revogação |
 | DEC-08 | Planos/vendas | Plano por empresa ou usuário, mensalidade/setup, venda automática/manual, exclusão, cobrança e limites |

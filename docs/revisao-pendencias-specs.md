@@ -4,7 +4,7 @@ Auditoria documental em 2026-10-10. Referências originais: staging `e2b3d8b`,
 integração HTTP `ee74823` ([PR #14](https://github.com/rafaelsbe/Civix/pull/14))
 e tooling Prisma `48eb252` ([PR #8](https://github.com/rafaelsbe/Civix/pull/8)).
 Atualização após merges: staging 7b976d7 incorpora tooling Prisma via PR #7
-(ea5f1d) e tipos de auth via PR #12. Os estados abaixo refletem essa integração.
+(eea5f1d) e tipos de auth via PR #12. Os estados abaixo refletem essa integração.
 A revisão compara specs, código, configurações e evidências das entregas;
 não executa implementação, banco, migrations, frontend ou novos testes.
 
