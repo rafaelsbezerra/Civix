@@ -9,6 +9,7 @@ da `staging` acima.
 
 ## Guia de leitura
 
+- [Base de padrões do backend e etapa de adoção](padroes-backend.md).
 - [Visão de produto e requisitos](produto.md).
 - [Arquitetura, módulos e persistência atuais](arquitetura.md).
 - [API e contratos observados](api.md).

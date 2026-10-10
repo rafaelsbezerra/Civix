@@ -114,6 +114,10 @@ async function get(x) {
   and branches, and create a third integration branch to combine their changes.
 - Do not merge or push unrelated changes with a task. Preserve other worktrees
   and pending changes.
-- Current phase exception: the user requested only `staging`, without commits.
-  Keep that restriction until the user explicitly changes it; the general
-  delivery rule does not override that instruction.
+- Current phase: commit the documentation before implementation; implement
+  the foundation without adopting it in existing application flows. Use
+  task worktrees/branches and open all PRs against `staging`. Update the main
+  documentation for every implementation. Adoption is a subsequent step.
+- Exception for this phase: reorganize the existing companies module into
+  route/controller/service and entity/interface files, preserving its current
+  HTTP behavior. Keep the frontend and other existing modules intact.
