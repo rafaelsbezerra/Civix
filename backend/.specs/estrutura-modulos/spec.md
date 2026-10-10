@@ -38,20 +38,32 @@ contratos novos. MOD-04 permanece para adoção posterior.
 - [ ] MOD-01: Aprovar idioma, nomes, pastas e um exemplo de módulo.
   Aceite: registrar regras de arquivos, exports/imports, funções/classes,
   tipos e constantes. Decidir estilo funcional versus classes.
-- [ ] MOD-02: Extrair controller de empresas e ajustar service/routes.
+- [x] MOD-02: Extrair controller de empresas e ajustar service/routes.
   Depende dos contratos HTTP e tipos aprovados.
   Aceite: handlers separados, erros preservam sua natureza, routes sem
   lógica de negócio e service sem dependência de HTTP.
-- [ ] MOD-03: Renomear/mover arquivos conforme o padrão aprovado.
+- [x] MOD-03: Renomear/mover arquivos conforme o padrão aprovado.
   Aceite: imports ESM resolvem e casing funciona em Linux; endpoints mantidos
   ou alterados somente com decisão e atualização dos consumidores.
 - [ ] MOD-04: Inventariar e adequar user/auth/admin/plans ao mesmo padrão.
   Aceite: nenhum SQL em routes/controllers, nenhuma duplicação de contratos;
   mudanças de regras de autenticação ficam fora desta tarefa.
-- [ ] MOD-05: Documentar convenções e atualizar arquitetura/diagnóstico.
+- [x] MOD-05: Documentar convenções e atualizar arquitetura/diagnóstico.
   Aceite: novo módulo pode seguir exemplo curto com responsabilidades claras.
 
 Verificação futura: typecheck e testes HTTP dos caminhos existentes de
 empresas (listar, detalhe, filtros e busca), cobrindo ausência e falha de
 persistência. Comparar inventário de rotas antes/depois; não considerar
 regressões atuais como comportamento desejado.
+
+## Implementação entregue
+
+Empresas segue pastas globais por função com arquivos em inglês/kebab-case
+conforme AGENTS.md. O estilo funcional existente foi preservado, sem
+impor classes aos demais módulos. Queries e resultados legados continuam
+no service; controller concentra HTTP e routes registra os sete endpoints.
+Arquivos de entidade, resultados legados e interface de query foram extraídos.
+Nenhum contrato novo, frontend ou outro módulo foi adotado/refatorado.
+MOD-01 fica parcialmente pendente para convenções além do AGENTS.md;
+MOD-04 pertence à adoção posterior. Testes HTTP locais verificam preservação
+de endpoints, mensagens, validações, ausência/vazio e falhas de persistência.

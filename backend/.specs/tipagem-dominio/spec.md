@@ -49,3 +49,18 @@ e modelo canônico de identidade permanecem para a adoção posterior.
 
 Verificação futura: typecheck; testes de mappers, validação e invariantes
 aprovadas. Não criar testes para getters sem comportamento relevante.
+
+## Extração de empresas nesta fase
+
+Extraídos `entities/company.ts`, `dtos/company-response.ts` e
+`interfaces/company-query.ts`. Company descreve o modelo observado e
+preserva nomes de campos legados; não representa schema aprovado nem
+introduz invariantes novas. Os wrappers foram renomeados para resultados
+legados e mantêm formato público. CompanyQuery é a dependência mínima
+de consulta, com fake exclusivo dos testes; não antecipa BE-06.
+
+TYP-02 está concluída somente para empresas. TYP-01/03/04 e a extração
+dos outros domínios continuam pendentes. Não há mapper camelCase nem
+novas validações no catálogo; adotar esses padrões seria alteração de
+comportamento, reservada para a próxima etapa. Documentação de arquitetura
+e diagnóstico atualizada (TYP-05 para esta extração).

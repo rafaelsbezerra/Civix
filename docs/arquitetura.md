@@ -54,7 +54,7 @@ adicionam `users.plan_id` somente se `users` já existir. Não criam `users`,
 | `empresas` | categoria, cnpj, descricao_detalhada, verificado, tamanho, status e contatos | Notion usa segmento_id, plano_id, slug, media_preco, welcome_message e is_active |
 | `plans` | BIGSERIAL, slug, price, billing_period, features/limits JSONB, flags e ordem | Notion usa UUID e separa preço único e mensalidade |
 
-Fontes: [empresaService](../backend/src/services/empresaService.ts),
+Fontes: [company-service](../backend/src/services/company-service.ts),
 [plan.service](../backend/src/services/plan.service.ts),
 [controllers](../backend/src/controller/userController.ts) e
 [migration inicial](../backend/prisma/migrations/20260914210000_create_plans/migration.sql).
@@ -77,3 +77,30 @@ usa URLs localhost fixas. O token de login fica em localStorage.
 Tipos são duplicados entre frontend e backend, sem contrato gerado ou
 validação de resposta em runtime. O catálogo escolhe um filtro por
 precedência, em vez de combinar os filtros.
+
+## Reorganização de empresas implementada
+
+O catálogo mantém `/api/v1/empresas` e seus sete endpoints.
+[company-routes](../backend/src/routes/company-routes.ts) registra handlers;
+[company-controller](../backend/src/controllers/company-controller.ts) valida
+entradas e define status/JSON; o service mantém consultas parametrizadas e
+resultados legados. O servidor mudou apenas o import/nome do router.
+
+[Company](../backend/src/entities/company.ts) descreve os campos existentes
+sem novas invariantes: os nomes portugueses e snake_case são preservados
+para compatibilidade com as linhas SQL e respostas atuais.
+[CompanyListResult/CompanyDetailResult](../backend/src/dtos/company-response.ts)
+são resultados legados, sem adoção dos contratos compartilhados novos.
+A interface [CompanyQuery](../backend/src/interfaces/company-query.ts) injeta
+a consulta usada nos testes; não define um repositório de domínio nem
+substitui o Pool Neon em produção. O SQL permanece no service enquanto
+a decisão de adapter/repositório aguarda resposta.
+
+Exemplo de fluxo: GET `/api/v1/empresas/categoria/Obras` → controller
+valida categoria não vazia → service consulta por LOWER com parâmetro →
+controller retorna o envelope legado. Frontend e demais módulos intactos.
+A próxima etapa adotará os contratos novos com os consumidores.
+
+Verificação: quatro testes HTTP com Express e consulta falsa cobrem os sete
+endpoints, mensagens/status, vazios, ausência, parâmetros e falhas SQL.
+Nenhum teste conecta ao banco remoto.
