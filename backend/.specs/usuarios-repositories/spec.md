@@ -16,13 +16,14 @@ Estado: refatoração solicitada. Implementação das decisões abaixo
   tabelas users/user ou regras de autenticação incidentalmente.
 - Sempre perguntar caso exista dúvida e registrar decisão pendente.
 
-## Decisões pendentes
+## Decisões confirmadas
 
-1. **Aguardando resposta:** repositories contém interface + implementação
-   SQL (user.repository.ts e user.postgres.repository.ts), retirando SQL dos
-   services, ou apenas interfaces com SQL mantido nos services?
-2. **Aguardando resposta:** usuários inclui auth.controller/admin.controller
-   (primeiro acesso e convites), ou apenas userController/userRoute agora?
+1. Somente interfaces em repositories; implementações futuras. SQL atual
+   permanece nos services, sem runner, adapter ou factories novos.
+2. Refatorar somente userController/userRoute; auth/admin e convite/primeiro
+   acesso permanecem intactos.
+3. Interfaces para usuários, empresas e planos. Não criar contrato de
+   persistência para envio de e-mail ou para módulos comerciais ausentes.
 
 ## Critérios de aceite
 

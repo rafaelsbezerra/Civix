@@ -78,8 +78,9 @@ adaptar frontend e definir schema canônico antes das migrations.
 ## Próxima refatoração: usuários e repositories
 
 Interfaces de persistência por módulo ficarão em backend/src/repositories.
-A separação de usuários foi solicitada; localização das implementações SQL
-e inclusão de primeiro acesso/convites aguardam resposta. Ver
+Somente interfaces de repositories foram aprovadas; implementações ficam
+para depois. Refatorar apenas userController/userRoute; primeiro acesso e
+convites permanecem intactos. SQL permanece nos services atuais. Ver
 [spec](../backend/.specs/usuarios-repositories/spec.md).
 Sempre perguntar diante de dúvida antes de implementar a parte afetada.
 
