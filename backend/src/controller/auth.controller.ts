@@ -3,7 +3,7 @@
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
-import { db } from '../config/data.js';
+import { db } from '../shared/config/data.js';
 import { sendForgotPasswordEmail } from '../services/mail.service.js';
 
 interface JwtInvitePayload {

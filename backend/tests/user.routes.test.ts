@@ -6,7 +6,7 @@ import bcrypt from 'bcrypt';
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import { Resend } from 'resend';
-import { db } from '../src/config/data.js';
+import { db } from '../src/shared/config/data.js';
 import userRoutes from '../src/routes/user.routes.js';
 
 type QueryCall = { text: string; values?: unknown[] };

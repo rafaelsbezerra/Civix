@@ -1,4 +1,4 @@
-import { db } from '../config/data.js';
+import { db } from '../shared/config/data.js';
 
 import type { Plan } from '../entities/plan.entity.js';
 import type { PlanRow } from '../interfaces/plan.row.js';

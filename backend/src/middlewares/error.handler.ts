@@ -1,6 +1,6 @@
 import type { ErrorRequestHandler, RequestHandler } from 'express';
-import { serializeError, type ErrorContext } from '../contracts/error.contract.js';
-import { AppError } from '../errors/app.error.js';
+import { serializeError, type ErrorContext } from '../shared/contracts/error.contract.js';
+import { AppError } from '../shared/errors/app.error.js';
 
 // Base exportada sem registro no servidor existente.
 export function createErrorHandler(context: ErrorContext = {}): ErrorRequestHandler {

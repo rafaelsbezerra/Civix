@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { sendInviteEmail } from '../services/mail.service.js';
-import { db } from '../config/data.js';
+import { db } from '../shared/config/data.js';
 
 interface UserRow {
   id: string;

@@ -1,4 +1,4 @@
-import { db } from '../config/data.js';
+import { db } from '../shared/config/data.js';
 import type { Company } from '../entities/company.entity.js';
 import type { CompanyListResult, CompanyDetailResult } from '../dtos/company.response.dto.js';
 

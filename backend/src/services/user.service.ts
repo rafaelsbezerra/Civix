@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import crypto from 'node:crypto';
-import { db } from '../config/data.js';
+import { db } from '../shared/config/data.js';
 import * as mailService from './mail.service.js';
 import type { User } from '../entities/user.entity.js';
 import type { LoginInput, LoginResult, PasswordResetInput } from '../dtos/user.auth.dto.js';

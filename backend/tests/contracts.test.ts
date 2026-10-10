@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { AppError } from '../src/errors/app.error.js';
-import { serializeError, sanitizeDiagnostic } from '../src/contracts/error.contract.js';
-import { parsePagination, createPaginationMeta } from '../src/contracts/pagination.contract.js';
-import { createSuccessResponse, sendCreated, sendNoContent, sendSuccess, type ResponseWriter } from '../src/contracts/response.contract.js';
+import { AppError } from '../src/shared/errors/app.error.js';
+import { serializeError, sanitizeDiagnostic } from '../src/shared/contracts/error.contract.js';
+import { parsePagination, createPaginationMeta } from '../src/shared/contracts/pagination.contract.js';
+import { createSuccessResponse, sendCreated, sendNoContent, sendSuccess, type ResponseWriter } from '../src/shared/contracts/response.contract.js';
 import { createErrorHandler, createNotFoundHandler } from '../src/middlewares/error.handler.js';
 import express from 'express';
 import { once } from 'node:events';

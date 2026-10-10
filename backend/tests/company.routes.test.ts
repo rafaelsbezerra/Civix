@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { once } from 'node:events';
 import test, { type TestContext } from 'node:test';
-import { db } from '../src/config/data.js';
+import { db } from '../src/shared/config/data.js';
 import companyRoutes from '../src/routes/company.routes.js';
 import express from 'express';
 import type { Company } from '../src/entities/company.entity.js';
