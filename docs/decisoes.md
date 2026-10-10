@@ -61,3 +61,9 @@ em ADRs apenas quando forem aprovadas.
 
 Esta fase termina com a baseline documental. A implementação dos itens
 acima pertence à próxima fase solicitada pelo usuário.
+
+## Decisões posteriores — 2026-10-10
+
+DEC-05: nome canônico users e banco criado do zero confirmados.
+Prisma CLI/client/adapter estão fixados em 7.10.0 com migrations SQL nativas. Estes pontos não
+aguardam confirmação; campos/vínculos mínimos continuam pendentes.

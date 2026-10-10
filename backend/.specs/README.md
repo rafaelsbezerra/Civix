@@ -33,7 +33,7 @@ uma camada de abstração sem necessidade concreta.
 
 Implementação atual: erro/sucesso com AppError, ErrorCode e handlers globais.
 [Spec de adoção HTTP](adocao-http/spec.md). Repositories seguem interfaces;
-paginação e schema permanecem para tarefas posteriores. Não adaptar o frontend
+paginação e schema permanecem para tarefas posteriores. Tooling Prisma 7.10.0 com SQL nativo integrado da staging; aplicação de migrations no banco continua pendente. Não adaptar o frontend
 nesta tarefa; documentar suas incompatibilidades.
 
 ## Outros padrões sugeridos

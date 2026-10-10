@@ -67,7 +67,7 @@ Não houve teste em banco ou alteração de contratos do frontend.
 ## Prisma e próximos passos
 
 O alvo aprovado é Prisma 7/SQL nativo com migration inversa. Este checkout
-ainda mistura CLI 6 e client/adapter 7; integração do tooling é separada.
+fixa CLI/client/adapter em 7.10.0; tooling integrado da staging.
 Schema comercial e baseline de banco vazio continuam pendentes.
 Próximos passos: frontend, queries paginadas/ordenadas e schema canônico.
 
@@ -135,6 +135,5 @@ Executado pela tarefa de implementação: npm run test:foundation passou com
 Suíte isolada cobre contratos, usuários, empresas, auth, planos, middleware,
 404, JSON inválido (400) e corpo acima do limite (413), com persistência/e-mail
 simulados. Produção omite diagnóstico; staging preserva stack/cause sanitizados.
-Typecheck completo continua bloqueado exclusivamente pelo TS2353 preexistente
-em prisma.config.ts (CLI 6/configuração 7). Não houve banco remoto, envio real
+Na entrega original, o typecheck completo estava bloqueado por TS2353 em prisma.config.ts (CLI 6/configuração 7); o tooling Prisma 7 integrado da staging corrigiu esse bloqueio. Não houve banco remoto, envio real
 de e-mail, migration, dependência nova ou adaptação frontend.

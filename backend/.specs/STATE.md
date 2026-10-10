@@ -42,7 +42,7 @@ As propostas abaixo não são contratos aprovados.
 | BE-04 | Idioma e arquivos | Identificadores em inglês; arquivos domínio.papel.ts; comentários/erros em português; controller com funções independentes | Confirmado |
 | BE-05 | Pastas | Manter pastas globais por função; nomes de novas pastas transversais pendentes | Parcialmente confirmado |
 | BE-06 | Persistência desacoplada | Repositories somente interfaces; SQL atual nos services; implementações futuras | Confirmado |
-| BE-07 | Migrations | Prisma 7 SQL nativo e migration inversa aprovados; integração do tooling pendente neste checkout | Confirmado |
+| BE-07 | Migrations | Prisma 7 SQL nativo e migration inversa aprovados; tooling 7.10.0 integrado; schema e execução no banco pendentes | Confirmado |
 | BE-08 | Banco e baseline | PostgreSQL e banco criado do zero confirmados; baseline depende do schema | Confirmado |
 | BE-09 | Modelo canônico | Nome canônico users confirmado; campos, vínculos e restrições pendentes | Parcialmente confirmado |
 | BE-10 | Padrões adicionais | Validação, serialização, filtros/ordenação, requestId/logs e configuração | Aguardando resposta |
@@ -67,7 +67,7 @@ O código possui consultas SQL/Neon; sua presença não comprova banco pronto.
   pela adoção HTTP de todos os endpoints backend.
 - Empresas: extração de camadas/tipos autorizada, sem mudar contratos atuais.
 - Prisma 7/SQL nativo substituiu a decisão anterior de aguardar Prisma 8.
-  Integração do tooling, schema definitivo, baseline e migrations ficam pendentes neste checkout.
+  Tooling 7.10.0 integrado da staging; schema definitivo, baseline e execução de migrations permanecem pendentes.
 - Contratos de erro/sucesso agora são adotados no backend. Frontend fica
   para a etapa seguinte por decisão explícita; paginação não foi aplicada.
 
@@ -78,12 +78,11 @@ português, identificadores/códigos em inglês. Controller com funções soltas
 importando service diretamente. Sem abstração CompanyQuery; interfaces apenas
 para contratos úteis. Correção local na staging, sem commit/PR/worktree nesta
 tarefa, conforme instrução explícita. O alvo de migrations é Prisma 7/SQL
-nativo; a instalação atual desta staging ainda tem CLI 6 até a integração
-da tarefa de tooling.
+nativo; CLI/client/adapter estão fixados em 7.10.0.
 
 ## Adoção HTTP — 2026-10-10
 
 AppError e ErrorCode substituem reason/switch; erros inesperados usam 500
 com causa preservada. JSON de sucesso contém data/meta, sem success/plan/plans
 duplicados. Auth/admin preservam regras; admin segue desmontado. Ver
-[spec de adoção](adocao-http/spec.md). 36 testes e typechecks isolados passaram; full typecheck bloqueado pelo Prisma preexistente.
+[spec de adoção](adocao-http/spec.md). 36 testes e typechecks isolados passaram; o bloqueio do typecheck completo por CLI 6 é histórico e foi corrigido pela base Prisma 7.
