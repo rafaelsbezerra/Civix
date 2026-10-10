@@ -44,7 +44,7 @@ e modelo canônico de identidade permanecem para a adoção posterior.
 - [ ] TYP-04: Implementar mapeamento e validação aprovados.
   Aceite: nomes camelCase/snake_case, null/ausente, datas e enums são tratados
   explicitamente; entradas inválidas falham antes de executar o caso de uso.
-- [ ] TYP-05: Atualizar documentação de modelo e arquitetura.
+- [x] TYP-05 (extração de empresas): Atualizar documentação de modelo e arquitetura.
   Aceite: exemplos distinguem entidade, DTO e persistência sem burocracia.
 
 Verificação futura: typecheck; testes de mappers, validação e invariantes

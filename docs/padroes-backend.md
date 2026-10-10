@@ -110,3 +110,13 @@ Mantidos login cliente por e-mail, empresa com bcrypt, JWT1h, recuperação
 sem enumeração, token aleatório com hash SHA-256/expiração1h, reset bcrypt10
 e limpeza dos tokens. Repositories são interfaces apenas: o SQL continua
 nos services. Convite/primeiro acesso, frontend e schema não foram alterados.
+
+## Resolução da base Prisma — 2026-10-10
+
+CLI, client e adapter fixados em 7.10.0 nos PRs #7/#8, com SQL nativo gerenciado
+pelo Prisma Migrate e reversão por migration inversa. Preservadas as convenções
+atuais de staging, src/shared, camadas de usuários e repositories somente
+interfaces. Nenhuma regra HTTP nova foi adotada nesta resolução. Schema,
+baseline de banco vazio e prova do ciclo de migrations permanecem pendentes.
+O teste offline usa prisma.tooling.test.mjs; comandos operacionais ainda
+dependem da discussão prevista. Consultar operação para verificações/limites.

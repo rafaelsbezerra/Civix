@@ -55,7 +55,8 @@ BE-10 é sugestão de escopo, ainda não aprovada.
 ## Estado da entrega
 
 Specs atualizadas para implementação da base passiva. Base HTTP e extração de empresas implementadas; adoção permanece pendente. Nenhum banco
-provisionado, migration executada, dependência alterada ou contrato aplicado.
+provisionado ou migration executada. Contratos continuam sem adoção nesta baseline;
+o alinhamento de dependências Prisma é o incremento desta branch.
 O código possui consultas SQL/Neon; sua presença não comprova banco pronto.
 
 ## Respostas posteriores à criação das specs
@@ -64,7 +65,7 @@ O código possui consultas SQL/Neon; sua presença não comprova banco pronto.
   diagnóstico sanitizado. A base HTTP está implementada sem ativação nas rotas.
 - Empresas: extração de camadas/tipos autorizada, sem mudar contratos atuais.
 - Prisma 7/SQL nativo substituiu a decisão anterior de aguardar Prisma 8.
-  Integração do tooling, schema definitivo, baseline e migrations ficam pendentes neste checkout.
+  Tooling preparado nesta branch com CLI/client/adapter 7.10.0; schema definitivo, baseline e aplicação de migrations continuam pendentes.
 - Adoção de contratos e frontend pertence à etapa seguinte.
 
 ## Convenções confirmadas após os merges — 2026-10-10
@@ -74,5 +75,13 @@ português, identificadores/códigos em inglês. Controller com funções soltas
 importando service diretamente. Sem abstração CompanyQuery; interfaces apenas
 para contratos úteis. Correção local na staging, sem commit/PR/worktree nesta
 tarefa, conforme instrução explícita. O alvo de migrations é Prisma 7/SQL
-nativo; a instalação atual desta staging ainda tem CLI 6 até a integração
-da tarefa de tooling.
+nativo; esta branch fixa CLI/client/adapter em 7.10.0 e preserva os ajustes atuais
+da staging. O merge remoto permanece a cargo do usuário.
+
+## Resolução dos PRs #7/#8 — 2026-10-10
+
+Staging e2b3d8b integrada às branches existentes, preservando nomes, src/shared,
+camadas de usuários e interfaces de repositories. CLI/client/adapter 7.10.0,
+test:prisma e testes offline permanecem como incremento. Schema sem models e
+SQL de planos preservados; nenhum banco acessado ou migration aplicada.
+Os PRs continuam abertos para merge pelo usuário.
