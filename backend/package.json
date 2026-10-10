@@ -7,7 +7,10 @@
     "start": "tsx src/server.ts",
     "dev": "tsx src/server.ts",
     "test:contracts": "node --import tsx --test tests/contracts.test.ts",
-    "typecheck:contracts": "tsc -p tsconfig.contracts.json"
+    "typecheck:contracts": "tsc -p tsconfig.contracts.json",
+    "test:users": "node --import tsx --test tests/user.routes.test.ts",
+    "test:foundation": "node --import tsx --test tests/contracts.test.ts tests/company.routes.test.ts tests/user.routes.test.ts",
+    "typecheck:foundation": "tsc -p tsconfig.foundation.json"
   },
   "dependencies": {
     "@getbrevo/brevo": "^6.0.3",

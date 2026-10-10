@@ -21,7 +21,8 @@ comportamentos demonstrados pela implementação atual.
 ## Backend
 
 O servidor monta routers de usuários, primeiro acesso, empresas e planos.
-Usuários concentram login e recuperação de senha no controller;
+Usuários agora separam handlers HTTP e validação no controller de login,
+recuperação e redefinição no user.service;
 primeiro acesso possui controller próprio. Na baseline inicial, empresas executavam handlers diretamente nas rotas.
 Após a extração, usam controller com funções independentes e SQL no service. Planos usam
 rota → controller → service, com mapeamento explícito do DTO.
@@ -56,7 +57,7 @@ adicionam `users.plan_id` somente se `users` já existir. Não criam `users`,
 
 Fontes: [company.service](../backend/src/services/company.service.ts),
 [plan.service](../backend/src/services/plan.service.ts),
-[controllers](../backend/src/controller/userController.ts) e
+[controllers](../backend/src/controller/user.controller.ts) e
 [migration inicial](../backend/prisma/migrations/20260914210000_create_plans/migration.sql).
 O banco real não foi inspecionado; tipos TypeScript não garantem que suas
 colunas existam. O SQL do Notion tem erros de sintaxe e campos incompletos;
@@ -104,3 +105,15 @@ A próxima etapa adotará os contratos novos com os consumidores.
 Verificação: quatro testes HTTP com Express e consulta falsa cobrem os sete
 endpoints, mensagens/status, vazios, ausência, parâmetros e falhas SQL.
 Nenhum teste conecta ao banco remoto.
+
+## Contratos de persistência e usuários
+
+Repositories reúne UserRepository, CompanyRepository e PlanRepository como
+interfaces sem implementação. Elas ainda não são importadas pelos services.
+Plan/PlanRow foram extraídos sem alterar consultas ou mapeamento. Atribuição
+de plano ao usuário pertence ao contrato UserRepository.
+
+Usuários segue routes → controller → service com handlers independentes,
+entity/DTO separados e SQL no service até implementar repositories. As
+rotas/aliases e os efeitos de login/recuperação/reset são preservados.
+Auth/admin mantêm seus controllers originais e a divergência users/user.
