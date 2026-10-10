@@ -1,4 +1,4 @@
-import { AppError } from '../errors/app-error.js';
+import { AppError } from '../errors/app.error.js';
 
 export interface ProductionErrorResponse { status: number; message: string }
 export interface DiagnosticErrorResponse extends ProductionErrorResponse {
@@ -10,7 +10,7 @@ export interface DiagnosticErrorResponse extends ProductionErrorResponse {
 export interface ErrorContext { environment?: string; requestId?: string }
 
 const SENSITIVE_KEY = /password|passwd|secret|token|authorization|cookie|credential|api[-_]?key/i;
-const REDACTED = '[REDACTED]';
+const REDACTED = '[REMOVIDO]';
 
 export function redactText(text: string): string {
   return text
@@ -25,11 +25,11 @@ function readErrorProperty(error: Error, key: string): unknown {
     const descriptor = Object.getOwnPropertyDescriptor(owner, key);
     if (descriptor) {
       if ('value' in descriptor) return descriptor.value;
-      // V8 exposes its lazily computed stack through a native getter.
+      // O V8 expõe a pilha calculada sob demanda por um getter nativo.
       if (key === 'stack' && descriptor.get && Function.prototype.toString.call(descriptor.get).includes('[native code]')) {
-        try { return descriptor.get.call(error); } catch { return '[Unavailable stack]'; }
+        try { return descriptor.get.call(error); } catch { return '[Pilha indisponível]'; }
       }
-      return '[Accessor]';
+      return '[Acessor]';
     }
     owner = Object.getPrototypeOf(owner);
   }
@@ -42,7 +42,7 @@ export function sanitizeDiagnostic(value: unknown, visited = new WeakSet<object>
   if (value === undefined) return null;
   if (typeof value !== 'object') return redactText(String(value));
   if (visited.has(value)) return '[Circular]';
-  if (depth >= 8) return '[Depth limit]';
+  if (depth >= 8) return '[Limite de profundidade]';
   visited.add(value);
   if (value instanceof Error) {
     return {
@@ -56,14 +56,14 @@ export function sanitizeDiagnostic(value: unknown, visited = new WeakSet<object>
   if (Array.isArray(value)) {
     return Array.from({ length: value.length }, (_, index) => {
       const descriptor = descriptors[String(index)];
-      return !descriptor ? null : 'value' in descriptor ? sanitizeDiagnostic(descriptor.value, visited, depth + 1) : '[Accessor]';
+      return !descriptor ? null : 'value' in descriptor ? sanitizeDiagnostic(descriptor.value, visited, depth + 1) : '[Acessor]';
     });
   }
   const result: Record<string, unknown> = {};
   for (const [key, descriptor] of Object.entries(descriptors)) {
     if (!descriptor.enumerable) continue;
     const item = SENSITIVE_KEY.test(key) ? REDACTED :
-      'value' in descriptor ? sanitizeDiagnostic(descriptor.value, visited, depth + 1) : '[Accessor]';
+      'value' in descriptor ? sanitizeDiagnostic(descriptor.value, visited, depth + 1) : '[Acessor]';
     Object.defineProperty(result, key, { value: item, enumerable: true });
   }
   return result;
@@ -74,12 +74,12 @@ export function serializeError(error: unknown, context: ErrorContext = {}): Prod
   const status = known ? error.status : 500;
   const message = known ? redactText(error.message) : 'Erro interno do servidor';
   if ((context.environment ?? process.env.NODE_ENV) === 'production') return { status, message };
-  const stack = readErrorProperty(error instanceof Error ? error : new Error('Non-Error thrown'), 'stack');
+  const stack = readErrorProperty(error instanceof Error ? error : new Error('Exceção lançada sem instância de Error'), 'stack');
   return {
     status, message,
     code: known ? redactText(error.code) : 'INTERNAL_ERROR',
     details: sanitizeDiagnostic(known ? { details: readErrorProperty(error, 'details'), cause: readErrorProperty(error, 'cause') } : error),
-    stack: typeof stack === 'string' ? redactText(stack) : '[Unavailable stack]',
+    stack: typeof stack === 'string' ? redactText(stack) : '[Pilha indisponível]',
     ...(context.requestId ? { requestId: redactText(context.requestId) } : {}),
   };
 }

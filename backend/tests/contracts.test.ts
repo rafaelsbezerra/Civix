@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { AppError } from '../src/errors/app-error.js';
-import { serializeError, sanitizeDiagnostic } from '../src/contracts/error.contract.js';
-import { parsePagination, createPaginationMeta } from '../src/contracts/pagination.contract.js';
-import { createSuccessResponse, sendCreated, sendNoContent, sendSuccess, type ResponseWriter } from '../src/contracts/response.contract.js';
-import { createErrorHandler, createNotFoundHandler } from '../src/middlewares/error-handler.js';
+import { AppError } from '../src/shared/errors/app.error.js';
+import { serializeError, sanitizeDiagnostic } from '../src/shared/contracts/error.contract.js';
+import { parsePagination, createPaginationMeta } from '../src/shared/contracts/pagination.contract.js';
+import { createSuccessResponse, sendCreated, sendNoContent, sendSuccess, type ResponseWriter } from '../src/shared/contracts/response.contract.js';
+import { createErrorHandler, createNotFoundHandler } from '../src/middlewares/error.handler.js';
 import express from 'express';
 import { once } from 'node:events';
 
@@ -17,7 +17,7 @@ for (const environment of ['development', 'test', 'staging', 'preview', '']) {
     assert.ok('stack' in body && body.stack?.includes('AppError'));
     assert.ok('requestId' in body && body.requestId === 'request-1');
     const json = JSON.stringify(body);
-    assert.ok(json.includes('[REDACTED]'));
+    assert.ok(json.includes('[REMOVIDO]'));
     assert.ok(json.includes('name'));
     assert.ok(!json.includes('private'));
   });
@@ -25,7 +25,7 @@ for (const environment of ['development', 'test', 'staging', 'preview', '']) {
 
 test('production has exactly status and message for classified and unexpected failures', () => {
   assert.deepEqual(serializeError(new AppError({ status: 400, code: 'VALIDATION_ERROR', message: 'Entrada inválida', details: { field: 'email' } }), { environment: 'production', requestId: 'secret' }), { status: 400, message: 'Entrada inválida' });
-  for (const failure of [new Error('SQL internals'), 'unexpected', null, { status: 401, message: 'fake' }]) {
+  for (const failure of [new Error('Detalhes internos do SQL'), 'unexpected', null, { status: 401, message: 'fake' }]) {
     assert.deepEqual(serializeError(failure, { environment: 'production' }), { status: 500, message: 'Erro interno do servidor' });
   }
 });
@@ -33,11 +33,11 @@ test('production has exactly status and message for classified and unexpected fa
 test('diagnostics handle non-Error throws, circular data, accessors and sensitive strings', () => {
   const cycle: Record<string, unknown> = { authorization: 'Bearer private', message: 'password=private token="private"' };
   cycle.self = cycle;
-  Object.defineProperty(cycle, 'getter', { enumerable: true, get() { throw new Error('must not execute'); } });
+  Object.defineProperty(cycle, 'getter', { enumerable: true, get() { throw new Error('Não deve ser executado'); } });
   const json = JSON.stringify(sanitizeDiagnostic(cycle));
   assert.ok(!json.includes('private'));
   assert.ok(json.includes('[Circular]'));
-  assert.ok(json.includes('[Accessor]'));
+  assert.ok(json.includes('[Acessor]'));
   assert.equal(serializeError('failure', { environment: 'test' }).status, 500);
 });
 
@@ -70,7 +70,7 @@ test('invalid pagination consistently raises 400 and rejects unsafe counts', () 
 
 test('isolated Express app exercises production errors and unknown route without changing real bootstrap', async () => {
   const app = express();
-  app.get('/failure', (_request, _response, next) => next(new Error('private SQL')));
+  app.get('/failure', (_request, _response, next) => next(new Error('SQL privado')));
   app.use(createNotFoundHandler());
   app.use(createErrorHandler({ environment: 'production' }));
   const server = app.listen(0, '127.0.0.1');
@@ -96,14 +96,14 @@ test('quoted JSON secrets are redacted from messages and stack', () => {
 });
 
 test('Error and array accessors do not interrupt serialization', () => {
-  const error = new Error('failure');
-  Object.defineProperty(error, 'cause', { get() { throw new Error('must not execute'); } });
+  const error = new Error('Falha');
+  Object.defineProperty(error, 'cause', { get() { throw new Error('Não deve ser executado'); } });
   const body = serializeError(error, { environment: 'test' });
   assert.equal(body.status, 500);
-  assert.ok(JSON.stringify(body).includes('[Accessor]'));
+  assert.ok(JSON.stringify(body).includes('[Acessor]'));
   const array: unknown[] = [null];
-  Object.defineProperty(array, '0', { get() { throw new Error('must not execute'); } });
-  assert.deepEqual(sanitizeDiagnostic(array), ['[Accessor]']);
+  Object.defineProperty(array, '0', { get() { throw new Error('Não deve ser executado'); } });
+  assert.deepEqual(sanitizeDiagnostic(array), ['[Acessor]']);
   assert.ok('stack' in serializeError(null, { environment: 'test' }));
 });
 

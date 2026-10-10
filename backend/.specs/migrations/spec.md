@@ -1,53 +1,58 @@
-# Base de migrations — Prisma 7
+# Migrations — base Prisma 7
 
-Estado: tooling implementado e verificado sem banco. Prisma 7.10.0 com SQL
-nativo, PostgreSQL novo e nome canônico `users` aprovados. Campos, vínculos e
-restrições do schema comercial: **Aguardando resposta**.
+Estado: tooling implementado nesta branch e alinhado à staging e2b3d8b.
+CLI/client/adapter fixados em 7.10.0; SQL nativo, banco novo PostgreSQL e
+nome canônico users confirmados. Schema comercial e aplicação no banco
+continuam pendentes. Os PRs #7/#8 permanecem abertos para merge pelo usuário.
 
-## Problema e escopo
+## Decisões e limites
 
-O diagnóstico inicial encontrou CLI 6 com client/adapter 7. Esta entrega fixa
-os três pacotes em 7.10.0 e preserva `prisma.config.ts`, validado com URL local
-fictícia. O schema continua sem models; as duas migrations SQL existentes de
-planos não são uma baseline completa e não foram alteradas ou aplicadas.
+Prisma Migrate é o único responsável pelo histórico. Não criar runner TS
+paralelo ou funções up/down; a decisão anterior por Prisma 8 foi substituída.
+Migration concluída é revertida por uma nova inversa. Migration falha exige
+inspeção/recuperação e reconciliação; migrate resolve não desfaz SQL.
+Uma inversa não recupera dados removidos. Transações e preservação de dados
+precisam ser avaliadas por mudança.
 
-Prisma Migrate será o único responsável pelo histórico. Não haverá runner
-TypeScript paralelo, funções up/down ou conversão de SQL por troca de extensão.
-A aprovação de Prisma 8 foi substituída pela decisão por Prisma 7.
+prisma/schema.prisma continua sem models. As duas migrations SQL de planos
+foram preservadas; não são uma baseline completa e não foram aplicadas.
+Não executar migrations automaticamente ao importar/iniciar a API, nem
+contra banco remoto ou produção.
 
-## Política aprovada
+## Tarefas e aceite — IDs originais preservados
 
-- Migration concluída: alterar o schema para o estado desejado e criar uma
-  nova migration inversa. Preservar o histórico aplicado.
-- Migration falha: inspecionar o estado, recuperar mudanças parciais quando
-  necessário e reconciliar o histórico com `migrate resolve`. Marcar
-  `--rolled-back` não desfaz SQL; `db execute` não registra migrations.
-- Uma inversa de schema não recupera dados removidos. Preservação de dados e
-  transações precisam ser avaliadas por mudança antes da aplicação.
-- Não executar migrations automaticamente ao importar módulos ou iniciar API.
-- Não conectar nem provisionar banco nesta entrega.
+- [x] MIG-01: Confirmar runner, PostgreSQL, formato e reversão.
+  Prisma 7/SQL nativo, nova migration inversa, PostgreSQL criado do zero.
+- [ ] MIG-02: Definir destino das migrations SQL e baseline canônica.
+  Banco novo confirmado. **Aguardando resposta:** schema mínimo e destino
+  dos SQL atuais de planos antes da baseline.
+- [ ] MIG-03: Configurar scripts, runner, histórico e ambiente completos.
+  Parcial: tooling/dependências/configuração e testes offline implementados;
+  comandos operacionais e prova de histórico no banco ainda pendentes.
+- [x] MIG-03-A: Preparar dependências/configuração e provas offline.
+  Manifesto/lockfile fixam 7.10.0; test:prisma verifica validate/generate,
+  SQL de criação/inversão e versões. Sem modelos comerciais ou banco real.
+- [ ] MIG-03-B: Integrar esta entrega à staging remota.
+  Conflitos resolvidos nas branches existentes dos PRs #7/#8; merge é do usuário.
+- [ ] MIG-03-C: Discutir/implementar comandos operacionais.
+  migrations:apply/show/rollback são propostas para discussão posterior;
+  não estão disponíveis nem representam rollback automático nesta base.
+- [ ] MIG-04: Implementar schema mínimo e evolução de dados aprovada.
+  **Aguardando resposta:** campos, vínculos, restrições e dados. Nome users
+  confirmado não autoriza mudar consultas user/users nesta resolução.
+- [ ] MIG-05: Verificar ciclo em PostgreSQL temporário e atualizar operação.
+  Aplicar do zero, reaplicar, consultar status, testar falha/recuperação e
+  inversa. Geração offline de SQL não comprova esse ciclo.
 
-Referência: [recuperação de falhas no Prisma 7](https://www.prisma.io/docs/orm/v7/prisma-migrate/workflows/patching-and-hotfixing).
+## Verificação
 
-## Tarefas e aceite
+O teste tests/prisma.tooling.test.mjs usa fixture temporária MigrationProbe
+e URL fictícia, sem carregar a configuração real ou aplicar SQL. Sua limpeza
+valida que os caminhos permanecem dentro da fixture criada pelo teste.
+Resolução verificada: test:prisma (3 testes) e test:foundation (27 testes)
+aprovados; typecheck:foundation, typecheck:contracts e TypeScript completo
+passaram. Diff contra staging sem problemas. Sem acesso a banco remoto
+ou execução de migrations.
 
-- [x] MIG-01: Confirmar mecanismo, versões e política de reversão.
-  Prisma Migrate/SQL nativo; CLI/client/adapter exatos em 7.10.0.
-- [x] MIG-02: Preparar dependências e verificar configuração sem banco.
-  Manifesto/lockfile alinhados; TypeScript completo e validate passaram.
-- [x] MIG-03: Verificar geração isolada de cliente e SQL de criação/inversão.
-  `npm run test:prisma`: três testes, fixture MigrationProbe temporária,
-  sem adicionar models/tabelas comerciais e sem aplicar SQL.
-- [ ] MIG-04: Definir schema mínimo e baseline de banco vazio.
-  **Aguardando resposta:** campos, relações e restrições; destino do histórico
-  SQL de planos. O nome users já está confirmado.
-- [ ] MIG-05: Discutir comandos operacionais após a implementação.
-  `migrations:apply`, `migrations:show` e `migrations:rollback` são propostas;
-  não há scripts com esses nomes nem rollback automático nesta entrega.
-- [ ] MIG-06: Validar ciclo em PostgreSQL temporário autorizado.
-  Aplicar do zero, reaplicar sem duplicação, consultar histórico, testar falha,
-  recuperação e uma nova migration inversa. Esta evidência ainda não existe.
-
-A geração de SQL não comprova execução ou recuperação em PostgreSQL.
-Atualizar [operação](../../../docs/operacao.md) e
-[padrões](../../../docs/padroes-backend.md) em cada etapa de adoção.
+Referências: [avaliação](avaliacao-prisma.md), [operação](../../../docs/operacao.md)
+e [padrões](../../../docs/padroes-backend.md).

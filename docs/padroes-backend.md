@@ -15,9 +15,11 @@ já retornado pelos endpoints atuais, documentados em [api.md](api.md).
 
 ## Estrutura e persistência
 
-Código em inglês, kebab-case e pastas por função. Cadeia
+Identificadores em inglês; arquivos domínio.papel.ts e pastas por função.
+Comentários e mensagens de erro em português. Cadeia
 routes → controller → service; entidades/interfaces/DTOs em arquivos próprios.
-Decisão atual: Prisma 7, banco novo e users. SQL nativo aprovado; campos/relacionamentos ainda dependem de confirmação.
+Prisma 8 com migrations TypeScript e reversão por migration inversa aprovado;
+o schema de identidade e empresas ainda depende de definição.
 Empresas será reorganizado por camadas e tipos preservando suas respostas
 atuais. Outros módulos e frontend não adotam os contratos nesta etapa.
 
@@ -28,12 +30,12 @@ dependências reunidas em branch de integração. PRs para `staging`, com o que,
 como, por quê, verificações, próximos passos e SQL quando houver nova tabela.
 
 Specs e decisões: [backend/.specs](../backend/.specs/README.md).
-A baseline documental precedeu a implementação descrita abaixo.
+Implementação e testes ainda pendentes neste commit documental.
 
 ## Implementação da base HTTP
 
 Disponível em `backend/src/contracts/{error,response,pagination}.contract.ts`,
-`backend/src/errors/app-error.ts` e `backend/src/middlewares/error-handler.ts`.
+`backend/src/errors/app.error.ts` e `backend/src/middlewares/error.handler.ts`.
 Esses arquivos não são importados pelo servidor atual.
 
 - `createSuccessResponse` gera `{ data }` ou `{ data, meta }`.
@@ -64,7 +66,7 @@ Não houve teste em banco ou alteração de contratos do frontend.
 
 ## Prisma e próximos passos
 
-Decisão histórica anterior, substituída em 2026-10-10: aguardar Prisma 8 estável. O registry consultado nesta revisão
+O usuário decidiu aguardar Prisma 8 estável. O registry consultado nesta revisão
 publicou CLI 8.0.0-rc.22 e runtime PostgreSQL 8.0.0-rc.17. Não instalar RC nem
 alterar configuração/schema/migrations SQL enquanto aguarda. Não existe
 monitoramento automático de release.
@@ -73,44 +75,48 @@ Na adoção posterior: conectar handlers no servidor, migrar envelopes/controlle
 consumidores, implementar queries paginadas com filtros e ordenação estável,
 adaptar frontend e definir schema canônico antes das migrations.
 
-## Integração verificada
+## Próxima refatoração: usuários e repositories
 
-Branches das tarefas: `codex/backend-contracts` e `codex/companies-layers`.
-Reunião: `codex/backend-foundation-integration`. Os PRs usam `staging` como
-base. A branch de integração inclui também a baseline documental; os PRs
-individuais compartilham essa base e servem para revisão por assunto.
-Não foram feitos merges na staging remota.
+Interfaces de persistência por módulo ficarão em backend/src/repositories.
+Somente interfaces de repositories foram aprovadas; implementações ficam
+para depois. Refatorar apenas userController/userRoute; primeiro acesso e
+convites permanecem intactos. SQL permanece nos services atuais. Ver
+[spec](../backend/.specs/usuarios-repositories/spec.md).
+Sempre perguntar diante de dúvida antes de implementar a parte afetada.
 
-Executar em backend: `npm run test:foundation` e
-`npm run typecheck:foundation`. Integração: 18 testes passaram; typecheck dos
-arquivos novos/empresas passou. Antes do alinhamento com Prisma 7, o typecheck completo falhava na
-configuração Prisma incompatível; nenhuma aprovação global de build/lint é
-alegada. Nenhuma migration aplicada e nenhuma tabela nova nesta entrega.
 
-## Decisão atual de persistência — 2026-10-10
+## Interfaces de persistência preparadas
 
-Prisma 7 substitui a escolha de Prisma 8. Migrations serão pensadas para um
-banco novo PostgreSQL; `users` é o nome canônico. Já está aprovado o
-formato SQL nativo; campos/relacionamentos continuam pendentes.
-A decisão foi commitada antes da atualização de pacotes; o schema permanece sem models.
-Os comandos migrations:apply/show/rollback são propostas para discussão
-posterior, não comandos disponíveis neste momento.
+Disponíveis em repositories/{user,company,plan}.repository.ts. São apenas
+interfaces; não são importadas pelos services nem possuem implementações.
+SQL continua nos services durante esta etapa. Não há interface query
+genérica nem novas factories. Busca sem resultado usa undefined, como
+rows[0] nas consultas atuais; atribuição de plano retorna boolean.
 
-## Política atual aprovada — Prisma 7
+User descreve campos observados internamente; password_hash é dado de
+persistência, nunca parte da resposta de login. Plan e PlanRow foram
+extraídos para entities/plan.entity.ts e interfaces/plan.row.ts; exports
+de tipos do service preservados para compatibilidade. Nenhuma query mudou.
 
-Migrations SQL gerenciadas pelo Prisma Migrate. Para reverter uma migration
-concluída, criar uma nova inversa; para migration falha, inspecionar/recuperar
-o banco e reconciliar o histórico. SQL executado diretamente não atualiza
-o histórico; marcar rolled-back não reverte o banco sozinho.
+## Usuários separados por responsabilidade
 
-PRs devem ter título/descrição/mensagens em português. Schema comercial
-permanece pendente e os comandos apply/show/rollback serão definidos depois.
+Rotas em user.routes.ts; controller em user.controller.ts exporta handlers
+independentes e importa userService diretamente; user.service.ts concentra
+login/recuperação/redefinição, sem Express. User fica em user.entity.ts e
+os tipos de entrada/saída em user.auth.dto.ts. Login não expõe password_hash.
+Profile e home permanecem com o middleware Bearer e as respostas atuais.
 
-## Tooling Prisma 7 implementado
+Mantidos login cliente por e-mail, empresa com bcrypt, JWT1h, recuperação
+sem enumeração, token aleatório com hash SHA-256/expiração1h, reset bcrypt10
+e limpeza dos tokens. Repositories são interfaces apenas: o SQL continua
+nos services. Convite/primeiro acesso, frontend e schema não foram alterados.
 
-CLI/client/adapter fixados em 7.10.0, usando configuração existente e SQL
-nativo. Três testes isolados validam cliente, SQL de criação/inversão e pins.
-TypeScript completo passou após o alinhamento; os 18 testes da base passaram.
-Nenhuma migration comercial foi criada ou executada. O ciclo em PostgreSQL,
-o schema e comandos operacionais permanecem pendentes. Ver [operação](operacao.md)
-para comandos, limitações e avisos da auditoria de dependências.
+## Resolução da base Prisma — 2026-10-10
+
+CLI, client e adapter fixados em 7.10.0 nos PRs #7/#8, com SQL nativo gerenciado
+pelo Prisma Migrate e reversão por migration inversa. Preservadas as convenções
+atuais de staging, src/shared, camadas de usuários e repositories somente
+interfaces. Nenhuma regra HTTP nova foi adotada nesta resolução. Schema,
+baseline de banco vazio e prova do ciclo de migrations permanecem pendentes.
+O teste offline usa prisma.tooling.test.mjs; comandos operacionais ainda
+dependem da discussão prevista. Consultar operação para verificações/limites.
