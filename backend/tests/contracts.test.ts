@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { ErrorCode } from '../src/shared/errors/error.code.js';
 import { AppError } from '../src/shared/errors/app.error.js';
 import { serializeError, sanitizeDiagnostic } from '../src/shared/contracts/error.contract.js';
 import { parsePagination, createPaginationMeta } from '../src/shared/contracts/pagination.contract.js';
@@ -9,8 +10,8 @@ import express from 'express';
 import { once } from 'node:events';
 
 for (const environment of ['development', 'test', 'staging', 'preview', '']) {
-  test(`diagnostic error in ${environment || 'unset'} includes stack and sanitized details`, () => {
-    const error = new AppError({ status: 409, code: 'CONFLICT', message: 'Conflito', details: { password: 'private', nested: { token: 'private' }, field: 'name' }, cause: new Error('postgresql://user:private@localhost/db') });
+  test(`Erro fora de produção em ${environment || 'não definido'} inclui pilha e detalhes sanitizados`, () => {
+    const error = new AppError({ status: 409, code: ErrorCode.CONFLICT, message: 'Conflito', details: { password: 'private', nested: { token: 'private' }, field: 'name' }, cause: new Error('postgresql://user:private@localhost/db') });
     const body = serializeError(error, { environment, requestId: 'request-1' });
     assert.equal(body.status, 409);
     assert.equal(body.message, 'Conflito');
@@ -23,14 +24,14 @@ for (const environment of ['development', 'test', 'staging', 'preview', '']) {
   });
 }
 
-test('production has exactly status and message for classified and unexpected failures', () => {
-  assert.deepEqual(serializeError(new AppError({ status: 400, code: 'VALIDATION_ERROR', message: 'Entrada inválida', details: { field: 'email' } }), { environment: 'production', requestId: 'secret' }), { status: 400, message: 'Entrada inválida' });
+test('Produção retorna somente status e mensagem para falhas esperadas e inesperadas', () => {
+  assert.deepEqual(serializeError(new AppError({ status: 400, code: ErrorCode.VALIDATION_ERROR, message: 'Entrada inválida', details: { field: 'email' } }), { environment: 'production', requestId: 'secret' }), { status: 400, message: 'Entrada inválida' });
   for (const failure of [new Error('Detalhes internos do SQL'), 'unexpected', null, { status: 401, message: 'fake' }]) {
     assert.deepEqual(serializeError(failure, { environment: 'production' }), { status: 500, message: 'Erro interno do servidor' });
   }
 });
 
-test('diagnostics handle non-Error throws, circular data, accessors and sensitive strings', () => {
+test('Diagnósticos tratam exceções sem Error, referências circulares, acessores e segredos', () => {
   const cycle: Record<string, unknown> = { authorization: 'Bearer private', message: 'password=private token="private"' };
   cycle.self = cycle;
   Object.defineProperty(cycle, 'getter', { enumerable: true, get() { throw new Error('Não deve ser executado'); } });
@@ -41,7 +42,7 @@ test('diagnostics handle non-Error throws, circular data, accessors and sensitiv
   assert.equal(serializeError('failure', { environment: 'test' }).status, 500);
 });
 
-test('response helpers emit exact envelope and 201/204 status', () => {
+test('Helpers de resposta retornam envelope exato e status 201/204', () => {
   assert.deepEqual(createSuccessResponse([]), { data: [] });
   assert.deepEqual(createSuccessResponse(['a'], { page: 1 }), { data: ['a'], meta: { page: 1 } });
   let status = 0; let body: unknown; let ended = false;
@@ -51,7 +52,7 @@ test('response helpers emit exact envelope and 201/204 status', () => {
   body = undefined; sendNoContent(response); assert.equal(status, 204); assert.equal(body, undefined); assert.equal(ended, true);
 });
 
-test('pagination defaults, maximum, offset, empty, last and beyond final page', () => {
+test('Paginação valida padrões, limite, offset, lista vazia e última página', () => {
   assert.deepEqual(parsePagination({}), { page: 1, pageSize: 20, offset: 0 });
   assert.deepEqual(parsePagination({ page: '2', pageSize: '100' }), { page: 2, pageSize: 100, offset: 100 });
   assert.deepEqual(createPaginationMeta(parsePagination({}), 0), { page: 1, pageSize: 20, total: 0, totalPages: 0 });
@@ -59,7 +60,7 @@ test('pagination defaults, maximum, offset, empty, last and beyond final page', 
   assert.equal(createPaginationMeta(parsePagination({ page: 3 }), 21).totalPages, 2);
 });
 
-test('invalid pagination consistently raises 400 and rejects unsafe counts', () => {
+test('Paginação inválida retorna 400 e rejeita contagens inseguras', () => {
   for (const value of [0, -1, 1.5, '', '0', '1.5', 'abc', null, [], {}, true, '9007199254740992']) {
     assert.throws(() => parsePagination({ page: value }), (error: unknown) => error instanceof AppError && error.status === 400);
   }
@@ -68,7 +69,7 @@ test('invalid pagination consistently raises 400 and rejects unsafe counts', () 
   assert.throws(() => createPaginationMeta(parsePagination({}), -1), RangeError);
 });
 
-test('isolated Express app exercises production errors and unknown route without changing real bootstrap', async () => {
+test('Aplicação isolada verifica erros de produção e rota inexistente', async () => {
   const app = express();
   app.get('/failure', (_request, _response, next) => next(new Error('SQL privado')));
   app.use(createNotFoundHandler());
@@ -88,14 +89,14 @@ test('isolated Express app exercises production errors and unknown route without
   } finally { await new Promise<void>((resolve, reject) => server.close(error => error ? reject(error) : resolve())); }
 });
 
-test('quoted JSON secrets are redacted from messages and stack', () => {
+test('Segredos JSON entre aspas são removidos da mensagem e da pilha', () => {
   const error = new Error(JSON.stringify({ password: 'private', token: 'private', field: 'email' }));
   const body = serializeError(error, { environment: 'test' });
   assert.ok(!JSON.stringify(body).includes('private'));
   assert.ok(JSON.stringify(body).includes('email'));
 });
 
-test('Error and array accessors do not interrupt serialization', () => {
+test('Acessores de Error e arrays não interrompem a serialização', () => {
   const error = new Error('Falha');
   Object.defineProperty(error, 'cause', { get() { throw new Error('Não deve ser executado'); } });
   const body = serializeError(error, { environment: 'test' });
@@ -107,7 +108,7 @@ test('Error and array accessors do not interrupt serialization', () => {
   assert.ok('stack' in serializeError(null, { environment: 'test' }));
 });
 
-test('escaped quotes inside JSON secret values do not leak the remainder', () => {
+test('Aspas escapadas em segredos JSON não expõem o restante do valor', () => {
   const error = new Error(JSON.stringify({ password: 'first"remainingSecret', token: 'line\\remainingSecret' }));
   const json = JSON.stringify(serializeError(error, { environment: 'test' }));
   assert.ok(!json.includes('remainingSecret'));

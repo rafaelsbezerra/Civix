@@ -118,21 +118,20 @@ async function get(x) {
   and branches, and create a third integration branch to combine their changes.
 - Do not merge or push unrelated changes with a task. Preserve other worktrees
   and pending changes.
-- Current phase: commit the documentation before implementation; implement
-  the foundation without adopting it in existing application flows. Use
-  task worktrees/branches and open all PRs against `staging`. Update the main
-  documentation for every implementation. Adoption is a subsequent step.
-- Exception for this phase: reorganize the existing companies module into
-  route/controller/service and entity/interface files, preserving its current
-  HTTP behavior. Keep the frontend and other existing modules intact.
+- Current phase: commit documentation before implementation, update main docs,
+  use task worktrees/branches and integration branches, and target staging PRs.
+  Error/success contracts are now adopted across the current backend endpoints.
+  Frontend adoption, paginated queries, schemas and repository implementations
+  are deferred. Admin remains unmounted; do not expose new endpoints.
 
-## Current user refactor scope
+## Historical user refactor scope
 
 - Refactor user routes/controllers/services and separate entity/DTO types.
-  Keep auth/admin invitation and first-access flows unchanged.
+  The initial extraction kept auth/admin unchanged. Current HTTP adoption
+  changes their envelopes/errors while preserving URLs and business rules.
 - The repositories folder contains persistence interfaces only in this phase;
   their implementations and service adoption will be a later task. Preserve
-  the existing SQL and HTTP behavior during the extraction.
+  existing SQL. Preserve business behavior; current HTTP adoption changes envelopes.
 
 ## Current HTTP contract adoption
 

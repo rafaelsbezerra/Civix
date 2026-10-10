@@ -4,7 +4,8 @@
 
 - Commit documental antes da implementação; tarefas em branches/worktrees,
   integração das dependências e PRs para `staging` (substitui sem commit).
-- Implementar a base sem adotá-la nos fluxos atuais; atualizar docs sempre.
+- A base inicial sem adoção é histórica. Adoção de erro/sucesso em todos os
+  endpoints backend agora aprovada; frontend explicitamente adiado.
 - Criar specs simples no backend, agrupadas por assunto.
 - Padronizar erros, respostas e paginação.
 - Seguir routes → controller → service; adequar o módulo de empresas.
@@ -36,11 +37,11 @@ As propostas abaixo não são contratos aprovados.
 | ID | Decisão | Proposta para discussão | Estado |
 | --- | --- | --- | --- |
 | BE-01 | Sucesso e adoção | Envelope, frontend, 201/204 e manutenção de /api/v1 aprovados | Confirmado |
-| BE-02 | Erro | status/message em produção; diagnóstico sanitizado fora de produção aprovado; catálogo específico futuro | Confirmado |
+| BE-02 | Erro | status/message em produção; diagnóstico sanitizado fora; enum ErrorCode e handler global aprovados | Confirmado |
 | BE-03 | Paginação | Parâmetros, limites, meta, vazio, além do fim e ordem nome/ID aprovados; campos extras de ordenação e abrangência pendentes | Parcialmente confirmado |
 | BE-04 | Idioma e arquivos | Identificadores em inglês; arquivos domínio.papel.ts; comentários/erros em português; controller com funções independentes | Confirmado |
 | BE-05 | Pastas | Manter pastas globais por função; nomes de novas pastas transversais pendentes | Parcialmente confirmado |
-| BE-06 | Persistência desacoplada | Interface de repositório e adapter em memória para testes; SQL no adapter | Aguardando resposta |
+| BE-06 | Persistência desacoplada | Repositories somente interfaces; SQL atual nos services; implementações futuras | Confirmado |
 | BE-07 | Migrations | Prisma 7 SQL nativo e migration inversa aprovados; integração do tooling pendente neste checkout | Confirmado |
 | BE-08 | Banco e baseline | PostgreSQL e banco criado do zero confirmados; baseline depende do schema | Confirmado |
 | BE-09 | Modelo canônico | Nome canônico users confirmado; campos, vínculos e restrições pendentes | Parcialmente confirmado |
@@ -54,18 +55,21 @@ BE-10 é sugestão de escopo, ainda não aprovada.
 
 ## Estado da entrega
 
-Specs atualizadas para implementação da base passiva. Base HTTP e extração de empresas implementadas; adoção permanece pendente. Nenhum banco
-provisionado, migration executada, dependência alterada ou contrato aplicado.
+Base HTTP e extrações implementadas; adoção de erro/sucesso aprovada e
+implementada e verificada nesta tarefa. Frontend, paginação e repositories operacionais
+continuam posteriores. Nenhum banco/migration/dependência alterado nesta adoção.
 O código possui consultas SQL/Neon; sua presença não comprova banco pronto.
 
 ## Respostas posteriores à criação das specs
 
 - Produção retorna exatamente status/message; fora de produção permite
-  diagnóstico sanitizado. A base HTTP está implementada sem ativação nas rotas.
+  diagnóstico sanitizado. A restrição inicial sem ativação foi substituída
+  pela adoção HTTP de todos os endpoints backend.
 - Empresas: extração de camadas/tipos autorizada, sem mudar contratos atuais.
 - Prisma 7/SQL nativo substituiu a decisão anterior de aguardar Prisma 8.
   Integração do tooling, schema definitivo, baseline e migrations ficam pendentes neste checkout.
-- Adoção de contratos e frontend pertence à etapa seguinte.
+- Contratos de erro/sucesso agora são adotados no backend. Frontend fica
+  para a etapa seguinte por decisão explícita; paginação não foi aplicada.
 
 ## Convenções confirmadas após os merges — 2026-10-10
 
@@ -76,3 +80,10 @@ para contratos úteis. Correção local na staging, sem commit/PR/worktree nesta
 tarefa, conforme instrução explícita. O alvo de migrations é Prisma 7/SQL
 nativo; a instalação atual desta staging ainda tem CLI 6 até a integração
 da tarefa de tooling.
+
+## Adoção HTTP — 2026-10-10
+
+AppError e ErrorCode substituem reason/switch; erros inesperados usam 500
+com causa preservada. JSON de sucesso contém data/meta, sem success/plan/plans
+duplicados. Auth/admin preservam regras; admin segue desmontado. Ver
+[spec de adoção](adocao-http/spec.md). 36 testes e typechecks isolados passaram; full typecheck bloqueado pelo Prisma preexistente.

@@ -55,7 +55,8 @@ Fonte: [.env.example](../backend/.env.example),
 No frontend: `npm test`, `npm run lint`, `npm run build`,
 `npm run test:e2e`. Build executa TypeScript, Vite e verificação de assets
 de Sobre. O script e2e é específico de Sobre, não uma suíte completa do SaaS.
-No backend não existem scripts de test, lint ou build; há apenas dev/start.
+No backend, confira package.json: há scripts de testes de contratos/usuários/base
+e typechecks; não presumir lint/build. A validação da adoção consta na entrega.
 O start do manifest frontend aponta `backend/src/server.ts` relativo ao
 frontend, caminho que não corresponde à estrutura atual.
 
@@ -68,7 +69,7 @@ de deploy, backup/restore, monitoramento, gestão de segredos ou workflow
 n8n exportado. Nenhum ambiente remoto, banco ou provedor foi alterado.
 Hostinger/R2/Auth0 não foram verificados externamente.
 
-## Validação desta revisão
+## Validação histórica da revisão inicial
 
 - Commit local e remoto de staging conferidos: `5db3c5b`.
 - Código de entrada, routers, controllers, services, schema/migrations,
@@ -92,3 +93,32 @@ continua preexistente. Nenhuma dependência nova ou acesso externo.
 
 Interfaces de repositories não são implementações; a aplicação mantém SQL
 nos services até a próxima etapa. Nenhuma migration aplicada nesta tarefa.
+
+## Execução da adoção HTTP
+
+`src/app.ts` exporta a aplicação Express sem abrir porta; `src/server.ts`
+inicia a escuta. Testes podem importar app e abrir uma porta local temporária,
+com banco/e-mail simulados, sem iniciar o servidor de produção. Routers são
+seguidos pelo 404 global e pelo handler de erros. Admin continua desmontado.
+
+NODE_ENV exatamente production limita erros a status/message; staging, test
+e demais valores permitem stack/details/code sanitizados. requestId é opcional
+quando recebido pelo contexto, sem geração automática nesta etapa.
+
+Nenhuma dependência, tabela ou migration foi alterada por esta adoção.
+Repositories são interfaces apenas; SQL permanece nos services. Frontend
+não foi adaptado: executar ambos não comprova compatibilidade dos envelopes.
+Os 27 testes acima são históricos; a suíte ampliada atual passou com 36 testes. Typecheck completo ainda depende da integração
+Prisma CLI 7/configuração, fora desta tarefa.
+
+
+## Verificação da adoção — 2026-10-10
+
+Executado pela tarefa de implementação: npm run test:foundation passou com
+36 testes; npm run typecheck:foundation e npm run typecheck:contracts passaram.
+Suíte isolada cobre contratos, usuários, empresas, auth, planos, middleware,
+404, JSON inválido (400) e corpo acima do limite (413), com persistência/e-mail
+simulados. Produção omite diagnóstico; staging preserva stack/cause sanitizados.
+Typecheck completo continua bloqueado exclusivamente pelo TS2353 preexistente
+em prisma.config.ts (CLI 6/configuração 7). Não houve banco remoto, envio real
+de e-mail, migration, dependência nova ou adaptação frontend.

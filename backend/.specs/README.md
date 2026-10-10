@@ -1,8 +1,8 @@
 # Specs do backend
 
 Planejamento inicial de SDD leve + DDD leve, em 2026-10-09, na `staging`.
-Etapa atual: implementar a base descrita pelas specs, sem ativá-la nos fluxos
-existentes. Commit documental antes do código; branches/worktrees por tarefa,
+Etapa atual: adotar os contratos de erro/sucesso nos endpoints backend.
+A base passiva foi a etapa anterior; frontend fica explicitamente adiado. Commit documental antes do código; branches/worktrees por tarefa,
 branch de integração para dependências e todos os PRs destinados à `staging`.
 Atualizar a documentação principal em cada tarefa.
 
@@ -31,11 +31,10 @@ modelos de negócio dos contratos HTTP e da persistência, e explicitar as
 interfaces necessárias. Não exige microserviços, CQRS, event sourcing ou
 uma camada de abstração sem necessidade concreta.
 
-Implementação atual: contratos reutilizáveis, estrutura e tipos separados,
-infraestrutura de migrations. Não registrar novos handlers no servidor,
-alterar rotas existentes, trocar consultas ou adaptar o frontend agora.
-Exceção aprovada: reorganizar empresas por camadas e extrair tipos, mantendo
-seu contrato atual. Demais módulos e consumers serão a próxima etapa.
+Implementação atual: erro/sucesso com AppError, ErrorCode e handlers globais.
+[Spec de adoção HTTP](adocao-http/spec.md). Repositories seguem interfaces;
+paginação e schema permanecem para tarefas posteriores. Não adaptar o frontend
+nesta tarefa; documentar suas incompatibilidades.
 
 ## Outros padrões sugeridos
 
