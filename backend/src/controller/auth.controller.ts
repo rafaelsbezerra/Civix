@@ -5,19 +5,8 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { db } from '../shared/config/data.js';
 import { sendForgotPasswordEmail } from '../services/mail.service.js';
-
-interface JwtInvitePayload {
-  email: string;
-  role: 'empresa' | 'cliente';
-}
-
-interface UserRow {
-  id: string;
-  email: string;
-  role: string;
-  status: string;
-  invite_token: string | null;
-}
+import type { JwtInvitePayload } from '../dtos/auth.invite.dto.js';
+import type { ResetTokenRow, UserRow } from '../interfaces/auth.user.row.js';
 
 // GET /api/v1/auth/validate-token?token=...
 export const validateTokenController = async (
@@ -36,7 +25,7 @@ export const validateTokenController = async (
       FROM users
       WHERE reset_password_token = $1
     `;
-    const { rows } = await db.query<{ email: string; reset_password_expires: Date | string }>(
+    const { rows } = await db.query<ResetTokenRow>(
       query,
       [token]
     );
