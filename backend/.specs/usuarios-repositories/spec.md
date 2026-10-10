@@ -38,8 +38,33 @@ Estado: escopo confirmado em 2026-10-10. Documentação anterior ao código.
 - Tarefas separadas em branches/worktrees e reunidas na integração.
 
 Nenhuma nova dependência, tabela ou migration está autorizada por esta tarefa.
-## Entrega dos contratos de persistência
+## Implementação por tarefa
 
-Interfaces UserRepository/CompanyRepository/PlanRepository criadas e
-verificadas com TypeScript isolado. Sem implementação ou uso pelos services.
-Plan/PlanRow extraídos com reexports de compatibilidade. Queries preservadas.
+- Interfaces UserRepository/CompanyRepository/PlanRepository preparadas, sem
+  implementação ou uso nos services. Busca ausente usa undefined, conforme
+  rows[0]; atribuição de plano usa boolean, conforme rowCount === 1.
+- User e tipos de Plan extraídos; PublicUser/entradas/resultados de login
+  definidos em user.auth.dto.ts, sem colocar Express nos services.
+- user.routes.ts registra handlers de user.controller.ts; user.service.ts
+  concentra SQL, bcrypt, JWT, geração/hash/expiração de token e envio de e-mail.
+- Controller valida entrada e traduz resultados para as respostas legadas;
+  profile/home saíram das rotas e continuam protegidos pelo mesmo middleware.
+- Auth/admin, frontend, schema, SQL de empresas e queries de planos intactos.
+
+A estrutura não é CRUD novo nem adoção dos envelopes HTTP da base. As
+interfaces não substituem o acesso SQL antes da implementação posterior.
+
+## Verificação
+
+27 testes passaram (14 contratos, 4 empresas, 9 usuários), com banco e e-mail
+simulados. Tipagem isolada de src/servidor/interfaces/testes passou. Comandos
+reproduzíveis em backend: test:users, test:foundation, typecheck:foundation.
+Typecheck completo ainda falha em prisma.config.ts por CLI6/configuração7.
+Nenhum teste em banco remoto, envio real, migration ou verificação frontend.
+
+## Integração
+
+Tarefas em codex/repository-contracts e codex/user-layers, reunidas em
+codex/users-persistence-integration. Os PRs têm staging como destino e
+compartilham a baseline documental e as correções anteriores. A integração
+é a entrega conjunta; não requer merge individual duplicado dos mesmos commits.

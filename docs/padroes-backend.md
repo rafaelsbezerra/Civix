@@ -97,3 +97,16 @@ User descreve campos observados internamente; password_hash é dado de
 persistência, nunca parte da resposta de login. Plan e PlanRow foram
 extraídos para entities/plan.entity.ts e interfaces/plan.row.ts; exports
 de tipos do service preservados para compatibilidade. Nenhuma query mudou.
+
+## Usuários separados por responsabilidade
+
+Rotas em user.routes.ts; controller em user.controller.ts exporta handlers
+independentes e importa userService diretamente; user.service.ts concentra
+login/recuperação/redefinição, sem Express. User fica em user.entity.ts e
+os tipos de entrada/saída em user.auth.dto.ts. Login não expõe password_hash.
+Profile e home permanecem com o middleware Bearer e as respostas atuais.
+
+Mantidos login cliente por e-mail, empresa com bcrypt, JWT1h, recuperação
+sem enumeração, token aleatório com hash SHA-256/expiração1h, reset bcrypt10
+e limpeza dos tokens. Repositories são interfaces apenas: o SQL continua
+nos services. Convite/primeiro acesso, frontend e schema não foram alterados.

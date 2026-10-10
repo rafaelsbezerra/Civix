@@ -125,3 +125,11 @@ async function get(x) {
 - Exception for this phase: reorganize the existing companies module into
   route/controller/service and entity/interface files, preserving its current
   HTTP behavior. Keep the frontend and other existing modules intact.
+
+## Current user refactor scope
+
+- Refactor user routes/controllers/services and separate entity/DTO types.
+  Keep auth/admin invitation and first-access flows unchanged.
+- The repositories folder contains persistence interfaces only in this phase;
+  their implementations and service adoption will be a later task. Preserve
+  the existing SQL and HTTP behavior during the extraction.

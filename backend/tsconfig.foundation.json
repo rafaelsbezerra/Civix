@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": [
+    "src/**/*.ts",
+    "tests/contracts.test.ts",
+    "tests/company.routes.test.ts",
+    "tests/user.routes.test.ts"
+  ]
+}
