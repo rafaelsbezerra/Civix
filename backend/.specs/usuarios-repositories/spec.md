@@ -63,6 +63,13 @@ reproduzíveis em backend: test:users, test:foundation, typecheck:foundation.
 Typecheck completo ainda falha em prisma.config.ts por CLI6/configuração7.
 Nenhum teste em banco remoto, envio real, migration ou verificação frontend.
 
+## Integração
+
+Tarefas em codex/repository-contracts e codex/user-layers, reunidas em
+codex/users-persistence-integration. Os PRs têm staging como destino e
+compartilham a baseline documental e as correções anteriores. A integração
+é a entrega conjunta; não requer merge individual duplicado dos mesmos commits.
+
 ## Entrega dos contratos de persistência
 
 Interfaces UserRepository/CompanyRepository/PlanRepository criadas e
