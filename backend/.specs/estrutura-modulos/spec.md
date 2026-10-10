@@ -1,7 +1,7 @@
 # Estrutura dos módulos e convenções
 
 Estado: planejamento; inglês e pastas globais por função confirmados.
-Nomenclatura detalhada e abrangência **Aguardando resposta** (BE-04/05).
+Nomes domínio.papel.ts e handlers independentes confirmados. Abrangência dos demais módulos permanece para adoção posterior.
 A cadeia routes → controller → service está confirmada.
 
 ## Problema e escopo
@@ -13,7 +13,7 @@ Controllers de user/auth/admin também contêm SQL e regras de aplicação.
 
 Definir um padrão único e adequar empresas primeiro. Inventariar os demais
 módulos; execução de MOD-04 aguarda confirmação de abrangência.
-Manter pastas como `src/routes`, `src/controllers` e `src/services`, sem
+Manter pastas como `src/routes`, `src/controller` e `src/services`, sem
 introduzir `src/modules`. Pastas de entities/interfaces/dtos dependem da
 confirmação de nomes; não duplicar estruturas por domínio.
 Não criar CRUD ou módulos
@@ -58,12 +58,22 @@ regressões atuais como comportamento desejado.
 
 ## Implementação entregue
 
-Empresas segue pastas globais por função com arquivos em inglês/kebab-case
+Empresas segue pastas globais por função com arquivos em inglês/domínio.papel.ts
 conforme AGENTS.md. O estilo funcional existente foi preservado, sem
 impor classes aos demais módulos. Queries e resultados legados continuam
 no service; controller concentra HTTP e routes registra os sete endpoints.
-Arquivos de entidade, resultados legados e interface de query foram extraídos.
+Arquivos de entidade e resultados legados foram extraídos. A interface de query foi removida por não agregar contrato de domínio; o service usa diretamente o pool existente.
 Nenhum contrato novo, frontend ou outro módulo foi adotado/refatorado.
-MOD-01 fica parcialmente pendente para convenções além do AGENTS.md;
+MOD-01: nomes domínio.papel.ts e funções independentes de controller confirmados;
 MOD-04 pertence à adoção posterior. Testes HTTP locais verificam preservação
 de endpoints, mensagens, validações, ausência/vazio e falhas de persistência.
+
+## Correção local após os merges — 2026-10-10
+
+Controller em `src/controller/company.controller.ts` exporta handlers soltos
+e importa `companyService` diretamente. Service exporta funções e usa
+`db.query<Company>`; router registra handlers e exporta a instância. Sem
+factories ou CompanyQuery. Mensagens de erro e comentários em português.
+Testes usam mock do pool, sem banco real, preservando os sete endpoints.
+Esta correção fica na staging existente, sem commit, PR ou nova worktree,
+conforme exceção solicitada pelo usuário para esta tarefa.

@@ -84,8 +84,8 @@ o repositório não permite reproduzi-lo nem verificar seu isolamento.
 
 ## Atualização: camadas do catálogo
 
-Empresas foi separado em `company-routes.ts`, `company-controller.ts`,
-`company-service.ts`, entidade, tipos de resultado e interface de consulta.
+Empresas foi separado em `company.routes.ts`, `company.controller.ts`,
+`company.service.ts`, entidade, tipos de resultado e interface de consulta.
 A mistura de handlers e registro de rotas foi resolvida nesse domínio;
 as inconsistências dos demais módulos permanecem.
 

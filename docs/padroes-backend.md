@@ -15,7 +15,8 @@ já retornado pelos endpoints atuais, documentados em [api.md](api.md).
 
 ## Estrutura e persistência
 
-Código em inglês, kebab-case e pastas por função. Cadeia
+Identificadores em inglês; arquivos domínio.papel.ts e pastas por função.
+Comentários e mensagens de erro em português. Cadeia
 routes → controller → service; entidades/interfaces/DTOs em arquivos próprios.
 Prisma 8 com migrations TypeScript e reversão por migration inversa aprovado;
 o schema de identidade e empresas ainda depende de definição.
@@ -34,7 +35,7 @@ Implementação e testes ainda pendentes neste commit documental.
 ## Implementação da base HTTP
 
 Disponível em `backend/src/contracts/{error,response,pagination}.contract.ts`,
-`backend/src/errors/app-error.ts` e `backend/src/middlewares/error-handler.ts`.
+`backend/src/errors/app.error.ts` e `backend/src/middlewares/error.handler.ts`.
 Esses arquivos não são importados pelo servidor atual.
 
 - `createSuccessResponse` gera `{ data }` ou `{ data, meta }`.

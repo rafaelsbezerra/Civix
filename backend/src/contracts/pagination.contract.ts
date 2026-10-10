@@ -1,4 +1,4 @@
-import { AppError } from '../errors/app-error.js';
+import { AppError } from '../errors/app.error.js';
 
 export const DEFAULT_PAGE_SIZE = 20;
 export const MAX_PAGE_SIZE = 100;
@@ -29,8 +29,8 @@ export function parsePagination(query: { page?: unknown; pageSize?: unknown }): 
 }
 
 export function createPaginationMeta(input: PaginationInput, total: number): PaginationMeta {
-  if (!Number.isSafeInteger(total) || total < 0) throw new RangeError('total must be a nonnegative safe integer');
+  if (!Number.isSafeInteger(total) || total < 0) throw new RangeError('O total deve ser um inteiro seguro maior ou igual a zero');
   const checked = parsePagination(input);
-  if (checked.offset !== input.offset) throw new RangeError('offset does not match page and pageSize');
+  if (checked.offset !== input.offset) throw new RangeError('O deslocamento não corresponde à página e ao tamanho da página');
   return { page: checked.page, pageSize: checked.pageSize, total, totalPages: Math.ceil(total / checked.pageSize) };
 }
