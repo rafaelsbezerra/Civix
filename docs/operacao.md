@@ -55,7 +55,7 @@ Fonte: [.env.example](../backend/.env.example),
 No frontend: `npm test`, `npm run lint`, `npm run build`,
 `npm run test:e2e`. Build executa TypeScript, Vite e verificação de assets
 de Sobre. O script e2e é específico de Sobre, não uma suíte completa do SaaS.
-No backend não existem scripts de test, lint ou build; há apenas dev/start.
+Na baseline inicial o backend tinha apenas dev/start. A base posterior adicionou test:contracts, test:foundation, test:prisma e verificações de tipos; não há scripts lint/build.
 O start do manifest frontend aponta `backend/src/server.ts` relativo ao
 frontend, caminho que não corresponde à estrutura atual.
 
@@ -86,4 +86,28 @@ produto. Relatórios históricos de PASS foram lidos apenas como fontes.
 Contratos e extração de empresas foram reunidos em branch de integração.
 `npm run test:foundation` verificou 18 testes; `npm run typecheck:foundation`
 passou no escopo implementado. Os novos handlers continuam desconectados do
-bootstrap. Frontend e demais módulos mantidos; Prisma 8 aguarda versão estável.
+bootstrap. Frontend e demais módulos mantidos; a decisão posterior adotou Prisma 7.10.0 com SQL nativo.
+
+## Tooling Prisma 7 verificado — 2026-10-10
+
+CLI, client e adapter PostgreSQL fixados em 7.10.0. A configuração existente
+foi preservada e validada offline com URL local fictícia. O schema sem models
+é válido, mas não gera cliente comercial nem inicializa um banco.
+
+Em backend, `npm run test:prisma` passou três testes: validate/generate com
+fixture temporária, SQL de criação e inversão via migrate diff e pins no
+manifesto/lockfile/instalação. `npm run test:foundation` passou 18 testes e
+`node node_modules/typescript/bin/tsc --noEmit` passou no backend completo.
+Geração de SQL não aplica migrations nem valida recuperação em PostgreSQL.
+Verificações locais realizadas com Node 25.6.0; runtime de CI não foi fixado.
+
+Comandos migrations:apply/show/rollback ainda serão discutidos. Schema
+comercial, baseline completa e ciclo em PostgreSQL temporário ficam pendentes.
+Histórico SQL de planos preservado. Nenhum banco remoto foi acessado.
+
+`npm audit` reportou nove pacotes afetados (sete high, um moderate, um critical);
+com omit=dev, sete (cinco high, um moderate, um critical). Há avisos na árvore
+Prisma 7 e em dependências existentes. A correção automática sugerida para
+parte da árvore Prisma troca para CLI 6; não foi aplicada por contrariar a
+versão aprovada. A avaliação e correção de dependências permanecem pendentes;
+o resultado dos testes não comprova ausência de vulnerabilidades.

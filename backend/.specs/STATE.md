@@ -53,7 +53,7 @@ BE-10 é sugestão de escopo, ainda não aprovada.
 
 ## Estado da entrega
 
-Base HTTP e extração estrutural de empresas implementadas em branches separadas e reunidas na branch de integração. Foram verificados 18 testes e typecheck da base. Nenhum banco provisionado, migration aplicada ou dependência Prisma atualizada.
+Base HTTP e extração estrutural de empresas implementadas em branches separadas e reunidas na branch de integração. Foram verificados 18 testes e typecheck da base. CLI/client/adapter Prisma fixados em 7.10.0; três testes de tooling passaram e o typecheck completo passou. Nenhum banco provisionado ou migration aplicada.
 O código possui consultas SQL/Neon; sua presença não comprova banco pronto.
 
 ## Respostas posteriores à criação das specs
@@ -61,5 +61,5 @@ O código possui consultas SQL/Neon; sua presença não comprova banco pronto.
 - Produção retorna exatamente status/message; fora de produção permite
   diagnóstico sanitizado. A base HTTP está implementada sem ativação nas rotas.
 - Empresas: extração de camadas/tipos autorizada, sem mudar contratos atuais.
-- Decisão posterior: usar Prisma 7 e users; baseline para banco novo. Formato das migrations e schema definitivo pendentes.
+- Decisão posterior: usar Prisma 7 e users; baseline para banco novo. SQL nativo aprovado; schema definitivo pendente.
 - Adoção de contratos e frontend pertence à etapa seguinte.

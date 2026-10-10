@@ -65,5 +65,5 @@ acima pertence à próxima fase solicitada pelo usuário.
 ## Decisões posteriores — 2026-10-10
 
 DEC-05: nome canônico users e banco criado do zero confirmados.
-Prisma será fixado na versão principal 7. Versão patch/formato de migration
+Prisma CLI/client/adapter estão fixados em 7.10.0 com migrations SQL nativas. Estes pontos não
 aguardam confirmação; campos/vínculos mínimos continuam pendentes.
