@@ -6,9 +6,9 @@ import cors from "cors";
 import helmet from "helmet";
 
 // Importação das rotas
-import authRoutes from './routes/userRoute.js';
+import userRoutes from './routes/user.routes.js';
 import firstAccessRoutes from './routes/auth.routes.js';
-import companyRoutes from './routes/company-routes.js';
+import companyRoutes from './routes/company.routes.js';
 import planRoutes from './routes/plan.routes.js';
 
 const app = express();
@@ -38,7 +38,7 @@ app.get("/", (_req: Request, res: Response) => {
 
 const apiVersion = "/api/v1";
 
-app.use(`${apiVersion}/users`, authRoutes);
+app.use(`${apiVersion}/users`, userRoutes);
 app.use('/api', firstAccessRoutes);
 app.use(`${apiVersion}/empresas`, companyRoutes);
 app.use(`${apiVersion}/plans`, planRoutes);

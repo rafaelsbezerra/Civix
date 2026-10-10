@@ -25,7 +25,7 @@ specs, decisão de produto ou execução dos testes.
 
 Evidências locais: [FirstAccess](../frontend/src/pages/FirstAccess.tsx),
 [auth.controller](../backend/src/controller/auth.controller.ts),
-[userController](../backend/src/controller/userController.ts),
+[userController](../backend/src/controller/user.controller.ts),
 [admin.controller](../backend/src/controller/admin.controller.ts),
 [AppRoute](../frontend/src/routes/AppRoute.tsx),
 [api](../frontend/src/lib/api.ts),
@@ -84,8 +84,8 @@ o repositório não permite reproduzi-lo nem verificar seu isolamento.
 
 ## Atualização: camadas do catálogo
 
-Empresas foi separado em `company-routes.ts`, `company-controller.ts`,
-`company-service.ts`, entidade, tipos de resultado e interface de consulta.
+Empresas foi separado em `company.routes.ts`, `company.controller.ts`,
+`company.service.ts`, entidade, tipos de resultado e interface de consulta.
 A mistura de handlers e registro de rotas foi resolvida nesse domínio;
 as inconsistências dos demais módulos permanecem.
 

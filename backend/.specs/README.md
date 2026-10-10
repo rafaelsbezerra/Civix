@@ -46,3 +46,10 @@ novos módulos privados. Nenhum desses padrões foi aprovado implicitamente.
 
 Referências: [diagnóstico](../../docs/diagnostico.md),
 [API atual](../../docs/api.md) e [pendências gerais](../../docs/decisoes.md).
+
+## Extração de usuários e repositories
+
+[Spec de usuários e persistência](usuarios-repositories/spec.md): somente
+interfaces de repositories e reorganização de userController/userRoute;
+convites/primeiro acesso preservados. Implementações e adoção dos
+repositories são posteriores.

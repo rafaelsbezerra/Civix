@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
 import { once } from 'node:events';
-import test from 'node:test';
+import test, { type TestContext } from 'node:test';
+import { db } from '../src/shared/config/data.js';
+import companyRoutes from '../src/routes/company.routes.js';
 import express from 'express';
-import type { Company } from '../src/entities/company.js';
-import type { CompanyQuery } from '../src/interfaces/company-query.js';
-import { createCompanyRouter } from '../src/routes/company-routes.js';
+import type { Company } from '../src/entities/company.entity.js';
 
 const company: Company = {
   id: 'catalog-id', nome: 'Construtora', cnpj: '123', descricao: 'Resumo',
@@ -12,9 +12,10 @@ const company: Company = {
   estado: 'CE', status: 'ativo', verificado: true, tamanho: 'media', logo: null,
 };
 
-async function withCatalog(queryClient: CompanyQuery, run: (url: string) => Promise<void>) {
+async function withCatalog(t: TestContext, query: (text: string, values?: string[]) => Promise<{ rows: Company[] }>, run: (url: string) => Promise<void>) {
+  t.mock.method(db, 'query', query);
   const app = express();
-  app.use('/api/v1/empresas', createCompanyRouter(queryClient));
+  app.use('/api/v1/empresas', companyRoutes);
   const server = app.listen(0, '127.0.0.1');
   try {
     await once(server, 'listening');
@@ -27,9 +28,9 @@ async function withCatalog(queryClient: CompanyQuery, run: (url: string) => Prom
   }
 }
 
-test('catalog endpoints preserve payloads, route order and parameterized queries', async () => {
+test('Endpoints do catálogo preservam respostas, ordem das rotas e consultas parametrizadas', async t => {
   const calls: { query: string; values?: string[] }[] = [];
-  await withCatalog({ async query(query, values) { calls.push({ query, values }); return { rows: [company] }; } }, async url => {
+  await withCatalog(t, async (query, values) => { calls.push({ query, values }); return { rows: [company] }; }, async url => {
     const cases = [
       ['', 'SELECT * FROM "empresas"', undefined, 'Empresas carregadas com sucesso'],
       ['/verificadas/todas', 'SELECT * FROM "empresas" WHERE verificado = TRUE', undefined, '1 empresas verificadas encontradas'],
@@ -48,9 +49,9 @@ test('catalog endpoints preserve payloads, route order and parameterized queries
   });
 });
 
-test('invalid inputs fail before persistence', async () => {
+test('Entradas inválidas falham antes de consultar o banco', async t => {
   let calls = 0;
-  await withCatalog({ async query() { calls++; return { rows: [] }; } }, async url => {
+  await withCatalog(t, async () => { calls++; return { rows: [] }; }, async url => {
     for (const [path, message] of [
       ['/buscar', 'Termo de busca é obrigatório'],
       ['/buscar?q=%20', 'Termo de busca é obrigatório'],
@@ -68,8 +69,8 @@ test('invalid inputs fail before persistence', async () => {
   });
 });
 
-test('empty lists and missing company retain their existing outcomes', async () => {
-  await withCatalog({ async query() { return { rows: [] }; } }, async url => {
+test('Listas vazias e empresas ausentes mantêm as respostas existentes', async t => {
+  await withCatalog(t, async () => { return { rows: [] }; }, async url => {
     const list = await fetch(url);
     assert.equal(list.status, 200);
     assert.deepEqual(await list.json(), { success: true, data: [], message: 'Empresas carregadas com sucesso' });
@@ -79,9 +80,9 @@ test('empty lists and missing company retain their existing outcomes', async () 
   });
 });
 
-test('database failures retain legacy statuses until coordinated contract adoption', async t => {
+test('Falhas no banco mantêm os status legados até a adoção coordenada dos contratos', async t => {
   t.mock.method(console, 'error', () => {});
-  await withCatalog({ async query() { throw new Error('simulated database failure'); } }, async url => {
+  await withCatalog(t, async () => { throw new Error('Falha simulada no banco de dados'); }, async url => {
     for (const [path, status, message] of [
       ['', 500, 'Erro ao buscar empresas no banco de dados'],
       ['/catalog-id', 404, 'Erro ao buscar empresa no banco de dados'],

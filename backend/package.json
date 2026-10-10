@@ -8,9 +8,10 @@
     "dev": "tsx src/server.ts",
     "test:contracts": "node --import tsx --test tests/contracts.test.ts",
     "typecheck:contracts": "tsc -p tsconfig.contracts.json",
-    "test:foundation": "node --import tsx --test tests/contracts.test.ts tests/company-routes.test.ts",
+    "test:users": "node --import tsx --test tests/user.routes.test.ts",
+    "test:foundation": "node --import tsx --test tests/contracts.test.ts tests/company.routes.test.ts tests/user.routes.test.ts",
     "typecheck:foundation": "tsc -p tsconfig.foundation.json",
-    "test:prisma": "node --test tests/prisma-tooling.test.mjs"
+    "test:prisma": "node --test tests/prisma.tooling.test.mjs"
   },
   "dependencies": {
     "@getbrevo/brevo": "^6.0.3",

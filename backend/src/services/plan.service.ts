@@ -1,34 +1,8 @@
-import { db } from '../config/data.js';
+import { db } from '../shared/config/data.js';
 
-export type BillingPeriod = 'monthly' | 'yearly' | 'one_time';
-
-export interface Plan {
-  id: string;
-  name: string;
-  slug: string;
-  description: string;
-  price: string;
-  billingPeriod: BillingPeriod;
-  features: string[];
-  limits: Record<string, number | string | boolean>;
-  isFeatured: boolean;
-  isActive: boolean;
-  displayOrder: number;
-}
-
-interface PlanRow {
-  id: string | number;
-  name: string;
-  slug: string;
-  description: string;
-  price: string | number;
-  billing_period: BillingPeriod;
-  features: unknown;
-  limits: unknown;
-  is_featured: boolean;
-  is_active: boolean;
-  display_order: number;
-}
+import type { Plan } from '../entities/plan.entity.js';
+import type { PlanRow } from '../interfaces/plan.row.js';
+export type { Plan, BillingPeriod } from '../entities/plan.entity.js';
 
 function parseFeatures(value: unknown): string[] {
   return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : [];
