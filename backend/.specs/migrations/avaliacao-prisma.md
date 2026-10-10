@@ -1,8 +1,8 @@
 # Avaliação inicial do Prisma
 
 Data: 2026-10-09. Somente análise; nenhuma dependência atualizada.
-Estado: adoção do Prisma 8 com migration inversa aprovada pelo usuário.
-Versão instalável e compatibilidade ainda precisam ser verificadas.
+Estado histórico: Prisma 8 foi avaliado; a decisão atual é Prisma 7.10.0 com SQL nativo (ver última seção).
+Na avaliação inicial, versão instalável e compatibilidade ainda precisavam ser verificadas.
 
 ## Situação do projeto
 
@@ -57,7 +57,25 @@ aceitando reversão por nova migration em vez de funções `up/down`.
 
 Não houve instalação de pacotes, conexão de banco ou prova de execução.
 
-## Decisão final de versão
+## Decisão histórica de versão
 
 Aguardar Prisma 8 estável. As versões RC consultadas não serão instaladas.
 A opção Prisma 8/migration inversa permanece aprovada para futura adoção.
+
+## Decisões de 2026-10-10
+
+Prisma principal 7, banco criado do zero e nome canônico `users` confirmados.
+Isso substitui a espera pelo Prisma 8 estável. Campo/vínculos de usuários não
+foram definidos apenas pela escolha do nome.
+
+Pergunta histórica, respondida na seção seguinte: fixar CLI/client/adapter exatamente em 7.10.0 e usar
+SQL versionado nativo do Prisma Migrate, ou manter TypeScript com runner separado?
+Comandos `npm run migrations:apply`, `migrations:show` e `migrations:rollback`
+são propostas do usuário para discussão após a implementação, não scripts
+existentes. A política de reversão foi posteriormente aprovada conforme seção seguinte.
+
+## Decisão de formato e reversão
+
+Prisma 7 com SQL nativo confirmado. CLI/client/adapter serão fixados em 7.10.0.
+Migration concluída é revertida por nova migration inversa; falhas exigem
+recuperação/reconciliação separadas. Isso substitui as alternativas anteriores.

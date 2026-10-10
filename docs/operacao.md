@@ -92,3 +92,19 @@ continua preexistente. Nenhuma dependência nova ou acesso externo.
 
 Interfaces de repositories não são implementações; a aplicação mantém SQL
 nos services até a próxima etapa. Nenhuma migration aplicada nesta tarefa.
+
+## Tooling Prisma 7 e resolução de conflitos — 2026-10-10
+
+Os PRs #7/#8 incorporam staging e2b3d8b sem reintroduzir nomes/camadas antigas.
+CLI/client/adapter permanecem fixados em 7.10.0. test:foundation mantém
+contratos, empresas e usuários; test:prisma executa três verificações offline
+em tests/prisma.tooling.test.mjs (validate/generate, SQL de criação/inversão e pins).
+A incompatibilidade de tipos CLI6/configuração7 descrita acima é histórica:
+essa branch alinha os pacotes. Verificações desta resolução: 27 testes de foundation e três testes offline
+Prisma aprovados; typecheck:foundation, typecheck:contracts e TypeScript
+completo passaram. Os registros anteriores permanecem históricos.
+
+Schema comercial, baseline completa, comandos migrations:apply/show/rollback
+e ciclo em PostgreSQL continuam pendentes. SQL de planos não foi alterado.
+Não executar migrations automaticamente nem contra produção/remoto.
+Os PRs permanecem abertos; esta resolução não realiza merge em staging.
