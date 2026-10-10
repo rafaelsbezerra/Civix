@@ -1,8 +1,8 @@
 # API e contratos observados
 
 Referência: [server](../backend/src/server.ts),
-[routers](../backend/src/routes/userRoute.ts) e
-[controllers](../backend/src/controller/userController.ts).
+[routers](../backend/src/routes/user.routes.ts) e
+[controllers](../backend/src/controller/user.controller.ts).
 As rotas abaixo são as efetivamente montadas. Não são um contrato futuro.
 
 ## Endpoints atuais
@@ -80,3 +80,10 @@ Os contratos novos estão implementados e descritos em
 os envelopes legados. A base exportada possui serialização de erros por
 ambiente, respostas tipadas e validação/metadados de paginação. Nenhum handler
 foi registrado no bootstrap nesta etapa.
+
+## Extração de usuários — 2026-10-10
+
+Os endpoints de usuários preservam métodos, URLs, aliases, status e corpos
+desta documentação. A implementação agora usa user.routes.ts,
+user.controller.ts e user.service.ts. Profile/home continuam protegidos
+pelo mesmo middleware. Nenhum contrato compartilhado novo foi adotado.

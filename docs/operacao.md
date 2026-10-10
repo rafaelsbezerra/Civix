@@ -80,3 +80,15 @@ Não há node_modules nos diretórios das aplicações. Testes, lint, build,
 browser e consultas ao banco não foram executados. Os achados são
 estáticos; não se afirma aprovação de execução ou disponibilidade do
 produto. Relatórios históricos de PASS foram lidos apenas como fontes.
+
+## Validação da extração de usuários e repositories
+
+No backend, npm run test:users verifica login, recuperação, reset e rotas
+protegidas com persistência/e-mail simulados. npm run test:foundation reúne
+contratos, empresas e usuários: 27 testes passaram.
+npm run typecheck:foundation cobre src, servidor, interfaces e esses testes
+sem incluir prisma.config.ts, cuja incompatibilidade CLI6/configuração7
+continua preexistente. Nenhuma dependência nova ou acesso externo.
+
+Interfaces de repositories não são implementações; a aplicação mantém SQL
+nos services até a próxima etapa. Nenhuma migration aplicada nesta tarefa.

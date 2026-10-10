@@ -25,7 +25,7 @@ specs, decisão de produto ou execução dos testes.
 
 Evidências locais: [FirstAccess](../frontend/src/pages/FirstAccess.tsx),
 [auth.controller](../backend/src/controller/auth.controller.ts),
-[userController](../backend/src/controller/userController.ts),
+[userController](../backend/src/controller/user.controller.ts),
 [admin.controller](../backend/src/controller/admin.controller.ts),
 [AppRoute](../frontend/src/routes/AppRoute.tsx),
 [api](../frontend/src/lib/api.ts),
