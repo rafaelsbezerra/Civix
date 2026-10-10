@@ -1,5 +1,9 @@
 # Tela Sobre Civix — Tarefas
 
+> **Auditoria de estado — 2026-10-10:** este documento preserva decisões, checkboxes e resultados históricos. A vigência dos requisitos antigos está **Aguardando resposta**. Não restaurar layout, reabrir escopo ou declarar gates atuais aprovados sem confirmação e evidência.
+> AppRoute não registra /sobre; About aparece dentro da Home. dashboard.png e macbook-silver.png do manifest histórico não existem no checkout; AboutVisual usa macbook.png e não renderiza dashboard. Não foi decidido restaurar a composição original ou aceitar essas divergências.
+> Revisão consolidada: [pendências das specs](../../../../docs/revisao-pendencias-specs.md).
+
 ## Execution Protocol (MANDATORY -- do not skip)
 
 Implementar estas tarefas com a skill `tlc-spec-driven`: ativá-la por nome e seguir seu fluxo Execute e suas Critical Rules. Cada tarefa concluída exige gate verde, atualização deste arquivo e um commit atômico.
@@ -387,3 +391,26 @@ As dependências entre fases são T3 após T2 e T5 após T4. O mapa mostra a ord
 - Browser local para comparação visual e responsividade.
 
 O usuário autorizou a execução ao confirmar a branch e responder “pode prosseguir com a implementação”.
+
+## Estado atual observado em leitura
+
+Os checkboxes acima permanecem como registro da entrega histórica; não comprovam
+o estado atual. Divergência não autoriza retorno ao layout anterior ou tarefa nova.
+
+| Tarefa / requisito | Estado atual | Evidência e limite |
+| --- | --- | --- |
+| T1 / gates compartilhados | Implementação presente; validação atual pendente | Configuração e testes existem, mas lint/build/testes não foram executados nesta auditoria. |
+| T2 / ABT-07 | Divergente do requisito histórico | dashboard.png e macbook-silver.png ausentes; macbook.png substitui notebook. Manifest aprovado preservado para decisão. |
+| T3 / ABT-07/13 | Divergente do requisito histórico | AboutVisual renderiza três imagens em vez de quatro; atributos decorativos presentes. Testes ainda esperam assets/dimensões originais. |
+| T4/T5 / ABT-02/03/04/05/06/12 | Implementação preservada no componente isolado | Conteúdo, princípios, estrutura local, fontes e tokens presentes. A integração na Home duplica main/h1. Não houve renderização dinâmica nesta auditoria. |
+| T6 / ABT-01 | Divergente do requisito histórico | /sobre não está registrada; About é incorporada na Home. Não declarar endpoint de frontend operacional. |
+| T7–T9 / ABT-08/09/10/11/14/15 | Validação atual não executada | Scripts de geometria, responsividade, zoom, CLS, contraste e bundle existem, mas dependem de rota/assets divergentes. PASS histórico não é aprovação atual. |
+
+Nenhuma suíte, build, lint, navegador ou comparação visual foi executada nesta
+auditoria. Não há dist, relatórios Playwright ou capturas locais nesta worktree
+para reaproveitar como evidência atual. Critérios visuais permanecem não verificados.
+
+Identidade dos SVGs: a auditoria de bytes encontrou diferenças CRLF/LF;
+os quatro SVGs normalizados para LF coincidem com os hashes históricos.
+O teste atual calcula hash bruto e pode divergir neste checkout Windows.
+Isso não explica os dois PNGs ausentes. Nenhum hash ou manifest foi alterado.

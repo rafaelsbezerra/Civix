@@ -1,5 +1,9 @@
 # Hero da Home Civix — Design
 
+> **Auditoria de estado — 2026-10-10:** este documento preserva decisões, checkboxes e resultados históricos. A vigência dos requisitos antigos está **Aguardando resposta**. Não restaurar layout, reabrir escopo ou declarar gates atuais aprovados sem confirmação e evidência.
+> Componentes atuais estão em src/components/home. Home incorpora About com outro main/h1; header usa destinos de aplicação, incluindo /planos sem rota registrada. As verificações originais de âncoras locais, semântica única e geometria não constituem validação atual.
+> Revisão consolidada: [pendências das specs](../../../../docs/revisao-pendencias-specs.md).
+
 **Spec**: `.specs/features/home-hero/spec.md`
 **Status**: Approved
 
@@ -135,7 +139,7 @@ Não há componentes shadcn/ui, `components.json` ou design system implementado.
 ### SearchForm
 
 - **Purpose**: Representar os três filtros do Figma com semântica de formulário e estado local.
-- **Location**: `src/features/home/components/SearchForm.tsx`
+- **Location**: `src/components/home/SearchForm.tsx`
 - **Interfaces**:
   - `initialValues?: Partial<SearchFormValues>`
   - `onSubmit?: (values: SearchFormValues) => void`
@@ -146,7 +150,7 @@ Não há componentes shadcn/ui, `components.json` ou design system implementado.
 ### HeroSection
 
 - **Purpose**: Compor copy, CTAs, ilustração e `SearchForm` dentro do container responsivo.
-- **Location**: `src/features/home/components/HeroSection.tsx`
+- **Location**: `src/components/home/HeroSection.tsx`
 - **Interfaces**: componente de apresentação sem props nesta feature.
 - **Dependencies**: `ActionButton`, `SearchForm` e assets locais.
 - **Reuses**: Tokens globais e conteúdo do frame `90:1204`.

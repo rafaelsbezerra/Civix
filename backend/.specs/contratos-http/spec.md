@@ -1,89 +1,75 @@
 # Contratos HTTP
 
-Estado: base implementada; adoção de erro/sucesso autorizada em todos os
-endpoints backend na [spec de adoção](../adocao-http/spec.md). Paginação não aplicada.
-Detalhes HTTP abaixo aprovados; catálogo de erros e detalhes de BE-10
-**Aguardando resposta** no [registro](../STATE.md).
+Estado: base implementada e integrada em `staging`; adoção de erro/sucesso
+implementada na baseline `codex/http-adoption-integration`, entregue no
+[PR #14](https://github.com/rafaelsbe/Civix/pull/14). O código desse PR não
+comprova merge em staging. Frontend e paginação SQL permanecem posteriores.
 
-## Problema e escopo
+## Problema inicial e escopo
 
-Respostas usam `message`, `error`, `success`, `data`, `plan` e `plans` sem
-contrato comum. Empresas pode retornar 200 para falha SQL ou 404 para erro
-interno. Listagens não têm paginação. Não há handler global de erros/404.
+As respostas misturavam message/error/success/data/plan/plans, e falhas SQL
+podiam resultar em 200 ou 404. A adoção padroniza os endpoints existentes,
+sem redesenhar autenticação, permissões, schema ou regras comerciais.
 
-Fontes: `src/server.ts`, `src/routes/empresaRoute.ts`,
-`src/services/empresaService.ts`, `src/controller/plan.controller.ts` e
-`src/middlewares/auth.ts`.
-
-Definir três contratos separados, com tipos compartilhados, exemplos e
-aplicação nos endpoints existentes. Planejar migração dos consumidores
-frontend. Não redesenhar autenticação, permissões ou regras comerciais.
+Fontes atuais: `src/app.ts`, `src/controller/*.controller.ts`,
+`src/middlewares/error.handler.ts` e `src/shared/contracts/*.contract.ts`.
 
 ## Requisitos
 
-- ERR-01: Quando ocorrer falha esperada, retornar código de erro estável,
-  mensagem pública e status HTTP coerente, conforme catálogo aprovado.
-- ERR-02: Em produção, retornar apenas status e mensagem pública, sem stack
-  ou diagnóstico. Nos demais ambientes, retornar stack trace e detalhes de
-  código. Sanitizar senhas, tokens e credenciais; preservar diagnóstico útil.
-- ERR-03: Erros de validação, autenticação, autorização, recurso inexistente,
-  conflito e infraestrutura devem ser distinguíveis. Definir detalhes por
-  campo, política de mensagens e tratamento de rota inexistente.
-- RES-01: Todo sucesso JSON segue um formato único aprovado; definir também
-  criação, resultado vazio, lista vazia e respostas sem corpo (204).
-- RES-02: Services retornam dados/resultados de negócio; controllers fazem
-  a tradução HTTP. Middlewares seguem o mesmo contrato de erro.
-- PAG-01: Toda listagem abrangida recebe limites validados e retorna dados
-  e metadados de paginação conforme o formato aprovado.
-- PAG-02: Ordenação usa desempate estável por identificador; filtros são
-  aplicados antes da paginação e da contagem.
-- PAG-03: Definir resposta a valores negativos, fracionários, não numéricos,
-  limite excedido, lista vazia e página além do fim.
+- ERR-01: Falhas esperadas usam AppError, código estável e status coerente.
+- ERR-02: Produção expõe somente status/message; demais ambientes incluem
+  stack e diagnóstico sanitizado, preservando a causa original.
+- ERR-03: Enum ErrorCode distingue validação, autenticação, autorização,
+  ausência, conflito e falha interna; rota desconhecida segue o contrato.
+  Política abrangente de validação por campo e rastreabilidade é posterior.
+- RES-01: Sucesso JSON usa data/meta; criação usa 201 e sem corpo usa 204.
+- RES-02: Services retornam dados ou lançam erros; controllers fazem HTTP.
+- PAG-01: Listagens escolhidas futuramente recebem limites validados e meta.
+- PAG-02: Filtros precedem contagem/paginação; ordenação tem desempate por ID.
+- PAG-03: Parâmetros inválidos retornam 400; vazio/além do fim usam data: [].
 
-## Contratos aprovados e detalhes pendentes
+## Contratos confirmados
 
-Sucesso `{ data, meta? }`; erro em produção `{ status, message }`, usando o
-mesmo status HTTP; fora de produção acrescentar `code`, `details`, `requestId`
-e `stack`, sanitizando credenciais. Este formato substitui o envelope de erro
-anterior. Paginação `page`/`pageSize`, base 1, padrão 20 e máximo 100,
-com total e ordem estável. Adaptação conjunta do frontend aprovada.
-Validação e paginação inválida: 400. Criação: 201 com data. Operações sem
-corpo: 204. Lista vazia e página além do fim: sucesso com `data: []`.
-Metadados da paginação: `page`, `pageSize`, `total`, `totalPages`.
-Manter `/api/v1` e adaptar consumidores juntos. Para empresas, ordenar por
-nome e ID. Nomes concretos de campos seguem a convenção em inglês.
-Decidir quais listagens serão paginadas, incluindo planos e catálogo.
-Campos adicionais de ordenação e comportamento de filtros aguardam
-resposta, assim como códigos de erro e formato de details/requestId.
-Não transformar indiscriminadamente toda exceção em 400 ou 404.
+Sucesso `{ data, meta? }`. Produção: `{ status, message }`, com status HTTP
+correspondente. Fora de produção: code/details/stack e requestId quando
+fornecido ao contexto. Geração e propagação de requestId não implementadas.
+
+ErrorCode: VALIDATION_ERROR, UNAUTHORIZED, FORBIDDEN, NOT_FOUND, CONFLICT,
+INTERNAL_ERROR. O enum e o handler global substituem reason/switch.
+
+Paginação: page/pageSize, base 1, padrão 20, máximo 100; metadados page,
+pageSize, total, totalPages. Empresas terão ordenação nome/ID. Abrangência,
+filtros e campos adicionais: **Aguardando resposta**. URLs atuais preservadas,
+incluindo `/api/v1` e as rotas auth sob `/api/auth`.
 
 ## Tarefas e aceite
 
-Escopo inicial histórico: criar/exportar base sem conectar ao servidor.
-Escopo atual: HTTP-04 adota erro/sucesso no backend; frontend está adiado.
-Testes usam aplicações isoladas; paginação permanece sem aplicação ao banco.
-HTTP-05 atualiza a documentação principal já nesta implementação.
-
-- [ ] HTTP-01: Aprovar schemas, exemplos e catálogo de erros/status.
-  Aceite: exemplos para sucesso, criação, validação, 401/403/404/409/500,
-  lista vazia e resposta sem corpo; registrar exceções necessárias.
+- [x] HTTP-01: Aprovar contratos, exemplos e catálogo básico de erros/status.
+  Evidência: STATE.md, ErrorCode, contratos compartilhados e docs/api.md.
+  Detalhes adicionais de BE-10 não impedem a conclusão do contrato aprovado.
 - [x] HTTP-02: Criar tipos/utilitários e tratamento central de erros.
-  Aceite: falha inesperada produz 500 sanitizado; falha esperada preserva
-  status/código; rota desconhecida segue o contrato; logs omitem segredos.
-- [x] HTTP-03: Implementar entrada e saída da paginação.
-  Aceite: testar limites aprovados, entradas inválidas, vazio, última página,
-  além do fim, contagem com filtros e desempate de registros equivalentes.
-- [ ] HTTP-04: Adoção backend em andamento; consumidores frontend adiados.
-  Aceite: inventário endpoint → consumidor; nenhuma falha SQL vira 200/404;
-  frontend trata sucesso, erro e metadados sem depender dos envelopes antigos.
-- [x] HTTP-05: Atualizar `docs/api.md` e decisões com exemplos definitivos.
-  Aceite: documentação coincide com os contratos e verificações executadas.
+  Evidência: AppError, serializeError e handlers globais; erros inesperados
+  usam 500 e produção omite diagnóstico. Logging central é etapa separada.
+- [x] HTTP-03: Implementar helpers de entrada e saída da paginação.
+  Evidência: parsePagination/createPaginationMeta e tests/contracts.test.ts.
+- [ ] HTTP-03-A: Aplicar paginação/contagem/ordenação nas consultas escolhidas.
+  Depende da abrangência; verificar filtros, desempate, vazio e além do fim
+  com dados controlados. Helpers não comprovam contagem ou ordenação SQL.
+- [x] HTTP-04-A: Adotar erro/sucesso em todos os endpoints atuais do backend.
+  Implementado no PR #14, ainda distinguir entrega e merge em staging.
+  Evidência: app.ts, controllers, auth middleware, http.adoption.test.ts.
+  Falha SQL de empresas usa 500; ausência usa 404; JSON inválido usa 400 e
+  corpo acima do limite usa 413, com causa preservada.
+- [ ] HTTP-04-B: Migrar consumidores frontend e validar compatibilidade.
+  Explicitamente adiado na adoção backend; lib/api.ts e páginas continuam
+  lendo envelopes antigos. Não considerar a integração frontend concluída.
+- [x] HTTP-05: Atualizar API, padrões e decisões com exemplos/verificações.
+  Evidência: docs/api.md, docs/padroes-backend.md e spec de adoção.
 
-Verificação futura: testes de contrato/integracão HTTP sem banco remoto,
-usando dependências controladas, mais typecheck dos consumidores afetados.
-Histórico da base inicial: 14 testes passaram e typecheck dos contratos passou. Aplicação HTTP isolada usada nos testes; server.ts e consumidores legados não alterados. Ordenação, contagem filtrada e lista além do fim no banco serão verificadas na adoção; os helpers validam parâmetros/metadados, sem executar consultas.
+## Verificação registrada
 
-Adoção atual: ErrorCode centralizado e handler global após routers/404.
-Exceções/cause chegam ao serializer; produção status/message, demais
-ambientes stack/details/code sanitizados. Verificação atual na entrega;
-os 14 testes registrados acima referem-se à base inicial.
+Base inicial: 14 testes de contrato. Adoção PR #14: 36 testes isolados e
+checks typecheck:foundation/typecheck:contracts aprovados pela implementação.
+Typecheck completo segue bloqueado por Prisma CLI 6/configuração 7 nesta
+baseline. Nenhum banco remoto, envio real de e-mail ou teste frontend.
+A auditoria de status não reexecutou os testes.
