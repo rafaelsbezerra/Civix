@@ -1,148 +1,97 @@
 import type { Request, Response } from 'express';
 import * as companyService from '../services/company.service.js';
+import { AppError } from '../shared/errors/app.error.js';
+import { ErrorCode } from '../shared/errors/error.code.js';
+import { createSuccessResponse } from '../shared/contracts/response.contract.js';
 
 export async function listCompanies(req: Request, res: Response): Promise<Response> {
-  try {
-    const response = await companyService.getCompanies();
+  const result = await companyService.getCompanies();
 
-    if (response.success) {
-      return res.status(200).json(response);
-    } else {
-      return res.status(500).json(response);
-    }
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      error: 'Erro interno do servidor ao buscar empresas',
-    });
-  }
+  return res.status(200).json(createSuccessResponse(result));
 }
 
 export async function listVerifiedCompanies(req: Request, res: Response): Promise<Response> {
-  try {
-    const response = await companyService.getVerifiedCompanies();
+  const result = await companyService.getVerifiedCompanies();
 
-    return res.status(200).json(response);
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      error: 'Erro interno do servidor ao buscar empresas verificadas',
-    });
-  }
+  return res.status(200).json(createSuccessResponse(result));
 }
 
 export async function searchCompanies(req: Request, res: Response): Promise<Response> {
-  try {
-    const { q } = req.query;
+  const { q } = req.query;
 
-    if (!q || typeof q !== 'string' || q.trim() === '') {
-      return res.status(400).json({
-        success: false,
-        error: 'Termo de busca é obrigatório',
-      });
-    }
-
-    const response = await companyService.searchCompanies(q);
-
-    return res.status(200).json(response);
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      error: 'Erro interno do servidor ao buscar empresas',
+  if (!q || typeof q !== 'string' || q.trim() === '') {
+    throw new AppError({
+      status: 400,
+      code: ErrorCode.VALIDATION_ERROR,
+      message: 'Termo de busca é obrigatório',
     });
   }
+
+  const result = await companyService.searchCompanies(q);
+
+  return res.status(200).json(createSuccessResponse(result));
 }
 
 export async function listCompaniesByCategory(req: Request, res: Response): Promise<Response> {
-  try {
-    const { categoria: category } = req.params as { categoria: string };
+  const { categoria: category } = req.params as { categoria: string };
 
-    if (!category || category.trim() === '') {
-      return res.status(400).json({
-        success: false,
-        error: 'Categoria é obrigatória',
-      });
-    }
-
-    const response = await companyService.getCompaniesByCategory(category);
-
-    return res.status(200).json(response);
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      error: 'Erro interno do servidor ao buscar empresas por categoria',
+  if (!category || category.trim() === '') {
+    throw new AppError({
+      status: 400,
+      code: ErrorCode.VALIDATION_ERROR,
+      message: 'Categoria é obrigatória',
     });
   }
+
+  const result = await companyService.getCompaniesByCategory(category);
+
+  return res.status(200).json(createSuccessResponse(result));
 }
 
 export async function listCompaniesByState(req: Request, res: Response): Promise<Response> {
-  try {
-    const { estado: state } = req.params as { estado: string };
+  const { estado: state } = req.params as { estado: string };
 
-    if (!state || state.trim() === '') {
-      return res.status(400).json({
-        success: false,
-        error: 'Estado é obrigatório',
-      });
-    }
-
-    const response = await companyService.getCompaniesByState(state);
-
-    return res.status(200).json(response);
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      error: 'Erro interno do servidor ao buscar empresas por estado',
+  if (!state || state.trim() === '') {
+    throw new AppError({
+      status: 400,
+      code: ErrorCode.VALIDATION_ERROR,
+      message: 'Estado é obrigatório',
     });
   }
+
+  const result = await companyService.getCompaniesByState(state);
+
+  return res.status(200).json(createSuccessResponse(result));
 }
 
 export async function listCompaniesBySize(req: Request, res: Response): Promise<Response> {
-  try {
-    const { tamanho: size } = req.params as {
-      tamanho: 'pequena' | 'media' | 'grande';
-    };
+  const { tamanho: size } = req.params as { tamanho: 'pequena' | 'media' | 'grande' };
 
-    if (!['pequena', 'media', 'grande'].includes(size)) {
-      return res.status(400).json({
-        success: false,
-        error: 'Tamanho inválido. Use: pequena, media ou grande',
-      });
-    }
-
-    const response = await companyService.getCompaniesBySize(size);
-
-    return res.status(200).json(response);
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      error: 'Erro interno do servidor ao buscar empresas por tamanho',
+  if (!['pequena', 'media', 'grande'].includes(size)) {
+    throw new AppError({
+      status: 400,
+      code: ErrorCode.VALIDATION_ERROR,
+      message: 'Tamanho inválido. Use: pequena, media ou grande',
     });
   }
+
+  const result = await companyService.getCompaniesBySize(size);
+
+  return res.status(200).json(createSuccessResponse(result));
 }
 
 export async function getCompany(req: Request, res: Response): Promise<Response> {
-  try {
-    const { id } = req.params as { id: string };
+  const { id } = req.params as { id: string };
 
-    if (!id || id.trim() === '') {
-      return res.status(400).json({
-        success: false,
-        error: 'ID da empresa é obrigatório',
-      });
-    }
-
-    const response = await companyService.getCompanyById(id);
-
-    if (response.success) {
-      return res.status(200).json(response);
-    } else {
-      return res.status(404).json(response);
-    }
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      error: 'Erro interno do servidor ao buscar empresa',
+  if (!id || id.trim() === '') {
+    throw new AppError({
+      status: 400,
+      code: ErrorCode.VALIDATION_ERROR,
+      message: 'ID da empresa é obrigatório',
     });
   }
+
+  const result = await companyService.getCompanyById(id);
+
+  return res.status(200).json(createSuccessResponse(result));
 }

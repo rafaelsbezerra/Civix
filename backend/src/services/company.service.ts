@@ -1,179 +1,75 @@
 import { db } from '../shared/config/data.js';
 import type { Company } from '../entities/company.entity.js';
-import type { CompanyListResult, CompanyDetailResult } from '../dtos/company.response.dto.js';
+import { AppError } from '../shared/errors/app.error.js';
+import { ErrorCode } from '../shared/errors/error.code.js';
 
-/** Preserva consultas e respostas do catálogo até a adoção dos contratos HTTP. */
-/**
- * Busca todas as empresas do catálogo
- */
-export async function getCompanies(): Promise<CompanyListResult> {
-  try {
-    const result = await db.query<Company>('SELECT * FROM "empresas"');
+export async function getCompanies(): Promise<Company[]> {
+  const result = await db.query<Company>(
+    'SELECT * FROM "empresas"'
+  );
 
-    return {
-      success: true,
-      data: result.rows,
-      message: 'Empresas carregadas com sucesso',
-    };
-  } catch (error) {
-    console.error('Erro em getCompanies:', error);
-    return {
-      success: false,
-      error: 'Erro ao buscar empresas no banco de dados',
-    };
-  }
+  return result.rows;
 }
 
-/**
- * Busca uma empresa específica pelo ID (VARCHAR36 / UUID)
- */
-export async function getCompanyById(id: string): Promise<CompanyDetailResult> {
-  try {
-    const result = await db.query<Company>(
-      'SELECT * FROM "empresas" WHERE id = $1',
-      [id]
-    );
+export async function getVerifiedCompanies(): Promise<Company[]> {
+  const result = await db.query<Company>(
+    'SELECT * FROM "empresas" WHERE verificado = TRUE'
+  );
 
-    const company = result.rows[0];
-
-    if (!company) {
-      return {
-        success: false,
-        error: `Empresa com ID ${id} não encontrada`,
-      };
-    }
-
-    return {
-      success: true,
-      data: company,
-      message: 'Empresa carregada com sucesso',
-    };
-  } catch (error) {
-    console.error(`Erro em getCompanyById (${id}):`, error);
-    return {
-      success: false,
-      error: 'Erro ao buscar empresa no banco de dados',
-    };
-  }
+  return result.rows;
 }
 
-/**
- * Busca empresas por categoria (sem diferenciar maiúsculas e minúsculas)
- */
-export async function getCompaniesByCategory(category: string): Promise<CompanyListResult> {
-  try {
-    const result = await db.query<Company>(
-      'SELECT * FROM "empresas" WHERE LOWER(categoria) = LOWER($1)',
-      [category]
-    );
+export async function getCompaniesByCategory(category: string): Promise<Company[]> {
+  const result = await db.query<Company>(
+    'SELECT * FROM "empresas" WHERE LOWER(categoria) = LOWER($1)',
+    [category]
+  );
 
-    return {
-      success: true,
-      data: result.rows,
-      message: `${result.rows.length} empresas encontradas na categoria ${category}`,
-    };
-  } catch (error) {
-    console.error(`Erro em getCompaniesByCategory (${category}):`, error);
-    return {
-      success: false,
-      error: 'Erro ao buscar empresas por categoria',
-    };
-  }
+  return result.rows;
 }
 
-/**
- * Busca apenas empresas com verificado = true
- */
-export async function getVerifiedCompanies(): Promise<CompanyListResult> {
-  try {
-    const result = await db.query<Company>(
-      'SELECT * FROM "empresas" WHERE verificado = TRUE'
-    );
+export async function getCompaniesByState(state: string): Promise<Company[]> {
+  const result = await db.query<Company>(
+    'SELECT * FROM "empresas" WHERE UPPER(estado) = UPPER($1)',
+    [state]
+  );
 
-    return {
-      success: true,
-      data: result.rows,
-      message: `${result.rows.length} empresas verificadas encontradas`,
-    };
-  } catch (error) {
-    console.error('Erro em getVerifiedCompanies:', error);
-    return {
-      success: false,
-      error: 'Erro ao buscar empresas verificadas',
-    };
-  }
+  return result.rows;
 }
 
-/**
- * Busca empresas por estado (sem diferenciar maiúsculas e minúsculas)
- */
-export async function getCompaniesByState(state: string): Promise<CompanyListResult> {
-  try {
-    const result = await db.query<Company>(
-      'SELECT * FROM "empresas" WHERE UPPER(estado) = UPPER($1)',
-      [state]
-    );
+export async function getCompaniesBySize(size: 'pequena' | 'media' | 'grande'): Promise<Company[]> {
+  const result = await db.query<Company>(
+    'SELECT * FROM "empresas" WHERE tamanho = $1',
+    [size]
+  );
 
-    return {
-      success: true,
-      data: result.rows,
-      message: `${result.rows.length} empresas encontradas em ${state}`,
-    };
-  } catch (error) {
-    console.error(`Erro em getCompaniesByState (${state}):`, error);
-    return {
-      success: false,
-      error: 'Erro ao buscar empresas por estado',
-    };
-  }
+  return result.rows;
 }
 
-/**
- * Busca empresas por tamanho
- */
-export async function getCompaniesBySize(
-  size: 'pequena' | 'media' | 'grande'
-): Promise<CompanyListResult> {
-  try {
-    const result = await db.query<Company>(
-      'SELECT * FROM "empresas" WHERE tamanho = $1',
-      [size]
-    );
+export async function searchCompanies(name: string): Promise<Company[]> {
+  const result = await db.query<Company>(
+    'SELECT * FROM "empresas" WHERE nome ILIKE $1',
+    [`%${name}%`]
+  );
 
-    return {
-      success: true,
-      data: result.rows,
-      message: `${result.rows.length} empresas ${size}s encontradas`,
-    };
-  } catch (error) {
-    console.error(`Erro em getCompaniesBySize (${size}):`, error);
-    return {
-      success: false,
-      error: 'Erro ao buscar empresas por tamanho',
-    };
-  }
+  return result.rows;
 }
 
-/**
- * Busca empresas pelo nome (busca parcial usando ILIKE)
- */
-export async function searchCompanies(name: string): Promise<CompanyListResult> {
-  try {
-    const result = await db.query<Company>(
-      'SELECT * FROM "empresas" WHERE nome ILIKE $1',
-      [`%${name}%`]
-    );
+export async function getCompanyById(id: string): Promise<Company> {
+  const result = await db.query<Company>(
+    'SELECT * FROM "empresas" WHERE id = $1',
+    [id]
+  );
 
-    return {
-      success: true,
-      data: result.rows,
-      message: `${result.rows.length} empresas encontradas para a busca "${name}"`,
-    };
-  } catch (error) {
-    console.error(`Erro em searchCompanies (${name}):`, error);
-    return {
-      success: false,
-      error: 'Erro ao buscar empresas no banco de dados',
-    };
+  const company = result.rows[0];
+
+  if (!company) {
+    throw new AppError({
+      status: 404,
+      code: ErrorCode.NOT_FOUND,
+      message: `Empresa com ID ${id} não encontrada`,
+    });
   }
+
+  return company;
 }

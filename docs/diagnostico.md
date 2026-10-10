@@ -85,18 +85,23 @@ o repositório não permite reproduzi-lo nem verificar seu isolamento.
 ## Atualização: camadas do catálogo
 
 Empresas foi separado em `company.routes.ts`, `company.controller.ts`,
-`company.service.ts`, entidade, tipos de resultado e interface de consulta.
+`company.service.ts`, entidade, tipos observados; a interface genérica de consulta foi removida.
 A mistura de handlers e registro de rotas foi resolvida nesse domínio;
 as inconsistências dos demais módulos permanecem.
 
-A refatoração preserva o contrato atual. Falhas SQL ainda retornam 500 na
-listagem, 404 no detalhe e 200 com `success: false` em filtros/busca.
-Esses resultados são regressões documentadas para corrigir na adoção
-coordenada dos contratos, não padrões recomendados. INT-08 e INT-10
-permanecem: URLs frontend e transformação snake_case/camelCase não foram
-alteradas. Não foram criadas tabelas/migrations nesta tarefa.
+A extração inicial preservou contratos legados e documentou falhas SQL
+como 200/404. A adoção atual corrige isso: infraestrutura retorna 500,
+ausência 404; sucesso usa data. INT-08/INT-10 persistem: URLs e diferenças
+snake_case/camelCase não foram resolvidas. Frontend foi explicitamente
+adiado e seus consumidores ainda exigem envelopes antigos (ver api.md).
+Nenhuma tabela/migration foi criada.
 
 Os quatro testes HTTP locais passaram com persistência simulada. O
 typecheck completo permanece bloqueado pela configuração Prisma existente
 (`datasource` incompatível com o PrismaConfig instalado); a checagem
 isolada dos arquivos de empresas e seus testes passou.
+
+A camada global de erro/sucesso substitui a ausência de padronização
+da revisão inicial. Stack/details/code fora de produção são sanitizados;
+produção retorna apenas status/message. Testes históricos de extração
+não substituem a validação da adoção, registrada em operacao.md.

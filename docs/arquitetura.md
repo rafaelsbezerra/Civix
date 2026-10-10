@@ -14,7 +14,7 @@
 Fontes: [frontend/package.json](../frontend/package.json),
 [backend/package.json](../backend/package.json),
 [server.ts](../backend/src/server.ts) e
-[data.ts](../backend/src/config/data.ts).
+[data.ts](../backend/src/shared/config/data.ts).
 Next.js, Auth0 e uso operacional de Prisma descritos no Notion não são
 comportamentos demonstrados pela implementação atual.
 
@@ -26,8 +26,9 @@ recuperação e redefinição no user.service;
 primeiro acesso possui controller próprio. Na baseline inicial, empresas executavam handlers diretamente nas rotas.
 Após a extração, usam controller com funções independentes e SQL no service. Planos usam
 rota → controller → service, com mapeamento explícito do DTO.
-Não há arquitetura modular uniforme nem camada compartilhada de validação,
-erros, autorização, DTOs ou paginação.
+Erros e respostas usam a camada compartilhada em src/shared. Validação e
+autorização ainda exigem alinhamento gradual; paginação está disponível
+somente em helpers, sem consultas paginadas.
 
 | Domínio | Estado |
 | --- | --- |
@@ -85,22 +86,25 @@ O catálogo mantém `/api/v1/empresas` e seus sete endpoints.
 [company.routes](../backend/src/routes/company.routes.ts) registra handlers;
 [company.controller](../backend/src/controller/company.controller.ts) valida
 entradas e define status/JSON; o service mantém consultas parametrizadas e
-resultados legados. O servidor mudou apenas o import/nome do router.
+dados do catálogo. A adoção HTTP envolve os dados em data e propaga falhas
+SQL para o handler global, distinguindo ausência 404 de infraestrutura 500.
 
 [Company](../backend/src/entities/company.entity.ts) descreve os campos existentes
 sem novas invariantes: os nomes portugueses e snake_case são preservados
 para compatibilidade com as linhas SQL e respostas atuais.
-[CompanyListResult/CompanyDetailResult](../backend/src/dtos/company.response.dto.ts)
-são resultados legados, sem adoção dos contratos compartilhados novos.
+CompanyListResult/CompanyDetailResult foram removidos após a extração anterior;
+o service agora retorna Company/Company[]
+e os controllers aplicam os contratos compartilhados.
 O service usa diretamente o Pool Neon com `db.query<Company>`. Os testes
 simulam `db.query`; não há interface CompanyQuery ou factory de controller.
 O controller importa o service diretamente e exporta handlers independentes.
-O SQL permanece no service enquanto a decisão de repositório aguarda resposta.
+Repositories foram aprovados somente como interfaces; SQL permanece nos services
+até sua implementação posterior.
 
 Exemplo de fluxo: GET `/api/v1/empresas/categoria/Obras` → controller
 valida categoria não vazia → service consulta por LOWER com parâmetro →
-controller retorna o envelope legado. Frontend e demais módulos intactos.
-A próxima etapa adotará os contratos novos com os consumidores.
+controller retorna { data }. Demais endpoints backend adotam o mesmo contrato.
+Frontend continua pendente e incompatível nos pontos descritos em api.md.
 
 Verificação: quatro testes HTTP com Express e consulta falsa cobrem os sete
 endpoints, mensagens/status, vazios, ausência, parâmetros e falhas SQL.
@@ -117,3 +121,12 @@ Usuários segue routes → controller → service com handlers independentes,
 entity/DTO separados e SQL no service até implementar repositories. As
 rotas/aliases e os efeitos de login/recuperação/reset são preservados.
 Auth/admin mantêm seus controllers originais e a divergência users/user.
+
+## Adoção dos contratos compartilhados
+
+app.ts exporta a aplicação sem listen; server.ts inicia a escuta. Express 5
+encaminha rejeições para o handler global, registrado após routers e 404.
+ErrorCode/AppError vivem em shared/errors; sucesso/serialização em
+shared/contracts; configuração em shared/config. Tipos de auth foram
+extraídos para DTO/interface; regras de convite/primeiro acesso permanecem.
+Repositories não são consumidos e nenhum schema/paginação foi adotado.

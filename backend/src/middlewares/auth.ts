@@ -1,55 +1,77 @@
-import { Request, Response, NextFunction } from 'express';
-import jwt, { JwtPayload } from 'jsonwebtoken';
+import type { Request, Response, NextFunction } from 'express';
+import jwt, { type JwtPayload } from 'jsonwebtoken';
+import { AppError } from '../shared/errors/app.error.js';
+import { ErrorCode } from '../shared/errors/error.code.js';
 
-// Extensão de tipos nativa do Express (substitui AuthenticatedRequest)
 declare global {
   namespace Express {
     interface Request {
       userId?: string | number;
-      userRole?: string; // Opcional: útil para controle de permissões por perfil
+      userRole?: string;
     }
   }
 }
 
-const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
+export default function authMiddleware(req: Request, _res: Response, next: NextFunction): void {
   const authHeader = req.headers.authorization;
 
   if (!authHeader) {
-    return res.status(401).json({ error: 'Token não fornecido.' });
+    return next(new AppError({
+      status: 401,
+      code: ErrorCode.UNAUTHORIZED,
+      message: 'Token não fornecido.',
+    }));
   }
 
-  // Validação e extração usando Regex limpa
   const parts = authHeader.split(' ');
 
   if (parts.length !== 2) {
-    return res.status(401).json({ error: 'Erro no formato do token.' });
+    return next(new AppError({
+      status: 401,
+      code: ErrorCode.UNAUTHORIZED,
+      message: 'Erro no formato do token.',
+    }));
   }
 
   const [scheme, token] = parts;
 
   if (!/^Bearer$/i.test(scheme)) {
-    return res.status(401).json({ error: 'Token mal formatado. Deve iniciar com Bearer.' });
+    return next(new AppError({
+      status: 401,
+      code: ErrorCode.UNAUTHORIZED,
+      message: 'Token mal formatado. Deve iniciar com Bearer.',
+    }));
   }
 
   const secret = process.env.JWT_SECRET;
+
   if (!secret) {
-    console.error('CRITICAL: JWT_SECRET não definida nas variáveis de ambiente.');
-    return res.status(500).json({ error: 'Erro interno no servidor de autenticação.' });
+    return next(new AppError({
+      status: 500,
+      code: ErrorCode.INTERNAL_ERROR,
+      message: 'Erro interno do servidor',
+      details: { message: 'JWT_SECRET não definida nas variáveis de ambiente.' },
+    }));
   }
+
+  let decoded: JwtPayload;
 
   try {
-    const decoded = jwt.verify(token, secret) as JwtPayload;
-
-    // Anexa os dados do usuário à requisição
-    req.userId = decoded.id;
-    if (decoded.role) {
-      req.userRole = decoded.role;
-    }
-
-    return next();
-  } catch (error) {
-    return res.status(401).json({ error: 'Token inválido ou expirado.' });
+    decoded = jwt.verify(token, secret) as JwtPayload;
+  } catch (cause) {
+    return next(new AppError({
+      status: 401,
+      code: ErrorCode.UNAUTHORIZED,
+      message: 'Token inválido ou expirado.',
+      cause,
+    }));
   }
-};
 
-export default authMiddleware;
+  req.userId = decoded.id;
+
+  if (decoded.role) {
+    req.userRole = decoded.role;
+  }
+
+  next();
+}

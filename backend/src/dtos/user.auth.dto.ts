@@ -7,10 +7,11 @@ export interface LoginInput {
 }
 
 export type PublicUser = Pick<User, 'id' | 'name' | 'email' | 'role'>;
-export type LoginFailure = 'userNotFound' | 'passwordRequired' | 'passwordHashMissing' | 'invalidPassword' | 'jwtSecretMissing';
-export type LoginResult =
-  | { success: true; user: PublicUser; token: string }
-  | { success: false; reason: LoginFailure };
+
+export interface LoginResult {
+  user: PublicUser;
+  token: string;
+}
 
 export interface PasswordResetInput {
   token: string;

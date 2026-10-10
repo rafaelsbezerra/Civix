@@ -9,7 +9,7 @@
     "test:contracts": "node --import tsx --test tests/contracts.test.ts",
     "typecheck:contracts": "tsc -p tsconfig.contracts.json",
     "test:users": "node --import tsx --test tests/user.routes.test.ts",
-    "test:foundation": "node --import tsx --test tests/contracts.test.ts tests/company.routes.test.ts tests/user.routes.test.ts",
+    "test:foundation": "node --import tsx --test tests/contracts.test.ts tests/company.routes.test.ts tests/user.routes.test.ts tests/http.adoption.test.ts",
     "typecheck:foundation": "tsc -p tsconfig.foundation.json"
   },
   "dependencies": {

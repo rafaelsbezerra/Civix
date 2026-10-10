@@ -8,6 +8,7 @@ import jwt from 'jsonwebtoken';
 import { Resend } from 'resend';
 import { db } from '../src/shared/config/data.js';
 import userRoutes from '../src/routes/user.routes.js';
+import { createErrorHandler, createNotFoundHandler } from '../src/middlewares/error.handler.js';
 
 type QueryCall = { text: string; values?: unknown[] };
 type Query = (text: string, values?: unknown[]) => Promise<{ rows: Record<string, unknown>[] }>;
@@ -25,6 +26,8 @@ async function withUsers(t: TestContext, query: Query, run: (url: string) => Pro
   const app = express();
   app.use(express.json());
   app.use('/api/v1/users', userRoutes);
+  app.use(createNotFoundHandler());
+  app.use(createErrorHandler({ environment: 'production' }));
   const server = app.listen(0, '127.0.0.1');
   try {
     await once(server, 'listening');
@@ -60,9 +63,9 @@ test('Login mantém bcrypt para empresas, acesso de clientes e JWT com validade 
     for (const role of ['empresa', 'cliente']) {
       const result = await post(url, '/login', { email: user.email, role, ...(role === 'empresa' ? { password: 'senha-local' } : {}) });
       assert.equal(result.status, 200);
-      assert.deepEqual(result.body.user, { ...user, role });
-      assert.equal('password_hash' in result.body.user, false);
-      const payload = jwt.verify(result.body.token, environment.JWT_SECRET) as jwt.JwtPayload;
+      assert.deepEqual(result.body.data.user, { ...user, role });
+      assert.equal('password_hash' in result.body.data.user, false);
+      const payload = jwt.verify(result.body.data.token, environment.JWT_SECRET) as jwt.JwtPayload;
       assert.equal(payload.id, user.id);
       assert.equal(payload.email, user.email);
       assert.equal(payload.role, role);
@@ -80,7 +83,7 @@ test('Login rejeita entradas ausentes ou perfil inválido antes de consultar a p
       [{ role: 'cliente' }, 'Email é obrigatório'],
       [{ email: user.email, role: 'outro' }, 'Tipo de usuário inválido'],
       [{ email: user.email, role: 'empresa' }, 'Senha é obrigatória para empresas'],
-    ] as const) assert.deepEqual(await post(url, '/login', body), { status: 400, body: { error: message } });
+    ] as const) assert.deepEqual(await post(url, '/login', body), { status: 400, body: { status: 400, message } });
   });
 });
 
@@ -94,14 +97,14 @@ test('Login preserva erros de credenciais, ausência de hash/segredo e falha de 
     for (const [nextScenario, status, message] of [
       ['missing', 401, 'Usuário não encontrado.'],
       ['password', 401, 'Senha incorreta.'],
-      ['hash', 500, 'Usuário da empresa não possui senha cadastrada.'],
-      ['secret', 500, 'Erro interno do servidor.'],
+      ['hash', 500, 'Erro interno do servidor'],
+      ['secret', 500, 'Erro interno do servidor'],
       ['database', 500, 'Erro interno do servidor'],
     ] as const) {
       scenario = nextScenario;
       if (scenario === 'secret') delete process.env.JWT_SECRET;
       else process.env.JWT_SECRET = environment.JWT_SECRET;
-      assert.deepEqual(await post(url, '/login', { email: user.email, role: 'empresa', password: scenario === 'password' ? 'senha-errada' : 'senha-correta' }), { status, body: { error: message } });
+      assert.deepEqual(await post(url, '/login', { email: user.email, role: 'empresa', password: scenario === 'password' ? 'senha-errada' : 'senha-correta' }), { status, body: { status, message } });
     }
   });
 });
@@ -110,8 +113,8 @@ test('Aliases de recuperação preservam validação e resposta que evita enumer
   const calls: QueryCall[] = [];
   await withUsers(t, async (text, values) => { calls.push({ text, values }); return { rows: [] }; }, async url => {
     for (const path of ['/forgot-password', '/esqueci-senha']) {
-      assert.deepEqual(await post(url, path, {}), { status: 400, body: { error: 'E-mail é obrigatório.' } });
-      assert.deepEqual(await post(url, path, { email: user.email }), { status: 200, body: { message: recoveryMessage } });
+      assert.deepEqual(await post(url, path, {}), { status: 400, body: { status: 400, message: 'E-mail é obrigatório.' } });
+      assert.deepEqual(await post(url, path, { email: user.email }), { status: 200, body: { data: { message: recoveryMessage } } });
     }
     assert.equal(calls.length, 2);
     for (const call of calls) {
@@ -126,7 +129,7 @@ test('Recuperação persiste somente hash SHA256 com expiração de uma hora ant
   const start = Date.now();
   let sentToken = '';
   await withUsers(t, async (text, values) => { calls.push({ text, values }); return { rows: text.includes('SELECT') ? [user] : [] }; }, async url => {
-    assert.deepEqual(await post(url, '/forgot-password', { email: user.email }), { status: 200, body: { message: recoveryMessage } });
+    assert.deepEqual(await post(url, '/forgot-password', { email: user.email }), { status: 200, body: { data: { message: recoveryMessage } } });
     const update = calls[1]!;
     assert.match(update.text, /SET reset_password_token = \$1, reset_password_expires = \$2/);
     assert.match(sentToken, /^[a-f0-9]{64}$/);
@@ -158,7 +161,7 @@ test('Recuperação mantém falhas de busca, atualização e envio sem conectar 
   }, async url => {
     for (const nextScenario of ['lookup', 'update', 'mail']) {
       scenario = nextScenario;
-      assert.deepEqual(await post(url, '/esqueci-senha', { email: user.email }), { status: 500, body: { error: 'Erro interno do servidor.' } });
+      assert.deepEqual(await post(url, '/esqueci-senha', { email: user.email }), { status: 500, body: { status: 500, message: 'Erro interno do servidor' } });
     }
     assert.equal(mailCalls, 1);
   }, async () => { mailCalls++; return { data: null, error: { message: 'Falha simulada no envio' } }; });
@@ -169,7 +172,7 @@ test('Aliases de redefinição verificam hash do token, usam bcrypt10 e limpam o
   await withUsers(t, async (text, values) => { calls.push({ text, values }); return { rows: text.includes('SELECT') ? [{ id: user.id }] : [] }; }, async url => {
     for (const path of ['/reset-password', '/redefinir-senha']) {
       const start = calls.length;
-      assert.deepEqual(await post(url, path, { token: 'token-local', password: 'nova-senha-local' }), { status: 200, body: { message: 'Senha redefinida com sucesso.' } });
+      assert.deepEqual(await post(url, path, { token: 'token-local', password: 'nova-senha-local' }), { status: 200, body: { data: { message: 'Senha redefinida com sucesso.' } } });
       const lookup = calls[start]!;
       assert.match(lookup.text, /reset_password_expires > NOW\(\)/);
       assert.deepEqual(lookup.values, [createHash('sha256').update('token-local').digest('hex')]);
@@ -192,17 +195,17 @@ test('Redefinição mantém entradas obrigatórias, senha mínima, token inváli
     return { rows: scenario === 'invalid' ? [] : [{ id: user.id }] };
   }, async url => {
     for (const path of ['/reset-password', '/redefinir-senha']) {
-      assert.deepEqual(await post(url, path, {}), { status: 400, body: { error: 'Token e nova senha são obrigatórios.' } });
-      assert.deepEqual(await post(url, path, { token: 'token-local', password: 'curta' }), { status: 400, body: { error: 'A senha deve ter no mínimo 8 caracteres.' } });
+      assert.deepEqual(await post(url, path, {}), { status: 400, body: { status: 400, message: 'Token e nova senha são obrigatórios.' } });
+      assert.deepEqual(await post(url, path, { token: 'token-local', password: 'curta' }), { status: 400, body: { status: 400, message: 'A senha deve ter no mínimo 8 caracteres.' } });
     }
     assert.equal(queries, 0);
     for (const [nextScenario, status, message] of [
       ['invalid', 400, 'Token inválido ou expirado.'],
-      ['lookup', 500, 'Erro interno do servidor.'],
-      ['update', 500, 'Erro interno do servidor.'],
+      ['lookup', 500, 'Erro interno do servidor'],
+      ['update', 500, 'Erro interno do servidor'],
     ] as const) {
       scenario = nextScenario;
-      assert.deepEqual(await post(url, '/reset-password', { token: 'token-local', password: 'nova-senha-local' }), { status, body: { error: message } });
+      assert.deepEqual(await post(url, '/reset-password', { token: 'token-local', password: 'nova-senha-local' }), { status, body: { status, message } });
     }
   });
 });
@@ -216,13 +219,13 @@ test('Perfil e home mantêm proteção Bearer e respostas públicas existentes',
     ] as const) {
       const absent = await fetch(url + path, { method });
       assert.equal(absent.status, 401);
-      assert.deepEqual(await absent.json(), { error: 'Token não fornecido.' });
+      assert.deepEqual(await absent.json(), { status: 401, message: 'Token não fornecido.' });
       const invalid = await fetch(url + path, { method, headers: { Authorization: 'Bearer invalido' } });
       assert.equal(invalid.status, 401);
-      assert.deepEqual(await invalid.json(), { error: 'Token inválido ou expirado.' });
+      assert.deepEqual(await invalid.json(), { status: 401, message: 'Token inválido ou expirado.' });
       const success = await fetch(url + path, { method, headers: { Authorization: `Bearer ${token}` } });
       assert.equal(success.status, 200);
-      assert.deepEqual(await success.json(), body);
+      assert.deepEqual(await success.json(), { data: body });
     }
   });
 });
