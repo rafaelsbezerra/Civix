@@ -33,6 +33,22 @@ export interface ApiResponse<T> {
   error?: string;
 }
 
+export type BillingPeriod = 'monthly' | 'yearly' | 'one_time';
+
+export interface Plan {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  price: string;
+  billingPeriod: BillingPeriod;
+  features: string[];
+  limits: Record<string, number | string | boolean>;
+  isFeatured: boolean;
+  isActive: boolean;
+  displayOrder: number;
+}
+
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
 
 /**
@@ -149,4 +165,27 @@ export const searchEmpresas = async (termo: string): Promise<Empresa[]> => {
     console.error(`Erro ao buscar empresas com termo "${termo}":`, error);
     throw error;
   }
+};
+
+export const fetchPlans = async (): Promise<Plan[]> => {
+  return fetchApi<Plan[]>('/plans');
+};
+
+export const selectPlan = async (planId: string): Promise<Plan> => {
+  const token = localStorage.getItem('token');
+  const response = await fetch(`${API_BASE_URL}/plans/selection`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify({ planId }),
+  });
+
+  const data: ApiResponse<Plan> = await response.json();
+  if (!response.ok || !data.success || !data.data) {
+    throw new Error(data.error || 'Não foi possível selecionar o plano.');
+  }
+
+  return data.data;
 };

@@ -1,12 +1,21 @@
 import { fireEvent, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { MemoryRouter } from 'react-router-dom'
 import { describe, expect, it } from 'vitest'
 
 import { SiteHeader } from './SiteHeader'
 
+function renderHeader(initialEntry = '/') {
+  return render(
+    <MemoryRouter initialEntries={[initialEntry]}>
+      <SiteHeader />
+    </MemoryRouter>,
+  )
+}
+
 describe('SiteHeader', () => {
   it('renders the logo, four desktop anchors and contact CTA', () => {
-    render(<SiteHeader />)
+    renderHeader()
 
     expect(screen.getByRole('img', { name: 'Civix' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Civix — início' })).toHaveClass(
@@ -19,14 +28,18 @@ describe('SiteHeader', () => {
     for (const label of ['Home', 'Sobre', 'Empresas', 'Planos']) {
       expect(within(desktopNav).getByRole('link', { name: label })).toBeInTheDocument()
     }
+    expect(within(desktopNav).getByRole('link', { name: 'Planos' })).toHaveAttribute(
+      'href',
+      '/planos',
+    )
     expect(screen.getByRole('link', { name: 'Contato' })).toHaveAttribute(
       'href',
-      '#contato',
+      '/#contato',
     )
   })
 
   it('exposes accessible mobile menu state and relationship', () => {
-    render(<SiteHeader />)
+    renderHeader()
 
     const menuButton = screen.getByRole('button', {
       name: 'Abrir menu principal',
@@ -37,7 +50,7 @@ describe('SiteHeader', () => {
 
   it('opens the compact navigation from the menu button', async () => {
     const user = userEvent.setup()
-    render(<SiteHeader />)
+    renderHeader()
 
     await user.click(
       screen.getByRole('button', { name: 'Abrir menu principal' }),
@@ -52,7 +65,7 @@ describe('SiteHeader', () => {
 
   it('closes the compact navigation from the toggle', async () => {
     const user = userEvent.setup()
-    render(<SiteHeader />)
+    renderHeader()
     const menuButton = screen.getByRole('button', {
       name: 'Abrir menu principal',
     })
@@ -65,7 +78,7 @@ describe('SiteHeader', () => {
 
   it('closes on Escape and returns focus to the menu button', async () => {
     const user = userEvent.setup()
-    render(<SiteHeader />)
+    renderHeader()
     const menuButton = screen.getByRole('button', {
       name: 'Abrir menu principal',
     })
@@ -79,7 +92,7 @@ describe('SiteHeader', () => {
 
   it('closes after a mobile navigation anchor is selected', async () => {
     const user = userEvent.setup()
-    render(<SiteHeader />)
+    renderHeader()
     await user.click(
       screen.getByRole('button', { name: 'Abrir menu principal' }),
     )
@@ -92,7 +105,9 @@ describe('SiteHeader', () => {
 
   it('accepts a custom navigation collection', () => {
     render(
-      <SiteHeader navigationItems={[{ href: '/servicos', label: 'Serviços' }]} />,
+      <MemoryRouter>
+        <SiteHeader navigationItems={[{ href: '/servicos', label: 'Serviços' }]} />
+      </MemoryRouter>,
     )
 
     const desktopNav = screen.getByRole('navigation', {
@@ -101,6 +116,18 @@ describe('SiteHeader', () => {
     expect(within(desktopNav).getByRole('link', { name: 'Serviços' })).toHaveAttribute(
       'href',
       '/servicos',
+    )
+  })
+
+  it('marks Plans as the current page on /planos', () => {
+    renderHeader('/planos')
+
+    const desktopNav = screen.getByRole('navigation', {
+      name: 'Navegação principal',
+    })
+    expect(within(desktopNav).getByRole('link', { name: 'Planos' })).toHaveAttribute(
+      'aria-current',
+      'page',
     )
   })
 })

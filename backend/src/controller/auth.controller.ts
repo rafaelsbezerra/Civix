@@ -32,8 +32,8 @@ export const validateTokenController = async (
     }
 
     const query = `
-      SELECT email, reset_password_expires 
-      FROM users 
+      SELECT email, reset_password_expires
+      FROM users
       WHERE reset_password_token = $1
     `;
     const { rows } = await db.query<{ email: string; reset_password_expires: Date | string }>(

@@ -7,7 +7,9 @@ import helmet from "helmet";
 
 // Importação das rotas
 import authRoutes from './routes/userRoute.js';
+import firstAccessRoutes from './routes/auth.routes.js';
 import empresaRoutes from './routes/empresaRoute.js';
+import planRoutes from './routes/plan.routes.js';
 
 const app = express();
 
@@ -37,7 +39,9 @@ app.get("/", (_req: Request, res: Response) => {
 const apiVersion = "/api/v1";
 
 app.use(`${apiVersion}/users`, authRoutes);
+app.use('/api', firstAccessRoutes);
 app.use(`${apiVersion}/empresas`, empresaRoutes);
+app.use(`${apiVersion}/plans`, planRoutes);
 
 app.listen(PORT, () => {
   console.log("Servidor rodando com sucesso!");

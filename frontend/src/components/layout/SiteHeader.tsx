@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 
 import logoCivix from '@/assets/civix/logo-civix.png'
 import { ActionButton } from '@/components/ui/ActionButton'
@@ -16,7 +17,7 @@ const defaultNavigationItems: readonly NavigationItem[] = [
   { href: '/', label: 'Home' },
   { href: '/#sobre', label: 'Sobre' },
   { href: '/catalogo', label: 'Empresas' },
-  { href: '/#planos', label: 'Planos' },
+  { href: '/planos', label: 'Planos' },
   { href: '/#faq', label: 'FAQ' },
 ]
 
@@ -25,6 +26,7 @@ export function SiteHeader({
 }: SiteHeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const menuButtonRef = useRef<HTMLButtonElement>(null)
+  const { pathname } = useLocation()
 
   useEffect(() => {
     if (!isMenuOpen) return
@@ -62,7 +64,8 @@ export function SiteHeader({
             {navigationItems.map((item) => (
               <li key={item.href}>
                 <a
-                  className="font-[family-name:var(--font-body)] text-base font-normal leading-[19px] text-[var(--color-civix-navy)] transition-colors hover:text-[#000e1b]"
+                  aria-current={item.href === pathname ? 'page' : undefined}
+                  className={`font-[family-name:var(--font-body)] text-base leading-[19px] transition-colors hover:text-[#000e1b] ${item.href === pathname ? 'font-semibold text-[var(--color-civix-gold-accessible)]' : 'font-normal text-[var(--color-civix-navy)]'}`}
                   href={item.href}
                 >
                   {item.label}
@@ -121,7 +124,8 @@ export function SiteHeader({
             {navigationItems.map((item) => (
               <li key={item.href}>
                 <a
-                  className="block rounded-lg px-4 py-3 font-[family-name:var(--font-body)] text-sm text-[var(--color-civix-navy)] hover:bg-[var(--color-civix-gold)]/10"
+                  aria-current={item.href === pathname ? 'page' : undefined}
+                  className={`block rounded-lg px-4 py-3 font-[family-name:var(--font-body)] text-sm hover:bg-[var(--color-civix-gold)]/10 ${item.href === pathname ? 'font-semibold text-[var(--color-civix-gold-accessible)]' : 'text-[var(--color-civix-navy)]'}`}
                   href={item.href}
                   onClick={() => setIsMenuOpen(false)}
                 >
