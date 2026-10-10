@@ -1,78 +1,71 @@
-# Migrations executáveis
+# Migrations — Prisma 7 e SQL nativo
 
-Estado: Prisma 8 com migrations TypeScript nativas e migration inversa
-aprovado. Configuração passiva nesta etapa; baseline e modelo canônico
-**Aguardando resposta** (BE-08/09). Não aplicar migrations ao banco remoto.
+Estado: mecanismo aprovado; tooling implementado separadamente no
+[PR #8](https://github.com/rafaelsbe/Civix/pull/8), commit 48eb252 da branch
+codex/prisma7-foundation. Não está integrado na baseline auditada nem na
+staging de referência e2b3d8b: CLI ainda 6, client/adapter ainda 7 neste código.
+Schema comercial e execução em PostgreSQL permanecem pendentes.
 
-## Problema e escopo
+## Decisões confirmadas
 
-`prisma/schema.prisma` não possui models. Existem duas migrations SQL para
-planos, sem criação completa de users/user/empresas. O package não define
-comandos de migration; Prisma CLI e client têm versões principais distintas.
+Prisma Migrate 7 com SQL nativo será o único dono do histórico; CLI/client/
+adapter fixados em 7.10.0 na entrega do tooling. PostgreSQL criado do zero,
+nome canônico users. Não usar runner TS paralelo ou funções up/down.
+A decisão anterior por Prisma 8/TS e espera de versão estável foi substituída.
 
-Criar scripts versionados executados por um runner com histórico. Apenas
-trocar extensão de SQL ou chamar um arquivo isolado não atende à tarefa.
-Scripts podem precisar de SQL para operações específicas; confirmar se o
-usuário exige builder/ORM também nas operações internas.
+- Migration concluída: gerar nova migration inversa, preservando histórico.
+- Migration falha: inspecionar/recuperar estado parcial e reconciliar o
+  histórico com migrate resolve. --rolled-back não desfaz SQL; db execute
+  não registra uma migration. Inversa não recupera dados removidos.
+- Transações e preservação de dados devem ser avaliadas por mudança.
+- Não aplicar migrations automaticamente na inicialização/importação da API.
+- Não executar contra banco remoto ou produção nesta entrega.
 
-As versões declaradas no projeto (CLI 6 e client 7) precisam ser alinhadas.
-O [fluxo documentado do Prisma 7](https://docs.prisma.io/docs/orm/v7/prisma-migrate)
-usa migrations SQL; a [documentação atual](https://www.prisma.io/docs/orm/migrations/how-migrations-work)
-descreve outra geração do fluxo. Não presumir compatibilidade entre versões.
-Após avaliação, o usuário aprovou Prisma 8 e reversão por migration inversa.
-A [avaliação inicial](avaliacao-prisma.md) registra os resultados e a decisão
-ainda necessária. Um único mecanismo deve
-ser responsável por aplicar e registrar cada migration.
+## Situação e requisitos
 
-Não conectar nem provisionar banco nesta entrega. Testes reais de migrations
-pertencem à implementação, em PostgreSQL temporário/local autorizado.
+prisma/schema.prisma não possui models. As duas migrations SQL de planos
+não constituem uma baseline completa. Seu destino deve ser definido junto
+com o schema; não apagar ou reexecutar esse histórico incidentalmente.
 
-## Requisitos
+Cada migration deve ter identificação/ordem e registro de aplicação pelo
+Prisma Migrate. Reexecução não deve duplicar mudanças; falha não deve ser
+registrada como sucesso. Separar schema de seeds e dados de demonstração.
+Banco vazio deve ser criado com chaves, vínculos, índices e restrições aprovados.
 
-- MIG-01: Cada migration possui identificação única, ordem determinística,
-  execução pelo runner e registro de aplicação; repetir execução não reaplica
-  migrations já concluídas.
-- MIG-02: Comandos documentados permitem criar, aplicar e consultar status.
-  Reversão e transações obedecem política aprovada, com falhas explícitas.
-- MIG-03: Banco vazio é inicializado a partir do modelo mínimo aprovado,
-  respeitando chaves, vínculos, índices e restrições necessários.
-- MIG-04: Separar mudanças de schema de seeds/dados de demonstração; preservar
-  evolução de dados de planos se necessária. Não inserir segredos nos scripts.
-- MIG-05: Não apagar ou substituir histórico aplicado antes de confirmar
-  existência de banco e política de compatibilidade.
-- MIG-06: Migration nunca roda automaticamente por efeito colateral de
-  importar módulo ou iniciar API, salvo decisão explícita futura.
+## Tarefas e aceite — IDs originais preservados
 
-## Tarefas e aceite
-
-Etapa atual: preparar tooling/configuração e validação isolada. MIG-02/04 e
-o ciclo em banco de MIG-05 dependem da definição do schema e da adoção.
-Preservar histórico SQL atual sem reexecutar ou apagar.
-
-- [ ] MIG-01: Escolher runner e confirmar PostgreSQL, Prisma e SQL interno.
-  Aceite: alternativa aprovada com motivo; scripts TypeScript ou formato
-  escolhido, versões compatíveis e política de transação/rollback registrada.
+- [x] MIG-01: Confirmar runner, PostgreSQL, formato e reversão.
+  Decisão: Prisma 7/SQL nativo, banco novo e migration inversa. Os detalhes
+  transacionais são avaliados por migration; não são um runner pendente.
 - [ ] MIG-02: Definir destino das migrations SQL e baseline canônica.
-  Depende do modelo de domínio e da confirmação de banco existente.
-  Aceite: plano para banco vazio; se houver banco aplicado, caminho de
-  preservação sem reset destrutivo ou perda de dados.
-- [ ] MIG-03: Configurar scripts, runner, histórico e ambiente.
-  Aceite: comandos documentados; falta de configuração gera erro claro;
-  reexecução não duplica histórico; falha não registra aplicação bem-sucedida.
+  Banco vazio já confirmado. **Aguardando resposta:** schema mínimo e
+  preservação/substituição dos SQL atuais de planos antes da nova baseline.
+- [ ] MIG-03: Configurar scripts, runner, histórico e ambiente completos.
+  Parcial: dependências/configuração e provas offline entregues no PR #8;
+  comandos operacionais, integração e comportamento em banco pendentes.
+- [x] MIG-03-A: Preparar dependências/configuração e provas isoladas.
+  Concluído no PR #8, não integrado aqui. Manifesto/lockfile fixam 7.10.0;
+  test:prisma possui três testes de validate/generate/SQL criação-inversa.
+  A entrega registrou TypeScript completo aprovado em seu próprio worktree.
+- [ ] MIG-03-B: Integrar tooling do PR #8 à staging atual, resolvendo
+  diferenças de arquivos/scripts sem reintroduzir padrões antigos.
+- [ ] MIG-03-C: Discutir e implementar comandos operacionais aprovados.
+  migrations:apply, migrations:show e migrations:rollback foram propostos
+  pelo usuário para discussão posterior; não estão implementados/aprovados
+  em detalhe. Não presumir um rollback automático do Prisma.
 - [ ] MIG-04: Implementar schema mínimo e evolução de dados aprovada.
-  Aceite: todas as estruturas necessárias aos módulos existentes criadas,
-  sem perpetuar a divergência `user`/`users` ou definir produto não aprovado.
-- [ ] MIG-05: Verificar ciclo completo e atualizar operação/arquitetura.
-  Aceite: aplicar do zero, reaplicar sem mudanças, consultar status e testar
-  falha; validar rollback se suportado, ou recuperação explícita se irreversível.
+  **Aguardando resposta:** campos, relações, restrições e dados necessários.
+  Resolver uso atual de user/users sem perpetuar duas identidades canônicas.
+- [ ] MIG-05: Verificar ciclo em PostgreSQL temporário e atualizar operação.
+  Aplicar do zero, reaplicar, consultar histórico, testar falha/recuperação
+  e migration inversa. Nenhuma evidência de execução desse ciclo existe.
 
-Não declarar sucesso apenas por typecheck: a execução precisa de banco
-temporário. Até existir essa evidência, registrar validação como pendente.
+## Verificação e limites
 
-## Decisão sobre a versão publicada
+PR #8 registra geração de cliente/SQL offline com fixture MigrationProbe e
+URL fictícia; não cria modelos comerciais nem aplica SQL em PostgreSQL.
+Esta auditoria não reexecutou testes. Geração ou typecheck não comprova
+aplicação, atomicidade, recuperação ou reversão de dados no banco.
 
-O usuário decidiu aguardar uma versão estável do Prisma 8. Consulta ao registry:
-prisma latest 8.0.0-rc.22; @prisma/orm-postgres latest 8.0.0-rc.17.
-Nenhum pacote RC instalado. MIG-01/03 e testes específicos do novo tooling
-ficam pendentes dessa condição; schema e aplicação real dependem também
-BE-08/09. Não marcar migrations como implementadas apenas pela documentação.
+Referências: [avaliação e histórico](avaliacao-prisma.md),
+[operação](../../../docs/operacao.md), [decisões](../STATE.md).

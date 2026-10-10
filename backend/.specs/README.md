@@ -1,55 +1,54 @@
 # Specs do backend
 
-Planejamento inicial de SDD leve + DDD leve, em 2026-10-09, na `staging`.
-Etapa atual: adotar os contratos de erro/sucesso nos endpoints backend.
-A base passiva foi a etapa anterior; frontend fica explicitamente adiado. Commit documental antes do código; branches/worktrees por tarefa,
-branch de integração para dependências e todos os PRs destinados à `staging`.
-Atualizar a documentação principal em cada tarefa.
+SDD leve + DDD leve: tarefas pequenas, evidências de implementação e decisões
+explícitas. Auditoria de status em 2026-10-10 na baseline
+codex/http-adoption-integration; staging de referência e2b3d8b.
+Checkbox marcado significa escopo implementado ou decisão confirmada,
+conforme a evidência do item. Entrega em PR não significa merge em staging.
 
-## Grupos de trabalho
+## Grupos e situação
 
-1. [Contratos HTTP: erro, resposta e paginação](contratos-http/spec.md).
-2. [Estrutura e convenções; adequação de empresas](estrutura-modulos/spec.md).
-3. [Entidades, interfaces e DTOs](tipagem-dominio/spec.md).
-4. [Migrations executáveis](migrations/spec.md).
+| Grupo | Implementado | Pendências reais |
+| --- | --- | --- |
+| [Contratos HTTP](contratos-http/spec.md) | Base/helpers integrados; backend com erro/sucesso na baseline/PR #14 | Frontend, aplicação SQL da paginação, abrangência/filtros |
+| [Estrutura](estrutura-modulos/spec.md) | Convenções, empresas, usuários/planos e tipos auth | SQL/regras de auth/admin para services; tipos úteis locais de admin |
+| [Tipagem](tipagem-dominio/spec.md) | Entidades/DTOs existentes, linhas auth/plan e três interfaces de repositories | Modelo canônico, validação/serialização abrangentes; implementação posterior da persistência |
+| [Migrations](migrations/spec.md) | Prisma 7/SQL/inversa aprovados; tooling no PR #8/48eb252 | Integração, schema/baseline, comandos a discutir, ciclo em PostgreSQL |
+| [Usuários/repositories](usuarios-repositories/spec.md) | Extração/interfaces integradas em staging | Implementação/adoção dos repositories em outra etapa |
+| [Tipos auth](adocao-http/auth-types.md) | Extração entregue no PR #12 e presente na baseline | Não equivale a auth.service.ts |
+| [Adoção HTTP](adocao-http/spec.md) | Backend implementado/verificado no PR #14 | Merge em staging não presumido; frontend posterior |
 
-As [decisões](STATE.md) distinguem instruções confirmadas de propostas.
-Itens com **Aguardando resposta** não autorizam escolha ou implementação.
-Todas as tarefas começam pendentes; checkbox marcado exige evidência.
+Consultar [STATE.md](STATE.md) para decisões atuais e históricas superadas.
+Prisma 8/TS e espera de versão estável não são pendências atuais: o usuário
+confirmou Prisma 7/SQL nativo. Nome users e banco criado do zero confirmados;
+campos, vínculos e restrições do schema ainda aguardam resposta.
 
 ## Como trabalhar
 
-- Confirmar as decisões necessárias ao grupo antes de implementar.
-- Atualizar sua spec com a resposta e um exemplo concreto do comportamento.
-- Implementar tarefas pequenas e verificar seus critérios de aceite.
-- Atualizar `/docs`; a migração de consumidores ocorrerá na etapa de adoção.
-- Usar subagentes nas tarefas secundárias e informar função e modelo.
-- Perguntar quando surgir dúvida ou decisão nova; registrá-la como pendente.
+- Ler AGENTS.md e a spec; perguntar diante de dúvidas/decisões novas.
+- Não pedir de novo confirmação já concedida; marcar decisões reais como
+  **Aguardando resposta** e não tratar propostas como aprovações.
+- Documentar antes do código e atualizar docs principais por implementação.
+- Verificar critérios pertinentes, registrar limitações e evidências.
+- Usar subagentes nas tarefas secundárias, informando função/modelo.
+- Manter tarefas em branches/worktrees e integração para dependências;
+  seguir exceções explícitas do usuário e PRs para staging.
 
-DDD leve significa organizar responsabilidades por domínio, separar os
-modelos de negócio dos contratos HTTP e da persistência, e explicitar as
-interfaces necessárias. Não exige microserviços, CQRS, event sourcing ou
-uma camada de abstração sem necessidade concreta.
+DDD leve separa responsabilidades e contratos úteis sem exigir microserviços,
+CQRS, event sourcing ou interfaces para toda estrutura. Repositories contêm
+somente interfaces nesta etapa; manter SQL até a implementação futura.
 
-Implementação atual: erro/sucesso com AppError, ErrorCode e handlers globais.
-[Spec de adoção HTTP](adocao-http/spec.md). Repositories seguem interfaces;
-paginação e schema permanecem para tarefas posteriores. Não adaptar o frontend
-nesta tarefa; documentar suas incompatibilidades.
+## Padrões ainda em discussão
 
-## Outros padrões sugeridos
+Validação runtime geral, serialização de datas/IDs/null, filtros/ordenação,
+geração/propagação de requestId, logs sem segredos e configuração runtime/CI.
+Sanitização, enum, handler e diagnóstico já estão implementados. Autorização
+nova e isolamento por empresa exigem escopo próprio; não ampliar o MVP.
 
-Antes de implementar os contratos, definir validação de entradas,
-serialização de datas/IDs/null, ordenação/filtros e configuração do ambiente.
-Rastreabilidade de erros exige decidir o `requestId` e logs sem segredos.
-Autorização e isolamento por empresa exigem uma spec própria antes de
-novos módulos privados. Nenhum desses padrões foi aprovado implicitamente.
+## Verificação desta auditoria
 
+Comparação somente documental com arquivos source/config, branches e specs.
+Não reexecutou testes, instalou dependências, executou migrations ou alterou
+código/configuração. Registros de testes pertencem às entregas indicadas.
 Referências: [diagnóstico](../../docs/diagnostico.md),
-[API atual](../../docs/api.md) e [pendências gerais](../../docs/decisoes.md).
-
-## Extração de usuários e repositories
-
-[Spec de usuários e persistência](usuarios-repositories/spec.md): somente
-interfaces de repositories e reorganização de userController/userRoute;
-convites/primeiro acesso preservados. Implementações e adoção dos
-repositories são posteriores.
+[API](../../docs/api.md), [pendências gerais](../../docs/decisoes.md).

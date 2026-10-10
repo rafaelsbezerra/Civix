@@ -10,13 +10,26 @@
 - **Date**: 2026-08-20
 - **Status**: active
 
-## Handoff
+## Handoff atual — auditoria de 2026-10-10
 
-- **Feature**: Tela Sobre / `.specs/features/about-page/`
-- **Phase / Task**: Execute / Complete
-- **Completed**: tela Sobre em `/sobre`, responsividade derivada, seis exports locais, testes unitários/browser/build e validação independente PASS 15/15
-- **In-progress** (file:line): none
-- **Next step**: revisão/release da branch; alteração externa em `src/pages/Home.tsx` permanece fora dos commits da feature
-- **Blockers**: none
-- **Uncommitted files**: `src/pages/Home.tsx` (alteração externa preservada; não pertence ao trabalho validado)
-- **Branch**: `feature/about-page`
+- **Feature**: home-hero e about-page.
+- **Phase / Task**: auditoria documental; requisitos vigentes **Aguardando resposta**.
+- **Implementado observado**: componentes de hero/About, tokens/fontes, formulário,
+  menu responsivo, metadados, testes e scripts de verificação.
+- **Divergências**: /sobre não está registrada; About é seção da Home com main/h1
+  adicionais. Dois assets históricos de About estão ausentes e o notebook mudou.
+  Header usa destinos de aplicação, incluindo /planos sem rota registrada.
+- **Next step**: confirmar se os requisitos históricos continuam obrigatórios
+  ou se as alterações atuais devem ser incorporadas às specs; não escolher isso
+  automaticamente. Adaptação frontend aos contratos backend segue adiada.
+- **Verificação atual**: leitura de source/config/testes e existência de arquivos;
+  sem execução de teste, lint, build, navegador, CLS, zoom ou contraste.
+- **Referência**: [revisão consolidada](../../docs/revisao-pendencias-specs.md).
+
+## Handoff histórico — não representa aprovação da versão atual
+
+A entrega da branch feature/about-page registrou PASS 15/15 e gates em agosto
+de 2026 (ver validation.md de cada feature). Os checkboxes originais foram
+preservados como histórico. Esse resultado não prova rota, assets ou integração
+da versão atual. LESSONS.md/lessons.json permanecem registros históricos sem
+edição ou promoção de candidatos nesta auditoria.

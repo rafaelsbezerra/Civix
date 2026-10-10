@@ -1,5 +1,9 @@
 # Tela Sobre Civix — Design
 
+> **Auditoria de estado — 2026-10-10:** este documento preserva decisões, checkboxes e resultados históricos. A vigência dos requisitos antigos está **Aguardando resposta**. Não restaurar layout, reabrir escopo ou declarar gates atuais aprovados sem confirmação e evidência.
+> AppRoute não registra /sobre; About aparece dentro da Home. dashboard.png e macbook-silver.png do manifest histórico não existem no checkout; AboutVisual usa macbook.png e não renderiza dashboard. Não foi decidido restaurar a composição original ou aceitar essas divergências.
+> Revisão consolidada: [pendências das specs](../../../../docs/revisao-pendencias-specs.md).
+
 **Spec**: `.specs/features/about-page/spec.md`
 **Status**: Approved
 
@@ -164,4 +168,3 @@ O modelo é local e somente organiza conteúdo estático.
 | Mobile | Fluxo vertical derivado | Mantém ordem de leitura e evita sobreposição. |
 | Assets | Exports originais locais | Evita URLs temporárias e placeholders. |
 | Chrome global | Ausente nesta rota | O frame é a fonte visual correta. |
-
