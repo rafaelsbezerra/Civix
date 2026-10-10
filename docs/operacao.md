@@ -136,3 +136,16 @@ Schema comercial, baseline completa, comandos migrations:apply/show/rollback
 e ciclo em PostgreSQL continuam pendentes. SQL de planos não foi alterado.
 Não executar migrations automaticamente nem contra produção/remoto.
 Os PRs permanecem abertos; esta resolução não realiza merge em staging.
+
+
+## Verificação da resolução dos PRs #13/#14/#15 — 2026-10-10
+
+A staging 7b976d7 foi conciliada com a adoção HTTP e o tooling Prisma 7.
+Validação em cópia temporária dos arquivos do backend, reutilizando as
+dependências 7.10.0 já instaladas: test:foundation (36 testes), test:prisma
+(3 testes), typecheck:foundation, typecheck:contracts e TypeScript completo
+(--noEmit) passaram. Os arquivos executáveis, testes e configuração são
+iguais nas três branches; suas diferenças são documentais. Nenhum pacote
+foi instalado, banco real acessado, e-mail enviado ou migration aplicada.
+O frontend permanece para a etapa posterior. Os merges dos PRs ficam a
+cargo do usuário.
