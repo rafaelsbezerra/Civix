@@ -30,6 +30,7 @@
 - Global constants: UPPER_SNAKE_CASE, such as `MAX_PAGE_SIZE`.
 - Backend files: use lowercase domain/responsibility names separated by dots, such as `company.service.ts`, `company.controller.ts`, `company.routes.ts` and `company.entity.ts`. Never use camelCase/PascalCase filenames or join the domain and responsibility with a hyphen. Preserve existing folders by function; controllers use the existing `src/controller/` directory.
 - Keep backend folders organized by function (routes, controllers, services, entities, interfaces and DTOs), with routes → controller → service. Keep HTTP handling in controllers and business rules in services. Existing modules still require gradual alignment.
+- Persistence interfaces for each implemented module belong in `backend/src/repositories`, with domain methods such as `UserRepository.getById`; do not replace these contracts with a generic SQL query interface. The location of SQL implementations must follow the confirmed task decision.
 - Export controller handlers as independent functions. Import the service directly (for example, `import * as companyService`) and call `companyService.method()`. Do not introduce controller/router/service factories as the default pattern.
 - Write error messages, diagnostic placeholder text and code comments in Brazilian Portuguese. Keep identifiers and machine-readable error codes in English.
 - On the frontend, adhere to existing conventions and framework-mandated naming.
@@ -67,7 +68,7 @@
 
 ## Ask First
 
-- If you have any questions about the task, ask before executing the affected part.
+- Caso exista qualquer dúvida sobre a tarefa, sempre faça perguntas antes de implementar a parte afetada. Registre decisões pendentes na spec como **Aguardando resposta**; não presuma aprovação.
 - Ask before installing dependencies, changing the schema, or making any other critical change.
 
 ## Commands and Verification

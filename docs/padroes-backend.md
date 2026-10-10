@@ -74,3 +74,12 @@ monitoramento automático de release.
 Na adoção posterior: conectar handlers no servidor, migrar envelopes/controllers
 consumidores, implementar queries paginadas com filtros e ordenação estável,
 adaptar frontend e definir schema canônico antes das migrations.
+
+## Próxima refatoração: usuários e repositories
+
+Interfaces de persistência por módulo ficarão em backend/src/repositories.
+A separação de usuários foi solicitada; localização das implementações SQL
+e inclusão de primeiro acesso/convites aguardam resposta. Ver
+[spec](../backend/.specs/usuarios-repositories/spec.md).
+Sempre perguntar diante de dúvida antes de implementar a parte afetada.
+
