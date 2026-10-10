@@ -133,3 +133,18 @@ async function get(x) {
 - The repositories folder contains persistence interfaces only in this phase;
   their implementations and service adoption will be a later task. Preserve
   the existing SQL and HTTP behavior during the extraction.
+
+## Current HTTP contract adoption
+
+- Follow the existing two-space indentation and readable spacing between
+  logical blocks. Avoid compressed one-line guards, multiple statements on
+  the same line and dense inline object literals in controllers/services.
+- All current backend endpoints adopt AppError and the shared success
+  contract. Use the central ErrorCode enum instead of ad hoc reason strings
+  and controller switches. Pass errors to the global handler.
+- Production errors contain status/message only; other environments include
+  sanitized stack/diagnostics. Preserve the original exception as cause.
+- Shared configuration, contracts and errors live in backend/src/shared.
+- Frontend consumer migration is deferred by explicit user decision. Record
+  breaking response changes and affected consumers in docs. Pagination
+  queries, schema changes and repository implementations remain separate.

@@ -110,3 +110,11 @@ Mantidos login cliente por e-mail, empresa com bcrypt, JWT1h, recuperação
 sem enumeração, token aleatório com hash SHA-256/expiração1h, reset bcrypt10
 e limpeza dos tokens. Repositories são interfaces apenas: o SQL continua
 nos services. Convite/primeiro acesso, frontend e schema não foram alterados.
+
+## Adoção HTTP aprovada
+
+Todos os endpoints atuais do backend adotarão AppError e { data, meta? },
+com ErrorCode centralizado e handler global. Stack/diagnóstico sanitizados
+fora de production; somente status/message em production. Frontend fica
+para a próxima etapa por decisão explícita. A spec de adoção está em
+[backend/.specs/adocao-http](../backend/.specs/adocao-http/spec.md).
