@@ -84,3 +84,16 @@ convites permanecem intactos. SQL permanece nos services atuais. Ver
 [spec](../backend/.specs/usuarios-repositories/spec.md).
 Sempre perguntar diante de dúvida antes de implementar a parte afetada.
 
+
+## Interfaces de persistência preparadas
+
+Disponíveis em repositories/{user,company,plan}.repository.ts. São apenas
+interfaces; não são importadas pelos services nem possuem implementações.
+SQL continua nos services durante esta etapa. Não há interface query
+genérica nem novas factories. Busca sem resultado usa undefined, como
+rows[0] nas consultas atuais; atribuição de plano retorna boolean.
+
+User descreve campos observados internamente; password_hash é dado de
+persistência, nunca parte da resposta de login. Plan e PlanRow foram
+extraídos para entities/plan.entity.ts e interfaces/plan.row.ts; exports
+de tipos do service preservados para compatibilidade. Nenhuma query mudou.
