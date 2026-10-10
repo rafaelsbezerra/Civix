@@ -10,6 +10,14 @@
 - **Date**: 2026-08-20
 - **Status**: active
 
+### AD-002
+- **Decision**: Registrar divergências entre specs históricas e frontend atual como aguardando confirmação, sem exigir retorno ao layout antigo.
+- **Reason**: Orientação explícita do usuário após a auditoria de Home/Sobre.
+- **Scope**: Registro documental das divergências; não autoriza restauração nem aprova todos os requisitos da composição atual.
+- **Date**: 2026-10-10
+- **Status**: active
+- **Pendente**: definição dos requisitos vigentes de navegação, rota, assets e composição — **Aguardando resposta**.
+
 ## Handoff atual — auditoria de 2026-10-10
 
 - **Feature**: home-hero e about-page.

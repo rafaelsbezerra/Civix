@@ -67,10 +67,14 @@ não validam automaticamente a composição atual de staging.
 | Geometria, responsividade, zoom, CLS, contraste e bundle do checkout atual | Relatórios antigos e scripts presentes | Validação atual não executada nesta auditoria |
 | Hashes crus de SVG dependem de CRLF/LF | Assets coincidem após normalização das quebras de linha | Conferir política de bytes ao alinhar testes |
 
-**Aguardando resposta:** as specs antigas de Home/Sobre continuam sendo
-requisitos, ou devem ser atualizadas para a composição atual? A pergunta foi
-apresentada ao usuário. Não restaurar layout, rota ou assets por suposição;
-registrar divergência não autoriza mudança no frontend.
+**Orientação confirmada pelo usuário em 2026-10-10:** registrar as divergências
+como aguardando confirmação, sem exigir retorno ao layout antigo. Essa
+orientação não aprova automaticamente todos os detalhes da composição atual
+nem reabre as tarefas históricas para restauração.
+
+**Aguardando resposta:** definição dos requisitos vigentes de Home/Sobre,
+incluindo navegação, rota, assets e composição. Até essa definição, manter
+as divergências registradas; nenhuma alteração de frontend foi autorizada.
 
 ## Limites e próximos passos
 
