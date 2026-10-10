@@ -1,42 +1,49 @@
-import express, { Request, Response } from 'express';
-import cors from 'cors';
-import 'dotenv/config';
+import "dotenv/config";
+import express, { Request, Response } from "express";
+import cookieParser from "cookie-parser";
+import compression from "compression";
+import cors from "cors";
+import helmet from "helmet";
 
 // Importação das rotas
-import authRoutes from './routes/userRoute.ts';
-// import userRoutes from './routes/userRoutes'; // Descomente quando criar outras rotas
+import authRoutes from './routes/userRoute.js';
+import firstAccessRoutes from './routes/auth.routes.js';
+import empresaRoutes from './routes/empresaRoute.js';
+import planRoutes from './routes/plan.routes.js';
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 
-// ===================================
-// Middlewares Globais
-// ===================================
+const PORT = process.env.PORT ?? 3000;
 
-// Permite requisições vindas de outros domínios (seu front-end React)
-app.use(cors());
+// Configuração explícita de CORS
+app.use(cors({
+  origin: true, // Permite a origem da requisição (Vite/React em dev)
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+}));
 
-// Converte o corpo das requisições (req.body) para JSON
 app.use(express.json());
+app.use(cookieParser());
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
+app.use(compression());
 
-// ===================================
-// Rotas
-// ===================================
-
-// Rota de teste simples para verificar se a API está online
-app.get('/', (req: Request, res: Response) => {
-  return res.json({ message: 'API do Civix está rodando com sucesso!' });
+app.get("/", (_req: Request, res: Response) => {
+  return res.json({
+    message: "API do Civix está rodando com sucesso!",
+  });
 });
 
-// Registra as rotas de autenticação (/api/auth/login)
-// app.use('/api/auth', authRoutes);
+const apiVersion = "/api/v1";
 
-app.use('/api/users', authRoutes);
+app.use(`${apiVersion}/users`, authRoutes);
+app.use('/api', firstAccessRoutes);
+app.use(`${apiVersion}/empresas`, empresaRoutes);
+app.use(`${apiVersion}/plans`, planRoutes);
 
-// ===================================
-// Inicialização do Servidor
-// ===================================
 app.listen(PORT, () => {
-  console.log(`🚀 Servidor rodando com sucesso!`);
-  console.log(`📍 Acesse: http://localhost:${PORT}`);
+  console.log("Servidor rodando com sucesso!");
+  console.log(`Acesse: http://localhost:${PORT}`);
 });

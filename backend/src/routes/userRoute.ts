@@ -1,28 +1,25 @@
-//Definição das rotas/endpoints
+import { Request, Response, Router } from 'express';
+import { forgotPassword, home, login, resetPassword } from '../controller/userController.js';
+import authMiddleware from '../middlewares/auth.js';
 
-import express, { Request, Response, Router } from 'express';
-import { login, home }  from '../controller/userController.ts';
-import authMiddleware from '../middlewares/auth.ts';
+const router: Router = Router();
 
-const router: Router = express.Router();
-
-console.log('login:', typeof login);
-console.log('home:', typeof home);
-console.log('authMiddleware:', typeof authMiddleware);
-
-//Rota para o login
+// Rota pública de login (/api/v1/users/login)
 router.post('/login', login);
 
-//Rota protegida que requer autenticação
+// Rotas públicas de recuperação de senha
+router.post(['/forgot-password', '/esqueci-senha'], forgotPassword);
+router.post(['/reset-password', '/redefinir-senha'], resetPassword);
+
+// Rota protegida de perfil
 router.get('/profile', authMiddleware, (req: Request, res: Response) => {
-    res.json({
-        //O payload decodificado está acessível via req.user
-        message: 'Acesso permitido à rota protegida',
-        userId: (req as { user?: { id?: string | number } }).user?.id
-    });
+  return res.json({
+    message: 'Acesso permitido à rota protegida',
+    userId: req.userId,
+  });
 });
 
-//Rota home
+// Rota protegida home (/api/v1/users/home)
 router.post('/home', authMiddleware, home);
 
 export default router;

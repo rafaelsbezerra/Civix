@@ -1,43 +1,53 @@
-//Interceptadores (Autenticação, validação, logs)
-
 import { Request, Response, NextFunction } from 'express';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 
-// Interface para estender o Request do Express permitindo a propriedade userId
-interface AuthenticatedRequest extends Request {
-  userId?: string | number;
+// Extensão de tipos nativa do Express (substitui AuthenticatedRequest)
+declare global {
+  namespace Express {
+    interface Request {
+      userId?: string | number;
+      userRole?: string; // Opcional: útil para controle de permissões por perfil
+    }
+  }
 }
 
-const authMiddleware = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
+  const authHeader = req.headers.authorization;
 
-  //Busca o token no cabeçalho da requisição
-  const token = req.headers['authorization'];
-
-  if (!token) {
-    return res.status(401).json({ error: 'Token não fornecido' });
+  if (!authHeader) {
+    return res.status(401).json({ error: 'Token não fornecido.' });
   }
 
-  //Verifica se o token está no formato correto (Bearer <token>)
-  const tokenParts = token.split(' ');
-  if (tokenParts.length !== 2 || tokenParts[0] !== 'Bearer') {
-    return res.status(401).json({ error: 'Token inválido' });
+  // Validação e extração usando Regex limpa
+  const parts = authHeader.split(' ');
+
+  if (parts.length !== 2) {
+    return res.status(401).json({ error: 'Erro no formato do token.' });
   }
 
-  const [scheme, tokenValue] = tokenParts;
+  const [scheme, token] = parts;
 
-  //Verifica se o esquema é "Bearer"
   if (!/^Bearer$/i.test(scheme)) {
-    return res.status(401).json({ error: 'Token mal formatado' });
+    return res.status(401).json({ error: 'Token mal formatado. Deve iniciar com Bearer.' });
+  }
+
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    console.error('CRITICAL: JWT_SECRET não definida nas variáveis de ambiente.');
+    return res.status(500).json({ error: 'Erro interno no servidor de autenticação.' });
   }
 
   try {
+    const decoded = jwt.verify(token, secret) as JwtPayload;
 
-    //Verifica se o token é válido e decodifica o payload
-    const decoded = jwt.verify(tokenValue, process.env.JWT_SECRET as string) as JwtPayload;
+    // Anexa os dados do usuário à requisição
     req.userId = decoded.id;
-    next();
+    if (decoded.role) {
+      req.userRole = decoded.role;
+    }
 
-  } catch {
+    return next();
+  } catch (error) {
     return res.status(401).json({ error: 'Token inválido ou expirado.' });
   }
 };
