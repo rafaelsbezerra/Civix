@@ -38,6 +38,7 @@ Estado: escopo confirmado em 2026-10-10. Documentação anterior ao código.
 - Tarefas separadas em branches/worktrees e reunidas na integração.
 
 Nenhuma nova dependência, tabela ou migration está autorizada por esta tarefa.
+
 ## Implementação por tarefa
 
 - Interfaces UserRepository/CompanyRepository/PlanRepository preparadas, sem
@@ -68,3 +69,9 @@ Tarefas em codex/repository-contracts e codex/user-layers, reunidas em
 codex/users-persistence-integration. Os PRs têm staging como destino e
 compartilham a baseline documental e as correções anteriores. A integração
 é a entrega conjunta; não requer merge individual duplicado dos mesmos commits.
+
+## Entrega dos contratos de persistência
+
+Interfaces UserRepository/CompanyRepository/PlanRepository criadas e
+verificadas com TypeScript isolado. Sem implementação ou uso pelos services.
+Plan/PlanRow extraídos com reexports de compatibilidade. Queries preservadas.
