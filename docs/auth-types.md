@@ -11,8 +11,11 @@ usam as linhas de persistência:
 
 Esses contratos descrevem os campos já utilizados nas consultas SQL. Não
 criam tabelas, não definem um novo schema e não validam valores em execução.
-A validação do token continua consultando `users`; primeiro acesso continua
-consultando `"user"`. Essa divergência permanece para a etapa de schema.
+A unificação de 2026-10-12 na branch codex/json-postgres-repositories usa
+`users` na validação, no convite e no primeiro acesso. Os campos existentes
+`status` e `invite_token` também pertencem à identidade de usuário.
+Essa mudança de consultas não cria colunas nem comprova schema no PostgreSQL.
+Os protocolos de convite e redefinição continuam distintos.
 
 A extração inicial preservou rotas, consultas, regras e respostas. A adoção
 posterior de envelopes HTTP e AppError já está integrada em staging bedb73a,

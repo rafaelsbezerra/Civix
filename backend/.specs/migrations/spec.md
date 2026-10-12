@@ -53,7 +53,9 @@ Banco vazio deve ser criado com chaves, vínculos, índices e restrições aprov
   em detalhe. Não presumir um rollback automático do Prisma.
 - [ ] MIG-04: Implementar schema mínimo e evolução de dados aprovada.
   **Aguardando resposta:** campos, relações, restrições e dados necessários.
-  Resolver uso atual de user/users sem perpetuar duas identidades canônicas.
+  As consultas e o JSON já foram unificados em users na branch
+  codex/json-postgres-repositories. A baseline deve suportar os campos
+  existentes de convite/ativação, sem criar uma segunda identidade canônica.
 - [ ] MIG-05: Verificar ciclo em PostgreSQL temporário e atualizar operação.
   Aplicar do zero, reaplicar, consultar histórico, testar falha/recuperação
   e migration inversa. Nenhuma evidência de execução desse ciclo existe.

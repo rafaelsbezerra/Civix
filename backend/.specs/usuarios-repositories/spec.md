@@ -39,7 +39,8 @@ PRs #13/#14; respostas legadas preservadas na extração inicial são histórico
   O modo local autorizou antecipar esta evolução. Interfaces permanecem em
   repositories; implementações em persistence/json e persistence/postgres, com nomes domínio.repository.ts. Services usam a seleção
   definida na inicialização. AuthRepository cobre as operações existentes de
-  users e user sem unificar schema. Não houve execução de banco real.
+  convite, ativação, validação e recuperação. A evolução posterior de
+  2026-10-12 usa apenas users, sem criar schema ou executar banco real.
   Ver [spec de dados locais](../dados-locais/spec.md).
 
 ## HTTP histórico e adoção posterior
@@ -48,7 +49,14 @@ A extração preservou respostas/status existentes e não adotou os envelopes.
 Depois, [a adoção HTTP](../adocao-http/spec.md) substituiu resultados com
 reason/switch por dados ou AppError e aplicou data/meta nos controllers.
 Esse código está integrado em staging via PRs #13/#14, referência bedb73a.
-A divergência users/user permanece até a etapa de schema aprovada.
+A unificação autorizada em 2026-10-12 na branch
+codex/json-postgres-repositories remove a divergência de identidade:
+consultas PostgreSQL e coleção JSON usam apenas users, preservando os campos
+existentes de convite/ativação. JSONs antigos são modificados explicitamente,
+sem conversão automática na leitura. Schema/baseline ainda dependem de aprovação.
+Os protocolos de convite/reset permanecem pendentes. Login bloqueia pending
+e preserva contas sem status; convites não substituem contas ativas ou atuais
+sem status. Ativação e atualização de convites identificam a conta pelo ID.
 
 ## Verificação registrada e entrega
 

@@ -54,13 +54,12 @@ somente em helpers, com adoção apenas quando necessária, fora das pendências
 
 [schema.prisma](../backend/prisma/schema.prisma) não declara entidades.
 As migrations versionadas criam `plans` e atualizam suas descrições;
-adicionam `users.plan_id` somente se `users` já existir. Não criam `users`,
-`"user"` ou `empresas`. Um banco vazio não é reconstruído por esse histórico.
+adicionam `users.plan_id` somente se `users` já existir. Não criam `users`
+ou `empresas`. Um banco vazio não é reconstruído por esse histórico.
 
 | Entidade | Expectativa do código | Divergência documental |
 | --- | --- | --- |
-| `users` | id, name, email, role, password_hash, reset_password_token, reset_password_expires, plan_id | Notion usa USERS com nome, empresa_id, is_active e quatro papéis |
-| `"user"` | email, role, status, invite_token, password_hash | Convites/ativação usam tabela diferente do login |
+| `users` | id, name, email, role, password_hash, reset_password_token, reset_password_expires, plan_id; convite/ativação também usam status e invite_token | Notion usa USERS com nome, empresa_id, is_active e quatro papéis; schema canônico completo pendente |
 | `empresas` | categoria, cnpj, descricao_detalhada, verificado, tamanho, status e contatos | Notion usa segmento_id, plano_id, slug, media_preco, welcome_message e is_active |
 | `plans` | BIGSERIAL, slug, price, billing_period, features/limits JSONB, flags e ordem | Notion usa UUID e separa preço único e mensalidade |
 
@@ -131,7 +130,11 @@ de plano ao usuário pertence ao contrato UserRepository.
 Usuários segue routes → controller → service com handlers independentes,
 entity/DTO separados e acesso a UserRepository. Rotas/aliases e efeitos de
 login/recuperação/reset são preservados. Auth/admin também separam controllers,
-services e persistência, mantendo a divergência users/user sem montar admin.
+services e persistência. Na branch codex/json-postgres-repositories, todos
+os fluxos usam users, incluindo convite e ativação; admin continua desmontado.
+O JSON reúne esses usuários na mesma coleção, com status/invite_token opcionais.
+A unificação não altera os protocolos de token nem cria schema/migrations.
+Login bloqueia pending com 401 e preserva usuários atuais sem status.
 
 ## Adoção dos contratos compartilhados
 

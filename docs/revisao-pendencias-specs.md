@@ -1,13 +1,13 @@
 # Revisão das pendências das specs
 
-Revisão atualizada em 2026-10-12 sobre o checkout staging, com alterações locais
-sem commit. Baseline de merges: bedb73a, revisada em 2026-10-10.
+Revisão atualizada em 2026-10-12 na branch codex/json-postgres-repositories,
+com destino à staging pelo PR #16. Baseline de merges: bedb73a, revisada em 2026-10-10.
 Essa referência já incorpora tooling Prisma 7 pelo PR #7, tipos de auth pelo
 PR #12, adoção HTTP pelo PR #13 e auditoria documental pelo PR #14.
 
 Paginação continua sob demanda. O usuário autorizou antecipar repositories
 para permitir JSON/PostgreSQL em todos os módulos atuais. Esse modo, caixa de
-saída, comando local e cadastro de empresas foram implementados sem commit.
+saída, comando local e cadastro de empresas foram publicados no PR #16.
 Services auth/admin também foram separados; frontend/schema continuam posteriores.
 
 Um checkbox concluído indica a entrega descrita; não comprova merge ou
@@ -20,18 +20,33 @@ execução no banco. Os estados abaixo distinguem essas situações.
 | Convenções de arquivos/idioma, pastas por função e controllers independentes | AGENTS.md; company.routes/controller/service | Em staging |
 | Empresas e usuários em routes → controller → service | Arquivos company.* e user.* | Em staging |
 | Entidades Company/User/Plan, PlanRow e DTOs de usuário | entities/, interfaces/plan.row.ts, dtos/user.auth.dto.ts | Em staging |
-| Interfaces e adapters de persistência | repositories + persistence; empresas/usuários/auth/planos | Adotados no checkout local em 2026-10-12, sem commit |
+| Interfaces e adapters de persistência | repositories + persistence; empresas/usuários/auth/planos | Publicados no PR #16; unificação users revisada nesta branch |
 | Contratos de erro, sucesso e helpers de paginação | src/shared/contracts e src/shared/errors | Base em staging |
 | Tipos de auth separados do controller | auth.invite.dto.ts e auth.user.row.ts | Integrado em staging via PR #12 |
 | Adoção de AppError/ErrorCode e sucesso em todos os endpoints backend | app.ts, controllers, middleware e services; sem reason/switch | Integrado em staging via PRs #13/#14 |
 | Diagnóstico sanitizado fora de produção; produção status/message | error.contract.ts; handler global e parser 400/413 | Integrado em staging via PRs #13/#14 |
 | Alinhamento Prisma CLI/client/adapter 7.10.0 e verificação offline | package/lockfile/config e prisma.tooling.test.mjs | Integrado em staging via PR #7/eea5f1d |
-| Modo local, cadastro protegido, outbox e bootstrap | spec dados-locais; services/adapters; POST empresas | Implementado no checkout local, sem commit |
-| Services auth/admin e remoção do tipo local de admin | auth.service.ts, admin.service.ts, AuthRepository | Implementado no checkout local, sem commit |
+| Modo local, cadastro protegido, outbox e bootstrap | spec dados-locais; services/adapters; POST empresas | Publicado no PR #16 |
+| Services auth/admin e remoção do tipo local de admin | auth.service.ts, admin.service.ts, AuthRepository | Publicado no PR #16 |
 
 O PR #14 contém o resultado combinado de #12/#13; não exige reaplicar seus
 mesmos commits. A resolução preserva os scripts atuais de testes e os caminhos
 src/shared, além do tooling Prisma já integrado à staging.
+
+## Unificação de usuários — 2026-10-12
+
+Na branch codex/json-postgres-repositories, consultas PostgreSQL e JSON usam
+somente users para convite, ativação, login, recuperação e seleção de plano.
+A divergência de nomes user/users (INT-02) está resolvida no código desta
+branch; não afirmar merge em staging ou migração do banco. JSONs antigos são
+modificados explicitamente para reunir seus registros em users, sem conversão
+automática no carregamento.
+
+Schema/baseline e protocolos de convite/reset continuam pendentes.
+Login bloqueia pending e preserva contas atuais sem status; convites não
+substituem contas ativas ou atuais sem status.
+Esta atualização passou por code review independente antes da entrega no PR #16;
+os resultados de testes abaixo são históricos até nova verificação.
 
 ## Pendências atuais
 

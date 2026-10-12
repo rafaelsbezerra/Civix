@@ -72,6 +72,22 @@ foi substituído, nos módulos atuais, pela autorização do modo local em
 2026-10-12: interfaces e adapters JSON/PostgreSQL foram implementados e adotados.
 SQL e regras existentes preservados; não houve criação/aplicação de schema.
 
+## Identidade unificada — 2026-10-12
+
+Autorizado usar somente users na branch codex/json-postgres-repositories:
+convite, ativação, login e recuperação compartilham essa identidade no SQL e
+no JSON. Os JSONs antigos são modificados explicitamente para reunir seus
+registros em users e remover legacyUsers, preservando os demais dados.
+Não há conversão automática na leitura nem schema/migration novo nesta etapa.
+Protocolos de tokens permanecem distintos; admin continua desmontado.
+Login bloqueia pending e preserva usuários atuais sem status; convites não
+substituem contas ativas ou atuais sem status.
+
+Code review independente aprovado antes de commit e atualização do PR #16.
+Verificação: 58 testes de foundation e typechecks foundation/contratos aprovados.
+A proteção de reconvite foi corrigida para preservar contas ativadas durante
+uma operação concorrente; nenhum schema/migration ou banco real foi executado.
+
 ## Decisões posteriores — 2026-10-10
 
 DEC-05: users e banco criado do zero confirmados. CLI/client/adapter Prisma

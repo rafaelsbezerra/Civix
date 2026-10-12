@@ -43,7 +43,7 @@ caixa de saída, bootstrap de usuário, cadastro protegido e services auth/admin
 | BE-06 | Persistência | Implementado localmente: interfaces e adapters JSON/PostgreSQL; USE_MOCK_DATA seleciona o modo. SQL preservado nos adapters reais |
 | BE-07 | Migrations | Confirmado: Prisma 7, SQL nativo e inversa; tooling 7.10.0 integrado via PR #7/eea5f1d; schema e banco pendentes |
 | BE-08 | Banco/baseline | Banco PostgreSQL do zero confirmado; baseline depende do schema e do destino dos SQL de planos |
-| BE-09 | Identidade/schema | users confirmado; campos, vínculos, restrições e correção do uso user/users aguardam resposta |
+| BE-09 | Identidade/schema | Consultas e coleção JSON unificadas em users na branch codex/json-postgres-repositories; campos, vínculos, restrições e schema/baseline completos aguardam resposta |
 | BE-10 | Padrões adicionais | Sanitização/enum/diagnóstico aprovados e implementados; requestId opcional no contexto. Validação abrangente, serialização, filtros, geração de requestId/logs e configuração aguardam resposta |
 
 ## Entregas e evidências
@@ -73,7 +73,11 @@ Paginação será usada somente quando necessário, fora das pendências atuais.
 Repositories foram adotados por necessidade do modo local autorizado;
 auth/admin agora usam services e adapters. Admin permanece desmontado.
 Ver o [relatório consolidado](../../docs/revisao-pendencias-specs.md).
-Nome users aprovado não autoriza converter consultas ou schema incidentalmente.
+A autorização posterior de 2026-10-12 unifica consultas e JSON em users nesta
+branch; não autoriza criar/aplicar schema. JSONs antigos são modificados
+explicitamente, preservando dados; não há conversão automática no carregamento.
+Login bloqueia pending e preserva usuários atuais sem status. Convites não
+substituem contas ativas ou atuais sem status.
 Nenhum banco remoto, envio real, migration ou mudança de frontend foi
 executado na adoção HTTP. Consultas presentes não comprovam banco pronto.
 

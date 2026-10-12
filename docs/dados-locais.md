@@ -46,7 +46,8 @@ Exemplo: [interface CompanyRepository](../backend/src/repositories/company.repos
 [PostgreSQL](../backend/src/persistence/postgres/company.repository.ts) e
 [seletor](../backend/src/persistence/company.repository.ts).
 local.store.ts, local.data.ts e mail.outbox.ts são auxiliares exclusivos de JSON;
-plan.mapper é compartilhado. Não há alteração do arquivo data.json ou da flag.
+plan.mapper é compartilhado. A seleção dos repositories não altera a flag. A atualização posterior de
+identidade modifica os JSONs antigos para reunir os usuários em users.
 
 ## Configuração e seleção
 
@@ -151,8 +152,7 @@ data.json contém version=1 e estas coleções:
 | Coleção | Uso |
 | --- | --- |
 | companies | Catálogo e novos cadastros |
-| users | Login, recuperação/redefinição e vínculo de plano |
-| legacyUsers | Convite e primeiro acesso, correspondendo à tabela legada user |
+| users | Login, convite/primeiro acesso, recuperação/redefinição e vínculo de plano |
 | plans | Linhas de plano com billing_period/is_active/display_order |
 | outbox | E-mails locais, com id, kind, email, url e createdAt |
 
@@ -185,9 +185,22 @@ Na recuperação, outbox guarda o link que contém o token; users armazena seu
 hash e expiração. Esses arquivos contêm informações privadas de teste e não
 devem ser publicados. A caixa local não possui endpoint público.
 
-users e legacyUsers continuam separados. As divergências entre protocolos
-de convite/reset e identidades existentes não foram corrigidas. O router admin
-continua sem montagem; esta entrega não cria um endpoint público de convite.
+Na branch codex/json-postgres-repositories, users é a única coleção de
+identidade; status e invite_token são opcionais para os registros que não
+passaram pelo convite. JSONs antigos são modificados explicitamente: reunir
+os registros de legacyUsers em users, preservar campos e demais coleções e
+remover legacyUsers. Não há conversão automática na leitura. O formato raiz
+é estrito e rejeita coleções antigas inesperadas, preservando o arquivo.
+Se houver IDs ou contas duplicadas, não sobrescrever dados: pedir orientação
+antes de escolher qual registro manter.
+
+Login bloqueia contas pending com 401; usuários atuais sem status continuam
+autenticando pelas regras existentes. Convites não substituem contas ativas
+ou atuais sem status. A ativação identifica a conta por ID, preservando seus
+demais campos.
+
+Os protocolos de convite/reset continuam distintos. O router admin permanece
+sem montagem; esta entrega não cria um endpoint público de convite.
 
 ## Integridade e limites
 
@@ -209,17 +222,30 @@ Trocar a flag não transfere dados e não substitui migrations.
 
 npm run test:local usa diretório temporário próprio e simuladores de banco/e-mail.
 Cobre reinício em outro processo, cadastro HTTP nos dois modos, permissões,
-validação, senha/hash/JWT, recuperação, caixa de saída, plano, identidade legada,
+validação, senha/hash/JWT, recuperação, caixa de saída, plano, convite/ativação,
 gravações concorrentes, bloqueio alheio e arquivo inválido.
 
 npm run test:foundation também inclui esses testes. Seu runner define false
 para as suítes SQL simuladas; a suíte local seleciona true no próprio processo.
 Assim, o .env do desenvolvedor não altera o modo das suítes.
 
-Resultados: 50 testes de foundation, incluindo 14 do modo local, e typechecks
+Resultados da entrega anterior à unificação de users: 50 testes de foundation,
+incluindo 14 do modo local, e typechecks
 foundation/contratos aprovados. TypeScript completo validado em fixture com
 Prisma 7.10.0; a instalação desta checkout ainda possui CLI 6.12.0, sem
 alteração ou instalação de dependências nesta tarefa.
 
 Referências: [spec](../backend/.specs/dados-locais/spec.md),
 [API](api.md) e [pendências atuais](revisao-pendencias-specs.md).
+
+## Verificação da unificação de users — 2026-10-12
+
+58 testes de foundation aprovados e typechecks foundation/contratos passaram.
+O code review independente exigiu proteger reconvites contra ativação concorrente;
+a correção e os testes correspondentes foram revisados e aprovados antes da entrega.
+Os protocolos de tokens e o schema/banco real permanecem pendentes.
+
+O JSON local anterior estava ausente. Por confirmação do usuário, foi recriado
+com cinco empresas e três planos fictícios, users vazio e sem legacyUsers.
+Os registros de demonstração permanecem fora do Git. Reinicie o backend para
+carregar as alterações; use mock:user:create para preparar um usuário local.
