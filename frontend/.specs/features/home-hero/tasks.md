@@ -2,7 +2,7 @@
 
 > **Auditoria de estado — 2026-10-10:** este documento preserva decisões, checkboxes e resultados históricos. A vigência dos requisitos antigos está **Aguardando resposta**. Não restaurar layout, reabrir escopo ou declarar gates atuais aprovados sem confirmação e evidência.
 > Componentes atuais estão em src/components/home. Home incorpora About com outro main/h1; header usa destinos de aplicação, incluindo /planos sem rota registrada. As verificações originais de âncoras locais, semântica única e geometria não constituem validação atual.
-> Revisão consolidada: [pendências das specs](../../../../docs/revisao-pendencias-specs.md).
+> Revisão consolidada: [pendências das specs](../../reviews/revisao-pendencias-specs.md).
 
 ## Execution Protocol (MANDATORY -- do not skip)
 

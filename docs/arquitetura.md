@@ -31,8 +31,8 @@ de configuração de persistência.
 O servidor monta routers de usuários, primeiro acesso, empresas e planos.
 Usuários agora separam handlers HTTP e validação no controller de login,
 recuperação e redefinição no user.service;
-primeiro acesso possui controller próprio. Na baseline inicial, empresas executavam handlers diretamente nas rotas.
-Após a extração, usam controller com funções independentes. Agora services usam adapters selecionados; SQL fica em persistence. Planos usam
+primeiro acesso possui controller próprio. Empresas utilizam controller com
+funções independentes; services usam adapters selecionados; SQL fica em persistence. Planos usam
 rota → controller → service, com mapeamento explícito do DTO.
 Erros e respostas usam a camada compartilhada em src/shared. Validação e
 autorização ainda exigem alinhamento gradual; paginação está disponível
@@ -90,7 +90,7 @@ Login permanece Axios, intacto e incompatível com o envelope por exclusão
 explícita do escopo. Seu token fica em localStorage. O catálogo escolhe um filtro por
 precedência, em vez de combinar os filtros.
 
-## Reorganização de empresas implementada
+## Camadas de empresas
 
 O catálogo mantém `/api/v1/empresas` e seus sete endpoints.
 [company.routes](../backend/src/routes/company.routes.ts) registra handlers;
@@ -115,12 +115,8 @@ SQL está na implementação PostgreSQL; a alternativa JSON persiste em disco.
 Exemplo de fluxo: GET `/api/v1/empresas/categoria/Obras` → controller
 valida categoria não vazia → service consulta por LOWER com parâmetro →
 controller retorna { data }. Demais endpoints backend adotam o mesmo contrato.
-Os consumidores existentes de catálogo/perfil foram adaptados nesta branch;
-login continua pendente conforme api.md.
-
-Verificação: quatro testes HTTP com Express e consulta falsa cobrem os sete
-endpoints, mensagens/status, vazios, ausência, parâmetros e falhas SQL.
-Nenhum teste conecta ao banco remoto.
+Os consumidores de catálogo/perfil utilizam data/message; login ainda
+precisa de adaptação conforme api.md.
 
 ## Contratos de persistência e usuários
 
@@ -134,10 +130,10 @@ de plano ao usuário pertence ao contrato UserRepository.
 Usuários segue routes → controller → service com handlers independentes,
 entity/DTO separados e acesso a UserRepository. Rotas/aliases e efeitos de
 login/recuperação/reset são preservados. Auth/admin também separam controllers,
-services e persistência. Na branch codex/json-postgres-repositories, todos
-os fluxos usam users, incluindo convite e ativação; admin continua desmontado.
+services e persistência. Todos os fluxos usam users, incluindo convite e ativação; admin continua desmontado.
 O JSON reúne esses usuários na mesma coleção, com status/invite_token opcionais.
-A unificação não altera os protocolos de token nem cria schema/migrations.
+Pré-validação e ativação verificam o mesmo convite; reenvio/reset ainda
+utilizam protocolos divergentes. Nenhum schema completo está definido.
 Login bloqueia pending com 401 e preserva usuários atuais sem status.
 
 ## Adoção dos contratos compartilhados
@@ -147,15 +143,6 @@ encaminha rejeições para o handler global, registrado após routers e 404.
 ErrorCode/AppError vivem em shared/errors; sucesso/serialização em
 shared/contracts; configuração em shared/config. Tipos de auth foram
 extraídos para DTO/interface; regras de convite/primeiro acesso permanecem.
-A adoção HTTP está integrada em staging bedb73a. O modo local de 2026-10-12
-antecipou uso de repositories nos módulos atuais, sem commit. Ver o
-[guia de dados locais](dados-locais.md). Paginação permanece sob demanda.
-Schema e baseline continuam pendentes; não há aplicação comprovada no banco.
 
-## Integração dos consumidores existentes — 2026-10-12
-
-A branch codex/frontend-backend-integration depende do PR #16 e tem destino
-staging. Sem dashboard, páginas/rotas novas ou alteração de login. A
-pré-validação de convite usa o mesmo JWT, perfil/status e invite_token da
-ativação; o protocolo divergente de reenvio permanece pendente.
-HTTP-04-B continua parcialmente completo. Ver [integração](frontend-backend.md).
+Paginação disponível sob demanda. [Dados locais](dados-locais.md) descreve
+a alternativa JSON; schema/baseline do PostgreSQL ainda não estão completos.

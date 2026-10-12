@@ -1,4 +1,4 @@
-# Decisões pendentes e próxima fase
+# Decisões e próxima fase do backend
 
 Este registro reúne questões para specs futuras. Não aprova padrões,
 provedores ou arquitetura novos.
@@ -23,7 +23,6 @@ provedores ou arquitetura novos.
 | DEC-14 | Operação | Hospedagem, ambientes, CI/CD, migrations, backups/restore, observabilidade e segredos |
 | DEC-15 | Convenções | Confirmadas: inglês, arquivos domínio.papel.ts, erros/comentários em português, pastas por função e handlers independentes; auth/admin separados em services na implementação local de 2026-10-12 |
 | DEC-16 | Escala | Cache, volume por empresa, latência, disponibilidade, RPO/RTO e retenção |
-| DEC-17 | Dashboards | Funcionalidades/rotas por perfil e definição das métricas |
 
 Notion apresenta simultaneamente vendas “imutáveis” e rotas POST/DELETE;
 empresa como tenant e usuário com role empresa; planos associados à empresa
@@ -61,9 +60,8 @@ atualização dos documentos afetados. Registrar decisões e alternativas
 em ADRs apenas quando forem aprovadas.
 
 A baseline documental, as extrações, o tooling Prisma 7 e a adoção HTTP já
-estão integrados em staging bedb73a. Consulte a [auditoria das specs](revisao-pendencias-specs.md)
+estão integrados em staging bedb73a. Consulte a [auditoria das specs](../reviews/revisao-pendencias-specs.md)
 para distinguir tarefas restantes de decisões já aprovadas.
-
 
 ## Evoluções fora das pendências atuais
 
@@ -94,16 +92,4 @@ DEC-05: users e banco criado do zero confirmados. CLI/client/adapter Prisma
 fixados em 7.10.0 com migrations SQL nativas; tooling integrado à staging
 via PR #7. Campos e vínculos do schema continuam aguardando confirmação.
 
-## Integração autorizada — 2026-10-12
-
-Adaptar consumidores frontend existentes e pré-validação do convite na
-branch codex/frontend-backend-integration, dependente do PR #16, para staging.
-Login e seus destinos ficam intactos por exclusão explícita. Sem páginas,
-rotas, dashboard, cadastro de empresa ou UI nova de seleção de plano.
-Home/Sobre permanecem sob AD-002; proposta de animações separada da implementação.
-Nenhuma biblioteca nova foi instalada.
-
-HTTP-04-B é parcial: data/message e URLs/campos foram adotados nos demais
-consumidores existentes. Pré-validação e ativação usam o mesmo JWT de convite,
-perfil/status e invite_token. Reenvio de recuperação continua pendente.
-Ver [integração frontend/backend](frontend-backend.md).
+Integração visual/consumidores e DEC-17: [decisões frontend](../../../frontend/.specs/decisions/decisoes.md).

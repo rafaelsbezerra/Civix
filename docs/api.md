@@ -31,7 +31,7 @@ As rotas abaixo são as efetivamente montadas. Não são um contrato futuro.
 
 O router de convite declara POST `/admin/invite`, mas não é montado no
 servidor. Não existe endpoint público operacional de convite nessa baseline.
-O cadastro de empresas foi acrescentado nesta entrega; atualização/exclusão,
+O cadastro de empresas está disponível; atualização/exclusão,
 CRUD público de usuários e vendas não foram implementados. Auth permanece
 montado em /api/auth. Detalhes do cadastro e configuração dos dois modos
 estão em [dados locais](dados-locais.md).
@@ -61,7 +61,7 @@ não substituem contas ativas ou atuais sem status.
 
 Empresas retornam linhas SQL sem mapper, com `descricao_detalhada` e
 `data_cadastro`. Os consumidores frontend agora utilizam esses nomes
-snake_case; a entrega não modifica o formato de dados do backend. Planos possuem mapper e retornam id e price como strings;
+snake_case; o backend mantém esse formato de dados. Planos possuem mapper e retornam id e price como strings;
 billingPeriod é monthly/yearly/one_time e limits é um objeto flexível.
 Não há moeda explícita ou enforcement dos limites no backend.
 
@@ -87,17 +87,15 @@ Recuperação retorna `{ "data": { "message": "Se o e-mail existir no sistema, a
 Erro inesperado em produção retorna `{ "status": 500, "message": "Erro interno do servidor" }`.
 Nos demais ambientes, code/stack/details são acrescentados com sanitização.
 
-Os helpers permitem 200/201 e 204 sem corpo; nenhuma rota atual foi convertida
-para 204 nesta tarefa. Admin mantém router desmontado; seu handler de convite
+Os helpers permitem 200/201 e 204 sem corpo; nenhuma rota atual responde
+204. Admin mantém router desmontado; seu handler de convite
 usará 201 com data contendo message, sem expor um endpoint novo.
-As URLs e os protocolos de autenticação permanecem. Na branch
-codex/json-postgres-repositories, convite, ativação, login e recuperação usam
-somente users; a unificação não inclui schema ou migrations.
+Convite, ativação, login e recuperação utilizam users. As migrations atuais
+não criam um schema comercial completo.
 
 ## Consumidores frontend — adoção parcial
 
-Na branch codex/frontend-backend-integration, dependente do PR #16, os
-consumidores existentes foram adaptados:
+Os consumidores existentes utilizam estes contratos:
 
 - lib/api.ts extrai data, aceita meta opcional e exibe message do erro público;
   não exige success nem usa dados fictícios para substituir falhas da API.
@@ -113,25 +111,8 @@ VITE_API_URL representa a origem do backend (padrão http://localhost:3000).
 O helper aceita também o valor anterior terminado em /api/v1 sem duplicar
 prefixos; inclui /api/v1 ou /api/auth por endpoint.
 
-**Login permanece pendente e intacto por exclusão explícita:** login.tsx
-ainda lê token no topo e error nos erros Axios. Não declarar HTTP-04-B completo
-ou o fluxo autenticado integrado. Seus destinos, incluindo dashboard inexistente,
-foram preservados. Não há UI nova de seleção de plano, páginas ou rotas novas.
+**Login ainda utiliza o envelope antigo:** login.tsx
+ainda lê token no topo e error nos erros Axios. Seus destinos incluem um dashboard ainda inexistente. Não há interface de seleção de plano no frontend.
 requestId não existe em produção e não é obrigatório no frontend.
 
 Detalhes e verificações: [integração frontend/backend](frontend-backend.md).
-
-## Histórico da extração
-
-A extração anterior preservou envelopes legados. Esta adoção substitui essa
-restrição em usuários, auth/admin, empresas, planos, root e middleware.
-A adoção HTTP foi integrada em staging bedb73a. O registro inicial de
-2026-10-12 descrevia o modo local ainda sem commit; depois ele foi publicado
-pelo PR #16, incluindo adapters e uso das interfaces nos módulos atuais.
-A branch de integração frontend depende desse PR, sem afirmar merge.
-Paginação permanece sob demanda; schema segue pendente.
-
-Registro histórico da adoção HTTP: 36 testes e typechecks isolados aprovados.
-A integração atual registrou 25 testes direcionados frontend e 60 backend,
-typechecks frontend/foundation/contratos e Vite aprovados. Build completo e
-lint continuam com falhas históricas; detalhes em operacao.md.

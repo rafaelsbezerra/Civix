@@ -45,7 +45,7 @@ sem factories por padrão; usar dois espaços e separar blocos lógicos.
   Implementação local em 2026-10-12, sem commit e sem expor novas rotas admin.
 - [x] MOD-05: Documentar convenções, arquitetura e diagnóstico.
   Evidência: AGENTS.md, docs/padroes-backend.md, docs/arquitetura.md,
-  docs/diagnostico.md e docs/auth-types.md.
+  backend/.specs/reviews/diagnostico.md e docs/auth-types.md.
 
 ## Entregas e limites
 

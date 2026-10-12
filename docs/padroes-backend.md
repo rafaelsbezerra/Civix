@@ -1,10 +1,10 @@
 # Base de padrões do backend
 
-A base reutilizável de erro e sucesso agora é adotada nos endpoints backend.
-Paginação permanece como helper e será adotada somente quando necessário.
-Repositories têm interfaces e adapters JSON/PostgreSQL adotados no modo local
-em 2026-10-12. Frontend consumidor continua
-pendente; envelopes em [api.md](api.md).
+Referência de organização do código, contratos compartilhados e persistência.
+Erro/sucesso são utilizados nos endpoints atuais; paginação permanece como
+helper disponível para uso quando necessário. Repositories possuem interfaces
+e implementações JSON/PostgreSQL. Envelopes em [API](api.md).
+
 
 ## Contratos aprovados
 
@@ -23,16 +23,7 @@ routes → controller → service; entidades/interfaces/DTOs em arquivos própri
 Prisma 7 com migrations SQL nativas e reversão por migration inversa aprovado;
 o schema de identidade e empresas ainda depende de definição.
 Empresas e usuários estão separados por camadas; todos os endpoints backend
-adotam os contratos de erro e sucesso. Frontend permanece pendente.
-
-## Entrega
-
-Commit documental antes da implementação. Tarefas em branches e worktrees;
-dependências reunidas em branch de integração. PRs para `staging`, com o que,
-como, por quê, verificações, próximos passos e SQL quando houver nova tabela.
-
-Specs e decisões: [backend/.specs](../backend/.specs/README.md).
-Verificação desta adoção é reportada na entrega; testes históricos abaixo são da extração anterior.
+adotam os contratos de erro e sucesso. O consumidor frontend de login ainda utiliza envelope antigo.
 
 ## Implementação da base HTTP
 
@@ -61,29 +52,6 @@ Exemplo de paginação verificado nos testes:
 `parsePagination({ page: '2', pageSize: '100' })` produz
 `{ page: 2, pageSize: 100, offset: 100 }`.
 
-Verificação: `npm run test:contracts` (14 testes) e
-`npm run typecheck:contracts`, dentro de backend. A instalação usou o lockfile
-existente, sem scripts de instalação ou atualização de dependências.
-Não houve teste em banco ou alteração de contratos do frontend.
-
-## Prisma e próximos passos
-
-O alvo aprovado é Prisma 7/SQL nativo com migration inversa. Este checkout
-fixa CLI/client/adapter em 7.10.0; tooling integrado da staging.
-Schema comercial e baseline de banco vazio continuam pendentes.
-Pendências atuais: frontend consumidor, schema canônico, baseline e prova de migrations em PostgreSQL. Auth/admin agora possuem services.
-
-## Histórico da extração: usuários e repositories
-
-Interfaces de persistência por módulo ficarão em backend/src/repositories.
-Somente interfaces de repositories foram aprovadas; implementações ficam
-para depois. A extração anterior afetou apenas userController/userRoute; a adoção
-atual adequa erro/sucesso também em auth/admin, preservando regras. SQL permanece
-nos services atuais. Ver
-[spec](../backend/.specs/usuarios-repositories/spec.md).
-Sempre perguntar diante de dúvida antes de implementar a parte afetada.
-
-
 ## Interfaces de persistência preparadas
 
 Disponíveis em repositories/{user,company,plan,auth}.repository.ts. Interfaces
@@ -110,15 +78,14 @@ Profile e home mantêm middleware Bearer; respostas agora são envolvidas em dat
 Mantidos login cliente por e-mail, empresa com bcrypt, JWT1h, recuperação
 sem enumeração, token aleatório com hash SHA-256/expiração1h, reset bcrypt10
 e limpeza dos tokens. SQL está nos adapters reais; modo local persiste JSON.
-Na extração anterior, convite/primeiro acesso ficaram intactos.
-Nesta adoção seus envelopes/erros são adequados; regras, frontend e schema permanecem.
+Convite/primeiro acesso também utilizam envelopes e erros compartilhados;
+pré-validação e ativação conferem o mesmo token/perfil/status.
 
 ## Adoção HTTP aprovada
 
 Todos os endpoints atuais do backend adotam AppError e { data, meta? },
 com ErrorCode centralizado e handler global. Stack/diagnóstico sanitizados
-fora de production; somente status/message em production. Frontend fica
-para a próxima etapa por decisão explícita. A spec de adoção está em
+fora de production; somente status/message em production. Frontend de login ainda não lê esse envelope. A spec de adoção está em
 [backend/.specs/adocao-http](../backend/.specs/adocao-http/spec.md).
 
 ErrorCode contém VALIDATION_ERROR, UNAUTHORIZED, FORBIDDEN, NOT_FOUND,
@@ -127,24 +94,8 @@ sem LoginFailure/reason ou switch no controller. Falha SQL de empresas
 retorna 500 com causa preservada; ausência retorna 404. Auth usa tipos
 extraídos em dtos/auth.invite.dto.ts e interfaces/auth.user.row.ts.
 
-A restrição inicial sem adoção é histórica. Não duplicar success, plan ou
-plans no envelope. A adoção backend já está integrada em staging bedb73a.
-Repositories foram adotados no modo local autorizado de 2026-10-12; paginação
-permanece sob demanda. Incompatibilidades do frontend constam em api.md.
-
-
 ## Modo local — 2026-10-12
 
 Flag global, JSON persistido, caixa de saída e novo cadastro protegido de
 empresas: ver [guia de uso](dados-locais.md) e [spec](../backend/.specs/dados-locais/spec.md).
 Esta necessidade antecipou os adapters e a separação de auth/admin em services.
-
-## Verificação da adoção — 2026-10-10
-
-Executado pela tarefa de implementação: npm run test:foundation passou com
-36 testes; npm run typecheck:foundation e npm run typecheck:contracts passaram.
-Suíte isolada cobre contratos, usuários, empresas, auth, planos, middleware,
-404, JSON inválido (400) e corpo acima do limite (413), com persistência/e-mail
-simulados. Produção omite diagnóstico; staging preserva stack/cause sanitizados.
-Na entrega original, o typecheck completo estava bloqueado por TS2353 em prisma.config.ts (CLI 6/configuração 7); o tooling Prisma 7 integrado da staging corrigiu esse bloqueio. Não houve banco remoto, envio real
-de e-mail, migration, dependência nova ou adaptação frontend.

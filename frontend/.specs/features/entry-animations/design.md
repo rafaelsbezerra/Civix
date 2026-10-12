@@ -1,47 +1,50 @@
 # Plano de animações de entrada
 
-**Estado:** proposta para a próxima etapa, **Aguardando resposta**.
+**Estado:** plano atualizado para leitura; requisitos de navbar aprovados
+para execução futura. Somente documentação nesta etapa.
 **Mapeamento:** 2026-10-12, sobre o frontend derivado do [PR #16](https://github.com/rafaelsbe/Civix/pull/16).
-Esta entrega adapta o consumo do backend em outra spec e documenta as animações.
-Nenhuma biblioteca de animação é instalada e nenhuma entrada é implementada aqui.
+A integração de consumidores tem spec própria. Este mapa não comprova
+execução das animações. Nenhuma navbar será alterada agora. Instalação e
+implementação aguardam leitura do plano e autorização posterior.
 
 ## Objetivo e estado observado
 
 Sugerimos entradas curtas e discretas para orientar a leitura: primeiro o título,
 depois o conteúdo e a ação. A intenção é transmitir clareza e confiança.
 Não haverá bloqueio de navegação, de formulários ou de requisições para aguardar
-animações. Não propomos mudança de layout nem construção de dashboard.
+animações. Preservar a composição de conteúdo, exceto ajustes necessários
+da navbar fixa e sua unificação após autorização de execução. Não construir dashboard.
 
 O site já tem transições de hover/menu, spinners e uma onda CSS no login.
 Não há um sistema comum de entradas de página e de seções na viewport.
 `lenis` e `tw-animate-css` estão instalados; Motion e GSAP não constam no
-[manifest do frontend](../frontend/package.json).
+[manifest do frontend](../../../package.json).
 
 O inventário abaixo distingue rotas de seções. A animação de cada seção só se
 aplica onde o componente é realmente renderizado.
 
 | Destino | Composição observada e fonte | Situação |
 | --- | --- | --- |
-| `/` | [Home](../frontend/src/pages/Home.tsx): modal de papel, header, hero/busca, About, empresas, planos, FAQ/CTA e footer | Página montada |
-| `/#sobre` | [About](../frontend/src/pages/About.tsx), AboutVisual e AboutPrinciples | Seção da Home; `/sobre` não é rota própria |
+| `/` | [Home](../../../src/pages/Home.tsx): modal de papel, header, hero/busca, About, empresas, planos, FAQ/CTA e footer | Página montada |
+| `/#sobre` | [About](../../../src/pages/About.tsx), AboutVisual e AboutPrinciples | Seção da Home; `/sobre` não é rota própria |
 | `/#empresas`, `/#planos`, `/#faq` | Cards de empresas, PlansSection e FAQ | Seções da Home |
-| `/catalogo` | [Catálogo](../frontend/src/pages/CatalogoEmpresas.tsx): hero, busca, contador/filtros, resultados e footer | Página montada |
-| `/empresa/:id` | [Perfil](../frontend/src/pages/PerfilEmpresa.tsx): hero, categoria, contatos/informações, apresentação detalhada, retorno e footer | Página montada; depende da API |
-| `/planos` | [Plans](../frontend/src/pages/Plans.tsx): hero, cards e footer | Componente existente, sem rota registrada; esta integração não adiciona `/planos` |
-| `/login` | [Login](../frontend/src/pages/login.tsx): papéis, formulário, logo e painel decorativo com AnimatedWave no desktop | Página montada; código preservado nesta integração por orientação do usuário |
-| `/primeiro-acesso` e `/primeiro-acesso/:token` | [FirstAccess](../frontend/src/pages/FirstAccess.tsx): validação, formulário ou convite indisponível, sucesso | Mesmo componente; contratos de token tratados na integração |
-| `/esqueci-senha` | [ForgotPassword](../frontend/src/pages/ForgotPassword.tsx): formulário e confirmação | Página montada |
-| `/redefinir-senha` | [ResetPassword](../frontend/src/pages/ResetPassword.tsx): link inválido, formulário e sucesso | Página montada |
-| `/termos-de-uso` | [TermsOfServices](../frontend/src/pages/TermsOfServices.tsx): header próprio, documento longo e footer próprio | Página montada |
-| `/politica-de-privacidade` | [PrivacityPolicy](../frontend/src/pages/PrivacityPolicy.tsx): header próprio, documento longo e footer próprio | Página montada |
-| `/central-de-ajuda` | [HelperCenter](../frontend/src/pages/HelperCenter.tsx): hero, categorias, artigos/accordion, suporte e footer próprio | Página montada; não implica existência de central de suporte no backend |
-| `*` | [PageError](../frontend/src/pages/PageError.tsx): 404, ilustração, retorno e suporte | Fallback para destinos sem rota |
+| `/catalogo` | [Catálogo](../../../src/pages/CatalogoEmpresas.tsx): hero, busca, contador/filtros, resultados e footer | Página montada |
+| `/empresa/:id` | [Perfil](../../../src/pages/PerfilEmpresa.tsx): hero, categoria, contatos/informações, apresentação detalhada, retorno e footer | Página montada; depende da API |
+| `/planos` | [Plans](../../../src/pages/Plans.tsx): hero, cards e footer | Componente existente, sem rota registrada; esta integração não adiciona `/planos` |
+| `/login` | [Login](../../../src/pages/login.tsx): papéis, formulário, logo e painel decorativo com AnimatedWave no desktop | Página montada; código preservado nesta integração por orientação do usuário |
+| `/primeiro-acesso` e `/primeiro-acesso/:token` | [FirstAccess](../../../src/pages/FirstAccess.tsx): validação, formulário ou convite indisponível, sucesso | Mesmo componente; contratos de token tratados na integração |
+| `/esqueci-senha` | [ForgotPassword](../../../src/pages/ForgotPassword.tsx): formulário e confirmação | Página montada |
+| `/redefinir-senha` | [ResetPassword](../../../src/pages/ResetPassword.tsx): link inválido, formulário e sucesso | Página montada |
+| `/termos-de-uso` | [TermsOfServices](../../../src/pages/TermsOfServices.tsx): header próprio, documento longo e footer próprio | Página montada |
+| `/politica-de-privacidade` | [PrivacityPolicy](../../../src/pages/PrivacityPolicy.tsx): header próprio, documento longo e footer próprio | Página montada |
+| `/central-de-ajuda` | [HelperCenter](../../../src/pages/HelperCenter.tsx): hero, categorias, artigos/accordion, suporte e footer próprio | Página montada; não implica existência de central de suporte no backend |
+| `*` | [PageError](../../../src/pages/PageError.tsx): 404, ilustração, retorno e suporte | Fallback para destinos sem rota |
 
 `FAQ.tsx` não possui rota própria: é seção da Home. `SearchFormEnterprise.tsx`
 é um componente adicional sem uso nas páginas auditadas; não ganha animação
 isolada. Referências a `dashboard.png` em teste/comentário não representam um
 painel funcional. As divergências históricas de Home/Sobre seguem
-[AD-002](../frontend/.specs/STATE.md), sem autorizar retorno ao layout anterior.
+[AD-002](../../STATE.md), sem autorizar retorno ao layout anterior.
 
 ## Padrão sugerido
 
@@ -138,7 +141,7 @@ shadow e dimensões animadas. Limpar observers/efeitos no unmount e testar Stric
 Mode. Conteúdo permanece visível se a biblioteca não carregar ou se um observer
 não existir. Não aplicar `will-change` permanente em toda a grade.
 
-[PublicSmoothScroll](../frontend/src/components/layout/PublicSmoothScroll.tsx)
+[PublicSmoothScroll](../../../src/components/layout/PublicSmoothScroll.tsx)
 atualmente cria Lenis fora de `/login` e não verifica reduced motion. Sugerimos
 adaptar esse comportamento na futura implementação de movimento. Lenis cuida da
 rolagem; não substitui a biblioteca de entradas. Usar o viewport normal para
@@ -150,8 +153,9 @@ esse segundo ticker junto ao `autoRaf` existente sem reconfiguração e cleanup.
 ## Biblioteca recomendada
 
 **Sugerimos Motion for React, pacote `motion`, combinado com CSS para hover/foco.**
-A escolha é uma recomendação, **Aguardando resposta**, inclusive autorização de
-instalação. Não é necessário instalar GSAP junto para executar este mapa.
+Motion continua como proposta. Instalação e execução aguardam leitura do
+plano atualizado e autorização posterior. Não instalar GSAP junto por conta
+desta recomendação.
 
 | Opção | Quando usar no Civix | Consideração |
 | --- | --- | --- |
@@ -174,7 +178,8 @@ Fontes primárias consultadas em 2026-10-12; recomendações não são aprovaç�
 
 ## Ordem de execução proposta
 
-1. Aprovar biblioteca e direção visual; confirmar orçamento de movimento.
+1. Ler este plano atualizado e autorizar uma etapa de execução; nenhuma
+   alteração de navbar ou instalação acontece antes disso.
 2. Definir presets reutilizáveis, fallback visível e reduced motion/Lenis.
 3. Validar Home/hero, About, empresas e planos como primeiro conjunto.
 4. Aplicar os mesmos presets a catálogo, perfil e autenticação/feedback.
@@ -182,8 +187,31 @@ Fontes primárias consultadas em 2026-10-12; recomendações não são aprovaç�
 6. Validar teclado, diálogos, animação com dados tardios, preferência alterada,
    navegação, Strict Mode, viewports e desempenho; atualizar esta documentação.
 
-A [spec](../frontend/.specs/features/entry-animations/spec.md) e suas
-[tarefas](../frontend/.specs/features/entry-animations/tasks.md) registram os
+A [spec](spec.md) e suas
+[tarefas](tasks.md) registram os
 critérios e os pontos de aprovação. Nesta entrega verificamos código, rotas,
 componentes, manifest e fontes oficiais. Animações, capturas comparativas,
 Core Web Vitals e medições de bundle ainda não foram executadas.
+
+## Navbar: plano aprovado para execução futura
+
+A navbar unificada deve atender Home, catálogo, perfil, ajuda, termos,
+privacidade e 404. Login e formulários de acesso permanecem preservados.
+Implementação e instalação de biblioteca aguardam leitura e autorização
+posteriores; não executar um núcleo separado nesta etapa documental.
+
+| Requisito | Comportamento futuro |
+| --- | --- |
+| Posicionamento | Fixa no topo durante scroll, com espaço de 106 px preservado |
+| Aparência | Fundo claro após rolagem, coerente com a UI atual |
+| Item ativo | Conforme seção visível em desktop e mobile |
+| Âncoras | Compensar altura da navbar; Empresas /#empresas e Planos /#planos |
+| Catálogo | Manter o botão Ver todas como acesso ao catálogo |
+| Modal | Navbar fica abaixo do modal na sobreposição |
+| Contato | Manter /#contato exatamente como está, sem novo bloco/ID ou alteração do destino |
+| Páginas | Unificar públicas, incluindo ajuda/termos/privacidade/404; preservar login/formulários |
+
+Limite atual preservado: não existe ID de seção contato correspondente a
+/#contato. O plano não autoriza criar esse bloco ou corrigir o destino.
+Não expor /planos como página independente; Planos navega para a seção da Home.
+Motion permanece proposta de biblioteca, sem instalação autorizada nesta etapa.

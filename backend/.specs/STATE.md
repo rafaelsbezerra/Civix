@@ -72,7 +72,7 @@ temporário autorizado. Requisitos vigentes de Home/Sobre aguardam confirmação
 Paginação será usada somente quando necessário, fora das pendências atuais.
 Repositories foram adotados por necessidade do modo local autorizado;
 auth/admin agora usam services e adapters. Admin permanece desmontado.
-Ver o [relatório consolidado](../../docs/revisao-pendencias-specs.md).
+Ver o [relatório consolidado](reviews/revisao-pendencias-specs.md).
 A autorização posterior de 2026-10-12 unifica consultas e JSON em users nesta
 branch; não autoriza criar/aplicar schema. JSONs antigos são modificados
 explicitamente, preservando dados; não há conversão automática no carregamento.

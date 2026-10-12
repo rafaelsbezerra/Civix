@@ -25,7 +25,7 @@ Adoção backend e auditoria documental integradas em staging bedb73a, em
 os consumidores existentes de empresas/planos, recuperação/redefinição e primeiro
 acesso foram adaptados. Login e novos destinos continuam fora do escopo por
 orientação explícita do usuário. Paginação será adotada somente quando necessário.
-O PR #16 implementa os repositories JSON/PostgreSQL; esta entrega depende dele. Ver o [relatório consolidado](../../docs/revisao-pendencias-specs.md).
+O PR #16 implementa os repositories JSON/PostgreSQL; esta entrega depende dele. Ver o [relatório consolidado](reviews/revisao-pendencias-specs.md).
 
 ## Handoff atual — auditoria de 2026-10-10
 
@@ -42,7 +42,7 @@ O PR #16 implementa os repositories JSON/PostgreSQL; esta entrega depende dele. 
   handoff abaixo; login segue adiado.
 - **Verificação atual**: leitura de source/config/testes e existência de arquivos;
   sem execução de teste, lint, build, navegador, CLS, zoom ou contraste.
-- **Referência**: [revisão consolidada](../../docs/revisao-pendencias-specs.md).
+- **Referência**: [revisão consolidada](reviews/revisao-pendencias-specs.md).
 
 ## Handoff — integração e planejamento de 2026-10-12
 
@@ -55,8 +55,9 @@ O PR #16 implementa os repositories JSON/PostgreSQL; esta entrega depende dele. 
   as mesmas 12 falhas históricas. Smoke HTTP isolado: 9/9; catálogo/busca/perfil
   e planos da Home confirmados no navegador. Build completo/lint mantêm
   falhas históricas documentadas em [integração](../../docs/frontend-backend.md).
-- **Proposta**: [mapa de animações](../../docs/plano-animacoes.md), Motion for React
-  com CSS. Biblioteca/instalação e implementação **Aguardando resposta**.
+- **Proposta**: [mapa de animações](features/entry-animations/design.md), Motion for React
+  com CSS. Biblioteca é proposta; instalação/implementação aguardam leitura
+  do plano atualizado e autorização posterior.
 - **Entrega**: PR para staging, dependente do #16; sem novas dependências/schema.
 
 ## Handoff histórico — não representa aprovação da versão atual
@@ -66,3 +67,20 @@ de 2026 (ver validation.md de cada feature). Os checkboxes originais foram
 preservados como histórico. Esse resultado não prova rota, assets ou integração
 da versão atual. LESSONS.md/lessons.json permanecem registros históricos sem
 edição ou promoção de candidatos nesta auditoria.
+
+## Organização documental
+
+Guias gerais permanecem em docs. Planos e evidências ficam nos grupos desta
+pasta: [mapa de animações](features/entry-animations/design.md),
+[validação da integração](features/backend-integration/validation.md),
+[diagnóstico](reviews/diagnostico.md), [pendências](reviews/revisao-pendencias-specs.md)
+e [decisões](decisions/decisoes.md).
+
+
+## Handoff documental — navbar e manutenção frontend
+
+- **Navbar/animações:** requisitos e mapa atualizados para leitura; nenhuma
+  implementação ou instalação nesta etapa. Abrangência pública, âncoras
+  Empresas/Planos e Contato preservado confirmados no plano.
+- **Manutenção:** manifest/lockfile limpos; verificação e limites em
+  [dependency-maintenance](features/dependency-maintenance/spec.md).

@@ -10,14 +10,14 @@ conforme a evidência do item. Entrega em PR não significa merge em staging.
 
 | Grupo | Implementado | Pendências reais |
 | --- | --- | --- |
-| [Contratos HTTP](contratos-http/spec.md) | Base/helpers e erro/sucesso backend integrados em staging | Frontend consumidor |
+| [Contratos HTTP](contratos-http/spec.md) | Base/helpers e erro/sucesso backend integrados em staging | Frontend parcial; login excluído da integração atual |
 | [Estrutura](estrutura-modulos/spec.md) | Camadas de empresas/usuários/planos; auth/admin separados em services no checkout local | Nenhuma extração atual pendente; não expor admin |
 | [Tipagem](tipagem-dominio/spec.md) | Entidades/DTOs existentes, linhas auth/plan e interfaces de persistência | Modelo canônico e validação/serialização abrangentes |
 | [Migrations](migrations/spec.md) | Prisma 7/SQL/inversa aprovados; tooling integrado via PR #7/eea5f1d | Schema/baseline, comandos a discutir, ciclo em PostgreSQL |
 | [Usuários/repositories](usuarios-repositories/spec.md) | Interfaces e adapters JSON/PostgreSQL adotados localmente em 2026-10-12 | Schema/banco real seguem em spec própria |
 | [Tipos auth](adocao-http/auth-types.md) | Tipos separados; auth.service.ts implementado localmente | Protocolo canônico de identidade/reset segue para definição |
-| [Adoção HTTP](adocao-http/spec.md) | Backend integrado via PRs #13/#14 | Frontend consumidor |
-| [Dados locais](dados-locais/spec.md) | Flag global, JSON persistido, caixa de saída, comando de usuário e POST empresas | Frontend adiado; banco real não executado |
+| [Adoção HTTP](adocao-http/spec.md) | Backend integrado via PRs #13/#14 | Consumidores adaptados no PR #17, exceto login; PR dependente do #16 |
+| [Dados locais](dados-locais/spec.md) | Flag global, JSON persistido, caixa de saída, comando de usuário e POST empresas, publicados no PR #16 | Banco real/schema não executados; frontend parcial no PR #17 |
 
 Consultar [STATE.md](STATE.md) para decisões atuais e históricas superadas.
 Prisma 8/TS e espera de versão estável não são pendências atuais: o usuário
@@ -29,7 +29,7 @@ campos, vínculos e restrições do schema ainda aguardam resposta.
 Paginação será adotada somente quando necessário (HTTP-03-A); helpers e contrato
 permanecem disponíveis. REP-02 foi antecipado pela implementação autorizada
 do modo local: interfaces e adapters foram adotados nos módulos atuais.
-Ver o [relatório consolidado](../../docs/revisao-pendencias-specs.md).
+Ver o [relatório consolidado](reviews/revisao-pendencias-specs.md).
 
 ## Como trabalhar
 
@@ -43,8 +43,9 @@ Ver o [relatório consolidado](../../docs/revisao-pendencias-specs.md).
   seguir exceções explícitas do usuário e PRs para staging.
 
 DDD leve separa responsabilidades e contratos úteis sem exigir microserviços,
-CQRS, event sourcing ou interfaces para toda estrutura. Repositories contêm
-somente interfaces nesta etapa; manter SQL até a implementação futura.
+CQRS, event sourcing ou interfaces para toda estrutura. A pasta repositories
+contém interfaces; implementações estão em persistence/json e persistence/postgres.
+Services utilizam seletores por ambiente; SQL fica nos adapters PostgreSQL.
 
 ## Padrões ainda em discussão
 
@@ -58,5 +59,13 @@ nova e isolamento por empresa exigem escopo próprio; não ampliar o MVP.
 Comparação somente documental com arquivos source/config, branches e specs.
 Não reexecutou testes, instalou dependências, executou migrations ou alterou
 código/configuração. Registros de testes pertencem às entregas indicadas.
-Referências: [diagnóstico](../../docs/diagnostico.md),
-[API](../../docs/api.md), [pendências gerais](../../docs/decisoes.md).
+Referências: [diagnóstico](reviews/diagnostico.md),
+[API](../../docs/api.md), [pendências gerais](decisions/decisoes.md).
+
+## Revisões e decisões
+
+- [Diagnóstico backend](reviews/diagnostico.md).
+- [Pendências backend](reviews/revisao-pendencias-specs.md).
+- [Decisões backend](decisions/decisoes.md).
+- [Histórico documental](reviews/historico-documental.md).
+- [Revisões frontend](../../frontend/.specs/reviews/revisao-pendencias-specs.md).

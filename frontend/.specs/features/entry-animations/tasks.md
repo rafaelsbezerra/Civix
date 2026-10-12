@@ -1,7 +1,8 @@
 # Animações de entrada — tarefas
 
-**Status:** proposta documentada; implementação **Aguardando resposta**.
-Referências: [spec](spec.md) e [mapa completo](../../../../docs/plano-animacoes.md).
+**Status:** plano atualizado para leitura. Navbar e animações não serão
+implementadas nesta etapa; instalação/execução aguardam autorização posterior.
+Referências: [spec](spec.md) e [mapa completo](design.md).
 
 ## Concluído nesta entrega
 
@@ -12,7 +13,21 @@ Referências: [spec](spec.md) e [mapa completo](../../../../docs/plano-animacoes
 - [x] Comparar Motion/CSS/GSAP com fontes primárias atuais e registrar recomendação.
 - [x] Documentar critérios simples e decisões que aguardam aprovação.
 
-## Execução futura, após aprovação
+## Navbar: tarefas futuras após leitura e autorização
+
+- [ ] NAV-01: Navbar fixa com espaço de 106 px e fundo claro após rolagem.
+- [ ] NAV-02: Item ativo por seção visível, desktop/mobile, com âncoras compensadas.
+- [ ] NAV-03: Ordem de sobreposição abaixo do modal e verificação responsiva.
+
+- [ ] NAV-04: Unificar navbar públicas; preservar login/formulários de acesso.
+- [ ] NAV-05: Empresas /#empresas e Planos /#planos; catálogo pelo botão Ver todas.
+- [ ] NAV-06: Preservar Contato /#contato sem criar destino/ID ausente.
+
+Os requisitos foram confirmados para o plano, não para execução imediata.
+Não implementar NAV-01..06 nem instalar Motion antes da leitura do usuário
+e autorização posterior.
+
+## Animações: tarefas futuras após autorização
 
 | Tarefa | Entrega | Critérios |
 | --- | --- | --- |
@@ -20,11 +35,11 @@ Referências: [spec](spec.md) e [mapa completo](../../../../docs/plano-animacoes
 | A2 | Presets/observação/fallback visível e tratamento reduced motion/Lenis | ANIM-02/03/07 |
 | A3 | Home: hero/busca, About, empresas, planos, FAQ/CTA, header/footer/modal | ANIM-01/04/05/06 |
 | A4 | Catálogo, perfil e Plans quando houver rota | ANIM-01/04/05/07 |
-| A5 | Login, primeiro acesso, recuperação/redefinição e estados | ANIM-01/04/06 |
+| A5 | Avaliar estados de acesso preservados, sem alteração nesta etapa | ANIM-01/04/06 |
 | A6 | Ajuda, documentos legais, 404 e navegação | ANIM-01/06/07 |
 | A7 | Validar comportamento, bundle, viewports e atualizar docs/specs | ANIM-03 a ANIM-08 |
 
-- [ ] A1 — **Aguardando resposta**; não instalar bibliotecas nesta entrega.
+- [ ] A1 — aguarda leitura do plano/autorização posterior; Motion é proposta.
 - [ ] A2 — aguarda A1; nenhuma animação criada nesta entrega.
 - [ ] A3 — aguarda A2; confirmar foco/semântica de dialog antes da animação.
 - [ ] A4 — aguarda A2 e integração backend; verificar rotas no código final.

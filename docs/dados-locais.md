@@ -1,6 +1,6 @@
 # Dados locais persistidos em JSON
 
-Implementado em 2026-10-12; entrega pela branch codex/json-postgres-repositories, com PR destinado à staging.
+Guia para configurar armazenamento local, preparar acesso e cadastrar dados.
 
 ## Organização dos repositories
 
@@ -126,7 +126,7 @@ Exemplo de corpo aceito, verificado pelos testes:
 
 O cadastro preserva os nomes atuais em português/snake_case; não aprova um
 novo schema comercial. CNPJ é uma string não vazia, sem validação de dígitos
-verificadores ou regra nova de unicidade nesta entrega.
+verificadores ou regra de unicidade.
 
 Campos opcionais: logo, endereco, telefone, email, website, whatsapp,
 descritivo e tone. Campos desconhecidos são rejeitados. O servidor gera id UUID,
@@ -138,13 +138,12 @@ Sem token/identidade: 401; outro perfil: 403; corpo inválido: 400.
 Falhas usam AppError e o handler global. GETs de catálogo passam a consultar
 os registros gravados, incluindo filtros, busca e detalhe.
 
-Em PostgreSQL, o INSERT utiliza campos permitidos e parâmetros. Esta entrega
-não cria tabela nem valida um banco real; a tabela empresas e suas colunas
-precisam existir. Schema e baseline seguem pendentes.
+Em PostgreSQL, o INSERT utiliza campos permitidos e parâmetros. A tabela
+empresas e suas colunas precisam existir; o código de cadastro não cria o
+banco automaticamente. Schema e baseline completos ainda não estão definidos.
 
-O dashboard/formulário não foi implementado nesta tarefa. A integração
-posterior de consumidores existentes adapta os envelopes, exceto login
-explicitamente excluído; ver [integração frontend/backend](frontend-backend.md).
+O frontend não possui dashboard/formulário de cadastro. Seus consumidores
+existentes utilizam os envelopes atuais, exceto login; ver [integração frontend/backend](frontend-backend.md).
 
 ## Coleções e fluxos existentes
 
@@ -186,8 +185,7 @@ Na recuperação, outbox guarda o link que contém o token; users armazena seu
 hash e expiração. Esses arquivos contêm informações privadas de teste e não
 devem ser publicados. A caixa local não possui endpoint público.
 
-Na branch codex/json-postgres-repositories, users é a única coleção de
-identidade; status e invite_token são opcionais para os registros que não
+users é a única coleção de identidade; status e invite_token são opcionais para os registros que não
 passaram pelo convite. JSONs antigos são modificados explicitamente: reunir
 os registros de legacyUsers em users, preservar campos e demais coleções e
 remover legacyUsers. Não há conversão automática na leitura. O formato raiz
@@ -201,7 +199,7 @@ ou atuais sem status. A ativação identifica a conta por ID, preservando seus
 demais campos.
 
 Os protocolos de convite/reset continuam distintos. O router admin permanece
-sem montagem; esta entrega não cria um endpoint público de convite.
+sem montagem; não há endpoint público operacional de convite.
 
 ## Integridade e limites
 
@@ -219,46 +217,5 @@ Use este modo com uma instância local e disco persistente. Não foi preparado
 para múltiplas réplicas, disco efêmero ou concorrência de um banco de produção.
 Trocar a flag não transfere dados e não substitui migrations.
 
-## Verificação
-
-npm run test:local usa diretório temporário próprio e simuladores de banco/e-mail.
-Cobre reinício em outro processo, cadastro HTTP nos dois modos, permissões,
-validação, senha/hash/JWT, recuperação, caixa de saída, plano, convite/ativação,
-gravações concorrentes, bloqueio alheio e arquivo inválido.
-
-npm run test:foundation também inclui esses testes. Seu runner define false
-para as suítes SQL simuladas; a suíte local seleciona true no próprio processo.
-Assim, o .env do desenvolvedor não altera o modo das suítes.
-
-Resultados da entrega anterior à unificação de users: 50 testes de foundation,
-incluindo 14 do modo local, e typechecks
-foundation/contratos aprovados. TypeScript completo validado em fixture com
-Prisma 7.10.0; a instalação desta checkout ainda possui CLI 6.12.0, sem
-alteração ou instalação de dependências nesta tarefa.
-
-Referências: [spec](../backend/.specs/dados-locais/spec.md),
-[API](api.md) e [pendências atuais](revisao-pendencias-specs.md).
-
-## Verificação da unificação de users — 2026-10-12
-
-58 testes de foundation aprovados e typechecks foundation/contratos passaram.
-O code review independente exigiu proteger reconvites contra ativação concorrente;
-a correção e os testes correspondentes foram revisados e aprovados antes da entrega.
-Na entrega da unificação, os protocolos de tokens e o schema/banco real
-continuavam pendentes. A integração posterior alinha convite/ativação;
-reenvio/reset divergente e schema permanecem pendentes.
-
-O JSON local anterior estava ausente. Por confirmação do usuário, foi recriado
-com cinco empresas e três planos fictícios, users vazio e sem legacyUsers.
-Os registros de demonstração permanecem fora do Git. Reinicie o backend para
-carregar as alterações; use mock:user:create para preparar um usuário local.
-
-## Consumo no frontend — 2026-10-12
-
-Na integração posterior, catálogo/perfil/planos, recuperação/reset e primeiro
-acesso leem data/message com configuração comum. USE_MOCK_DATA continua
-exclusivamente no backend; falhas da API não são substituídas por mocks do
-frontend. A pré-validação do convite usa o mesmo token/identidade/status da
-ativação, enquanto reenvio ainda possui protocolo divergente.
-Login foi excluído e permanece incompatível; não há dashboard/cadastro novo.
-Ver [integração frontend/backend](frontend-backend.md).
+Testes e limites registrados na [spec](../backend/.specs/dados-locais/spec.md)
+e no [histórico](../backend/.specs/dados-locais/history.md).
