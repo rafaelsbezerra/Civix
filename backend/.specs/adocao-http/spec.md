@@ -16,8 +16,9 @@ Estado: implementado, verificado na entrega e integrado em staging via PRs
   como 500. Causa original preservada, com stack/diagnóstico sanitizados
   fora de production; production contém somente status/message.
 - Frontend explicitamente adiado: documentar consumidores incompatíveis.
-- Repositories continuam apenas interfaces; SQL/regras comerciais atuais
-  mantidos. Paginação, schema, migração de dados e autenticação nova fora.
+- Na adoção HTTP inicial, repositories ficaram apenas como interfaces.
+  Em 2026-10-12, o modo local autorizou adapters JSON/PostgreSQL e services
+  auth/admin. Regras existentes e schema preservados; paginação sob demanda.
 - Seguir identação/espaçamento corrigidos pelo usuário; separar blocos,
   usar guards legíveis e evitar código compactado.
 

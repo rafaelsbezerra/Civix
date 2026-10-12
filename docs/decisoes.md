@@ -21,7 +21,7 @@ provedores ou arquitetura novos.
 | DEC-12 | Integrações | Banco direto pelo n8n ou API; API key/HMAC; integração com sistemas existentes |
 | DEC-13 | Assets | Armazenamento de fotos, upload, R2 ou alternativa e limites |
 | DEC-14 | Operação | Hospedagem, ambientes, CI/CD, migrations, backups/restore, observabilidade e segredos |
-| DEC-15 | Convenções | Confirmadas: inglês, arquivos domínio.papel.ts, erros/comentários em português, pastas por função e handlers independentes; aplicação completa em auth/admin permanece parcial |
+| DEC-15 | Convenções | Confirmadas: inglês, arquivos domínio.papel.ts, erros/comentários em português, pastas por função e handlers independentes; auth/admin separados em services na implementação local de 2026-10-12 |
 | DEC-16 | Escala | Cache, volume por empresa, latência, disponibilidade, RPO/RTO e retenção |
 | DEC-17 | Dashboards | Funcionalidades/rotas por perfil e definição das métricas |
 
@@ -43,7 +43,7 @@ comentários/erros em português e controllers com funções independentes.
 2. Definir modelo de dados, identidade, papéis e isolamento tenant antes
    de criar entidades operacionais. Planejar baseline de banco novo, conforme confirmado pelo usuário.
 3. Adaptar consumidores frontend aos contratos já adotados no backend e
-   completar a separação de auth/admin em services. Schemas/OpenAPI exigem
+   verificar os fluxos atuais de acesso. Schemas/OpenAPI exigem
    definição de escopo; verificar compatibilidade dos consumidores.
 4. Consolidar instalação, scripts e gates da staging; definir ambientes,
    deploy, secrets, migrations, observabilidade e recuperação.
@@ -67,10 +67,10 @@ para distinguir tarefas restantes de decisões já aprovadas.
 
 ## Evoluções fora das pendências atuais
 
-Decisão do usuário em 2026-10-10: usar paginação somente quando necessário;
-implementar e consumir repositories em etapa futura. A base existente fica
-preservada; nenhuma dessas adoções bloqueia a etapa atual. Sua definição
-será retomada na tarefa correspondente, sem marcar implementação como concluída.
+Paginação continua sob demanda. O adiamento de repositories em 2026-10-10
+foi substituído, nos módulos atuais, pela autorização do modo local em
+2026-10-12: interfaces e adapters JSON/PostgreSQL foram implementados e adotados.
+SQL e regras existentes preservados; não houve criação/aplicação de schema.
 
 ## Decisões posteriores — 2026-10-10
 

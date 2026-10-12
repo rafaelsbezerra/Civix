@@ -18,7 +18,8 @@ As rotas abaixo são as efetivamente montadas. Não são um contrato futuro.
 | GET `/api/auth/validate-token` | query token | Público | 200 `{data:{email}}` |
 | POST `/api/auth/first-access` | token, password mínimo 8 | Token de convite | 200 `{data:{message}}` |
 | POST `/api/auth/resend-invite-email` | email | Público | 200 `{data:{message}}` |
-| GET `/api/v1/empresas` | — | Público | 200 `{data:Company[]}` |
+| POST /api/v1/empresas | Campos de CompanyCreateInput | Bearer JWT, role empresa | 201 com data contendo Company |
+| GET /api/v1/empresas | — | Público | 200 com data contendo Company[] |
 | GET `/api/v1/empresas/verificadas/todas` | — | Público | 200 `{data:Company[]}` |
 | GET `/api/v1/empresas/buscar` | query q não vazio | Público | 200 `{data:Company[]}` |
 | GET `/api/v1/empresas/categoria/:categoria` | categoria | Público | 200 `{data:Company[]}` |
@@ -30,9 +31,10 @@ As rotas abaixo são as efetivamente montadas. Não são um contrato futuro.
 
 O router de convite declara POST `/admin/invite`, mas não é montado no
 servidor. Não existe endpoint público operacional de convite nessa baseline.
-Os CRUDs de usuários, empresas e vendas listados no Notion não estão
-implementados. Comentários de controller com `/api/v1/auth` não refletem
-o mount real `/api/auth`.
+O cadastro de empresas foi acrescentado nesta entrega; atualização/exclusão,
+CRUD público de usuários e vendas não foram implementados. Auth permanece
+montado em /api/auth. Detalhes do cadastro e configuração dos dois modos
+estão em [dados locais](dados-locais.md).
 
 ## Sessões e tokens
 
@@ -101,8 +103,8 @@ Persistem diferenças snake_case/camelCase e URLs anteriormente documentadas.
 
 A extração anterior preservou envelopes legados. Esta adoção substitui essa
 restrição em usuários, auth/admin, empresas, planos, root e middleware.
-Repositories seguem interfaces apenas; implementação/uso ficam em etapa futura,
-fora das pendências atuais. Paginação será adotada somente quando necessário;
-schema continua pendente. A adoção HTTP está integrada em staging bedb73a.
+A adoção HTTP está integrada em staging bedb73a. Em 2026-10-12, o modo local
+antecipou adapters e uso das interfaces em empresas/usuários/auth/planos, no
+checkout sem commit. Paginação permanece sob demanda; schema segue pendente.
 Verificação da entrega: 36 testes e typechecks isolados aprovados; detalhes
 em operacao.md. Esta atualização documental não reexecuta esses checks.

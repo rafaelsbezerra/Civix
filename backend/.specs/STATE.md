@@ -2,6 +2,8 @@
 
 Revisão documental: 2026-10-10. Referência atual: staging `bedb73a`.
 Base Prisma 7, tipos de auth, adoção HTTP e auditoria documental já integrados.
+Atualização de 2026-10-12 no checkout local, sem commit: modo JSON global,
+caixa de saída, bootstrap de usuário, cadastro protegido e services auth/admin.
 
 ## Decisões confirmadas
 
@@ -15,8 +17,8 @@ Base Prisma 7, tipos de auth, adoção HTTP e auditoria documental já integrado
   configuração/contratos/erros e repositories para interfaces de persistência.
   Controllers exportam funções independentes e importam services diretamente.
 - Interfaces úteis, sem CompanyQuery ou interface para todo objeto. Repositories
-  de usuários/empresas/planos somente interfaces; implementação/adoção ficam
-  fora das pendências atuais e serão retomadas em etapa futura.
+  ficam como interfaces; adapters por domínio em persistence foram autorizados
+  e adotados no modo local de 2026-10-12, antecipando a evolução REP-02.
 - Sucesso data/meta; criação 201; sem corpo 204. Produção status/message;
   demais ambientes code/details/stack sanitizados, requestId quando fornecido.
   ErrorCode central e handler global; preservar cause. Adoção em todos os
@@ -38,7 +40,7 @@ Base Prisma 7, tipos de auth, adoção HTTP e auditoria documental já integrado
 | BE-03 | Paginação | Sob demanda: contrato/helpers prontos; adoção fora das pendências atuais. Abrangência/filtros serão definidos quando necessário |
 | BE-04 | Idioma/arquivos | Confirmado: domínio.papel.ts, código em inglês, erros/comentários em português, funções independentes |
 | BE-05 | Pastas | Confirmado: pastas por função, shared e repositories atuais; nenhuma escolha de src/modules pendente |
-| BE-06 | Persistência | Etapa futura: interfaces prontas; SQL atual preservado; implementação/adoção fora das pendências atuais |
+| BE-06 | Persistência | Implementado localmente: interfaces e adapters JSON/PostgreSQL; USE_MOCK_DATA seleciona o modo. SQL preservado nos adapters reais |
 | BE-07 | Migrations | Confirmado: Prisma 7, SQL nativo e inversa; tooling 7.10.0 integrado via PR #7/eea5f1d; schema e banco pendentes |
 | BE-08 | Banco/baseline | Banco PostgreSQL do zero confirmado; baseline depende do schema e do destino dos SQL de planos |
 | BE-09 | Identidade/schema | users confirmado; campos, vínculos, restrições e correção do uso user/users aguardam resposta |
@@ -48,7 +50,7 @@ Base Prisma 7, tipos de auth, adoção HTTP e auditoria documental já integrado
 
 - Integrado em staging e2b3d8b: base dos contratos/helpers, correções de
   empresas, camadas/tipos de usuários/planos e três interfaces de repositories.
-  Services ainda executam SQL; interfaces não são persistência operacional.
+  Na extração inicial, services executavam SQL. Em 2026-10-12, adapters foram adotados no checkout local.
 - Tipos auth: PR #12 integrado em staging; auth.invite.dto.ts/auth.user.row.ts.
 - Adoção HTTP: integrada via PR #13 (8548c2b); PR #14 (bedb73a) incorpora
   também a auditoria documental. app.ts, AppError/ErrorCode, endpoints e
@@ -62,16 +64,15 @@ Prisma 7 integrado. Auditoria de status não reexecutou esses checks.
 
 ## Pendências reais
 
-Frontend consumidor; extração de SQL/regras de auth/admin; tipo útil local de
-admin; modelo canônico e validação/serialização; schema/baseline/migrations
+Frontend consumidor; modelo canônico e validação/serialização;
+schema/baseline/migrations
 comerciais; comandos operacionais a discutir; ciclo completo em PostgreSQL
 temporário autorizado. Requisitos vigentes de Home/Sobre aguardam confirmação.
 
-Paginação será usada somente quando necessário; repositories serão usados
-mais adiante. Ambos ficam fora das pendências atuais, sem declarar sua adoção
-concluída. Ver o [relatório consolidado](../../docs/revisao-pendencias-specs.md).
-
-Auth/admin preservam regras e ainda acessam SQL; admin permanece desmontado.
+Paginação será usada somente quando necessário, fora das pendências atuais.
+Repositories foram adotados por necessidade do modo local autorizado;
+auth/admin agora usam services e adapters. Admin permanece desmontado.
+Ver o [relatório consolidado](../../docs/revisao-pendencias-specs.md).
 Nome users aprovado não autoriza converter consultas ou schema incidentalmente.
 Nenhum banco remoto, envio real, migration ou mudança de frontend foi
 executado na adoção HTTP. Consultas presentes não comprovam banco pronto.

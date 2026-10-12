@@ -6,9 +6,9 @@
 | --- | --- |
 | Frontend | React 19, TypeScript, Vite, React Router, Tailwind 4, componentes shadcn/Base UI, Lenis |
 | Backend | Node, TypeScript, Express 5, Helmet, CORS, compression, cookie-parser, JWT, bcrypt |
-| Persistência utilizada | Pool de `@neondatabase/serverless` e SQL parametrizado |
+| Persistência utilizada | USE_MOCK_DATA seleciona JSON persistido ou Pool Neon com SQL parametrizado |
 | ORM configurado | Prisma com generator e datasource, sem modelos no schema |
-| E-mail utilizado | Resend em `mail.service.ts` |
+| E-mail utilizado | Resend no modo real; outbox JSON no modo local |
 | Testes versionados | Vitest/Testing Library e script de navegador para Sobre |
 
 Fontes: [frontend/package.json](../frontend/package.json),
@@ -18,13 +18,21 @@ Fontes: [frontend/package.json](../frontend/package.json),
 Next.js, Auth0 e uso operacional de Prisma descritos no Notion não são
 comportamentos demonstrados pela implementação atual.
 
+## Configuração de dados
+
+backend/src/shared/config/data.ts centraliza USE_MOCK_DATA, BACKEND_ROOT,
+MOCK_DATA_DIR e db. O Pool real só é criado ao executar uma consulta; no modo
+local, consultas PostgreSQL são bloqueadas. Seleção dos repositories permanece
+em persistence, usando a flag exportada por data.ts. Não há módulo auxiliar
+de configuração de persistência.
+
 ## Backend
 
 O servidor monta routers de usuários, primeiro acesso, empresas e planos.
 Usuários agora separam handlers HTTP e validação no controller de login,
 recuperação e redefinição no user.service;
 primeiro acesso possui controller próprio. Na baseline inicial, empresas executavam handlers diretamente nas rotas.
-Após a extração, usam controller com funções independentes e SQL no service. Planos usam
+Após a extração, usam controller com funções independentes. Agora services usam adapters selecionados; SQL fica em persistence. Planos usam
 rota → controller → service, com mapeamento explícito do DTO.
 Erros e respostas usam a camada compartilhada em src/shared. Validação e
 autorização ainda exigem alinhamento gradual; paginação está disponível
@@ -95,11 +103,12 @@ para compatibilidade com as linhas SQL e respostas atuais.
 CompanyListResult/CompanyDetailResult foram removidos após a extração anterior;
 o service agora retorna Company/Company[]
 e os controllers aplicam os contratos compartilhados.
-O service usa diretamente o Pool Neon com `db.query<Company>`. Os testes
-simulam `db.query`; não há interface CompanyQuery ou factory de controller.
+O service usa CompanyRepository pela seleção de persistência. O adapter real
+usa Pool Neon com db.query<Company>; o local usa JSON. Testes simulam db.query
+no modo real; não há CompanyQuery ou factory de controller.
 O controller importa o service diretamente e exporta handlers independentes.
-Repositories foram aprovados somente como interfaces; SQL permanece nos services
-até sua implementação posterior.
+A etapa inicial criou somente interfaces; o modo local autorizou adapters.
+SQL está na implementação PostgreSQL; a alternativa JSON persiste em disco.
 
 Exemplo de fluxo: GET `/api/v1/empresas/categoria/Obras` → controller
 valida categoria não vazia → service consulta por LOWER com parâmetro →
@@ -112,16 +121,17 @@ Nenhum teste conecta ao banco remoto.
 
 ## Contratos de persistência e usuários
 
-Repositories reúne UserRepository, CompanyRepository e PlanRepository como
-interfaces sem implementação. Elas ainda não são importadas pelos services.
+Repositories reúne UserRepository, CompanyRepository, PlanRepository e
+AuthRepository como interfaces. Implementações em persistence/json e
+persistence/postgres usam domínio.repository.ts. Seletores na raiz de
+persistence exportam repositories tipados; services os usam diretamente.
 Plan/PlanRow foram extraídos sem alterar consultas ou mapeamento. Atribuição
 de plano ao usuário pertence ao contrato UserRepository.
 
 Usuários segue routes → controller → service com handlers independentes,
-entity/DTO separados e SQL no service. Implementação e uso de repositories
-ficam em etapa futura, fora das pendências atuais. Rotas/aliases e os efeitos
-de login/recuperação/reset são preservados.
-Auth/admin mantêm seus controllers originais e a divergência users/user.
+entity/DTO separados e acesso a UserRepository. Rotas/aliases e efeitos de
+login/recuperação/reset são preservados. Auth/admin também separam controllers,
+services e persistência, mantendo a divergência users/user sem montar admin.
 
 ## Adoção dos contratos compartilhados
 
@@ -130,6 +140,7 @@ encaminha rejeições para o handler global, registrado após routers e 404.
 ErrorCode/AppError vivem em shared/errors; sucesso/serialização em
 shared/contracts; configuração em shared/config. Tipos de auth foram
 extraídos para DTO/interface; regras de convite/primeiro acesso permanecem.
-Essa adoção está integrada em staging bedb73a. Repositories não são consumidos;
-seu uso fica em etapa futura. Paginação será adotada somente quando necessário.
+A adoção HTTP está integrada em staging bedb73a. O modo local de 2026-10-12
+antecipou uso de repositories nos módulos atuais, sem commit. Ver o
+[guia de dados locais](dados-locais.md). Paginação permanece sob demanda.
 Schema e baseline continuam pendentes; não há aplicação comprovada no banco.

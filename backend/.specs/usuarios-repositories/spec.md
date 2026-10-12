@@ -9,8 +9,9 @@ PRs #13/#14; respostas legadas preservadas na extração inicial são histórico
 - Refatorar userController/userRoute em user.routes.ts/user.controller.ts/
   user.service.ts; separar entidade/DTO e manter pastas por função.
 - Controllers com handlers independentes e imports diretos do service.
-- Repositories somente interfaces de usuários, empresas e planos. Manter
-  SQL nos services; implementação e adoção são tarefas futuras.
+- A extração inicial criou somente interfaces. Em 2026-10-12, o modo local
+  autorizou adapters JSON/PostgreSQL e adoção nos módulos atuais; SQL está
+  em src/persistence, sem parser genérico de consultas.
 - Não criar repository para envio de e-mail ou módulos comerciais ausentes.
 - Extração inicial manteve auth/admin, frontend, schema e regras intactos.
   A adoção posterior altera envelopes/erros de auth/admin sem novo schema.
@@ -26,17 +27,20 @@ PRs #13/#14; respostas legadas preservadas na extração inicial são histórico
   interfaces/plan.row.ts; saída PublicUser não inclui hash/senha.
 - [x] REP-01: Criar UserRepository/CompanyRepository/PlanRepository.
   repositories/*.repository.ts: métodos de domínio, ausência undefined;
-  assignPlan retorna boolean. Sem implementação ou consumo nos services.
+  assignPlan retorna boolean. Implementações/consumo foram adicionados no modo local.
 - [x] USR-03: Verificar fluxos preservados e documentar extração.
   Login empresa bcrypt/cliente atual/JWT 1h, recuperação sem enumeração,
   token aleatório/hash/expiração e reset bcrypt10; persistência/e-mail
   simulados em tests/user.routes.test.ts, documentos de arquitetura/padrões.
 
-## Evolução futura — fora das pendências atuais
+## Adoção autorizada — 2026-10-12
 
-**REP-02:** implementar e consumir repositories apenas em etapa futura,
-conforme decisão do usuário. As interfaces existentes são preservadas; SQL
-continua nos services. Essa adoção não está concluída nem integra o aceite atual.
+- [x] REP-02: Implementar e consumir repositories dos módulos atuais.
+  O modo local autorizou antecipar esta evolução. Interfaces permanecem em
+  repositories; implementações em persistence/json e persistence/postgres, com nomes domínio.repository.ts. Services usam a seleção
+  definida na inicialização. AuthRepository cobre as operações existentes de
+  users e user sem unificar schema. Não houve execução de banco real.
+  Ver [spec de dados locais](../dados-locais/spec.md).
 
 ## HTTP histórico e adoção posterior
 
