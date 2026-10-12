@@ -1,7 +1,7 @@
 # Logs estruturados — tarefas e entrega
 
-Status: fundação implementada/verificada; revisão independente concluída.
-Adoção nos services pendente, em commit separado.
+Status: fundação publicada em d1114da; adoção nos services implementada/
+verificada, revisão independente concluída. Commit 2/integração/PR pendentes.
 Referência: [spec](spec.md). Data: 2026-10-12.
 
 ## Fase documental atual
@@ -43,18 +43,18 @@ A fundação funciona sem eventos de negócio do commit 2. Rodada final:
 ## Commit 2 — adoção nos services
 
 Mensagem prevista: feat(logging): instrument existing service operations
-Dependência: commit 1 validado, disponível na branch desta tarefa.
+Dependência: commit 1 d1114da validado/publicado em codex/backend-logs-foundation.
 
-- [ ] Instrumentar os sete services mapeados, sem mudar assinaturas/retornos.
-- [ ] Confirmar gravação/atribuição antes de cada evento de sucesso.
-- [ ] Separar token preparado, outbox salva e aceite do provedor.
-- [ ] Preservar retornos silenciosos/anti-enumeração e router admin desmontado.
-- [ ] Adequar logs do comando local à política, com fronteira de erro única.
-- [ ] Testar sucessos/falhas com doubles de repositories/provedor, contextos
+- [x] Instrumentar os sete services mapeados, sem mudar assinaturas/retornos.
+- [x] Confirmar gravação/atribuição antes de cada evento de sucesso.
+- [x] Separar token preparado, outbox salva e aceite do provedor.
+- [x] Preservar retornos silenciosos/anti-enumeração e router admin desmontado.
+- [x] Adequar logs do comando local à política, com fronteira de erro única.
+- [x] Testar sucessos/falhas com doubles de repositories/provedor, contextos
   HTTP e não HTTP, ausência de segredos e ausência de diagnóstico duplicado.
-- [ ] Cobrir JSON com arquivo temporário e sem enviar e-mail externo; testar
+- [x] Cobrir JSON com arquivo temporário e sem enviar e-mail externo; testar
   adapter PostgreSQL por doubles, sem executar banco remoto ou migrations.
-- [ ] Atualizar docs gerais e evidências da feature; não marcar teste não executado.
+- [x] Atualizar docs gerais e evidências da feature; não marcar teste não executado.
 
 Aceite: LOG-05/06/07. Não modificar regras de autenticação, endpoints ou schema.
 
@@ -62,9 +62,9 @@ Aceite: LOG-05/06/07. Não modificar regras de autenticação, endpoints ou sche
 
 - [ ] Reunir branches dependentes na branch de integração, preservando os
   dois commits. Registrar hashes e PRs reais depois de criados.
-- [ ] Executar scripts pertinentes existentes no manifest, acrescentando
+- [x] Executar scripts pertinentes existentes no manifest, acrescentando
   testes de logging somente durante implementação autorizada.
-- [ ] Registrar comandos/resultados, ambientes e checks não executados.
+- [x] Registrar comandos/resultados, ambientes e checks não executados.
 
 Hoje existem test:foundation e typecheck:foundation; confirmar scripts na
 fase de execução. Não presumir lint/test/build genéricos no backend.
@@ -82,7 +82,23 @@ executável, instalação ou alteração de código realizada nesta fase.
 - [x] Executar typecheck:foundation e typecheck:contracts.
 - [x] Verificar pino-pretty em processo filho e fechamento de seu worker.
 - [x] Incorporar parecer independente e sete casos adicionais: allowlist, profundidade, fechamento, rota desconhecida, falha produção, aliases e headersSent.
-- [ ] Criar/publicar o commit 1 validado, sem juntar adoção nos services.
+- [x] Criar/publicar commit 1 d1114da em codex/backend-logs-foundation, sem adoção nos services.
 
 Histórico documental de criação da spec acima permanece anterior ao código.
 Estado atual/evidências: [validation.md](validation.md).
+
+
+## Rodada final da adoção
+
+- [x] test:foundation: 99/99.
+- [x] Suíte services: 17/17; fundação de logging: 22/22.
+- [x] typecheck:foundation e typecheck:contracts: exit 0.
+- [x] Parecer independente da adoção: sem bloqueadores.
+- [x] CLI positivo com prompts stderr/logs stdout e configuração inválida
+  capturada por import dinâmico com erro estruturado.
+- [ ] Criar/publicar commit 2, preservando separação de d1114da.
+- [ ] Integrar adoção à branch codex/backend-logging-integration e abrir PR
+  para staging; registrar somente hashes/URL reais depois dessas ações.
+
+A branch de integração existe sobre d1114da; a reunião do commit 2 ainda
+não foi executada neste registro. [Validação](validation.md).

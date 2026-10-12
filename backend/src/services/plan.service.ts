@@ -1,3 +1,5 @@
+import { getLogger } from '../shared/logging/log.context.js';
+import { USE_MOCK_DATA } from '../shared/config/data.js';
 import type { Plan } from '../entities/plan.entity.js';
 import { planRepository } from '../persistence/plan.repository.js';
 import { userRepository } from '../persistence/user.repository.js';
@@ -6,7 +8,16 @@ import { toPlan } from '../persistence/plan.mapper.js';
 export type { Plan, BillingPeriod } from '../entities/plan.entity.js';
 
 export async function listActivePlans(): Promise<Plan[]> {
-  return (await planRepository.getActive()).map(toPlan);
+  const plans = (await planRepository.getActive()).map(toPlan);
+
+  getLogger().debug({
+    event: 'plans.listed',
+    module: 'plans',
+    message: 'Consulta de planos concluída',
+    context: { count: plans.length, persistenceMode: USE_MOCK_DATA ? 'json' : 'postgres' },
+  });
+
+  return plans;
 }
 
 export async function assignPlanToUser(userId: string | number, planId: string): Promise<Plan | null> {
@@ -18,5 +29,18 @@ export async function assignPlanToUser(userId: string | number, planId: string):
 
   const assigned = await userRepository.assignPlan(userId, plan.id);
 
-  return assigned ? toPlan(plan) : null;
+  if (!assigned) {
+    return null;
+  }
+
+  const assignedPlan = toPlan(plan);
+
+  getLogger().info({
+    event: 'plan.assigned',
+    module: 'plans',
+    message: 'Plano atribuído ao usuário',
+    context: { userId, planId: plan.id, persistenceMode: USE_MOCK_DATA ? 'json' : 'postgres' },
+  });
+
+  return assignedPlan;
 }

@@ -152,8 +152,26 @@ permite IDs/operação/contagens, sem bodies, destinatários, credenciais ou SQL
 Não há truncamento ou limite arbitrário de tamanho/profundidade por política.
 
 Falha da emissão não substitui a operação de negócio. Os registros do
-ciclo HTTP e inicialização existem; eventos de services pertencem à etapa
-de adoção posterior. Comandos disponíveis: npm run test:logging,
+ciclo HTTP, inicialização e etapas confirmadas dos services são registrados.
+Evento de preparação de token não garante envio; aceite de provedor não
+garante entrega de e-mail. O helper delegador de mail não duplica o evento. Comandos disponíveis: npm run test:logging,
 npm run test:foundation, npm run typecheck:foundation e
 npm run typecheck:contracts no backend. Evidências ficam na
 [validação](../backend/.specs/features/structured-logs/validation.md).
+
+
+## Comando de usuário local e logs
+
+npm run mock:user:create continua solicitando os dados necessários de forma
+interativa, com prompts em stderr e stdout reservado ao logger. Em modo
+JSON, cada linha de stdout é um registro estruturado; em development vale
+a apresentação pretty configurada. Após persistir, o service emite
+mock.user.created com ID/role,
+sem imprimir objeto ou e-mail do resultado. Uma falha emite
+mock.user-command.failed na fronteira do comando, com diagnóstico sanitizado;
+readline e logger são fechados ao concluir.
+
+Não há requestId HTTP inventado para esse comando. Os prompts solicitam
+e-mail/senha, mas esses valores não fazem parte do registro estruturado.
+Logs de caixa de saída guardam tipo/modo, sem destinatário ou link de reset/
+convite. As evidências e limitações ficam na spec da feature.

@@ -128,5 +128,8 @@ requisição; não integra o payload de sucesso/erro nem cria um header novo.
 O handler registra stack/causa sanitizados internamente também em produção,
 enquanto os consumidores continuam recebendo os mesmos corpos, status e
 diagnóstico público definidos acima. LOG_LEVEL e apresentação pretty alteram
-somente a saída interna. Eventos de negócio nos services continuam em etapa
-separada; a fundação HTTP não muda autenticação, rotas ou regras comerciais.
+somente a saída interna. Services também registram etapas confirmadas,
+sem mudar autenticação, retornos, rotas ou regras comerciais. Falhas propagadas
+continuam pertencendo ao handler; não são registradas repetidamente pelos
+services. Preparação de token, outbox salva e aceite do provedor são eventos
+distintos, sem expor identidade/segredos ao consumidor. Admin continua desmontado.

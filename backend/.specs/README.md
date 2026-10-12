@@ -10,10 +10,12 @@ conforme a evidência do item. Entrega em PR não significa merge em staging.
 
 [Spec e contrato](features/structured-logs/spec.md) e
 [tarefas em dois commits](features/structured-logs/tasks.md). Fundação
-implementada e verificada nesta worktree; adoção nos services ainda pendente.
-Logs internos, sem tabela ou alteração de respostas HTTP. Revisão independente
-concluída; [evidências](features/structured-logs/validation.md): 82 foundation,
-22 logging, dois typechecks e processo pretty aprovados.
+publicada em d1114da (codex/backend-logs-foundation). Adoção nos sete services
+e CLI implementada/verificada na worktree services, com revisão independente
+sem bloqueadores. Logs internos, sem tabela ou alteração HTTP.
+[Evidências](features/structured-logs/validation.md): 99 foundation, 17 services,
+22 da fundação de logging e dois typechecks aprovados. Commit 2/integração/PR
+ainda pendentes de entrega.
 
 ## Grupos e situação
 
@@ -61,7 +63,7 @@ Services utilizam seletores por ambiente; SQL fica nos adapters PostgreSQL.
 Validação runtime geral, serialização de datas/IDs/null, filtros/ordenação,
 rastreabilidade no contrato HTTP, coleta/retenção de logs e configuração runtime/CI.
 Contexto/UUID interno e logs HTTP sem segredos estão implementados na fundação;
-adoção de eventos nos services permanece separada.
+adoção nos services foi implementada e verificada separadamente.
 Sanitização, enum, handler e diagnóstico já estão implementados. Autorização
 nova e isolamento por empresa exigem escopo próprio; não ampliar o MVP.
 

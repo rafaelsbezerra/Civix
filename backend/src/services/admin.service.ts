@@ -1,3 +1,5 @@
+import { getLogger } from '../shared/logging/log.context.js';
+import { USE_MOCK_DATA } from '../shared/config/data.js';
 import jwt from 'jsonwebtoken';
 import type { UserRole } from '../entities/user.entity.js';
 import { authRepository } from '../persistence/auth.repository.js';
@@ -20,5 +22,13 @@ export async function inviteUser(email: string, role: UserRole): Promise<void> {
   const inviteToken = jwt.sign({ email, role }, jwtSecret, { expiresIn: '24h' });
 
   await authRepository.saveInvite(email, role, inviteToken, existingUser?.id);
+
+  getLogger().info({
+    event: 'admin.invite.prepared',
+    module: 'admin',
+    message: 'Convite preparado',
+    context: { userId: existingUser?.id, role, persistenceMode: USE_MOCK_DATA ? 'json' : 'postgres' },
+  });
+
   await sendInviteEmail({ email, role, token: inviteToken });
 }

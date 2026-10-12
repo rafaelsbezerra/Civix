@@ -1,7 +1,7 @@
 # Logs estruturados internos
 
-Status: fundação implementada e verificada nesta worktree; revisão independente concluída.
-Adoção de eventos nos services ainda pendente. Data: 2026-10-12.
+Status: fundação publicada; adoção nos services/CLI implementada e verificada
+nesta worktree, com revisão independente concluída. Data: 2026-10-12.
 Base examinada: staging 258da1a. Entrega: [tarefas e commits](tasks.md).
 
 ## Objetivo e decisões confirmadas
@@ -57,8 +57,8 @@ biblioteca não deve ser importada diretamente por cada service.
 | http | Quando pertinente: method, route normalizada, statusCode e durationMs |
 | error | Quando pertinente: name, code, status, message, stack, details e cause sanitizados |
 
-Exemplo do contrato interno de log. O evento company.created pertence à
-adoção futura nos services; ainda não é emitido nesta fundação:
+Exemplo ilustrativo do contrato interno de log. company.created é emitido
+pelo service somente após a criação confirmada pelo repository:
 
 ~~~json
 {
@@ -127,7 +127,7 @@ para todo texto arbitrário: cobrir tokens em URLs, e-mail e credenciais em
 causas externas. Não limitar nem truncar registros por tamanho; tratar ciclos/objetos lançados
 sem instância de Error, sem invocar getters não confiáveis.
 
-## Adoção nos services — próxima etapa
+## Adoção implementada nos services
 
 | Service atual | Eventos e contexto permitidos |
 | --- | --- |
@@ -148,7 +148,7 @@ delega sendResetPasswordEmail: o log de envio pertence à função executora.
 Preparação de token e envio são etapas diferentes: se o envio falhar depois
 de salvar o token, manter o evento de preparação e registrar a falha no
 handler. Não declarar operação inteira concluída nem e-mail entregue.
-O comando mock:user:create deve usar a mesma política para mensagens de
+O comando mock:user:create usa a mesma política para mensagens de
 log, sem transformar o objeto retornado pelo service em contexto completo.
 
 ## Critérios de aceite
@@ -196,6 +196,35 @@ o tratamento terminal de erro após headersSent: encaminhamento/erro original
 preservados, conexão destruída e nenhum console bruto do Express. O caso
 verifica um único failed e um único aborted.
 
-Nenhum evento de negócio foi adotado nos services; o commit 2 permanece
-separado. Sem schema/migration ou alteração de respostas HTTP.
-Evidências: [validation.md](validation.md).
+Esses resultados pertencem ao commit 1, d1114da, publicado na branch
+codex/backend-logs-foundation. O commit 2 adota eventos nos services e é
+verificado separadamente; não usar essa contagem para atestar a adoção.
+Sem schema/migration ou alteração HTTP. [Evidências](validation.md).
+
+
+## Adoção e entrega separadas
+
+Os sete services usam getLogger, preservando retornos/assinaturas. Mudanças
+geram eventos após confirmação; consultas/validação usam debug sem termos
+de busca, e-mail, token ou objetos completos. Não instrumentar os repositories.
+
+Preparação de convite/reset precede o envio. mail.outbox.saved ocorre após
+gravação JSON; mail.provider.accepted após aceite do Resend, sem afirmar
+entrega ao destinatário. sendForgotPasswordEmail apenas delega: a função
+executora possui o único evento de envio. Falhas propagadas pertencem ao
+handler HTTP, sem catch-log-throw repetido em cada service.
+
+No comando local, mock.user.created pertence ao service após persistência,
+sem imprimir objeto/e-mail de retorno. Prompts usam stderr para não
+misturar texto de interação com stdout dos logs. mock.user-command.failed pertence à
+fronteira CLI; readline e logger são fechados. Fora de HTTP não fabricar UUID.
+Admin continua desmontado; instrumentar inviteUser não expõe endpoint.
+
+Fundação d1114da publicada. A branch codex/backend-logging-integration já
+foi criada sobre essa fundação e aguarda commit 2/merge da adoção. Hash do
+commit 2, integração concluída e PR para staging serão registrados somente
+após as ações reais. Não presumir merge ou número de PR.
+
+Verificação final da adoção: 99/99 foundation, 17/17 services e 22/22 da
+fundação de logging; ambos typechecks aprovados. Revisão independente sem
+bloqueadores. [Evidências](validation.md).

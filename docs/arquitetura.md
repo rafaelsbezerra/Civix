@@ -184,6 +184,13 @@ segredos e tratamento de ciclos, sem limite arbitrário de tamanho/profundidade.
 O JSON interno utiliza timestamp/level/event/module/message e contexto
 permitido, sem metadados schemaVersion/service/environment. Logger trata
 falhas de emissão sem alterar negócio ou exceção original. Não acrescenta
-requestId/header às respostas HTTP nem cria tabela de logs. Eventos dos
-services ainda não foram adotados nesta fundação; ver
-[spec](../backend/.specs/features/structured-logs/spec.md).
+requestId/header às respostas HTTP nem cria tabela de logs. Os sete services
+utilizam getLogger e emitem eventos após a etapa confirmada, sem instrumentar
+repositories. Criação/atribuição/ativação distinguem persistência de envio;
+consultas rotineiras usam debug sem termo de busca ou objetos completos.
+
+mail.outbox.saved significa gravação JSON; mail.provider.accepted significa
+aceite do provedor, não entrega ao destinatário. A função delegadora de mail
+não repete o evento. Falhas são diagnosticadas no handler HTTP ou fronteira
+CLI, sem catch-log-throw nos services. Admin permanece desmontado.
+[Spec e evidências](../backend/.specs/features/structured-logs/spec.md).

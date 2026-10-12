@@ -1,9 +1,11 @@
 # Verificação da fundação de logs estruturados
 
 Estado: fundação implementada e verificada na worktree backend-logs-foundation.
-Revisão independente concluída sem bloqueadores novos. Adoção nos services
-(commit 2), integração/push/PR seguem etapas de entrega separadas; nenhum
-hash ou número de PR é inventado neste documento.
+Revisão independente da fundação concluída sem bloqueadores novos;
+commit 1 d1114da publicado em codex/backend-logs-foundation.
+Adoção nos services (commit 2) implementada e verificada na worktree
+backend-logs-services, revisão independente sem bloqueadores. Commit 2 e
+integração/push/PR do conjunto ainda pendentes de entrega.
 
 ## Contrato e escopo
 
@@ -52,10 +54,53 @@ zero. Pretty não pode ser ativado fora de development.
 
 ## Limites e próxima etapa
 
-Adoção nos sete services e fronteira do comando local pertence ao commit 2.
-Eventos comerciais só seguem confirmação de persistência/atribuição/aceite,
-sem transformar token preparado em e-mail entregue.
+Os resultados acima são da fundação. Adoção nos sete services e fronteira
+CLI é verificada separadamente no commit 2; não usar os 82 testes anteriores
+para afirmar conclusão da adoção.
 
 Sem banco remoto, migration, envio externo, tabela ou alteração de dados locais.
 Destino remoto, retenção e busca histórica dependem de infraestrutura futura;
 logging interno não é auditoria durável. AGENTS não foi modificado.
+
+
+## Adoção nos services — implementação verificada
+
+Services de empresas, planos, usuários, auth, admin, mail e mock.user usam
+getLogger. Eventos de criação/atribuição/troca de senha/ativação seguem a
+confirmação da etapa. Autenticação é registrada após gerar o token, sem
+registrá-lo. Consultas usam debug, operação/contagem/IDs, sem termo ou objeto.
+
+mail.outbox.saved e mail.provider.accepted representam estados distintos:
+gravação JSON e aceite do provedor, nunca entrega final de e-mail.
+A função delegadora não repete o evento. Token preparado permanece uma etapa
+confirmada quando um envio posterior falha; diagnóstico único na fronteira
+HTTP/CLI. Recuperação de conta inexistente conserva retorno silencioso.
+
+CLI envia prompts para stderr e reserva stdout ao logger; no modo JSON,
+nenhuma linha interativa mistura-se aos registros. Não imprime objeto/e-mail
+retornado pelo service, registra erro
+estruturado único na fronteira e fecha readline/logger. Admin continua
+desmontado; repositories não receberam instrumentação.
+
+Resultados finais da adoção:
+
+- test:foundation: 99/99 aprovados.
+- Suíte de services: 17/17 aprovados.
+- Fundação de logging: 22/22 aprovados.
+- typecheck:foundation e typecheck:contracts: exit 0.
+- Revisão independente da adoção: sem bloqueadores.
+
+Os testes cobrem sucessos somente após gravação/atribuição confirmada,
+ausência de sucesso na etapa que falhou, token preparado antes de falha
+de envio, ownership único de mail, anti-enumeração, logger que falha,
+contexto HTTP/não HTTP e isolamento de dados sensíveis. Persistência local
+usa fixture temporária; PostgreSQL/Resend usam doubles, sem acesso externo.
+
+CLI positivo interativo confirmou prompts em stderr e logs JSON em stdout,
+sem imprimir e-mail/objeto. Configuração inválida é capturada pela fronteira
+graças aos imports dinâmicos; produz erro estruturado e exit code de falha,
+sem stack bruto do Node. Logger/readline encerrados após a operação.
+
+A branch codex/backend-logging-integration existe sobre d1114da e aguarda
+commit 2/merge da adoção. Não há hash do commit 2 ou número/URL de PR neste
+registro. A entrega final para staging será documentada após as ações reais.

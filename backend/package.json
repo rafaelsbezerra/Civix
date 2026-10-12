@@ -9,12 +9,12 @@
     "test:contracts": "node scripts/test.runner.mjs tests/contracts.test.ts",
     "typecheck:contracts": "tsc -p tsconfig.contracts.json",
     "test:users": "node scripts/test.runner.mjs tests/user.routes.test.ts",
-    "test:foundation": "node scripts/test.runner.mjs tests/contracts.test.ts tests/company.routes.test.ts tests/user.routes.test.ts tests/http.adoption.test.ts tests/local.persistence.test.ts tests/logging.test.ts tests/logging.http.test.ts",
+    "test:foundation": "node scripts/test.runner.mjs tests/contracts.test.ts tests/company.routes.test.ts tests/user.routes.test.ts tests/http.adoption.test.ts tests/local.persistence.test.ts tests/logging.test.ts tests/logging.http.test.ts tests/logging.services.test.ts",
     "typecheck:foundation": "tsc -p tsconfig.foundation.json",
     "test:prisma": "node --test tests/prisma.tooling.test.mjs",
     "mock:user:create": "tsx scripts/mock.user.create.ts",
     "test:local": "node --import tsx --test tests/local.persistence.test.ts",
-    "test:logging": "node scripts/test.runner.mjs tests/logging.test.ts tests/logging.http.test.ts"
+    "test:logging": "node scripts/test.runner.mjs tests/logging.test.ts tests/logging.http.test.ts tests/logging.services.test.ts"
   },
   "dependencies": {
     "@getbrevo/brevo": "^6.0.3",

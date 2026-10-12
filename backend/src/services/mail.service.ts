@@ -1,3 +1,4 @@
+import { getLogger } from '../shared/logging/log.context.js';
 import { AppError } from '../shared/errors/app.error.js';
 import { ErrorCode } from '../shared/errors/error.code.js';
 // # Funções de envio de e-mail transacional
@@ -39,7 +40,16 @@ export async function sendInviteEmail({ email, role, token }: SendInviteParams) 
   const inviteUrl = `${frontendUrl.replace(/\/$/, '')}/primeiro-acesso?token=${encodeURIComponent(token)}`;
 
   if (USE_MOCK_DATA) {
-    return saveLocalMail('invite', email, inviteUrl);
+    const result = await saveLocalMail('invite', email, inviteUrl);
+
+    getLogger().info({
+      event: 'mail.outbox.saved',
+      module: 'mail',
+      message: 'E-mail salvo na caixa de saída local',
+      context: { mailType: 'invite', persistenceMode: 'json' },
+    });
+
+    return result;
   }
 
   const roleText = role === 'empresa' ? 'Organização/Empresa' : 'Cliente/Usuário';
@@ -93,6 +103,13 @@ export async function sendInviteEmail({ email, role, token }: SendInviteParams) 
       throw new Error(result.error.message);
     }
 
+    getLogger().info({
+      event: 'mail.provider.accepted',
+      module: 'mail',
+      message: 'E-mail aceito pelo provedor',
+      context: { mailType: 'invite' },
+    });
+
     return { success: true, data: result.data };
   } catch (error) {
     throw new AppError({
@@ -112,7 +129,16 @@ interface SendResetPasswordParams {
 
 export async function sendResetPasswordEmail({ email, resetUrl }: SendResetPasswordParams) {
   if (USE_MOCK_DATA) {
-    return saveLocalMail('password-reset', email, resetUrl);
+    const result = await saveLocalMail('password-reset', email, resetUrl);
+
+    getLogger().info({
+      event: 'mail.outbox.saved',
+      module: 'mail',
+      message: 'E-mail salvo na caixa de saída local',
+      context: { mailType: 'password-reset', persistenceMode: 'json' },
+    });
+
+    return result;
   }
 
   try {
@@ -130,6 +156,13 @@ export async function sendResetPasswordEmail({ email, resetUrl }: SendResetPassw
     if (result.error) {
       throw new Error(result.error.message);
     }
+
+    getLogger().info({
+      event: 'mail.provider.accepted',
+      module: 'mail',
+      message: 'E-mail aceito pelo provedor',
+      context: { mailType: 'password-reset' },
+    });
 
     return { success: true, data: result.data };
   } catch (error) {

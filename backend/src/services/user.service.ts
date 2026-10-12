@@ -1,3 +1,5 @@
+import { getLogger } from '../shared/logging/log.context.js';
+import { USE_MOCK_DATA } from '../shared/config/data.js';
 import { AppError } from '../shared/errors/app.error.js';
 import { ErrorCode } from '../shared/errors/error.code.js';
 import crypto from 'node:crypto';
@@ -64,6 +66,13 @@ export async function login({ email, role, password }: LoginInput): Promise<Logi
 
   const token = authService.signToken(payload, '1h');
 
+  getLogger().info({
+    event: 'user.authenticated',
+    module: 'users',
+    message: 'Autenticação concluída',
+    context: { userId: user.id, role: user.role, persistenceMode: USE_MOCK_DATA ? 'json' : 'postgres' },
+  });
+
   return {
     user: { id: user.id, name: user.name, email: user.email, role: user.role },
     token,
@@ -85,6 +94,13 @@ export async function forgotPassword(email: string): Promise<void> {
   const expiresAt = new Date(Date.now() + 3600000);
 
   await userRepository.savePasswordResetToken(user.id, resetTokenHash, expiresAt);
+
+  getLogger().info({
+    event: 'user.password-reset.prepared',
+    module: 'users',
+    message: 'Recuperação de senha preparada',
+    context: { userId: user.id, persistenceMode: USE_MOCK_DATA ? 'json' : 'postgres' },
+  });
 
   const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
 
@@ -109,5 +125,12 @@ export async function resetPassword({ token, password }: PasswordResetInput): Pr
   const passwordHash = await authService.hashPassword(password, 10);
 
   await userRepository.updatePasswordAndClearResetToken(user.id, passwordHash);
+
+  getLogger().info({
+    event: 'user.password.changed',
+    module: 'users',
+    message: 'Senha atualizada',
+    context: { userId: user.id, persistenceMode: USE_MOCK_DATA ? 'json' : 'postgres' },
+  });
 
 }

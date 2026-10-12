@@ -1,3 +1,5 @@
+import { getLogger } from '../shared/logging/log.context.js';
+import { USE_MOCK_DATA } from '../shared/config/data.js';
 import jwt, { type SignOptions } from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { authRepository } from '../persistence/auth.repository.js';
@@ -53,6 +55,13 @@ async function getInviteUser(token: string): Promise<UserRow> {
     });
   }
 
+  getLogger().debug({
+    event: 'auth.invite.validated',
+    module: 'auth',
+    message: 'Convite validado',
+    context: { userId: user.id, role: decoded.role, persistenceMode: USE_MOCK_DATA ? 'json' : 'postgres' },
+  });
+
   return user;
 }
 
@@ -76,6 +85,13 @@ export async function firstAccess(token: string, password: string): Promise<void
       message: 'Este link de convite já foi utilizado ou é inválido.',
     });
   }
+
+  getLogger().info({
+    event: 'auth.first-access.completed',
+    module: 'auth',
+    message: 'Primeiro acesso concluído',
+    context: { userId: user.id, persistenceMode: USE_MOCK_DATA ? 'json' : 'postgres' },
+  });
 }
 
 export async function resendInviteEmail(email: string): Promise<void> {
@@ -94,6 +110,14 @@ export async function resendInviteEmail(email: string): Promise<void> {
   );
 
   await authRepository.saveResetToken(user.id, resetToken);
+
+  getLogger().info({
+    event: 'auth.password-reset.prepared',
+    module: 'auth',
+    message: 'Recuperação de senha preparada',
+    context: { userId: user.id, persistenceMode: USE_MOCK_DATA ? 'json' : 'postgres' },
+  });
+
   await sendForgotPasswordEmail({ email: user.email, token: resetToken });
 }
 
