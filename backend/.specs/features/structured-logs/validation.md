@@ -1,11 +1,11 @@
-# Verificação da fundação de logs estruturados
+# Verificação dos logs estruturados
 
 Estado: fundação implementada e verificada na worktree backend-logs-foundation.
 Revisão independente da fundação concluída sem bloqueadores novos;
 commit 1 d1114da publicado em codex/backend-logs-foundation.
 Adoção nos services (commit 2) implementada e verificada na worktree
-backend-logs-services, revisão independente sem bloqueadores. Commit 2 e
-integração/push/PR do conjunto ainda pendentes de entrega.
+backend-logs-services, revisão independente sem bloqueadores. Commits publicados
+e PR #19 de integração aberto para staging; merge ainda não aplicado.
 
 ## Contrato e escopo
 
@@ -101,6 +101,8 @@ sem imprimir e-mail/objeto. Configuração inválida é capturada pela fronteira
 graças aos imports dinâmicos; produz erro estruturado e exit code de falha,
 sem stack bruto do Node. Logger/readline encerrados após a operação.
 
-A branch codex/backend-logging-integration existe sobre d1114da e aguarda
-commit 2/merge da adoção. Não há hash do commit 2 ou número/URL de PR neste
-registro. A entrega final para staging será documentada após as ações reais.
+Fundação d1114da e adoção 5258124 publicadas em branches próprias.
+A branch codex/backend-logging-integration reúne as duas por fast-forward.
+PR [#19](https://github.com/rafaelsbe/Civix/pull/19) aberto para staging, aguardando revisão/merge.
+O código integrado é o mesmo validado com 99 testes; esta atualização final
+altera somente Markdown. Não tratar PR aberto como merge em staging.

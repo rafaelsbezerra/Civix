@@ -220,10 +220,11 @@ misturar texto de interação com stdout dos logs. mock.user-command.failed pert
 fronteira CLI; readline e logger são fechados. Fora de HTTP não fabricar UUID.
 Admin continua desmontado; instrumentar inviteUser não expõe endpoint.
 
-Fundação d1114da publicada. A branch codex/backend-logging-integration já
-foi criada sobre essa fundação e aguarda commit 2/merge da adoção. Hash do
-commit 2, integração concluída e PR para staging serão registrados somente
-após as ações reais. Não presumir merge ou número de PR.
+Fundação d1114da e adoção 5258124 publicadas em branches próprias.
+A branch codex/backend-logging-integration reúne as duas por fast-forward.
+PR [#19](https://github.com/rafaelsbe/Civix/pull/19) aberto para staging, aguardando revisão/merge.
+O código integrado é o mesmo validado com 99 testes; esta atualização final
+altera somente Markdown. Não tratar PR aberto como merge em staging.
 
 Verificação final da adoção: 99/99 foundation, 17/17 services e 22/22 da
 fundação de logging; ambos typechecks aprovados. Revisão independente sem

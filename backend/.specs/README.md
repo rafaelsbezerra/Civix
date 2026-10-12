@@ -14,8 +14,8 @@ publicada em d1114da (codex/backend-logs-foundation). Adoção nos sete services
 e CLI implementada/verificada na worktree services, com revisão independente
 sem bloqueadores. Logs internos, sem tabela ou alteração HTTP.
 [Evidências](features/structured-logs/validation.md): 99 foundation, 17 services,
-22 da fundação de logging e dois typechecks aprovados. Commit 2/integração/PR
-ainda pendentes de entrega.
+22 da fundação de logging e dois typechecks aprovados. Commits d1114da/5258124
+publicados e reunidos no PR [#19](https://github.com/rafaelsbe/Civix/pull/19) para staging; merge pendente.
 
 ## Grupos e situação
 

@@ -1,7 +1,7 @@
 # Logs estruturados — tarefas e entrega
 
 Status: fundação publicada em d1114da; adoção nos services implementada/
-verificada, revisão independente concluída. Commit 2/integração/PR pendentes.
+verificada, revisão independente concluída. Commits publicados e PR #19 aberto.
 Referência: [spec](spec.md). Data: 2026-10-12.
 
 ## Fase documental atual
@@ -58,10 +58,9 @@ Dependência: commit 1 d1114da validado/publicado em codex/backend-logs-foundati
 
 Aceite: LOG-05/06/07. Não modificar regras de autenticação, endpoints ou schema.
 
-## Integração e evidências — ainda pendentes
+## Integração e evidências
 
-- [ ] Reunir branches dependentes na branch de integração, preservando os
-  dois commits. Registrar hashes e PRs reais depois de criados.
+- [x] Reunir d1114da e 5258124 em codex/backend-logging-integration; PR #19 para staging.
 - [x] Executar scripts pertinentes existentes no manifest, acrescentando
   testes de logging somente durante implementação autorizada.
 - [x] Registrar comandos/resultados, ambientes e checks não executados.
@@ -70,7 +69,7 @@ Hoje existem test:foundation e typecheck:foundation; confirmar scripts na
 fase de execução. Não presumir lint/test/build genéricos no backend.
 A criação desta spec não executa testes, comandos de banco ou infraestrutura.
 
-Verificação documental: fonte conferida por subagente; cinco links locais da
+Verificação documental inicial (antes da implementação): fonte conferida por subagente; cinco links locais da
 spec/tarefas verificados, zero ausentes; diff --check sem erros. Nenhum teste
 executável, instalação ou alteração de código realizada nesta fase.
 
@@ -96,9 +95,13 @@ Estado atual/evidências: [validation.md](validation.md).
 - [x] Parecer independente da adoção: sem bloqueadores.
 - [x] CLI positivo com prompts stderr/logs stdout e configuração inválida
   capturada por import dinâmico com erro estruturado.
-- [ ] Criar/publicar commit 2, preservando separação de d1114da.
-- [ ] Integrar adoção à branch codex/backend-logging-integration e abrir PR
-  para staging; registrar somente hashes/URL reais depois dessas ações.
+- [x] Publicar commit 2 5258124, preservando separação de d1114da.
+- [x] Integrar adoção em codex/backend-logging-integration e abrir PR #19 para staging.
 
-A branch de integração existe sobre d1114da; a reunião do commit 2 ainda
-não foi executada neste registro. [Validação](validation.md).
+Fundação d1114da e adoção 5258124 publicadas em branches próprias.
+A branch codex/backend-logging-integration reúne as duas por fast-forward.
+PR [#19](https://github.com/rafaelsbe/Civix/pull/19) aberto para staging, aguardando revisão/merge.
+O código integrado é o mesmo validado com 99 testes; esta atualização final
+altera somente Markdown. Não tratar PR aberto como merge em staging.
+
+[Validação](validation.md).

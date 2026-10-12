@@ -44,7 +44,7 @@ caixa de saída, bootstrap de usuário, cadastro protegido e services auth/admin
 | BE-07 | Migrations | Confirmado: Prisma 7, SQL nativo e inversa; tooling 7.10.0 integrado via PR #7/eea5f1d; schema e banco pendentes |
 | BE-08 | Banco/baseline | Banco PostgreSQL do zero confirmado; baseline depende do schema e do destino dos SQL de planos |
 | BE-09 | Identidade/schema | Consultas e coleção JSON unificadas em users na branch codex/json-postgres-repositories; campos, vínculos, restrições e schema/baseline completos aguardam resposta |
-| BE-10 | Padrões adicionais | Contratos HTTP preservados; fundação de logs/UUID interno publicada; services/CLI adotados, com verificação da adoção em andamento. Validação abrangente, serialização, filtros, contrato HTTP de rastreabilidade e configuração/coleta futuros |
+| BE-10 | Padrões adicionais | Contratos HTTP preservados; fundação de logs/UUID interno publicada; services/CLI adotados e verificados; coleta/retenção ainda futuras. Validação abrangente, serialização, filtros, contrato HTTP de rastreabilidade e configuração/coleta futuros |
 
 ## Entregas e evidências
 
@@ -100,7 +100,7 @@ development, info/JSON nos demais, com LOG_LEVEL validado em cinco níveis.
 AsyncLocalStorage/UUID interno, middleware anterior ao parser, diagnóstico
 único no handler, resumo completed/aborted e logs de inicialização presentes.
 Sem schemaVersion/service/environment, limites arbitrários de JSON/profundidade,
-tabela/migration ou mudança HTTP. Commit 2 adota os services e está sob verificação.
+tabela/migration ou mudança HTTP. Adoção nos services concluída no commit 5258124.
 
 Rodada final: 82 testes foundation e 22 logging aprovados; dois typechecks
 e processo pretty iniciado/fechado passaram. Revisão sem bloqueadores novos
@@ -115,6 +115,13 @@ Sete services/CLI adotados na worktree backend-logs-services: eventos após
 etapa confirmada, envio com ownership único, diagnóstico na fronteira e
 admin ainda desmontado. CLI sem objeto/e-mail na saída e com logger fechado.
 
-Testes/revisão da adoção ainda em andamento. Commit 2, terceira branch de
-integração e PR para staging serão registrados quando existirem; sem hashes
-ou números presumidos. [Validation](features/structured-logs/validation.md).
+Rodada final: 99/99 foundation, 17/17 services, 22/22 da fundação de logging
+e ambos typechecks aprovados. Revisão independente sem bloqueadores; CLI
+positivo stderr/JSON stdout e configuração inválida com erro estruturado
+verificados. [Validation](features/structured-logs/validation.md).
+
+Fundação d1114da e adoção 5258124 publicadas em branches próprias.
+A branch codex/backend-logging-integration reúne as duas por fast-forward.
+PR [#19](https://github.com/rafaelsbe/Civix/pull/19) aberto para staging, aguardando revisão/merge.
+O código integrado é o mesmo validado com 99 testes; esta atualização final
+altera somente Markdown. Não tratar PR aberto como merge em staging.
