@@ -1,21 +1,10 @@
+import type { Request, Response } from 'express';
+import * as authService from '../services/auth.service.js';
 import { AppError } from '../shared/errors/app.error.js';
 import { ErrorCode } from '../shared/errors/error.code.js';
 import { createSuccessResponse } from '../shared/contracts/response.contract.js';
-// # Lógica de primeiro acesso e validação do token
 
-import type { Request, Response } from 'express';
-import jwt from 'jsonwebtoken';
-import bcrypt from 'bcrypt';
-import { db } from '../shared/config/data.js';
-import { sendForgotPasswordEmail } from '../services/mail.service.js';
-import type { JwtInvitePayload } from '../dtos/auth.invite.dto.js';
-import type { ResetTokenRow, UserRow } from '../interfaces/auth.user.row.js';
-
-// GET /api/v1/auth/validate-token?token=...
-export const validateTokenController = async (
-  req: Request,
-  res: Response
-): Promise<Response> => {
+export async function validateTokenController(req: Request, res: Response): Promise<Response> {
   const { token } = req.query;
 
   if (!token || typeof token !== 'string') {
@@ -26,46 +15,15 @@ export const validateTokenController = async (
     });
   }
 
-  const query = `
-    SELECT email, reset_password_expires
-    FROM users
-    WHERE reset_password_token = $1
-  `;
-  const { rows } = await db.query<ResetTokenRow>(
-    query,
-    [token]
-  );
+  const result = await authService.validateToken(token);
 
-  const user = rows[0];
+  return res.status(200).json(createSuccessResponse(result));
+}
 
-  if (!user) {
-    throw new AppError({
-      status: 404,
-      code: ErrorCode.NOT_FOUND,
-      message: 'Este link de convite é inválido ou já foi utilizado.',
-    });
-  }
-
-  if (user.reset_password_expires) {
-    const expiresAt = new Date(user.reset_password_expires);
-
-    if (expiresAt < new Date()) {
-      throw new AppError({
-        status: 400,
-        code: ErrorCode.VALIDATION_ERROR,
-        message: 'Este link de convite expirou.',
-      });
-    }
-  }
-
-  return res.status(200).json(createSuccessResponse({ email: user.email }));
-};
-
-export async function firstAccessController(req: Request, res: Response) {
+export async function firstAccessController(req: Request, res: Response): Promise<Response> {
   const { token, password } = req.body ?? {};
 
-  // 1. Validação simples dos dados recebidos
-  if (!token || !password) {
+  if (typeof token !== 'string' || !token || typeof password !== 'string' || !password) {
     throw new AppError({
       status: 400,
       code: ErrorCode.VALIDATION_ERROR,
@@ -81,73 +39,17 @@ export async function firstAccessController(req: Request, res: Response) {
     });
   }
 
-  // 2. Valida o Token JWT
-  const jwtSecret = process.env.JWT_INVITE_SECRET || 'secret-chave-civix';
-  let decoded: JwtInvitePayload;
-
-  try {
-    decoded = jwt.verify(token, jwtSecret) as JwtInvitePayload;
-  } catch (err) {
-    throw new AppError({
-      status: 401,
-      code: ErrorCode.UNAUTHORIZED,
-      message: 'Link de convite inválido ou expirado.',
-      cause: err,
-    });
-  }
-
-  // 3. Busca o usuário no banco usando Raw SQL
-  const userQuery = await db.query<UserRow>(
-    'SELECT * FROM "user" WHERE email = $1',
-    [decoded.email]
-  );
-  const user = userQuery.rows[0];
-
-  if (!user) {
-    throw new AppError({
-      status: 404,
-      code: ErrorCode.NOT_FOUND,
-      message: 'Usuário não encontrado.',
-    });
-  }
-
-  if (user.status === 'active') {
-    throw new AppError({
-      status: 400,
-      code: ErrorCode.VALIDATION_ERROR,
-      message: 'Esta conta já foi ativada anteriormente.',
-    });
-  }
-
-  if (user.invite_token !== token) {
-    throw new AppError({
-      status: 401,
-      code: ErrorCode.UNAUTHORIZED,
-      message: 'Este link de convite já foi utilizado ou é inválido.',
-    });
-  }
-
-  // 4. Criptografa a nova senha (hash)
-  const saltRounds = 10;
-  const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-  // 5. Atualiza o registro no banco: grava a senha, ativa a conta e limpa o token via UPDATE SQL
-  await db.query(
-    `UPDATE "user"
-     SET password_hash = $1, status = $2, invite_token = $3
-     WHERE email = $4`,
-    [hashedPassword, 'active', null, decoded.email]
-  );
+  await authService.firstAccess(token, password);
 
   return res.status(200).json(createSuccessResponse({
     message: 'Senha cadastrada com sucesso! Sua conta está ativa.',
   }));
 }
 
-export async function resendInviteEmailController(req: Request, res: Response) {
+export async function resendInviteEmailController(req: Request, res: Response): Promise<Response> {
   const { email } = req.body ?? {};
 
-  if (!email) {
+  if (typeof email !== 'string' || !email) {
     throw new AppError({
       status: 400,
       code: ErrorCode.VALIDATION_ERROR,
@@ -155,33 +57,7 @@ export async function resendInviteEmailController(req: Request, res: Response) {
     });
   }
 
-  // 1. Procura o usuário pelo e-mail usando o driver pg (Pool)
-  const result = await db.query('SELECT * FROM users WHERE email = $1', [email]);
-  const user = result.rows[0];
-
-  // Retorne status 200 de qualquer forma para evitar enumeração de e-mails.
-  if (!user) {
-    return res.status(200).json(createSuccessResponse({
-      message: 'Se o e-mail estiver cadastrado, um link de redefinição será enviado.',
-    }));
-  }
-
-  // 2. Gera um token temporário exclusivo para reset de senha (válido por 1h)
-  const jwtSecret = process.env.JWT_RESET_SECRET || 'secret-reset-civix';
-  const resetToken = jwt.sign(
-    { userId: user.id, email: user.email },
-    jwtSecret,
-    { expiresIn: '1h' }
-  );
-
-  // 3. Salva o token de redefinição no banco de dados usando pg Pool
-  await db.query(
-    'UPDATE users SET reset_password_token = $1 WHERE id = $2',
-    [resetToken, user.id]
-  );
-
-  // 4. Dispara o e-mail
-  await sendForgotPasswordEmail({ email: user.email, token: resetToken });
+  await authService.resendInviteEmail(email);
 
   return res.status(200).json(createSuccessResponse({
     message: 'Se o e-mail estiver cadastrado, um link de redefinição será enviado.',

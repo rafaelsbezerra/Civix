@@ -1,0 +1,120 @@
+import jwt, { type SignOptions } from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
+import { authRepository } from '../persistence/auth.repository.js';
+import { AppError } from '../shared/errors/app.error.js';
+import { ErrorCode } from '../shared/errors/error.code.js';
+import { sendForgotPasswordEmail } from './mail.service.js';
+import type { JwtInvitePayload } from '../dtos/auth.invite.dto.js';
+
+export async function validateToken(token: string): Promise<{ email: string }> {
+  const user = await authRepository.getByResetToken(token);
+
+  if (!user) {
+    throw new AppError({
+      status: 404,
+      code: ErrorCode.NOT_FOUND,
+      message: 'Este link de convite é inválido ou já foi utilizado.',
+    });
+  }
+
+  if (user.reset_password_expires && new Date(user.reset_password_expires) < new Date()) {
+    throw new AppError({
+      status: 400,
+      code: ErrorCode.VALIDATION_ERROR,
+      message: 'Este link de convite expirou.',
+    });
+  }
+
+  return { email: user.email };
+}
+
+export async function firstAccess(token: string, password: string): Promise<void> {
+  const jwtSecret = process.env.JWT_INVITE_SECRET || 'secret-chave-civix';
+  let decoded: JwtInvitePayload;
+
+  try {
+    decoded = jwt.verify(token, jwtSecret) as JwtInvitePayload;
+  } catch (cause) {
+    throw new AppError({
+      status: 401,
+      code: ErrorCode.UNAUTHORIZED,
+      message: 'Link de convite inválido ou expirado.',
+      cause,
+    });
+  }
+
+  const user = await authRepository.getLegacyByEmail(decoded.email);
+
+  if (!user) {
+    throw new AppError({
+      status: 404,
+      code: ErrorCode.NOT_FOUND,
+      message: 'Usuário não encontrado.',
+    });
+  }
+
+  if (user.status === 'active') {
+    throw new AppError({
+      status: 400,
+      code: ErrorCode.VALIDATION_ERROR,
+      message: 'Esta conta já foi ativada anteriormente.',
+    });
+  }
+
+  if (user.invite_token !== token) {
+    throw new AppError({
+      status: 401,
+      code: ErrorCode.UNAUTHORIZED,
+      message: 'Este link de convite já foi utilizado ou é inválido.',
+    });
+  }
+
+  const passwordHash = await bcrypt.hash(password, 10);
+
+  await authRepository.activateLegacy(decoded.email, passwordHash);
+}
+
+export async function resendInviteEmail(email: string): Promise<void> {
+  const user = await authRepository.getResetUserByEmail(email);
+
+  // Não revelar se o endereço está cadastrado.
+  if (!user) {
+    return;
+  }
+
+  const jwtSecret = process.env.JWT_RESET_SECRET || 'secret-reset-civix';
+  const resetToken = jwt.sign(
+    { userId: user.id, email: user.email },
+    jwtSecret,
+    { expiresIn: '1h' },
+  );
+
+  await authRepository.saveResetToken(user.id, resetToken);
+  await sendForgotPasswordEmail({ email: user.email, token: resetToken });
+}
+
+export function signToken(
+  payload: string | object | Buffer,
+  expiresIn: SignOptions['expiresIn'],
+) {
+  const secret = process.env.JWT_SECRET;
+
+  if (!secret) {
+    throw new AppError({
+      status: 500,
+      code: ErrorCode.INTERNAL_ERROR,
+      message: 'Erro interno do servidor',
+      details: { message: 'JWT_SECRET não informada nas variáveis de ambiente.' },
+    });
+  }
+
+  return jwt.sign(payload, secret, { expiresIn });
+}
+
+export async function hashPassword(password: string, salt: number) {
+  return bcrypt.hash(password, salt);
+}
+
+export async function comparePassword(password: string, hashPassword: string) {
+  return bcrypt.compare(password, hashPassword);
+}

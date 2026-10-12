@@ -1,7 +1,7 @@
-import type { Plan } from '../entities/plan.entity.js';
+import type { PlanRow } from '../interfaces/plan.row.js';
 
-/** A atribuição de plano ao usuário pertence ao contrato UserRepository. */
+/** Linhas de persistência; a atribuição ao usuário pertence a UserRepository. */
 export interface PlanRepository {
-  getActive(): Promise<Plan[]>;
-  getActiveById(id: string): Promise<Plan | undefined>;
+  getActive(): Promise<PlanRow[]>;
+  getActiveById(id: string): Promise<PlanRow | undefined>;
 }

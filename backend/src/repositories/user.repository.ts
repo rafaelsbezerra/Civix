@@ -1,6 +1,6 @@
 import type { User, UserId, UserRole } from '../entities/user.entity.js';
 
-/** Contrato de persistência preparado para implementação posterior. */
+/** Contrato compartilhado pelas implementações JSON e PostgreSQL. */
 export interface UserRepository {
   getById(id: UserId): Promise<User | undefined>;
   getByEmail(email: string): Promise<Pick<User, 'id' | 'name' | 'email'> | undefined>;

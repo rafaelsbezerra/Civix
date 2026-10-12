@@ -10,5 +10,5 @@ export interface UserRow {
 /** Resultado da consulta de validação do token de redefinição. */
 export interface ResetTokenRow {
   email: string;
-  reset_password_expires: Date | string;
+  reset_password_expires: Date | string | null;
 }

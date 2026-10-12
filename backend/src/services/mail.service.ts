@@ -3,6 +3,8 @@ import { ErrorCode } from '../shared/errors/error.code.js';
 // # Funções de envio de e-mail transacional
 
 import { Resend } from 'resend';
+import { USE_MOCK_DATA } from '../shared/config/data.js';
+import { saveLocalMail } from '../persistence/json/mail.outbox.js';
 
 // Inicializa o SDK do Resend com a chave do arquivo .env
 function getResendClient() {
@@ -33,7 +35,12 @@ interface SendInviteParams {
 
 export async function sendInviteEmail({ email, role, token }: SendInviteParams) {
   // Monta a URL para o frontend com o token
-  const inviteUrl = `${process.env.FRONTEND_URL}/primeiro-acesso?token=${token}`;
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+  const inviteUrl = `${frontendUrl.replace(/\/$/, '')}/primeiro-acesso?token=${encodeURIComponent(token)}`;
+
+  if (USE_MOCK_DATA) {
+    return saveLocalMail('invite', email, inviteUrl);
+  }
 
   const roleText = role === 'empresa' ? 'Organização/Empresa' : 'Cliente/Usuário';
 
@@ -104,6 +111,10 @@ interface SendResetPasswordParams {
 }
 
 export async function sendResetPasswordEmail({ email, resetUrl }: SendResetPasswordParams) {
+  if (USE_MOCK_DATA) {
+    return saveLocalMail('password-reset', email, resetUrl);
+  }
+
   try {
     const result = await getResendClient().emails.send({
       from: getMailFrom(),

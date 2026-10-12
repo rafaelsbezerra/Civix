@@ -1,11 +1,9 @@
 import { AppError } from '../shared/errors/app.error.js';
 import { ErrorCode } from '../shared/errors/error.code.js';
-import jwt from 'jsonwebtoken';
-import bcrypt from 'bcrypt';
 import crypto from 'node:crypto';
-import { db } from '../shared/config/data.js';
+import { userRepository } from '../persistence/user.repository.js';
 import * as mailService from './mail.service.js';
-import type { User } from '../entities/user.entity.js';
+import * as authService from './auth.service.js';
 import type { LoginInput, LoginResult, PasswordResetInput } from '../dtos/user.auth.dto.js';
 
 export async function login({ email, role, password }: LoginInput): Promise<LoginResult> {
@@ -17,18 +15,7 @@ export async function login({ email, role, password }: LoginInput): Promise<Logi
     });
   }
 
-  const query = role === 'empresa' ? `
-        SELECT id, name, email, password_hash, role
-        FROM users
-        WHERE email = $1 AND role = 'empresa'
-      ` : `
-        SELECT id, name, email, role
-        FROM users
-        WHERE email = $1 AND role = 'cliente'
-      `;
-  const { rows } = await db.query<User>(query, [email]);
-
-  const user = rows[0];
+  const user = await userRepository.getByEmailAndRole(email, role);
 
   if (!user) {
     throw new AppError({
@@ -56,7 +43,7 @@ export async function login({ email, role, password }: LoginInput): Promise<Logi
       });
     }
 
-    if (!await bcrypt.compare(password, user.password_hash)) {
+    if (!await authService.comparePassword(password, user.password_hash)) {
       throw new AppError({
         status: 401,
         code: ErrorCode.UNAUTHORIZED,
@@ -65,20 +52,9 @@ export async function login({ email, role, password }: LoginInput): Promise<Logi
     }
   }
 
-  const secret = process.env.JWT_SECRET;
-
-  if (!secret) {
-    throw new AppError({
-      status: 500,
-      code: ErrorCode.INTERNAL_ERROR,
-      message: 'Erro interno do servidor',
-      details: { message: 'JWT_SECRET não informada nas variáveis de ambiente.' },
-    });
-  }
-
   const payload = { id: user.id, email: user.email, role: user.role };
 
-  const token = jwt.sign(payload, secret, { expiresIn: '1h' });
+  const token = authService.signToken(payload, '1h');
 
   return {
     user: { id: user.id, name: user.name, email: user.email, role: user.role },
@@ -87,9 +63,7 @@ export async function login({ email, role, password }: LoginInput): Promise<Logi
 }
 
 export async function forgotPassword(email: string): Promise<void> {
-  const { rows } = await db.query<Pick<User, 'id' | 'name' | 'email'>>('SELECT id, name, email FROM users WHERE email = $1', [email]);
-
-  const user = rows[0];
+  const user = await userRepository.getByEmail(email);
 
   // Não revelar se o endereço está cadastrado.
   if (!user) {
@@ -102,11 +76,7 @@ export async function forgotPassword(email: string): Promise<void> {
 
   const expiresAt = new Date(Date.now() + 3600000);
 
-  await db.query(`
-      UPDATE users
-      SET reset_password_token = $1, reset_password_expires = $2
-      WHERE id = $3
-    `, [resetTokenHash, expiresAt, user.id]);
+  await userRepository.savePasswordResetToken(user.id, resetTokenHash, expiresAt);
 
   const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
 
@@ -118,14 +88,7 @@ export async function forgotPassword(email: string): Promise<void> {
 export async function resetPassword({ token, password }: PasswordResetInput): Promise<void> {
   const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
 
-  const { rows } = await db.query<Pick<User, 'id'>>(`
-      SELECT id
-      FROM users
-      WHERE reset_password_token = $1
-      AND reset_password_expires > NOW()
-    `, [tokenHash]);
-
-  const user = rows[0];
+  const user = await userRepository.getByValidResetTokenHash(tokenHash);
 
   if (!user) {
     throw new AppError({
@@ -135,12 +98,8 @@ export async function resetPassword({ token, password }: PasswordResetInput): Pr
     });
   }
 
-  const passwordHash = await bcrypt.hash(password, 10);
+  const passwordHash = await authService.hashPassword(password, 10);
 
-  await db.query(`
-      UPDATE users
-      SET password_hash = $1, reset_password_token = NULL, reset_password_expires = NULL
-      WHERE id = $2
-    `, [passwordHash, user.id]);
+  await userRepository.updatePasswordAndClearResetToken(user.id, passwordHash);
 
 }

@@ -8,6 +8,8 @@
     "tests/contracts.test.ts",
     "tests/company.routes.test.ts",
     "tests/user.routes.test.ts",
-    "tests/http.adoption.test.ts"
+    "tests/http.adoption.test.ts",
+    "tests/local.persistence.test.ts",
+    "scripts/mock.user.create.ts"
   ]
 }
