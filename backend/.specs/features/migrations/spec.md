@@ -69,3 +69,11 @@ aplicação, atomicidade, recuperação ou reversão de dados no banco.
 
 Referências: [avaliação e histórico](avaliacao-prisma.md),
 [operação](../../../docs/operacao.md), [decisões](../STATE.md).
+
+## Evolução planejada para identidade e dashboards
+
+A [spec 02 de dados](../identity-data-model/spec.md) detalha a próxima baseline
+mínima com base no [modelo 01](../identity-access-model/spec.md). Vínculo único
+de dono/atendente e cadastro pela Civix estão confirmados; campos/enums/
+restrições/legado seguem aguardando decisão. Essa ligação não conclui
+MIG-02/03-C/04/05 nem executa migrations. Não trocar Prisma 7/SQL nativo.

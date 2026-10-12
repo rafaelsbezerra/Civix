@@ -17,6 +17,9 @@ Planos, decisões, revisões de entrega e evidências de execução ficam nas sp
 
 ## Planejamento e acompanhamento
 
+- [Ordem e pares das specs dos dashboards](../backend/.specs/roadmaps/dashboards/README.md).
+- [Índice das specs frontend](../frontend/.specs/README.md).
+
 - [Specs e decisões backend](../backend/.specs/README.md).
 - [Estado e decisões frontend](../frontend/.specs/STATE.md).
 - [Revisão backend](../backend/.specs/reviews/revisao-pendencias-specs.md).

@@ -16,14 +16,26 @@ Não há implementação completa do SaaS apenas por existirem páginas pública
 
 ## Atores e canais previstos
 
-- Superadministrador da plataforma.
-- Administrador e vendedores/atendentes de cada empresa.
-- Clientes/leads.
-- Sistemas externos.
+- Superadministrador Civix: gestão de empresas, vendas, métricas e gastos de IA;
+  sem acesso ou controle das conversas das empresas.
+- Dono/administrador: operação e equipe da própria empresa.
+- Atendente: vinculado a uma única empresa e somente aos atendimentos atribuídos.
+- Contato promocional: cadastro apenas do e-mail, sem dashboard ou autenticação.
+- Interlocutores/leads dos atendimentos e sistemas externos: domínio a detalhar;
+  inscrição promocional não cria lead ou conta de equipe automaticamente.
 
 Entradas: site institucional, WhatsApp da empresa e site da empresa.
 O código usa apenas os papéis `empresa` e `cliente`; eles não equivalem
-automaticamente à matriz de permissões prevista.
+automaticamente à matriz de permissões prevista. As definições acima são
+requisitos confirmados pelo usuário; o código ainda não implementa esses
+três perfis nem separa contatos promocionais das contas autenticadas.
+
+A Civix cadastra a empresa e convida o primeiro dono. Dono/atendente pertence
+a uma única empresa; não há troca entre empresas nesta fase. O responsável
+por atribuir/transferir atendimentos ainda não foi definido. Papel de gestor
+Civix não concede acesso a mensagens por relatórios, busca, logs ou custo IA.
+Planejamento e decisões ficam nas
+[specs dos dashboards](../backend/.specs/roadmaps/dashboards/README.md).
 
 ## Casos de uso do Notion
 

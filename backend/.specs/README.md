@@ -1,5 +1,14 @@
 # Specs do backend
 
+## Planejamento dos dashboards — 2026-10-12
+
+Novo [plano ordenado](roadmaps/dashboards/README.md), com specs por entrega,
+[contratos E2E propostos](roadmaps/dashboards/contracts.md) e
+[decisões confirmadas/pendentes](roadmaps/dashboards/decisions.md).
+Nesta rodada só documentação: nenhum código implementado, commit ou migration.
+Referências históricas abaixo preservam as entregas de base; não substituem
+esse planejamento de identidade, empresa, atribuição e acesso à plataforma.
+
 SDD leve + DDD leve: tarefas pequenas, evidências de implementação e decisões
 explícitas. Revisão de status em 2026-10-10 na staging `bedb73a`, após os
 merges da base Prisma 7, tipos de auth, adoção HTTP e auditoria documental.
