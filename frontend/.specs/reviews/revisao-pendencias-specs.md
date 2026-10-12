@@ -31,7 +31,7 @@ não validam automaticamente a composição atual de staging.
 | --- | --- | --- |
 | Sobre sem rota /sobre; incorporado na Home | AppRoute.tsx e pages/Home.tsx | Confirmar requisito vigente |
 | Home incorpora outro main e h1 de About | pages/Home.tsx e pages/About.tsx | Diverge dos critérios de landmarks da Home |
-| Header usa novos destinos, incluindo /planos sem rota | SiteHeader.tsx e AppRoute.tsx | Confirmar navegação vigente |
+| Navbar pública usa /#empresas e /#planos aprovados | SiteHeader.tsx e AppRoute.tsx | Navegação confirmada; /planos não ganha rota |
 | Manifest/testes de Sobre esperam dashboard.png e macbook-silver.png, ausentes no código atual | src/assets/civix/about, AboutVisual e testes de assets | Confirmar assets vigentes e alinhar testes |
 | Geometria, responsividade, zoom, CLS, contraste e bundle do checkout atual | Relatórios antigos e scripts presentes | Validação atual não executada nesta auditoria |
 | Hashes crus de SVG dependem de CRLF/LF | Assets coincidem após normalização das quebras de linha | Conferir política de bytes ao alinhar testes |
@@ -65,3 +65,12 @@ de assets Sobre; lint falha em SignSelect preexistente. Sem dependências novas
 ou banco real. Ver [integração](../../../docs/frontend-backend.md).
 
 Modelo/schema/migrations e evoluções backend: [revisão backend](../../../backend/.specs/reviews/revisao-pendencias-specs.md).
+
+
+## Navbar/animações: execução no escopo público
+
+Mapa público e Motion 14.1.0 implementados/verificados; A7 executado com
+limites registrados. Todas as telas/formulários de acesso excluídos; A5
+fora do escopo. Ver [validação](../features/entry-animations/validation.md).
+O restante de AD-002, login/envelope, dashboard, reenvio/reset e modelo/schema
+não são concluídos por esta navegação específica ou pelas animações.

@@ -104,7 +104,7 @@ tsx também não é necessário para iniciar o frontend com Vite.
 
 | Grupo | Local no manifest | Exemplos |
 | --- | --- | --- |
-| Runtime da interface | dependencies | React/Router, Axios, fontes, Lenis, Lucide, classes e tw-animate-css |
+| Runtime da interface | dependencies | React/Router, Axios, fontes, Lenis, Motion, Lucide, classes e tw-animate-css |
 | Ferramentas de build/geração | devDependencies | Vite, TypeScript, @tailwindcss/vite, tailwindcss, shadcn |
 | Testes e tipagem | devDependencies | @playwright/test, Vitest, Testing Library, ESLint, tipos React/Node |
 
@@ -115,3 +115,17 @@ no manifest, sem depender de um pacote Playwright implícito.
 
 A [spec de manutenção](../frontend/.specs/features/dependency-maintenance/spec.md)
 registra a análise e as verificações da alteração de manifest/lockfile.
+
+
+## Movimento e preferência do navegador
+
+Motion 14.1.0 pertence às dependencies do frontend e é carregado sob demanda
+por motion/mini. Não exige configuração de backend ou variável de ambiente.
+Nas páginas públicas, prefers-reduced-motion reduz as entradas e desativa
+Lenis; mudanças da preferência são acompanhadas durante a sessão.
+
+O motor fica desabilitado nas telas de login/primeiro acesso/recuperação/
+redefinição. Falta de IntersectionObserver, MutationObserver ou Web Animations
+API mantém conteúdo visível. A [validação da feature](../frontend/.specs/features/entry-animations/validation.md)
+contém verificações e limitações; estes guias não representam aprovação
+automática de build completo ou dos testes históricos.

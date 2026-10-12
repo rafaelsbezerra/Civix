@@ -115,12 +115,14 @@ export default function HelpCenter() {
               <div className="relative z-10 px-6 pb-36 pt-16 text-[var(--color-civix-ivory)] sm:px-10 sm:pt-20 lg:absolute lg:left-[63px] lg:top-[124px] lg:p-0">
                 <h1
                   id="hero-title"
+                  data-motion="page"
+                  data-motion-trigger="mount"
                   className="max-w-[643px] font-[family-name:var(--font-display)] text-[clamp(2.5rem,5vw,4rem)] font-semibold uppercase leading-[1.1] tracking-[-0.02em] lg:w-[643px] lg:text-[64px] lg:leading-[80px] lg:tracking-[-0.034em]"
                 >
                   <p className="text-[var(--color-civix-gold)] font-bold tracking-widest text-sm mb-4">REDE CIVIX / CENTRAL DE AJUDA</p>
                   <span className="lg:block lg:whitespace-nowrap">Como podemos ajudar <br></br> sua empresa hoje?</span>{' '}
                 </h1>
-                <p className="mt-10 max-w-[511px] font-[family-name:var(--font-body)] text-base font-normal leading-[normal] text-[var(--color-civix-ivory)]/90 sm:text-lg lg:absolute lg:left-0 lg:top-[164px] lg:mt-0 lg:w-[511px] lg:leading-[20.6667px]">
+                <p data-motion="page" data-motion-trigger="mount" data-motion-delay="60" className="mt-10 max-w-[511px] font-[family-name:var(--font-body)] text-base font-normal leading-[normal] text-[var(--color-civix-ivory)]/90 sm:text-lg lg:absolute lg:left-0 lg:top-[164px] lg:mt-0 lg:w-[511px] lg:leading-[20.6667px]">
                   Pesquise por soluções rápidas sobre convites, gestão, senhas e parcerias.
                 </p>
               </div>
@@ -132,11 +134,13 @@ export default function HelpCenter() {
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 {/* Categories Grid */}
                 <div className="mb-16">
-                    <h2 className="text-2xl font-bold text-slate-900">Navegue por Categoria</h2>
+                    <h2 data-motion="section" className="text-2xl font-bold text-slate-900">Navegue por Categoria</h2>
                     <div className="grid grid-cols-1 mt-6 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         {categories.map((cat, index) => (
                             <div
                                 key={index}
+                                data-motion="item"
+                                data-motion-step="50"
                                 className="bg-white rounded-xl p-6 border border-slate-200 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between group"
                             >
                                 <div>
@@ -157,7 +161,7 @@ export default function HelpCenter() {
 
                 {/* Popular Articles */}
                 <div className="w-full max-w-4xl mx-auto mb-16">
-                    <div className="bg-white rounded-xl p-6 border border-slate-200">
+                    <div data-motion="section" className="bg-white rounded-xl p-6 border border-slate-200">
                         <div className="flex items-center space-x-2 mb-6">
                             <span className="text-[var(--color-civix-gold-accessible)]">//</span>{' '}
                             <h2 className="text-xl font-bold text-slate-900">Artigos Mais Acessados</h2>
@@ -176,8 +180,11 @@ export default function HelpCenter() {
                                     >
                                         <button
                                             type="button"
+                                            id={`help-question-${index}`}
+                                            aria-expanded={isOpen}
+                                            aria-controls={`help-answer-${index}`}
                                             onClick={() => toggleFAQ(index)}
-                                            className="w-full py-4 px-6 flex items-center justify-between text-left font-semibold text-base md:text-lg focus:outline-none"
+                                            className="w-full py-4 px-6 flex items-center justify-between text-left font-semibold text-base md:text-lg focus-visible:outline-2 focus-visible:outline-offset-2"
                                         >
                                             <span>{item.question}</span>
                                             <div
@@ -191,7 +198,13 @@ export default function HelpCenter() {
                                         </button>
 
                                         {isOpen && (
-                                            <div className="px-6 pb-5 text-sm md:text-base leading-relaxed text-[#071b2b]/90 border-t border-black/5 pt-2">
+                                            <div
+                                                id={`help-answer-${index}`}
+                                                role="region"
+                                                aria-labelledby={`help-question-${index}`}
+                                                data-motion="feedback"
+                                                data-motion-trigger="mount"
+                                                className="px-6 pb-5 text-sm md:text-base leading-relaxed text-[#071b2b]/90 border-t border-black/5 pt-2">
                                                 {item.answer}
                                             </div>
                                         )}
@@ -203,7 +216,7 @@ export default function HelpCenter() {
                 </div>
 
                 {/* Contact Support Section */}
-                <div className="bg-blue-50 border border-blue-100 rounded-2xl p-8 text-center max-w-4xl mx-auto">
+                <div data-motion="section" className="bg-blue-50 border border-blue-100 rounded-2xl p-8 text-center max-w-4xl mx-auto">
                     <HelpCircle className="w-12 h-12 #0b1825 mx-auto mb-4" />
                     <h2 className="text-2xl font-bold text-slate-900 mb-2">Ainda precisa de ajuda?</h2>
                     <p className="text-slate-600 mb-8 max-w-xl mx-auto text-sm sm:text-base">

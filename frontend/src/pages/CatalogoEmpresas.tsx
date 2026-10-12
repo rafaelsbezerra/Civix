@@ -147,6 +147,8 @@ export default function CatalogoEmpresas() {
               <div className="relative z-10 px-6 pb-36 pt-16 text-[var(--color-civix-ivory)] sm:px-10 sm:pt-20 lg:absolute lg:left-[63px] lg:top-[124px] lg:p-0">
                 <h1
                   id="hero-title"
+                  data-motion="page"
+                  data-motion-trigger="mount"
                   className="max-w-[643px] font-[family-name:var(--font-display)] text-[clamp(2.5rem,5vw,4rem)] font-semibold uppercase leading-[1.1] tracking-[-0.02em] lg:w-[643px] lg:text-[64px] lg:leading-[80px] lg:tracking-[-0.034em]"
                 >
                   <p className="text-[var(--color-civix-gold)] font-bold tracking-widest text-sm mb-4">REDE CIVIX / EMPRESAS</p>
@@ -155,7 +157,7 @@ export default function CatalogoEmpresas() {
                     CONSTRUÇÃO CIVIL
                   </span>
                 </h1>
-                <p className="mt-10 max-w-[511px] font-[family-name:var(--font-body)] text-base font-normal leading-[normal] text-[var(--color-civix-ivory)]/90 sm:text-lg lg:absolute lg:left-0 lg:top-[164px] lg:mt-0 lg:w-[511px] lg:leading-[20.6667px]">
+                <p data-motion="page" data-motion-trigger="mount" data-motion-delay="60" className="mt-10 max-w-[511px] font-[family-name:var(--font-body)] text-base font-normal leading-[normal] text-[var(--color-civix-ivory)]/90 sm:text-lg lg:absolute lg:left-0 lg:top-[164px] lg:mt-0 lg:w-[511px] lg:leading-[20.6667px]">
                   Encontre profissionais e fornecedores verificados, prontos para o seu próximo projeto.
                 </p>
               </div>
@@ -172,10 +174,10 @@ export default function CatalogoEmpresas() {
 
         {/* Results Section */}
         <section className="py-16 px-6 sm:px-10 lg:px-16 xl:px-32 max-w-[1728px] mx-auto">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 border-b border-gray-200 pb-6">
+          <div data-motion="section" className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 border-b border-gray-200 pb-6">
             <div>
               <p className="text-sm font-bold text-gray-400 tracking-wider mb-2">EXPLORAR A REDE</p>
-              <h2 className="text-3xl font-[family-name:var(--font-display)] font-semibold text-[var(--color-civix-navy)]">
+              <h2 aria-live="polite" aria-atomic="true" className="text-3xl font-[family-name:var(--font-display)] font-semibold text-[var(--color-civix-navy)]">
                 {loading ? 'Buscando empresas...' : `${empresas.length} ${empresas.length === 1 ? 'empresa encontrada' : 'empresas encontradas'}`}
               </h2>
             </div>
@@ -190,19 +192,19 @@ export default function CatalogoEmpresas() {
           </div>
 
           {loading && (
-            <div className="flex justify-center items-center py-20">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--color-civix-navy)]"></div>
+            <div role="status" aria-label="Carregando empresas" className="flex justify-center items-center py-20">
+              <div className="animate-spin motion-reduce:animate-none rounded-full h-12 w-12 border-b-2 border-[var(--color-civix-navy)]"></div>
             </div>
           )}
 
           {error && (
-            <div className="bg-red-50 text-red-600 p-6 rounded-lg text-center font-medium">
+            <div role="alert" data-motion="feedback" data-motion-trigger="mount" className="bg-red-50 text-red-600 p-6 rounded-lg text-center font-medium">
               {error}
             </div>
           )}
 
           {!loading && !error && empresas.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-16 text-center">
+            <div role="status" data-motion="feedback" data-motion-trigger="mount" className="flex flex-col items-center justify-center py-16 text-center">
               <SearchX className="w-16 h-16 text-gray-300 mb-4" />
               <h3 className="text-xl font-semibold text-gray-700 mb-2">Nenhuma empresa encontrada</h3>
               <p className="text-gray-500 max-w-md mb-6">
@@ -223,6 +225,8 @@ export default function CatalogoEmpresas() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {empresas.map((empresa) => (
                 <article
+                  data-motion="item"
+                  data-motion-step="50"
                   key={empresa.id}
                   onClick={() => handleEmpresaClick(empresa.id)}
                   className="group bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col h-full"

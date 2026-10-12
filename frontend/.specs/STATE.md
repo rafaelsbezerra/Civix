@@ -84,3 +84,58 @@ e [decisões](decisions/decisoes.md).
   Empresas/Planos e Contato preservado confirmados no plano.
 - **Manutenção:** manifest/lockfile limpos; verificação e limites em
   [dependency-maintenance](features/dependency-maintenance/spec.md).
+
+
+
+## Handoff — execução das animações autorizada em 2026-10-12
+
+- **Feature**: [entry-animations](features/entry-animations/spec.md).
+- **Referência**: worktree frontend-entry-animations, branch
+  codex/frontend-entry-animations, base staging da92a07.
+- **Autorizado**: instalação/uso de Motion 14.1.0 e implementação do mapa,
+  incluindo navbar pública unificada, fixa, espaço de 106 px, fundo claro após
+  rolagem, seção ativa e compensação das âncoras Empresas/Planos.
+- **Exclusão adicional**: não animar a tela de login; login.tsx integralmente
+  intacto. Navbar ausente em login/formulários; preservar fluxos de acesso.
+- **Preservado**: Contato /#contato sem alterar destino ou criar ID/bloco;
+  AD-002 para divergências históricas não relacionadas ao escopo aprovado.
+- **Estado**: autorizado/em execução. Não marcar entregue antes de verificação;
+  registrar testes, runtime e limites no grupo da feature após obter evidências.
+- **Entrega histórica**: sem commit durante a implementação inicial. Restrição anterior de apenas documentar
+  substituída pela autorização vigente; demais históricos permanecem históricos.
+
+
+## Handoff — implementação pública de navbar/animações
+
+- **Instalado**: Motion 14.1.0 fixado; MotionRoot/entradas e navbar públicas
+  implementados. Modal/menu com foco e preferência reduzida contemplados.
+- **Preservado**: login, primeiro acesso, recuperação e redefinição
+  integralmente intactos. A5 fora de escopo; nenhuma navbar/motor nesses destinos.
+- **Verificação**: 57 testes direcionados finais, lint, TypeScript e Vite passaram.
+  Suíte completa 86/97, com 11 falhas históricas em sete arquivos. Gate About
+  dashboard.png mantém falha histórica no build completo.
+- **Executado**: A7/navegador nas cinco larguras, API lenta/erro, âncoras,
+  menu/modal e comparação de bundle; limites nativos/CLS/e2e registrados em
+  [entry-animations/validation.md](features/entry-animations/validation.md).
+- **Entrega**: commit/push/PR autorizados em 2026-10-12; verificações executadas com limites explícitos.
+
+
+## Fechamento da verificação de navbar/animações
+
+57/57 direcionados finais passaram; a suíte completa anterior à inclusão
+de quatro testes de scroll registrou 86/97 e 11 falhas históricas. Cinco
+larguras, API lenta/indisponível, foco/modal/menu, âncoras e bundle foram
+verificados. A7 concluído como verificação executada, com preferência nativa
+reduced motion, e2e histórico e CLS quantitativo não executados/medidos.
+Login e todos os formulários permanecem integralmente preservados. Verificação registrada antes da autorização de publicação.
+
+
+## Handoff — publicação autorizada em 2026-10-12
+
+- **Autorizado**: commit da entrega, push de codex/frontend-entry-animations
+  e abertura de PR para staging.
+- **Estado vigente**: publicação autorizada, substituindo a restrição anterior
+  de sem commit. Os registros anteriores de execução sem commit são históricos.
+- **PR**: número/URL pendentes de criação; não afirmar publicação já realizada.
+- **Preservado**: escopo público, todas as telas de acesso intactas e limites
+  de verificação registrados na feature. Nenhuma autorização de merge implícita.

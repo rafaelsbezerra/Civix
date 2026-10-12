@@ -13,7 +13,7 @@ specs, decisão de produto ou execução dos testes.
 | INT-01 | Resolvido nesta branch | FirstAccess usa helpers comuns sob /api/auth | Pré-validação e ativação usam as rotas existentes |
 | INT-05 | Alta | Login navega `/dashboard-empresa`; router não declara rota | Login empresa termina no fallback 404 |
 | INT-06 | Resolvido nesta branch | Router importa ResetPassword com caixa correspondente ao arquivo | TypeScript e Vite passaram; não foi executado em Linux |
-| INT-07 | Alta | `/sobre` e `/planos` ausentes de AppRoute; testes/header esperam páginas | Features existem como arquivos, mas não como destinos navegáveis |
+| INT-07 | Parcial: navegação pública alinhada | /sobre e /planos continuam sem rotas, mas navbar aprovada usa /#sobre e /#planos | Não criar rotas por esta feature; requisitos históricos de Home/Sobre seguem AD-002 |
 | INT-08 | Resolvido nesta branch | searchEmpresas usa /api/v1/empresas/buscar?q= com codificação | Busca atinge o contrato existente |
 | INT-09 | Parcial nesta branch | Helpers normalizam VITE_API_URL e incluem prefixo por endpoint; login Axios foi excluído | Consumidores adaptados corrigidos; login ainda exige alinhamento |
 | INT-10 | Resolvido nos consumidores atuais | Tipos e exibição frontend usam descricao_detalhada e data_cadastro | Backend preserva snake_case, sem mapper novo |
@@ -52,3 +52,12 @@ em SignSelect preexistente. Login, dashboard, páginas/rotas novas, schema e
 migrations estão fora desta entrega.
 
 Questões de auth, schema e backend: [backend](../../../backend/.specs/reviews/diagnostico.md).
+
+
+## Navbar/animações públicas — atualização
+
+Navbar pública fixa/unificada e âncoras de seções aprovadas implementadas.
+Login e todos os formulários de acesso preservados. Lint de SignSelect
+corrigido junto à semântica/foco do modal; gate histórico de assets Sobre
+continua falhando. Resultados e limites atuais:
+[validação](../features/entry-animations/validation.md).

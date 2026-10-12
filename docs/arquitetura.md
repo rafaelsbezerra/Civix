@@ -4,7 +4,7 @@
 
 | Camada | Implementação observada |
 | --- | --- |
-| Frontend | React 19, TypeScript, Vite, React Router, Tailwind 4, componentes shadcn/Base UI, Lenis |
+| Frontend | React 19, TypeScript, Vite, React Router, Tailwind 4, componentes shadcn/Base UI, Lenis e Motion |
 | Backend | Node, TypeScript, Express 5, Helmet, CORS, compression, cookie-parser, JWT, bcrypt |
 | Persistência utilizada | USE_MOCK_DATA seleciona JSON persistido ou Pool Neon com SQL parametrizado |
 | ORM configurado | Prisma com generator e datasource, sem modelos no schema |
@@ -146,3 +146,22 @@ extraídos para DTO/interface; regras de convite/primeiro acesso permanecem.
 
 Paginação disponível sob demanda. [Dados locais](dados-locais.md) descreve
 a alternativa JSON; schema/baseline do PostgreSQL ainda não estão completos.
+
+
+## Navegação e movimento no frontend
+
+SiteHeader é compartilhado nas páginas públicas, incluindo ajuda, termos,
+privacidade e 404. Navbar fixa reserva 106 px no layout, usa fundo claro após
+rolagem e indica seção visível. Empresas/Planos levam às seções da Home;
+Ver todas abre o catálogo. Contato mantém /#contato, cujo ID não existe.
+
+MotionRoot aplica presets às marcações data-motion, usando motion/mini sob
+demanda, IntersectionObserver para viewport e MutationObserver para dados
+tardios. Opacity/translate conservam transforms do layout. Conteúdo continua
+visível quando APIs de movimento faltam; foco e reduced motion cancelam
+entradas. PublicSmoothScroll acompanha a preferência reduzida para Lenis.
+
+Login, primeiro acesso, recuperação e redefinição ficam fora do motor e sem
+navbar. Seus componentes e fluxos permanecem intactos. Detalhes da
+[feature](../frontend/.specs/features/entry-animations/spec.md) e
+[verificações](../frontend/.specs/features/entry-animations/validation.md).

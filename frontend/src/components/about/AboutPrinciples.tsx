@@ -35,6 +35,8 @@ export function AboutPrinciples() {
     >
       {principles.map((principle, index) => (
         <article
+          data-motion="item"
+          data-motion-step="60"
           className="relative py-5 2xl:h-[130px] 2xl:py-0 last:2xl:h-auto [&:nth-child(2)]:2xl:h-[127px]"
           key={principle.title}
         >

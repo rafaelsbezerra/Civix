@@ -236,3 +236,20 @@ svg {
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
 }
+
+/* Reservar espaço para a navbar e respeitar a preferência de movimento. */
+html:has([data-site-header]) {
+  scroll-padding-top: 130px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  [data-motion-root] .animate-spin,
+  [data-motion-root] .animate-fadeIn { animation: none !important; }
+  [data-motion-root] [data-motion] { transition: none !important; }
+}
+
+/* Um controle focado não deve aguardar transições CSS herdadas do card. */
+[data-motion-root] [data-motion]:focus-within {
+  transition: none !important;
+}

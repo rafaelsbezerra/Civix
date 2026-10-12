@@ -1,7 +1,8 @@
 # Animações de entrada — tarefas
 
-**Status:** plano atualizado para leitura. Navbar e animações não serão
-implementadas nesta etapa; instalação/execução aguardam autorização posterior.
+**Status:** implementação, instalação e verificação executadas no escopo.
+Motion 14.1.0 fixado; todas as telas de acesso preservadas. A5 fora de escopo;
+A7 executado com limitações registradas.
 Referências: [spec](spec.md) e [mapa completo](design.md).
 
 ## Concluído nesta entrega
@@ -11,43 +12,44 @@ Referências: [spec](spec.md) e [mapa completo](design.md).
 - [x] Distinguir seções/componentes existentes de rotas e funcionalidades ausentes.
 - [x] Registrar estados API, mobile, reduced motion, teclado, Lenis e performance.
 - [x] Comparar Motion/CSS/GSAP com fontes primárias atuais e registrar recomendação.
-- [x] Documentar critérios simples e decisões que aguardam aprovação.
+- [x] Documentar critérios e autorização de implementação/instalação, com login excluído.
 
-## Navbar: tarefas futuras após leitura e autorização
+## Navbar: implementação autorizada
 
-- [ ] NAV-01: Navbar fixa com espaço de 106 px e fundo claro após rolagem.
-- [ ] NAV-02: Item ativo por seção visível, desktop/mobile, com âncoras compensadas.
-- [ ] NAV-03: Ordem de sobreposição abaixo do modal e verificação responsiva.
+- [x] NAV-01: Navbar fixa com espaço de 106 px e fundo claro após rolagem.
+- [x] NAV-02: Item ativo por seção visível, desktop/mobile, com âncoras compensadas.
+- [x] NAV-03: Ordem de sobreposição abaixo do modal e verificação responsiva.
 
-- [ ] NAV-04: Unificar navbar públicas; preservar login/formulários de acesso.
-- [ ] NAV-05: Empresas /#empresas e Planos /#planos; catálogo pelo botão Ver todas.
-- [ ] NAV-06: Preservar Contato /#contato sem criar destino/ID ausente.
+- [x] NAV-04: Unificar navbar públicas; preservar login/formulários de acesso.
+- [x] NAV-05: Empresas /#empresas e Planos /#planos; catálogo pelo botão Ver todas.
+- [x] NAV-06: Preservar Contato /#contato sem criar destino/ID ausente.
 
-Os requisitos foram confirmados para o plano, não para execução imediata.
-Não implementar NAV-01..06 nem instalar Motion antes da leitura do usuário
-e autorização posterior.
+Navbar implementada e coberta por testes direcionados. Login e todos os
+formulários permanecem intactos, sem motor ou navbar. Aceite de runtime/
+viewports está registrado em A7/validation, com limitações explícitas.
 
-## Animações: tarefas futuras após autorização
+## Animações: execução autorizada
 
 | Tarefa | Entrega | Critérios |
 | --- | --- | --- |
-| A1 | Confirmar biblioteca, autorização de instalação e escopo visual | Decisões da spec |
+| A1 | Registrar autorização de Motion 14.1.0, escopo e exclusão total de login | Decisões da spec |
 | A2 | Presets/observação/fallback visível e tratamento reduced motion/Lenis | ANIM-02/03/07 |
 | A3 | Home: hero/busca, About, empresas, planos, FAQ/CTA, header/footer/modal | ANIM-01/04/05/06 |
 | A4 | Catálogo, perfil e Plans quando houver rota | ANIM-01/04/05/07 |
-| A5 | Avaliar estados de acesso preservados, sem alteração nesta etapa | ANIM-01/04/06 |
+| A5 | Fora do escopo: login, primeiro acesso, recuperação e redefinição integralmente preservados | Não concluir nem implementar nesta entrega |
 | A6 | Ajuda, documentos legais, 404 e navegação | ANIM-01/06/07 |
 | A7 | Validar comportamento, bundle, viewports e atualizar docs/specs | ANIM-03 a ANIM-08 |
 
-- [ ] A1 — aguarda leitura do plano/autorização posterior; Motion é proposta.
-- [ ] A2 — aguarda A1; nenhuma animação criada nesta entrega.
-- [ ] A3 — aguarda A2; confirmar foco/semântica de dialog antes da animação.
-- [ ] A4 — aguarda A2 e integração backend; verificar rotas no código final.
-- [ ] A5 — aguarda A2 e integração dos contratos de autenticação.
-- [ ] A6 — aguarda A2; preservar leitura imediata dos documentos legais.
-- [ ] A7 — executar sobre código com animações, sem reutilizar PASS histórico.
+- [x] A1 — implementação/instalação autorizadas; Motion 14.1.0 e login excluído.
+- [x] A1-INSTALL — Motion 14.1.0 instalado e fixado no manifest/lockfile.
+- [x] A2 — presets, fallback, foco, cleanup e reduced motion/Lenis implementados.
+- [x] A3 — Home/seções/modal implementados; foco/dialog cobertos nos testes.
+- [x] A4 — catálogo/perfil implementados; Plans sem rota permanece fora do escopo.
+- **A5 — fora do escopo**, não concluído: preservar todos os componentes/fluxos de acesso.
+- [x] A6 — ajuda, documentos legais e 404 implementados; conteúdo legal preservado.
+- [x] A7 — navegador nas cinco larguras, API lenta/erro, âncoras, modal/menu e bundle verificados; limites registrados.
 
-## Verificações da execução futura
+## Verificações da execução
 
 Revisar os scripts existentes antes de executar. Atualmente `npm run test`,
 `npm run lint`, `npm run build` e `npm run test:e2e` estão no manifest frontend;
@@ -59,3 +61,6 @@ navegação/hash, Strict Mode, reduced motion inicialmente e alterado em runtime
 Capturar os cinco viewports da spec, verificar overflow e layout estável e medir
 o bundle antes/depois. Adicionar testes para comportamento útil, evitando testes
 que apenas copiam números de duração ou detalhes internos da biblioteca.
+
+
+Evidências: [validation.md](validation.md). Logs não ficam nos guias gerais.
