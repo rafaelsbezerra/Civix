@@ -2,7 +2,8 @@
 
 Implementação autorizada em 2026-10-12 na branch codex/frontend-backend-integration,
 derivada do PR #16. Consumidores do escopo adaptados; verificações direcionadas concluídas.
-A entrega é destinada à staging e depende do PR #16.
+Entrega publicada no [PR #17](https://github.com/rafaelsbe/Civix/pull/17),
+aberto para staging e dependente do [PR #16](https://github.com/rafaelsbe/Civix/pull/16).
 
 ## Consumidores adaptados
 
