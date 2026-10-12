@@ -1,6 +1,6 @@
 # Logs estruturados — tarefas e entrega
 
-Status: planejamento aprovado no escopo; implementação não iniciada.
+Status: implementação autorizada; execução aguarda confirmação de configuração.
 Referência: [spec](spec.md). Data: 2026-10-12.
 
 ## Fase documental atual
@@ -15,7 +15,9 @@ Referência: [spec](spec.md). Data: 2026-10-12.
 O commit documental é próprio e antecede os dois commits abaixo. Criar
 branches/worktrees por tarefa e uma terceira branch de integração para
 reunir as entregas dependentes, conforme AGENTS; PRs apontam para staging.
-Não iniciar as branches de implementação nem instalar libs nesta etapa.
+Branches de implementação autorizadas; instalar libs após confirmar versões
+e registrar as decisões pendentes. O contrato revisado exclui schemaVersion,
+service e environment.
 
 ## Commit 1 — estrutura e integração HTTP
 

@@ -1,6 +1,6 @@
 # Logs estruturados internos
 
-Status: especificação; implementação não iniciada. Data: 2026-10-12.
+Status: implementação autorizada; código ainda não iniciado. Data: 2026-10-12.
 Base examinada: staging 258da1a. Entrega: [tarefas e commits](tasks.md).
 
 ## Objetivo e decisões confirmadas
@@ -17,7 +17,8 @@ externa; retenção e consulta futura dependem da infraestrutura de coleta.
   status/message; outros ambientes mantêm diagnóstico sanitizado existente.
   Sucesso, status, headers de negócio e fluxos de autenticação não mudam.
 - Separar estrutura/contrato/middleware e adoção nos services em dois commits.
-- Esta entrega documenta; não instala dependências nem executa implementação.
+- Implementação autorizada em 2026-10-12 após revisão do usuário. O registro
+  não contém schemaVersion, service ou environment, removidos na revisão.
 
 ## Estado atual e pontos de integração
 
@@ -41,11 +42,8 @@ biblioteca não deve ser importada diretamente por cada service.
 
 | Campo | Regra |
 | --- | --- |
-| schemaVersion | Inteiro 1, versão do contrato |
 | timestamp | Data UTC ISO 8601, gerada pelo logger |
 | level | debug, info, warn, error ou fatal |
-| service | civix-backend, preenchido centralmente |
-| environment | Ambiente da execução, preenchido centralmente |
 | event | Identificador estável em inglês, como company.created |
 | module | Área responsável, como companies, users, auth, plans, mail ou http |
 | message | Texto legível em português, sem segredos |
@@ -58,11 +56,8 @@ Exemplo ilustrativo da saída proposta, não API já implementada:
 
 ~~~json
 {
-  "schemaVersion": 1,
   "timestamp": "2026-10-12T18:30:00.000Z",
   "level": "info",
-  "service": "civix-backend",
-  "environment": "development",
   "event": "company.created",
   "module": "companies",
   "requestId": "d442d53f-9e2a-43b2-8ba0-721d3e1b21e9",
@@ -168,7 +163,8 @@ log, sem transformar o objeto retornado pelo service em contexto completo.
 
 **Aguardando resposta:** versão exata das bibliotecas, valores definitivos de
 LOG_LEVEL, limites de tamanho/profundidade dos registros e destino/retenção
-futura de coleta. Não instalar/configurar novas dependências nesta fase.
+futura de coleta. Versões/níveis/limites foram apresentados ao usuário para
+confirmação antes da instalação e da implementação da configuração.
 Destino remoto e retenção ficam para infraestrutura; não bloqueiam a saída
 JSON local, mas não prometer busca histórica antes dessa integração.
 
