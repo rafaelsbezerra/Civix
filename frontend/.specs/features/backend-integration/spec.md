@@ -1,0 +1,49 @@
+# Integração dos consumidores existentes com o backend
+
+Estado: implementação autorizada em 2026-10-12, na branch codex/frontend-backend-integration,
+criada a partir de e229843 (PR #16). Entrega para staging, dependente do PR #16.
+
+## Escopo confirmado
+
+- Adaptar os consumidores já existentes de empresas, planos, recuperação,
+  redefinição de senha e primeiro acesso ao sucesso { data, meta? } e erro
+  { status, message, ...diagnóstico fora de produção }.
+- Corrigir URLs, prefixos, codificação de parâmetros e campos de empresas
+  para os contratos efetivamente retornados pelo backend.
+- Corrigir a pré-validação do convite no backend: validar o mesmo JWT,
+  identidade/perfil, status e invite_token usados na ativação.
+- Preservar login.tsx, seus destinos e fluxos. Não criar dashboard, páginas,
+  rotas novas, cadastro de empresa no frontend ou UI nova de seleção de plano.
+- Apenas corrigir a caixa do import de ResetPassword e o link de recuperação
+  para a rota já existente. Manter Home/Sobre sob AD-002.
+- Documentar proposta de animações separadamente; não instalar bibliotecas
+  nem implementar animações nesta etapa.
+
+## Contratos e limites
+
+API de empresas/planos/usuários: /api/v1. Primeiro acesso: /api/auth.
+VITE_API_URL aponta para a origem do backend; manter compatibilidade com
+configuração anterior terminada em /api/v1 sem duplicar prefixos.
+Nenhum mock do frontend substitui falhas da API; USE_MOCK_DATA pertence ao backend.
+
+A entidade de empresa recebida mantém snake_case, incluindo
+descricao_detalhada e data_cadastro. Erros apresentam message; não depender
+de success, error string ou reason. Primeiro acesso aceita os formatos de
+token já declarados nas rotas (query e parâmetro).
+
+Login permanece incompatível com o envelope por exclusão explícita do usuário.
+PlanCard mantém seu link existente; o helper selectPlan é adaptado sem criar
+uma interface nova. /planos continua sem rota. Reenvio de convite/recuperação
+ainda exige alinhamento específico de protocolo, fora desta pré-validação.
+
+## Aceite
+
+- Catálogo, filtros, detalhe e planos leem data de respostas HTTP reais.
+- Busca utiliza /empresas/buscar e parâmetros são codificados.
+- Recuperação/redefinição e primeiro acesso utilizam a configuração de API
+  comum e exibem a mensagem pública do backend.
+- Convites válidos passam na pré-validação e ativação; tokens inválidos,
+  expirados, consumidos ou de outro perfil são rejeitados.
+- Nenhum diff em login.tsx, nenhum novo destino ou biblioteca.
+- Verificar testes de contrato/consumidores, tipagem, build e regressões,
+  distinguindo falhas históricas de problemas introduzidos.

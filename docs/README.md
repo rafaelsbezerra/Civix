@@ -46,3 +46,8 @@ verificação ou decisão ainda necessária. Quando faltar aprovação, registra
 **Aguardando resposta**. Não presumir que toda pendência é uma pergunta ainda aberta.
 Sugestões para a próxima fase não constituem contratos aprovados.
 A auditoria das specs é documental; não altera implementação, migrations ou infraestrutura.
+
+## Frontend: integração e animações
+
+- [Integração com o backend](frontend-backend.md): contratos dos consumidores existentes e limites do escopo.
+- [Plano de animações](plano-animacoes.md): mapa das entradas por página/componente e biblioteca sugerida, aguardando aprovação.
