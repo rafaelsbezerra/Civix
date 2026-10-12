@@ -41,6 +41,7 @@ altere o .env automaticamente como parte dos testes.
 | DATABASE_URL | Conexão Neon no modo real e configuração Prisma |
 | PORT | Porta backend, default 3000 |
 | JWT_SECRET | Assinatura/verificação do access token |
+| LOG_LEVEL | debug/info/warn/error/fatal; override validado do nível interno de logs |
 | JWT_INVITE_SECRET | Convite, pré-validação e ativação; código ainda tem fallback fixo |
 | JWT_RESET_SECRET | Reenvio legado; ausente do .env.example |
 | FRONTEND_URL | Links de e-mail; não controla o CORS atual |
@@ -85,7 +86,8 @@ seguidos pelo 404 global e pelo handler de erros. Admin continua desmontado.
 
 NODE_ENV exatamente production limita erros a status/message; staging, test
 e demais valores permitem stack/details/code sanitizados. requestId é opcional
-quando recebido pelo contexto, sem geração automática nesta etapa.
+quando recebido pelo contexto do serializador. O UUID criado para logs
+internos não é acrescentado ao corpo/header das respostas HTTP.
 
 ## Registros de verificação
 
@@ -129,3 +131,47 @@ redefinição. Falta de IntersectionObserver, MutationObserver ou Web Animations
 API mantém conteúdo visível. A [validação da feature](../frontend/.specs/features/entry-animations/validation.md)
 contém verificações e limitações; estes guias não representam aprovação
 automática de build completo ou dos testes históricos.
+
+
+## Logs estruturados e nível
+
+O backend usa Pino 10.4.0 e pino-http 11.0.0. NODE_ENV exatamente development
+ativa pino-pretty 13.2.0 e nível padrão debug; qualquer outro ambiente usa
+JSON bruto e nível padrão info. LOG_LEVEL permite override somente com
+debug, info, warn, error ou fatal. Valor inválido falha na configuração,
+sem selecionar silenciosamente outro nível.
+
+Cada registro JSON interno contém timestamp UTC ISO, level em texto,
+event/module/message e, quando pertinente, requestId/context/http/error.
+A saída vai ao processo, sem arquivo obrigatório, banco ou retenção remota.
+Em desenvolvimento, pretty é apenas apresentação desse registro.
+
+Stacks/causas internas são sanitizados inclusive em produção. Isso não
+muda a resposta pública, limitada a status/message em produção. Contexto
+permite IDs/operação/contagens, sem bodies, destinatários, credenciais ou SQL.
+Não há truncamento ou limite arbitrário de tamanho/profundidade por política.
+
+Falha da emissão não substitui a operação de negócio. Os registros do
+ciclo HTTP, inicialização e etapas confirmadas dos services são registrados.
+Evento de preparação de token não garante envio; aceite de provedor não
+garante entrega de e-mail. O helper delegador de mail não duplica o evento. Comandos disponíveis: npm run test:logging,
+npm run test:foundation, npm run typecheck:foundation e
+npm run typecheck:contracts no backend. Evidências ficam na
+[validação](../backend/.specs/features/structured-logs/validation.md).
+
+
+## Comando de usuário local e logs
+
+npm run mock:user:create continua solicitando os dados necessários de forma
+interativa, com prompts em stderr e stdout reservado ao logger. Em modo
+JSON, cada linha de stdout é um registro estruturado; em development vale
+a apresentação pretty configurada. Após persistir, o service emite
+mock.user.created com ID/role,
+sem imprimir objeto ou e-mail do resultado. Uma falha emite
+mock.user-command.failed na fronteira do comando, com diagnóstico sanitizado;
+readline e logger são fechados ao concluir.
+
+Não há requestId HTTP inventado para esse comando. Os prompts solicitam
+e-mail/senha, mas esses valores não fazem parte do registro estruturado.
+Logs de caixa de saída guardam tipo/modo, sem destinatário ou link de reset/
+convite. As evidências e limitações ficam na spec da feature.

@@ -6,6 +6,17 @@ merges da base Prisma 7, tipos de auth, adoção HTTP e auditoria documental.
 Checkbox marcado significa escopo implementado ou decisão confirmada,
 conforme a evidência do item. Entrega em PR não significa merge em staging.
 
+## Logs estruturados internos
+
+[Spec e contrato](features/structured-logs/spec.md) e
+[tarefas em dois commits](features/structured-logs/tasks.md). Fundação
+publicada em d1114da (codex/backend-logs-foundation). Adoção nos sete services
+e CLI implementada/verificada na worktree services, com revisão independente
+sem bloqueadores. Logs internos, sem tabela ou alteração HTTP.
+[Evidências](features/structured-logs/validation.md): 99 foundation, 17 services,
+22 da fundação de logging e dois typechecks aprovados. Commits d1114da/5258124
+publicados e reunidos no PR [#19](https://github.com/rafaelsbe/Civix/pull/19) para staging; merge pendente.
+
 ## Grupos e situação
 
 | Grupo | Implementado | Pendências reais |
@@ -50,7 +61,9 @@ Services utilizam seletores por ambiente; SQL fica nos adapters PostgreSQL.
 ## Padrões ainda em discussão
 
 Validação runtime geral, serialização de datas/IDs/null, filtros/ordenação,
-geração/propagação de requestId, logs sem segredos e configuração runtime/CI.
+rastreabilidade no contrato HTTP, coleta/retenção de logs e configuração runtime/CI.
+Contexto/UUID interno e logs HTTP sem segredos estão implementados na fundação;
+adoção nos services foi implementada e verificada separadamente.
 Sanitização, enum, handler e diagnóstico já estão implementados. Autorização
 nova e isolamento por empresa exigem escopo próprio; não ampliar o MVP.
 

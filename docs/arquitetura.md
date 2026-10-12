@@ -165,3 +165,32 @@ Login, primeiro acesso, recuperação e redefinição ficam fora do motor e sem
 navbar. Seus componentes e fluxos permanecem intactos. Detalhes da
 [feature](../frontend/.specs/features/entry-animations/spec.md) e
 [verificações](../frontend/.specs/features/entry-animations/validation.md).
+
+
+## Logs internos do backend
+
+A camada shared/logging reúne contrato tipado, adapter Pino, sanitização e
+AsyncLocalStorage. log.middleware é registrado antes do parser, gera UUID
+interno e mantém o contexto da requisição nas chamadas assíncronas. Fora de
+uma requisição ativa, getLogger utiliza o logger base, sem fabricar UUID.
+
+O ciclo HTTP produz completed ou aborted; o handler global produz failed
+com stack/causa sanitizados em todos os ambientes. O resumo da requisição
+não repete diagnóstico. Aliases em arrays usam a primeira rota registrada.
+Erro após headersSent é encaminhado e encerra a conexão sem console bruto
+do Express. Sanitização usa allowlist de contexto, remoção de
+segredos e tratamento de ciclos, sem limite arbitrário de tamanho/profundidade.
+
+O JSON interno utiliza timestamp/level/event/module/message e contexto
+permitido, sem metadados schemaVersion/service/environment. Logger trata
+falhas de emissão sem alterar negócio ou exceção original. Não acrescenta
+requestId/header às respostas HTTP nem cria tabela de logs. Os sete services
+utilizam getLogger e emitem eventos após a etapa confirmada, sem instrumentar
+repositories. Criação/atribuição/ativação distinguem persistência de envio;
+consultas rotineiras usam debug sem termo de busca ou objetos completos.
+
+mail.outbox.saved significa gravação JSON; mail.provider.accepted significa
+aceite do provedor, não entrega ao destinatário. A função delegadora de mail
+não repete o evento. Falhas são diagnosticadas no handler HTTP ou fronteira
+CLI, sem catch-log-throw nos services. Admin permanece desmontado.
+[Spec e evidências](../backend/.specs/features/structured-logs/spec.md).

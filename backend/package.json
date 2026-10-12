@@ -9,11 +9,12 @@
     "test:contracts": "node scripts/test.runner.mjs tests/contracts.test.ts",
     "typecheck:contracts": "tsc -p tsconfig.contracts.json",
     "test:users": "node scripts/test.runner.mjs tests/user.routes.test.ts",
-    "test:foundation": "node scripts/test.runner.mjs tests/contracts.test.ts tests/company.routes.test.ts tests/user.routes.test.ts tests/http.adoption.test.ts tests/local.persistence.test.ts",
+    "test:foundation": "node scripts/test.runner.mjs tests/contracts.test.ts tests/company.routes.test.ts tests/user.routes.test.ts tests/http.adoption.test.ts tests/local.persistence.test.ts tests/logging.test.ts tests/logging.http.test.ts tests/logging.services.test.ts",
     "typecheck:foundation": "tsc -p tsconfig.foundation.json",
     "test:prisma": "node --test tests/prisma.tooling.test.mjs",
     "mock:user:create": "tsx scripts/mock.user.create.ts",
-    "test:local": "node --import tsx --test tests/local.persistence.test.ts"
+    "test:local": "node --import tsx --test tests/local.persistence.test.ts",
+    "test:logging": "node scripts/test.runner.mjs tests/logging.test.ts tests/logging.http.test.ts tests/logging.services.test.ts"
   },
   "dependencies": {
     "@getbrevo/brevo": "^6.0.3",
@@ -30,6 +31,8 @@
     "helmet": "^8.3.0",
     "jsonwebtoken": "^9.0.3",
     "pg": "^8.23.0",
+    "pino": "10.4.0",
+    "pino-http": "11.0.0",
     "resend": "^6.25.0",
     "zod": "^4.4.3"
   },
@@ -49,6 +52,7 @@
     "@types/pg": "^8.23.1",
     "globals": "^17.7.0",
     "jsdom": "^29.1.1",
+    "pino-pretty": "13.2.0",
     "prisma": "7.10.0",
     "tsx": "^4.23.12",
     "typescript": "~6.0.2"

@@ -1,15 +1,22 @@
 import 'dotenv/config';
+import { getLogger } from '../src/shared/logging/log.context.js';
+import { createLogger } from '../src/shared/logging/log.logger.js';
+import type { AppLogger } from '../src/shared/logging/log.contract.js';
 import { createInterface } from 'node:readline/promises';
-import { stdin, stdout } from 'node:process';
-import { createMockUser } from '../src/services/mock.user.service.js';
-import { USE_MOCK_DATA } from '../src/shared/config/data.js';
+import { stdin, stderr } from 'node:process';
+
+let commandLogger: AppLogger | undefined;
 
 async function main(): Promise<void> {
+  commandLogger = getLogger();
+  const { USE_MOCK_DATA } = await import('../src/shared/config/data.js');
+
   if (!USE_MOCK_DATA) {
     throw new Error('Defina USE_MOCK_DATA=true antes de criar um usuário local.');
   }
 
-  const input = createInterface({ input: stdin, output: stdout });
+  const { createMockUser } = await import('../src/services/mock.user.service.js');
+  const input = createInterface({ input: stdin, output: stderr });
 
   try {
     const email = await input.question('E-mail do usuário local: ');
@@ -18,15 +25,21 @@ async function main(): Promise<void> {
     const password = role === 'empresa'
       ? await input.question('Senha (mínimo de 8 caracteres): ')
       : undefined;
-    const user = await createMockUser({ email, role, name, password });
-
-    console.log('Usuário local criado:', user);
+    await createMockUser({ email, role, name, password });
   } finally {
     input.close();
   }
 }
 
 main().catch(error => {
-  console.error(error instanceof Error ? error.message : 'Não foi possível criar o usuário local.');
+  commandLogger ??= createLogger({ level: 'info', pretty: false });
+  commandLogger.error({
+    event: 'mock.user-command.failed',
+    module: 'mock',
+    message: 'Não foi possível criar o usuário local',
+    error,
+  });
   process.exitCode = 1;
+}).finally(async () => {
+  await commandLogger?.close();
 });
