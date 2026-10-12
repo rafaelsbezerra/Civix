@@ -244,3 +244,15 @@ login/primeiro acesso/recuperação/redefinição estão integralmente intactos.
 SignSelect mantém fluxo e cooldown, com dialog, contenção/devolução de foco,
 Escape e conteúdo de fundo inert. Navbar fica abaixo desse modal.
 Verificações e limitações ficam em [validation.md](validation.md).
+
+
+## Evolução do perfil de empresa — 2026-10-12
+
+O usuário autorizou cortina azul + revelação do hero na staging, sem commit.
+A [spec específica](../company-page-transition/spec.md) substitui as entradas
+page/mount anteriores somente nos elementos do hero do perfil, usando
+motion/react. Descrição abaixo do hero e demais páginas continuam no motor
+MotionRoot. A navbar do perfil não participa das entradas, e a cortina fica
+abaixo dela. O clique inicia navegação/consulta imediatamente.
+Resultados dessa entrega estão na [validação específica](../company-page-transition/validation.md);
+os resultados históricos deste mapa não são uma nova execução de seus gates.

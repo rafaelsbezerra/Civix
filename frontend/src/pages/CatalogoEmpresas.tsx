@@ -111,8 +111,8 @@ export default function CatalogoEmpresas() {
     loadEmpresas();
   };
 
-  const handleEmpresaClick = (empresaId: string) => {
-    navigate(`/empresa/${empresaId}`);
+  const handleEmpresaClick = (empresaId: string, startedAt: number) => {
+    navigate(`/empresa/${empresaId}`, { state: { companyTransition: { startedAt } } });
   };
 
   return (
@@ -228,8 +228,8 @@ export default function CatalogoEmpresas() {
                   data-motion="item"
                   data-motion-step="50"
                   key={empresa.id}
-                  onClick={() => handleEmpresaClick(empresa.id)}
-                  className="group bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col h-full"
+                  onClick={() => handleEmpresaClick(empresa.id, Date.now())}
+                  className="group active:scale-[0.985] motion-reduce:active:scale-100 bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col h-full"
                 >
                   {/* Card Header Pattern/Color */}
                   <div className={`h-32 p-6 flex flex-col justify-between relative overflow-hidden bg-gradient-to-br ${empresa.tone === 'blue' ? 'from-blue-50 to-blue-100' :

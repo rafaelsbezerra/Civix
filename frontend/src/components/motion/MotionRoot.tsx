@@ -118,6 +118,8 @@ export function MotionRoot({ children }: PropsWithChildren) {
 
       for (const element of root!.querySelectorAll<HTMLElement>('[data-motion]')) {
         if (seen.has(element) || element.closest('[inert]')) continue
+        // A navbar permanece estática durante a abertura do perfil.
+        if (pathname.startsWith('/empresa/') && element.closest('[data-site-header]')) continue
         const preset = presets[element.dataset.motion as keyof typeof presets]
         if (!preset) continue
         if (!animate && !preference.matches && !failed) continue

@@ -121,8 +121,9 @@ registra a análise e as verificações da alteração de manifest/lockfile.
 
 ## Movimento e preferência do navegador
 
-Motion 14.1.0 pertence às dependencies do frontend e é carregado sob demanda
-por motion/mini. Não exige configuração de backend ou variável de ambiente.
+Motion 14.1.0 pertence às dependencies do frontend. O motor de entradas
+MotionRoot carrega motion/mini sob demanda; a transição do perfil usa
+motion/react, importado pelos componentes React. Não exige configuração de backend ou variável de ambiente.
 Nas páginas públicas, prefers-reduced-motion reduz as entradas e desativa
 Lenis; mudanças da preferência são acompanhadas durante a sessão.
 

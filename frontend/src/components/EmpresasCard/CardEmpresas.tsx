@@ -51,8 +51,8 @@ export default function CatalogoEmpresas() {
     }
   }, [])
 
-  const handleEmpresaClick = (id: string) => {
-    navigate(`/empresa/${id}`)
+  const handleEmpresaClick = (id: string, startedAt: number) => {
+    navigate(`/empresa/${id}`, { state: { companyTransition: { startedAt } } })
   }
 
   return (
@@ -107,8 +107,8 @@ export default function CatalogoEmpresas() {
               data-motion="item"
               data-motion-step="50"
               key={empresa.id}
-              onClick={() => handleEmpresaClick(empresa.id)}
-              className="group bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col h-full"
+              onClick={() => handleEmpresaClick(empresa.id, Date.now())}
+              className="group active:scale-[0.985] motion-reduce:active:scale-100 bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col h-full"
             >
               {/* Topo / Pattern do Card */}
               <div

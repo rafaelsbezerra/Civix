@@ -1,4 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type PropsWithChildren } from 'react';
+import { motion, type Variants } from 'motion/react';
+import { useCompanyTransition } from '@/components/motion/useCompanyTransition';
 import { useParams, useNavigate } from 'react-router-dom';
 import { fetchEmpresaById } from '@/lib/api';
 import type { Empresa } from '@/lib/api';
@@ -8,6 +10,52 @@ import { MapPin, Phone, LayoutGrid, Briefcase, ExternalLink, MessageCircle } fro
 import decorativeShape from "@/assets/civix/decorative-shape.svg";
 import heroArtwork from "@/assets/civix/hero-artwork.svg";
 
+const profileItemVariants: Variants = {
+  hidden: { opacity: 0, y: 12 },
+  static: { opacity: [1, 1], y: [0, 0], transition: { duration: 0 } },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.28, ease: [0.2, 0, 0, 1] } },
+};
+
+function CompanyHeroReveal({ children }: PropsWithChildren) {
+  const { reducedMotion, startedAt } = useCompanyTransition();
+  const [mountedAt] = useState(() => Date.now());
+  // Respostas tardias não esperam novamente o tempo da cortina.
+  const delay = !reducedMotion && startedAt !== undefined
+    ? Math.max(0, Math.min(0.22, (startedAt + 220 - mountedAt) / 1000))
+    : 0;
+
+  return (
+    <motion.div
+      data-testid="hero-surface"
+      className="relative mx-auto w-full max-w-[1600px] overflow-hidden rounded-[var(--radius-hero)] bg-[var(--color-civix-navy)]"
+      initial={reducedMotion ? false : 'hidden'}
+      animate={reducedMotion ? 'static' : 'visible'}
+      variants={{
+        hidden: { opacity: 0, y: 24 },
+        // Keyframes distintos interrompem também uma entrada que já estava em curso.
+        static: {
+          opacity: [1, 1],
+          y: [0, 0],
+          transition: { duration: 0, delayChildren: 0, staggerChildren: 0 },
+        },
+        visible: {
+          opacity: 1,
+          y: 0,
+          transition: {
+            duration: reducedMotion ? 0 : 0.42,
+            delay,
+            ease: [0.2, 0, 0, 1],
+            delayChildren: reducedMotion ? 0 : delay + 0.04,
+            staggerChildren: reducedMotion ? 0 : 0.05,
+          },
+        },
+      }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
 export default function PerfilEmpresa() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -15,7 +63,10 @@ export default function PerfilEmpresa() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const itemVariants = profileItemVariants;
+
   useEffect(() => {
+    let isMounted = true;
     const loadEmpresa = async () => {
       if (!id) {
         setError('ID da empresa não fornecido');
@@ -27,16 +78,19 @@ export default function PerfilEmpresa() {
         setLoading(true);
         setError(null);
         const data = await fetchEmpresaById(id);
-        setEmpresa(data);
+        if (isMounted) setEmpresa(data);
       } catch (err) {
-        console.error('Erro ao carregar empresa:', err);
-        setError(err instanceof Error ? err.message : 'Erro ao carregar detalhes da empresa. Tente novamente mais tarde.');
+        if (isMounted) {
+          console.error('Erro ao carregar empresa:', err);
+          setError(err instanceof Error ? err.message : 'Erro ao carregar detalhes da empresa. Tente novamente mais tarde.');
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
 
     loadEmpresa();
+    return () => { isMounted = false; };
   }, [id]);
 
   if (loading) {
@@ -76,12 +130,9 @@ export default function PerfilEmpresa() {
       <SiteHeader />
 
       <main className="flex-1">
-        {/* Profile Hero */}
+        {/* Apresentação do perfil */}
         <section className="px-4 pb-12 sm:px-8 lg:px-16">
-          <div
-            className="relative mx-auto w-full max-w-[1600px] overflow-hidden rounded-[var(--radius-hero)] bg-[var(--color-civix-navy)]"
-            data-testid="hero-surface"
-          >
+          <CompanyHeroReveal key={empresa.id}>
             <img
               aria-hidden="true"
               alt=""
@@ -111,20 +162,20 @@ export default function PerfilEmpresa() {
                   {empresa.verificado ? 'PERFIL VERIFICADO / CIVIX' : 'PERFIL / CIVIX'}
                 </p>
 
-                <h1 data-motion="page" data-motion-trigger="mount" className="max-w-[643px] break-words font-[family-name:var(--font-display)] text-[clamp(2.5rem,5vw,4rem)] font-semibold uppercase leading-[1.1] tracking-[-0.02em] lg:leading-[80px] lg:tracking-[-0.034em]">
+                <motion.h1 variants={itemVariants} className="max-w-[643px] break-words font-[family-name:var(--font-display)] text-[clamp(2.5rem,5vw,4rem)] font-semibold uppercase leading-[1.1] tracking-[-0.02em] lg:leading-[80px] lg:tracking-[-0.034em]">
                   {empresa.nome}
-                </h1>
+                </motion.h1>
 
-                <p data-motion="page" data-motion-trigger="mount" data-motion-delay="60" className="mt-2 text-xl italic text-[var(--color-civix-ivory)]/70 md:text-2xl">
+                <motion.p variants={itemVariants} className="mt-2 text-xl italic text-[var(--color-civix-ivory)]/70 md:text-2xl">
                   {empresa.categoria?.toUpperCase()}
-                </p>
+                </motion.p>
                 {empresa.descritivo ? (
-                  <p data-motion="page" data-motion-trigger="mount" data-motion-delay="60" className="mt-5 max-w-2xl text-lg leading-relaxed text-[var(--color-civix-ivory)]/90">
+                  <motion.p variants={itemVariants} className="mt-5 max-w-2xl text-lg leading-relaxed text-[var(--color-civix-ivory)]/90">
                     {empresa.descritivo}
-                  </p>
+                  </motion.p>
                 ) : null}
 
-                <div data-motion="page" data-motion-trigger="mount" data-motion-delay="120" className="mt-10 flex flex-wrap gap-4">
+                <motion.div variants={itemVariants} className="mt-10 flex flex-wrap gap-4">
                   {empresa.website ? (
                     <a
                       className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-[var(--color-civix-ivory)]/30 bg-transparent px-6 py-3 font-semibold text-[var(--color-civix-ivory)] transition-colors hover:border-[var(--color-civix-ivory)] hover:bg-white/10"
@@ -147,10 +198,10 @@ export default function PerfilEmpresa() {
                       WhatsApp
                     </a>
                   ) : null}
-                </div>
+                </motion.div>
               </div>
 
-              <div data-motion="page" data-motion-trigger="mount" data-motion-delay="120" className="grid h-fit w-full shrink-0 grid-cols-1 gap-4 sm:grid-cols-2 lg:w-[500px]">
+              <motion.div variants={itemVariants} className="grid h-fit w-full shrink-0 grid-cols-1 gap-4 sm:grid-cols-2 lg:w-[500px]">
                 <div className="rounded-xl border border-[#425466] bg-[#faf9f6] p-5 text-[var(--color-civix-navy)]">
                   <div className="mb-3 flex size-10 items-center justify-center rounded-lg bg-[#f3e6c9]">
                     <MapPin aria-hidden="true" className="text-[var(--color-civix-gold)]" size={20} />
@@ -182,12 +233,12 @@ export default function PerfilEmpresa() {
                   <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-[#5f6b75]">Porte</p>
                   <p className="text-base font-medium capitalize">{empresa.tamanho}</p>
                 </div>
-              </div>
+              </motion.div>
             </div>
-          </div>
+          </CompanyHeroReveal>
         </section>
 
-        {/* Content Section */}
+        {/* Descrição da empresa */}
         <section className="py-20 px-6 sm:px-10 lg:px-16 xl:px-32 max-w-[1728px] mx-auto -mt-10 relative z-20">
           <div data-motion="section" className="bg-white rounded-2xl shadow-xl p-8 md:p-12 border border-gray-100 max-w-5xl">
             <p className="text-sm font-bold text-gray-400 tracking-wider mb-2">SOBRE A EMPRESA</p>
