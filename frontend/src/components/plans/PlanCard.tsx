@@ -22,6 +22,8 @@ export function PlanCard({ plan }: PlanCardProps) {
 
   return (
     <article
+      data-motion="item"
+      data-motion-step="60"
       aria-labelledby={`plan-${plan.id}-title`}
       className={`relative flex h-full flex-col border p-6 sm:p-8 ${
         isFeatured

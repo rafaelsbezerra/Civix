@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Building2, User, ArrowRight, X } from "lucide-react";
 
@@ -10,51 +10,111 @@ interface RoleModalProps {
 }
 
 export default function RoleSelectionModal({ onSelectRole }: RoleModalProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(() => {
+    try {
+      const savedRole = localStorage.getItem("@civix:user_role");
+      const expiryTime = localStorage.getItem("@civix:modal_dismissed_until");
+      return !savedRole && (!expiryTime || Date.now() > Number(expiryTime));
+    } catch {
+      return true;
+    }
+  });
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const savedRole = localStorage.getItem("@civix:user_role");
-    const expiryTime = localStorage.getItem("@civix:modal_dismissed_until");
-    const now = Date.now();
-
-    // Se já tem papel salvo, não abre.
-    // Se marcou para ignorar E o tempo ainda não expirou, também não abre.
-    if (!savedRole) {
-      if (!expiryTime || now > Number(expiryTime)) {
-        setIsOpen(true);
-      }
-    }
-  }, []);
-
   const handleSelectRole = (role: "empresa" | "cliente") => {
-    localStorage.setItem("@civix:user_role", role);
-    localStorage.removeItem("@civix:modal_dismissed_until"); // Limpa o timer
+    try {
+      localStorage.setItem("@civix:user_role", role);
+      localStorage.removeItem("@civix:modal_dismissed_until");
+    } catch {
+      // A navegação continua quando o armazenamento do navegador está indisponível.
+    }
     if (onSelectRole) onSelectRole(role);
     setIsOpen(false);
     
     navigate("/login");
   };
 
-  const handleCloseWithTimer = () => {
-    // Define a hora exata em que o modal voltará a ser exibido
-    const expireAt = Date.now() + MODAL_COOLDOWN_MS;
-    localStorage.setItem("@civix:modal_dismissed_until", expireAt.toString());
+  const handleCloseWithTimer = useCallback(() => {
+    try {
+      const expireAt = Date.now() + MODAL_COOLDOWN_MS;
+      localStorage.setItem("@civix:modal_dismissed_until", expireAt.toString());
+    } catch {
+      // Fechar o diálogo também deve funcionar sem localStorage.
+    }
     setIsOpen(false);
-  };
+  }, []);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+
+    const previousFocus = document.activeElement;
+    const previousOverflow = document.body.style.overflow;
+    const overlay = dialog.parentElement;
+    const siblings = [...(overlay?.parentElement?.children ?? [])]
+      .filter((element): element is HTMLElement => element instanceof HTMLElement && element !== overlay)
+      .map(element => ({ element, inert: element.inert }));
+
+    document.body.style.overflow = "hidden";
+    siblings.forEach(({ element }) => { element.inert = true; });
+    closeButtonRef.current?.focus({ preventScroll: true });
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        handleCloseWithTimer();
+        return;
+      }
+      if (event.key !== "Tab") return;
+
+      const controls = [...dialog!.querySelectorAll<HTMLElement>('button:not(:disabled), a[href], input:not(:disabled), [tabindex="0"]')];
+      const first = controls[0];
+      const last = controls[controls.length - 1];
+      if (!first || !last) return;
+      if (event.shiftKey && (document.activeElement === first || !dialog!.contains(document.activeElement))) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && (document.activeElement === last || !dialog!.contains(document.activeElement))) {
+        event.preventDefault();
+        first.focus();
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+      siblings.forEach(({ element, inert }) => { element.inert = inert; });
+      if (previousFocus instanceof HTMLElement && previousFocus.isConnected) previousFocus.focus({ preventScroll: true });
+    };
+  }, [isOpen, handleCloseWithTimer]);
 
   if (!isOpen) return null;
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fadeIn"
+      role="presentation"
+      data-lenis-prevent=""
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
       onClick={handleCloseWithTimer}
     >
-      <div 
+      <div aria-hidden="true" data-motion="overlay" data-motion-trigger="mount" className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="role-dialog-title"
+        aria-describedby="role-dialog-description"
+        data-motion="panel"
+        data-motion-trigger="mount"
         className="w-full max-w-md bg-[#faf9f7] rounded-xl p-6 shadow-2xl border border-gray-200 relative"
         onClick={(e) => e.stopPropagation()}
       >
         <button
+          ref={closeButtonRef}
           type="button"
           onClick={handleCloseWithTimer}
           className="absolute top-4 right-4 p-1 rounded-lg text-[#737373] hover:text-[#101010] hover:bg-gray-200/60 transition"
@@ -63,10 +123,10 @@ export default function RoleSelectionModal({ onSelectRole }: RoleModalProps) {
           <X className="w-5 h-5" />
         </button>
 
-        <h2 className="text-xl font-bold text-[#071b2b] text-center mb-2 pr-6 pl-6">
+        <h2 id="role-dialog-title" className="text-xl font-bold text-[#071b2b] text-center mb-2 pr-6 pl-6">
           Bem-vindo ao sistema!
         </h2>
-        <p className="text-sm text-[#626262] text-center mb-6">
+        <p id="role-dialog-description" className="text-sm text-[#626262] text-center mb-6">
           Escolha como deseja se identificar para entrar ou continue navegando.
         </p>
 

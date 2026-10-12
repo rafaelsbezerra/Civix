@@ -1,4 +1,5 @@
 import React from 'react';
+import { MotionRoot } from '@/components/motion/MotionRoot';
 import { Routes, Route } from 'react-router-dom';
 import HomePage from '@/pages/Home';
 import Login from '@/pages/login';
@@ -14,7 +15,7 @@ import { PrivacyPolicy } from '@/pages/PrivacityPolicy';
 import HelperCenter from '@/pages/HelperCenter';
 
 export const AppRoutes: React.FC = () => (
-    <>
+    <MotionRoot>
         <PublicSmoothScroll />
         <Routes>
             <Route path='/' element={<HomePage />} />
@@ -31,5 +32,5 @@ export const AppRoutes: React.FC = () => (
 
             <Route path='*' element={<NotFound />} />
         </Routes>
-    </>
+    </MotionRoot>
 );

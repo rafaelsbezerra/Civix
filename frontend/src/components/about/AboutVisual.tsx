@@ -15,6 +15,7 @@ export function AboutVisual() {
         alt=""
         className="absolute -bottom-12 -left-20 w-[280px] rotate-[145.64deg] sm:-bottom-20 sm:-left-24 sm:w-[390px] 2xl:bottom-auto 2xl:left-[-81px] 2xl:top-[382px] 2xl:w-[432px]"
         data-testid="about-background-shape"
+        data-motion="item"
         height="432"
         src={backgroundShape}
         width="432"
@@ -29,6 +30,8 @@ export function AboutVisual() {
           alt=""
           className="absolute left-[6.7%] top-[2.2%] h-[86.3%] w-[92.6%] rotate-[1.84deg] object-fill"
           data-testid="about-macbook"
+          data-motion="item"
+          data-motion-delay="60"
           src={macbookSilver}
         />
       </div>
@@ -38,6 +41,8 @@ export function AboutVisual() {
         alt=""
         className="absolute right-2 top-2 size-[70px] sm:right-0 sm:top-5 sm:size-[90px] 2xl:left-[672px] 2xl:right-auto 2xl:top-[289px] 2xl:size-[104px]"
         data-testid="about-scribble"
+        data-motion="item"
+        data-motion-delay="120"
         height="104"
         src={emphasisScribble}
         width="104"

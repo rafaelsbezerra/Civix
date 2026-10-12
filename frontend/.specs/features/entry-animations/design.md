@@ -1,24 +1,28 @@
 # Plano de animações de entrada
 
-**Estado:** plano atualizado para leitura; requisitos de navbar aprovados
-para execução futura. Somente documentação nesta etapa.
+**Estado:** plano autorizado para implementação, com Motion 14.1.0 fixado.
+Código, instalação e verificação executados no escopo público; limites de
+runtime/gates registrados em validation.md. Telas de acesso fora do escopo.
 **Mapeamento:** 2026-10-12, sobre o frontend derivado do [PR #16](https://github.com/rafaelsbe/Civix/pull/16).
-A integração de consumidores tem spec própria. Este mapa não comprova
-execução das animações. Nenhuma navbar será alterada agora. Instalação e
-implementação aguardam leitura do plano e autorização posterior.
+A integração de consumidores tem spec própria. O usuário autorizou agora
+instalação e execução deste mapa; login e todos os formulários de acesso
+permanecem excluídos integralmente.
+Esse registro de autorização não comprova a feature entregue.
 
-## Objetivo e estado observado
+## Direção aprovada e inventário inicial
 
 Sugerimos entradas curtas e discretas para orientar a leitura: primeiro o título,
 depois o conteúdo e a ação. A intenção é transmitir clareza e confiança.
 Não haverá bloqueio de navegação, de formulários ou de requisições para aguardar
 animações. Preservar a composição de conteúdo, exceto ajustes necessários
-da navbar fixa e sua unificação após autorização de execução. Não construir dashboard.
+da navbar fixa e sua unificação aprovadas. Não construir dashboard.
 
 O site já tem transições de hover/menu, spinners e uma onda CSS no login.
-Não há um sistema comum de entradas de página e de seções na viewport.
-`lenis` e `tw-animate-css` estão instalados; Motion e GSAP não constam no
-[manifest do frontend](../../../package.json).
+O inventário inicial não tinha um sistema comum de entradas; a implementação
+atual usa MotionRoot, descrito ao final deste mapa.
+`lenis` e `tw-animate-css` já constam no
+[manifest do frontend](../../../package.json). A instalação autorizada
+acrescenta Motion 14.1.0; GSAP não será instalado.
 
 O inventário abaixo distingue rotas de seções. A animação de cada seção só se
 aplica onde o componente é realmente renderizado.
@@ -35,8 +39,8 @@ aplica onde o componente é realmente renderizado.
 | `/primeiro-acesso` e `/primeiro-acesso/:token` | [FirstAccess](../../../src/pages/FirstAccess.tsx): validação, formulário ou convite indisponível, sucesso | Mesmo componente; contratos de token tratados na integração |
 | `/esqueci-senha` | [ForgotPassword](../../../src/pages/ForgotPassword.tsx): formulário e confirmação | Página montada |
 | `/redefinir-senha` | [ResetPassword](../../../src/pages/ResetPassword.tsx): link inválido, formulário e sucesso | Página montada |
-| `/termos-de-uso` | [TermsOfServices](../../../src/pages/TermsOfServices.tsx): header próprio, documento longo e footer próprio | Página montada |
-| `/politica-de-privacidade` | [PrivacityPolicy](../../../src/pages/PrivacityPolicy.tsx): header próprio, documento longo e footer próprio | Página montada |
+| `/termos-de-uso` | [TermsOfServices](../../../src/pages/TermsOfServices.tsx): navbar compartilhada, documento longo e footer existente | Página montada |
+| `/politica-de-privacidade` | [PrivacityPolicy](../../../src/pages/PrivacityPolicy.tsx): navbar compartilhada, documento longo e footer existente | Página montada |
 | `/central-de-ajuda` | [HelperCenter](../../../src/pages/HelperCenter.tsx): hero, categorias, artigos/accordion, suporte e footer próprio | Página montada; não implica existência de central de suporte no backend |
 | `*` | [PageError](../../../src/pages/PageError.tsx): 404, ilustração, retorno e suporte | Fallback para destinos sem rota |
 
@@ -46,17 +50,18 @@ isolada. Referências a `dashboard.png` em teste/comentário não representam um
 painel funcional. As divergências históricas de Home/Sobre seguem
 [AD-002](../../STATE.md), sem autorizar retorno ao layout anterior.
 
-## Padrão sugerido
+## Presets do mapa
 
-Os valores abaixo são uma proposta, não contratos aprovados.
+Presets do mapa autorizado; verificar comportamento real antes do aceite.
 
-| Preset | Uso | Propriedades e duração |
+| Preset implementado | Uso | Propriedades e duração |
 | --- | --- | --- |
-| `page-enter` | Títulos e texto inicial | `opacity: 0 → 1`, `translateY: 16 → 0 px`, 420 ms |
-| `section-enter` | Seção na primeira entrada na viewport | `opacity: 0 → 1`, `translateY: 16 → 0 px`, 320 ms |
-| `item-enter` | Card/grupo dentro de seção | `opacity: 0 → 1`, `translateY: 12 → 0 px`, 280 ms |
-| `feedback-enter` | Estado recebido da API | `opacity: 0 → 1`, `translateY: 4 → 0 px`, 180 ms, sem atraso |
-| `panel-enter` | Menu/modal | `opacity: 0 → 1`, `translateY: 8 → 0 px`, 220 ms; saída 140 ms |
+| `page-enter` | Títulos e texto inicial | `opacity: 0 → valor CSS`, `translate: y CSS + 16 → y CSS px`, 420 ms |
+| `section-enter` | Seção na primeira entrada na viewport | `opacity: 0 → valor CSS`, `translate: y CSS + 16 → y CSS px`, 320 ms |
+| `item-enter` | Card/grupo dentro de seção | `opacity: 0 → valor CSS`, `translate: y CSS + 12 → y CSS px`, 280 ms |
+| `feedback-enter` | Estado recebido da API | `opacity: 75% → valor CSS`, `translate: y CSS + 4 → y CSS px`, 180 ms, sem atraso |
+| `panel-enter` | Menu/modal | `opacity: 0 → valor CSS`, `translate: y CSS + 8 → y CSS px`, 220 ms; fechamento sem aguardar saída |
+| overlay | Fundo do modal | opacity: 0 → valor CSS, sem deslocamento, 140 ms |
 
 Usar `cubic-bezier(0.2, 0, 0, 1)` nas entradas. Para saídas curtas, sugerimos
 `cubic-bezier(0.3, 0, 1, 1)`. Sem bounce, overshoot, rotação de texto ou letras
@@ -75,18 +80,24 @@ acompanham e as decorações entram uma única vez em plano secundário.
 
 ## Mapa de aplicação
 
+A tabela aplica os presets comuns reais: page 420 ms/16 px, section
+320 ms/16 px, item 280 ms/12 px, feedback 180 ms/4 px, panel 220 ms/8 px e
+overlay 140 ms/0 px. Nomes -enter correspondem aos atributos page/section/
+item/feedback/panel no código; não há overrides de duração por alvo.
+No mobile o deslocamento fica em até 8 px e stagger por grupo é removido.
+
 Na coluna “ordem”, a seta descreve prioridade de leitura; componentes continuam
 montados e utilizáveis durante a animação. Aplicar um wrapper sem substituir as
 transforms de posicionamento, rotação ou hover já usadas no elemento.
 
 | Local e alvo | Gatilho e ordem sugerida | Entrada e limites |
 | --- | --- | --- |
-| SiteHeader compartilhado: logo, navegação e ações | Mount: logo → grupo de navegação/ações | 220 ms, `y=6`; não animar cada link nem repetir em re-render. Não ocultar o header inteiro enquanto a página espera dados |
+| SiteHeader compartilhado: logo, navegação e ações | Mount: logo → grupo de navegação/ações | `item-enter`, navegação com 60 ms de atraso; não animar cada link nem repetir em re-render. Não ocultar o header inteiro enquanto a página espera dados |
 | Menu móvel do SiteHeader | Abrir/fechar por interação | `panel-enter`; lista entra como um grupo. Escape e devolução de foco continuam imediatos; não animar altura da página |
-| Home/HeroSection: título, parágrafo e CTAs | Mount: título → parágrafo → CTAs | `page-enter`, atrasos 0/60/120 ms. Fundo hero já visível; forma decorativa pode entrar 320 ms com `y=8`, sem loop/parallax |
+| Home/HeroSection: título, parágrafo e CTAs | Mount: título → parágrafo → CTAs | `page-enter`, atrasos 0/60/120 ms. Fundo hero já visível; forma decorativa usa `item-enter`, sem loop/parallax |
 | HeroSection/SearchForm | Mount, independente dos dados | `item-enter`, no máximo 120 ms de atraso. Animar o card como grupo, sem mover inputs individuais ou atrasar a possibilidade de pesquisar |
 | Home/About: marcador, título e apresentação | Viewport: marcador/título → parágrafo | `section-enter`, 60 ms entre grupos; respeitar `#sobre` e leitura ao navegar diretamente para a âncora |
-| AboutVisual: notebook, forma e rabisco | Viewport do próprio visual | Notebook `item-enter` 320 ms com `y=12`; decoração acompanha sem loop. Preservar transforms/rotações e crop responsivo existentes |
+| AboutVisual: notebook, forma e rabisco | Viewport do próprio visual | Notebook `item-enter`; decoração acompanha sem loop. Preservar transforms/rotações e crop responsivo existentes |
 | AboutPrinciples: Valor, Visão e Missão | Viewport de cada grupo | `item-enter` com 60 ms por item visível. Divisórias acompanham o artigo; não animar largura ou posição de layout |
 | Home/CardEmpresas: cabeçalho e “Ver todas” | Viewport: cabeçalho e ação juntos | `section-enter`; título não depende da resposta da API |
 | Home/CardEmpresas: até seis cards | API pronta + viewport de cada card | `item-enter`, 50 ms de intervalo, delay máximo 200 ms. Preservar ordem da API e usar o ID como identidade |
@@ -100,16 +111,15 @@ transforms de posicionamento, rotação ou hover já usadas no elemento.
 | Catálogo: hero e formulário de busca | Mount: título → descrição; busca independente | Reutilizar `page-enter` e entrada de SearchForm, sem repetir hero a cada filtro |
 | Catálogo: contador e filtros | Mount/viewport; atualizações da API | `section-enter` uma vez; novo total aparece imediatamente e recebe anúncio acessível sem animar dígitos |
 | Catálogo: resultado por card | API pronta + viewport; nova busca confirma nova lista | `item-enter`, 40–50 ms por grupo visível, delay máximo 200 ms. Não executar animação de saída que deixe resultados antigos clicáveis durante uma nova busca |
-| Perfil: nome, categoria, descritivo e contatos/informações | API pronta: nome → categoria/texto → grupo de contatos | `page-enter` 320 ms, 60 ms entre grupos. Links e informações aparecem juntos; não repetir quando muda um campo ou estado de hover |
+| Perfil: nome, categoria, descritivo e contatos/informações | API pronta: nome → categoria/texto → grupo de contatos | `page-enter`, 60 ms entre grupos. Links e informações aparecem juntos; não repetir quando muda um campo ou estado de hover |
 | Perfil: descrição detalhada e retorno ao catálogo | Viewport | `section-enter`; texto entra como um bloco e retorno fica disponível. Sem revelação linha a linha |
 | Plans: título e apresentação | Mount, apenas se o registro da rota for aprovado em etapa posterior | Reutilizar `page-enter`; cards de todos os planos seguem os mesmos presets/estados da PlansSection |
-| Login: título/papéis e formulário | Mount: cabeçalho → formulário como grupo | `page-enter` 280 ms, atraso máximo 60 ms; não animar campos individualmente nem repetir ao trocar papel |
-| Login: painel decorativo/AnimatedWave | Mount no desktop | Painel `item-enter` 320 ms. O loop atual só permanece com preferência de movimento; desativar a onda em reduced motion e fora da viewport. Não criar outro loop |
-| Primeiro acesso: validar → formulário/convite indisponível → sucesso | Cada resposta real da API | Card `item-enter` ao chegar conteúdo; alertas e sucesso `feedback-enter`, sem atraso. Não modificar tempo de redirecionamento nem esconder as regras de senha |
-| Recuperação e redefinição: logo/formulário → confirmação/link inválido | Mount e resultado da submissão | Formulário como grupo `item-enter`; retorno e erro `feedback-enter`. Preservar valores/autocomplete, foco e nomes dos inputs |
+| Login: tela completa e AnimatedWave existente | Excluído | Não adicionar animações, wrappers, navbar nem alterar login.tsx. Preservar integralmente a implementação atual |
+| Primeiro acesso: página e todos os estados | Fora do escopo | FirstAccess.tsx intacto; sem nova animação, navbar, atributos ou alteração de fluxo |
+| Recuperação e redefinição: páginas e todos os estados | Fora do escopo | ForgotPassword.tsx e ResetPassword.tsx intactos, sem nova animação/navbar ou mudança de fluxo |
 | Central de ajuda: hero, quatro categorias, artigos e suporte | Hero no mount; blocos em viewport | `page-enter` no hero; categorias `item-enter` com 50 ms; artigos/suporte `section-enter`. Destinos de suporte continuam conforme implementação, sem inventar chat funcional |
-| Termos e privacidade: header próprio e cabeçalho do documento | Mount | `item-enter` 180 ms, `y=4`. Corpo legal, seções e footer visíveis imediatamente, sem cascata, bloqueio de leitura ou animação de seleção de texto |
-| 404: título/mensagem, retorno, ilustração e suporte | Mount: texto/ações juntos → ilustração | `page-enter` 280 ms; ilustração 320 ms com `y=8`, preservando rotação. Suporte estático; sem loop ou contagem animada de “404” |
+| Termos e privacidade: navbar compartilhada e cabeçalho do documento | Mount | `item-enter` comum. Corpo legal, seções e footer visíveis imediatamente, sem cascata, bloqueio de leitura ou animação de seleção de texto |
+| 404: título/mensagem, retorno, ilustração e suporte | Mount: texto/ações juntos → ilustração | `page-enter`; ilustração `item-enter` com 60 ms de atraso, preservando rotação. Suporte estático; sem loop ou contagem animada de “404” |
 | Navegação entre páginas | Nova página entra no mount | Não aguardar saída da anterior. Navegação, scroll/foco e hash são controlados pelo router; mudança de hash não remonta animações nem apaga conteúdo |
 
 ## API, acessibilidade e desempenho
@@ -123,7 +133,7 @@ A entrada não cria novas requisições e não muda validações do backend.
 | Sucesso com dados | Animar apenas os itens reais, com IDs estáveis; não substituir resultados por mocks do frontend |
 | Vazio | Mensagem e ação `feedback-enter`, sem atraso; não mostrar grade fantasma como resultado |
 | Erro | `role=alert`, mensagem imediatamente legível, sem shake. Usar mensagem do contrato, sem renderizar stack/details em tela |
-| Sucesso de formulário | Anunciar resultado, preservar retorno/foco e não atrasar redirecionamento ou limpar inputs por causa do movimento |
+| Formulários de acesso | Fora do escopo: estados, foco, redirecionamento e componentes atuais ficam intactos |
 
 `prefers-reduced-motion: reduce` desliga translate, scale, stagger, loops e scroll
 suavizado; o conteúdo entra imediatamente, sem ocultação inicial. Detectar mudanças
@@ -142,20 +152,19 @@ Mode. Conteúdo permanece visível se a biblioteca não carregar ou se um observ
 não existir. Não aplicar `will-change` permanente em toda a grade.
 
 [PublicSmoothScroll](../../../src/components/layout/PublicSmoothScroll.tsx)
-atualmente cria Lenis fora de `/login` e não verifica reduced motion. Sugerimos
-adaptar esse comportamento na futura implementação de movimento. Lenis cuida da
+mantém Lenis fora de /login e agora acompanha reduced motion, destruindo/
+recriando sua instância conforme a preferência. Lenis cuida da
 rolagem; não substitui a biblioteca de entradas. Usar o viewport normal para
 revelações e não criar um segundo smooth scroll. A
 [documentação do Lenis](https://github.com/darkroomengineering/lenis) descreve a
 sincronização com ScrollTrigger caso GSAP seja escolhido futuramente; não adotar
 esse segundo ticker junto ao `autoRaf` existente sem reconfiguração e cleanup.
 
-## Biblioteca recomendada
+## Biblioteca autorizada
 
-**Sugerimos Motion for React, pacote `motion`, combinado com CSS para hover/foco.**
-Motion continua como proposta. Instalação e execução aguardam leitura do
-plano atualizado e autorização posterior. Não instalar GSAP junto por conta
-desta recomendação.
+**Motion for React, pacote `motion` 14.1.0, autorizado para instalação e uso.**
+Combinar com CSS existente de hover/foco. Fixar a versão; não instalar GSAP.
+A comparação abaixo permanece como registro das alternativas avaliadas.
 
 | Opção | Quando usar no Civix | Consideração |
 | --- | --- | --- |
@@ -174,33 +183,33 @@ GSAP dispõe de [timelines](https://gsap.com/docs/v3/GSAP/Timeline/) e do
 [hook oficial para React](https://gsap.com/resources/React/) com cleanup.
 A alternativa sem biblioteca pode usar a
 [IntersectionObserver API](https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API).
-Fontes primárias consultadas em 2026-10-12; recomendações não são aprovação.
+Fontes primárias consultadas em 2026-10-12; a autorização vigente escolheu Motion.
 
-## Ordem de execução proposta
+## Ordem de execução
 
-1. Ler este plano atualizado e autorizar uma etapa de execução; nenhuma
-   alteração de navbar ou instalação acontece antes disso.
+1. Registrar a autorização vigente e instalar Motion 14.1.0 sem alterar login.
 2. Definir presets reutilizáveis, fallback visível e reduced motion/Lenis.
 3. Validar Home/hero, About, empresas e planos como primeiro conjunto.
-4. Aplicar os mesmos presets a catálogo, perfil e autenticação/feedback.
+4. Aplicar presets a catálogo, perfil e feedback público; telas de acesso excluídas.
 5. Aplicar movimentos discretos a ajuda, documentos legais e 404.
 6. Validar teclado, diálogos, animação com dados tardios, preferência alterada,
    navegação, Strict Mode, viewports e desempenho; atualizar esta documentação.
 
 A [spec](spec.md) e suas
 [tarefas](tasks.md) registram os
-critérios e os pontos de aprovação. Nesta entrega verificamos código, rotas,
-componentes, manifest e fontes oficiais. Animações, capturas comparativas,
-Core Web Vitals e medições de bundle ainda não foram executadas.
+critérios e verificações. Código e testes direcionados estão implementados;
+evidências de navegador, capturas e bundle estão em
+[validation.md](validation.md). Não afirmar Core Web Vitals/CLS medidos ou
+preferência nativa de movimento executada no navegador.
 
-## Navbar: plano aprovado para execução futura
+## Navbar: comportamento implementado
 
 A navbar unificada deve atender Home, catálogo, perfil, ajuda, termos,
 privacidade e 404. Login e formulários de acesso permanecem preservados.
-Implementação e instalação de biblioteca aguardam leitura e autorização
-posteriores; não executar um núcleo separado nesta etapa documental.
+Implementação e instalação realizadas nesta etapa. Login e formulários de
+acesso são excluídos do motor e preservados integralmente.
 
-| Requisito | Comportamento futuro |
+| Requisito | Comportamento aprovado |
 | --- | --- |
 | Posicionamento | Fixa no topo durante scroll, com espaço de 106 px preservado |
 | Aparência | Fundo claro após rolagem, coerente com a UI atual |
@@ -214,4 +223,24 @@ posteriores; não executar um núcleo separado nesta etapa documental.
 Limite atual preservado: não existe ID de seção contato correspondente a
 /#contato. O plano não autoriza criar esse bloco ou corrigir o destino.
 Não expor /planos como página independente; Planos navega para a seção da Home.
-Motion permanece proposta de biblioteca, sem instalação autorizada nesta etapa.
+Motion 14.1.0 instalado; verificações e limites registrados em validation.md.
+
+
+## Motor implementado
+
+MotionRoot monta um contêiner sem caixa de layout (display: contents) e usa
+atributos data-motion com presets page/section/item/feedback/panel/overlay.
+motion/mini é importado dinamicamente; a entrada altera opacity e translate,
+preservando transform/rotate existentes. Observação da viewport dispara uma
+vez por elemento, com atraso limitado por grupo; MutationObserver incorpora
+dados tardios e blocos que deixam de estar inert.
+
+Sem biblioteca, IntersectionObserver, MutationObserver ou Web Animations
+API, o conteúdo conserva sua visibilidade. Foco revela/cancela entradas
+imediatamente; reduced motion e cleanup restauram os valores originais.
+O motor não atua em nenhuma rota de acesso; os quatro componentes de
+login/primeiro acesso/recuperação/redefinição estão integralmente intactos.
+
+SignSelect mantém fluxo e cooldown, com dialog, contenção/devolução de foco,
+Escape e conteúdo de fundo inert. Navbar fica abaixo desse modal.
+Verificações e limitações ficam em [validation.md](validation.md).

@@ -32,9 +32,9 @@ retorno ao layout antigo. Decisões de navbar e animações estão na
 [spec existente](../features/entry-animations/spec.md).
 
 
-## Plano de navbar — requisitos confirmados
+## Histórico do plano de navbar — etapa documental anterior
 
-Nesta etapa, somente documentação para leitura do usuário. Navbar fixa,
+Na etapa documental anterior, somente documentação para leitura do usuário. Navbar fixa,
 106 px, fundo claro após scroll, seção ativa desktop/mobile, compensação de
 âncoras e sobreposição abaixo do modal são requisitos futuros aprovados.
 Unificar navbar nas páginas públicas, incluindo ajuda/termos/privacidade/404;
@@ -45,3 +45,16 @@ sem novo bloco/ID; sua âncora ausente é um limite preservado.
 Motion permanece proposta. Instalação e implementação, inclusive navbar,
 aguardam leitura do [plano atualizado](../features/entry-animations/design.md)
 e autorização posterior. Nenhuma dessas alterações está implementada agora.
+
+
+## Execução autorizada — 2026-10-12
+
+A autorização posterior aprovou Motion 14.1.0 e implementação do mapa
+público, incluindo navbar compartilhada. Código e pin implementados na
+branch codex/frontend-entry-animations, base staging da92a07.
+
+Login, FirstAccess, ForgotPassword e ResetPassword ficam excluídos
+integralmente; A5 fora do escopo. Contato continua como está, sem novo ID.
+AD-002 permanece para outras divergências históricas. Ver
+[spec](../features/entry-animations/spec.md) e
+[validação](../features/entry-animations/validation.md). Sem commit nesta etapa.

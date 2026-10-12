@@ -52,6 +52,9 @@ export function SearchForm({ initialValues, onSubmit, onSearch }: SearchFormProp
 
   return (
     <form
+      data-motion="item"
+      data-motion-trigger="mount"
+      data-motion-delay="120"
       aria-label="Pesquisa de serviços"
       className="grid w-full grid-cols-1 items-end gap-5 md:grid-cols-2 lg:grid-cols-[repeat(3,minmax(0,1fr))_auto] lg:gap-4 xl:gap-6"
       onSubmit={submitSearch}

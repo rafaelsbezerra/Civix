@@ -58,7 +58,7 @@ export default function CatalogoEmpresas() {
   return (
     <section className="py-16 px-6 sm:px-10 lg:px-16 xl:px-32 max-w-[1728px] mx-auto" id="empresas">
       {/* Cabeçalho da Seção */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 border-b border-gray-200 pb-6 gap-4">
+      <div data-motion="section" className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 border-b border-gray-200 pb-6 gap-4">
         <div>
           <p className="font-[family-name:var(--font-display)] text-base font-medium leading-normal text-[var(--color-civix-navy)]">
             <span className="text-[var(--color-civix-gold-accessible)]">//</span>{' '}
@@ -75,22 +75,22 @@ export default function CatalogoEmpresas() {
 
       {/* Estado de Carregamento */}
       {loading && (
-        <div className="flex justify-center items-center py-20 text-gray-500 gap-2">
-          <Loader2 className="animate-spin w-6 h-6 text-[var(--color-civix-navy)]" />
+        <div role="status" className="flex justify-center items-center py-20 text-gray-500 gap-2">
+          <Loader2 className="animate-spin motion-reduce:animate-none w-6 h-6 text-[var(--color-civix-navy)]" />
           <span>Carregando empresas...</span>
         </div>
       )}
 
       {/* Estado de Erro */}
       {error && (
-        <div className="p-6 rounded-lg bg-red-50 text-red-600 font-medium text-center my-8 border border-red-200">
+        <div role="alert" data-motion="feedback" data-motion-trigger="mount" className="p-6 rounded-lg bg-red-50 text-red-600 font-medium text-center my-8 border border-red-200">
           {error}
         </div>
       )}
 
       {/* Estado Sem Registros */}
       {!loading && !error && empresas.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-16 text-center">
+        <div role="status" data-motion="feedback" data-motion-trigger="mount" className="flex flex-col items-center justify-center py-16 text-center">
           <SearchX className="w-16 h-16 text-gray-300 mb-4" />
           <h3 className="text-xl font-semibold text-gray-700 mb-2">Nenhuma empresa encontrada</h3>
           <p className="text-gray-500 max-w-md">
@@ -104,6 +104,8 @@ export default function CatalogoEmpresas() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {empresas.map((empresa) => (
             <article
+              data-motion="item"
+              data-motion-step="50"
               key={empresa.id}
               onClick={() => handleEmpresaClick(empresa.id)}
               className="group bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col h-full"

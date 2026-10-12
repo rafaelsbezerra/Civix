@@ -13,7 +13,7 @@ export function PlansSection() {
       id="planos"
     >
       <div className="mx-auto max-w-[1200px]">
-        <div className="mb-10 max-w-2xl">
+        <div data-motion="section" className="mb-10 max-w-2xl">
           <p className="font-[family-name:var(--font-display)] text-base font-medium text-[var(--color-civix-gold-accessible)]">
             // Planos Civix
           </p>
@@ -33,7 +33,7 @@ export function PlansSection() {
             className="flex min-h-48 items-center justify-center text-[var(--color-civix-navy)]"
             role="status"
           >
-            <Loader2 aria-hidden="true" className="mr-3 size-5 animate-spin" />
+            <Loader2 aria-hidden="true" className="mr-3 size-5 animate-spin motion-reduce:animate-none" />
             Carregando planos...
           </div>
         )}
@@ -42,6 +42,8 @@ export function PlansSection() {
           <div
             className="flex items-center justify-center gap-3 border border-red-200 bg-red-50 p-6 text-center text-red-700"
             role="alert"
+            data-motion="feedback"
+            data-motion-trigger="mount"
           >
             <AlertCircle aria-hidden="true" className="size-5 shrink-0" />
             {error}
@@ -49,7 +51,7 @@ export function PlansSection() {
         )}
 
         {!loading && !error && plans.length === 0 && (
-          <p className="border border-black/10 bg-white p-8 text-center text-black/60">
+          <p role="status" data-motion="feedback" data-motion-trigger="mount" className="border border-black/10 bg-white p-8 text-center text-black/60">
             Nenhum plano disponível no momento.
           </p>
         )}
@@ -62,7 +64,7 @@ export function PlansSection() {
           </div>
         )}
 
-        <div className="mt-10 text-center">
+        <div data-motion="section" className="mt-10 text-center">
           <a
             className="inline-flex min-h-11 items-center justify-center rounded-[var(--radius-control)] border border-[var(--color-civix-navy)] px-6 font-[family-name:var(--font-display)] font-semibold text-[var(--color-civix-navy)] transition-colors hover:bg-[var(--color-civix-navy)] hover:text-[var(--color-civix-ivory)] focus-visible:outline-offset-4"
             href="/planos"

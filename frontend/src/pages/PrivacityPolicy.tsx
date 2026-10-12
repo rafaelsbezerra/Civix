@@ -1,30 +1,17 @@
 import React from 'react';
-import { Eye, Server, Lock, UserCheck, ArrowLeft, Mail } from 'lucide-react';
+import { Eye, Server, Lock, UserCheck, Mail } from 'lucide-react';
 
-import logoCivix from '@/assets/civix/logo-civix-white.png'
+import { SiteHeader } from '@/components/layout/SiteHeader'
 
 export const PrivacyPolicy: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#faf9f7] text-[#071b2b] flex flex-col justify-between font-sans">
-      {/* Header / Topo */}
-      <header className="bg-[#071b2b] text-white py-6 px-4 sm:px-8 border-b-4 border-[#eab308] shadow-md">
-        <div className="max-w-5xl mx-auto flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <img src={logoCivix} alt="Logo CIVIX" className="h-10 w-auto" />
-          </div>
-          <a
-            href="/"
-            className="flex items-center gap-2 text-sm text-gray-300 hover:text-white transition-colors"
-          >
-            <ArrowLeft size={16} /> Voltar ao início
-          </a>
-        </div>
-      </header>
+      <SiteHeader />
 
       {/* Conteúdo Principal */}
       <main className="max-w-4xl mx-auto px-4 py-12 flex-1 w-full">
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sm:p-10">
-          <div className="border-b border-gray-100 pb-6 mb-8">
+          <div data-motion="item" data-motion-trigger="mount" className="border-b border-gray-100 pb-6 mb-8">
             <h2 className="text-3xl font-extrabold text-[#071b2b] mb-2">Política de Privacidade</h2>
             <p className="text-xs sm:text-sm text-gray-500">
               Conforme a Lei Geral de Proteção de Dados (LGPD - Lei nº 13.709/2018) &bull; Atualizado em Setembro de 2026

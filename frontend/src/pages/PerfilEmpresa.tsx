@@ -43,8 +43,8 @@ export default function PerfilEmpresa() {
     return (
       <div className="min-h-screen bg-[var(--color-civix-ivory)] flex flex-col">
         <SiteHeader />
-        <main className="flex-1 flex justify-center items-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--color-civix-navy)]"></div>
+        <main role="status" aria-label="Carregando empresa" className="flex-1 flex justify-center items-center">
+          <div className="animate-spin motion-reduce:animate-none rounded-full h-12 w-12 border-b-2 border-[var(--color-civix-navy)]"></div>
         </main>
         <Footer />
       </div>
@@ -55,8 +55,8 @@ export default function PerfilEmpresa() {
     return (
       <div className="min-h-screen bg-[var(--color-civix-ivory)] flex flex-col">
         <SiteHeader />
-        <main className="flex-1 flex flex-col justify-center items-center p-6 text-center">
-          <p className="text-red-500 font-semibold text-lg mb-4">{error || 'Empresa não encontrada'}</p>
+        <main data-motion="feedback" data-motion-trigger="mount" className="flex-1 flex flex-col justify-center items-center p-6 text-center">
+          <p role="alert" className="text-red-500 font-semibold text-lg mb-4">{error || 'Empresa não encontrada'}</p>
           <button
             className="bg-[var(--color-civix-navy)] text-white px-6 py-2 rounded-lg font-medium hover:bg-opacity-90 transition-colors"
             onClick={() => navigate('/catalogo')}
@@ -111,20 +111,20 @@ export default function PerfilEmpresa() {
                   {empresa.verificado ? 'PERFIL VERIFICADO / CIVIX' : 'PERFIL / CIVIX'}
                 </p>
 
-                <h1 className="max-w-[643px] break-words font-[family-name:var(--font-display)] text-[clamp(2.5rem,5vw,4rem)] font-semibold uppercase leading-[1.1] tracking-[-0.02em] lg:leading-[80px] lg:tracking-[-0.034em]">
+                <h1 data-motion="page" data-motion-trigger="mount" className="max-w-[643px] break-words font-[family-name:var(--font-display)] text-[clamp(2.5rem,5vw,4rem)] font-semibold uppercase leading-[1.1] tracking-[-0.02em] lg:leading-[80px] lg:tracking-[-0.034em]">
                   {empresa.nome}
                 </h1>
 
-                <p className="mt-2 text-xl italic text-[var(--color-civix-ivory)]/70 md:text-2xl">
+                <p data-motion="page" data-motion-trigger="mount" data-motion-delay="60" className="mt-2 text-xl italic text-[var(--color-civix-ivory)]/70 md:text-2xl">
                   {empresa.categoria?.toUpperCase()}
                 </p>
                 {empresa.descritivo ? (
-                  <p className="mt-5 max-w-2xl text-lg leading-relaxed text-[var(--color-civix-ivory)]/90">
+                  <p data-motion="page" data-motion-trigger="mount" data-motion-delay="60" className="mt-5 max-w-2xl text-lg leading-relaxed text-[var(--color-civix-ivory)]/90">
                     {empresa.descritivo}
                   </p>
                 ) : null}
 
-                <div className="mt-10 flex flex-wrap gap-4">
+                <div data-motion="page" data-motion-trigger="mount" data-motion-delay="120" className="mt-10 flex flex-wrap gap-4">
                   {empresa.website ? (
                     <a
                       className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-[var(--color-civix-ivory)]/30 bg-transparent px-6 py-3 font-semibold text-[var(--color-civix-ivory)] transition-colors hover:border-[var(--color-civix-ivory)] hover:bg-white/10"
@@ -150,7 +150,7 @@ export default function PerfilEmpresa() {
                 </div>
               </div>
 
-              <div className="grid h-fit w-full shrink-0 grid-cols-1 gap-4 sm:grid-cols-2 lg:w-[500px]">
+              <div data-motion="page" data-motion-trigger="mount" data-motion-delay="120" className="grid h-fit w-full shrink-0 grid-cols-1 gap-4 sm:grid-cols-2 lg:w-[500px]">
                 <div className="rounded-xl border border-[#425466] bg-[#faf9f6] p-5 text-[var(--color-civix-navy)]">
                   <div className="mb-3 flex size-10 items-center justify-center rounded-lg bg-[#f3e6c9]">
                     <MapPin aria-hidden="true" className="text-[var(--color-civix-gold)]" size={20} />
@@ -189,7 +189,7 @@ export default function PerfilEmpresa() {
 
         {/* Content Section */}
         <section className="py-20 px-6 sm:px-10 lg:px-16 xl:px-32 max-w-[1728px] mx-auto -mt-10 relative z-20">
-          <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12 border border-gray-100 max-w-5xl">
+          <div data-motion="section" className="bg-white rounded-2xl shadow-xl p-8 md:p-12 border border-gray-100 max-w-5xl">
             <p className="text-sm font-bold text-gray-400 tracking-wider mb-2">SOBRE A EMPRESA</p>
             <h2 className="text-3xl font-[family-name:var(--font-display)] font-semibold text-[var(--color-civix-navy)] mb-8">
               Quem é {empresa.nome}?
@@ -202,7 +202,7 @@ export default function PerfilEmpresa() {
           </div>
         </section>
 
-        <section className="py-10 text-center">
+        <section data-motion="section" className="py-10 text-center">
           <button
             className="text-[var(--color-civix-navy)] font-semibold hover:text-[var(--color-civix-gold)] transition-colors flex items-center justify-center gap-2 mx-auto"
             onClick={() => navigate('/catalogo')}

@@ -9,16 +9,50 @@ export function PublicSmoothScroll() {
   useEffect(() => {
     if (!isPublicPage || typeof window.matchMedia !== 'function') return
 
-    const lenis = new Lenis({
-      anchors: true,
-      autoRaf: true,
-      duration: 1.1,
-      smoothWheel: true,
-      stopInertiaOnNavigate: true,
+    const preference = window.matchMedia('(prefers-reduced-motion: reduce)')
+    let lenis: Lenis | undefined
+
+    function syncPreference() {
+      lenis?.destroy()
+      lenis = undefined
+      if (preference.matches) return
+
+      lenis = new Lenis({
+        anchors: true,
+        autoRaf: true,
+        duration: 1.1,
+        smoothWheel: true,
+        stopInertiaOnNavigate: true,
+      })
+
+    }
+
+    syncPreference()
+    preference.addEventListener('change', syncPreference)
+
+    return () => {
+      preference.removeEventListener('change', syncPreference)
+      lenis?.destroy()
+    }
+  }, [isPublicPage])
+
+  useEffect(() => {
+    const hash = window.location.hash
+    if (!isPublicPage || !hash) return
+
+    // Ao trocar de página, a seção só existe depois que o React monta o destino.
+    const frame = window.requestAnimationFrame(() => {
+      try {
+        document.getElementById(decodeURIComponent(hash.slice(1)))
+          ?.scrollIntoView({ block: 'start', behavior: 'instant' })
+      } catch {
+        // Uma âncora inválida não deve impedir a navegação da página.
+      }
     })
 
-    return () => lenis.destroy()
-  }, [isPublicPage])
+    return () => window.cancelAnimationFrame(frame)
+    // Mudanças de hash na mesma página são atendidas pelas âncoras do Lenis/browser.
+  }, [isPublicPage, pathname])
 
   return null
 }

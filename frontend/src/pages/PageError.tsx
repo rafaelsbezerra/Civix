@@ -1,34 +1,19 @@
 import { ArrowLeft, ArrowRight, Headphones } from "lucide-react";
 import laptop404 from "../assets/civix/404_page.png";
-import logoCivix from '@/assets/civix/logo-civix.png'
+import { SiteHeader } from '@/components/layout/SiteHeader'
 
 export default function NotFound() {
   return (
-    <main className="min-h-screen w-full overflow-hidden bg-[#f8f7f4] text-[#102846]">
-      <div className="relative mx-auto flex min-h-screen w-full max-w-[1600px] flex-col px-8 py-8 sm:px-12 lg:px-16">
-
-        <header className="flex items-center">
-          <a
-            aria-label="Civix — início"
-            className="inline-flex min-h-11 min-w-11 shrink-0 items-center rounded-sm lg:-translate-y-[5px]"
-            href="/"
-          >
-            <img
-              alt="Civix"
-              className="h-8 w-[99px] object-contain"
-              height="32"
-              src={logoCivix}
-              width="99"
-            />
-          </a>
-        </header>
+    <div className="min-h-screen w-full overflow-hidden bg-[#f8f7f4] text-[#102846]">
+      <SiteHeader />
+      <main className="relative mx-auto flex min-h-[calc(100svh-106px)] w-full max-w-[1600px] flex-col px-8 py-8 sm:px-12 lg:px-16">
 
         <section className="relative flex flex-1 items-center">
           <div className="pointer-events-none absolute -bottom-32 -left-32 h-[480px] w-[480px] rounded-full border-[80px] border-[#f2e8ce] opacity-90" />
 
           <div className="relative z-10 grid w-full grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-4">
 
-            <div className="max-w-[570px] pl-2 sm:pl-8 lg:pl-12">
+            <div data-motion="page" data-motion-trigger="mount" className="max-w-[570px] pl-2 sm:pl-8 lg:pl-12">
               <div className="mb-7 flex items-center gap-1 text-[15px] font-medium">
                 <span className="text-[#f5b51b]">//</span>
                 <span>Página não encontrada</span>
@@ -78,6 +63,9 @@ export default function NotFound() {
 
               <div className="relative z-10 w-[85%] max-w-[680px] rotate-[4deg]">
                 <img
+                  data-motion="item"
+                  data-motion-trigger="mount"
+                  data-motion-delay="60"
                   src={laptop404}
                   alt="Página não encontrada"
                   className="w-full object-contain drop-shadow-[0_25px_30px_rgba(16,40,70,0.12)]"
@@ -121,7 +109,7 @@ export default function NotFound() {
             </button>
           </div>
         </footer>
-      </div>
-    </main>
+      </main>
+    </div>
   );
 }

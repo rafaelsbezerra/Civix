@@ -14,6 +14,7 @@ export default function AboutPage() {
           <p
             className="font-[family-name:var(--font-display)] text-base font-medium leading-[normal] text-[var(--color-civix-navy)] 2xl:absolute 2xl:left-[128px] 2xl:top-[80px] 2xl:w-[88px]"
             data-testid="about-marker"
+            data-motion="section"
           >
             <span className="text-[var(--color-civix-gold-accessible)]">//</span>{' '}
             <span>Sobre nós</span>
@@ -23,6 +24,7 @@ export default function AboutPage() {
             <h1
               className="break-words font-[family-name:var(--font-display)] text-[clamp(2.25rem,7vw,3rem)] font-normal leading-[1.1] text-[var(--color-civix-navy)] 2xl:absolute 2xl:left-[calc(41.667%+93px)] 2xl:top-[80px] 2xl:w-[683px] 2xl:text-[48px]"
               id="about-title"
+              data-motion="section"
             >
               <span className="block">Transformamos atendimento</span>{' '}
               <span className="block">em oportunidades.</span>
@@ -30,6 +32,8 @@ export default function AboutPage() {
             <p
               className="mt-6 max-w-[557px] whitespace-pre-wrap font-[family-name:var(--font-body)] text-base font-normal leading-[normal] text-[rgba(7,25,42,0.8)] 2xl:absolute 2xl:left-[calc(41.667%+93px)] 2xl:top-[209px] 2xl:mt-0 2xl:w-[557px]"
               data-testid="about-introduction"
+              data-motion="section"
+              data-motion-delay="60"
             >
               A Civix nasceu para tornar o atendimento comercial mais inteligente, ágil e
               eficiente. Unimos inteligência artificial, automação e gestão para ajudar
