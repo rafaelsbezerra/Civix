@@ -209,6 +209,7 @@ test('Persistência local funciona sem banco ou envio externo', async t => {
 
       assert.equal(login.user.id, invited.id);
       await assert.rejects(authService.firstAccess(token, 'senha-substituta-123'), { status: 400 });
+      await assert.rejects(authService.validateToken(token), { status: 400 });
       assert.deepEqual(await store.readLocalData(), data);
 
       const restarted = runChild(`
@@ -234,7 +235,7 @@ test('Persistência local funciona sem banco ou envio externo', async t => {
       assert.equal(pending.users[0].status, 'pending');
       assert.equal(pending.users[0].invite_token, token);
       assert.equal(pending.outbox[0].kind, 'invite');
-      await assert.rejects(authService.validateToken(token), { status: 404 });
+      assert.deepEqual(await authService.validateToken(token), { email: pending.users[0].email });
       await authService.firstAccess(token, 'senha-admin-convite-123');
 
       const active = await store.readLocalData();
@@ -246,6 +247,7 @@ test('Persistência local funciona sem banco ou envio externo', async t => {
       assert.ok(await bcrypt.compare('senha-admin-convite-123', originalHash!));
       await assert.rejects(adminService.inviteUser('admin-convite@example.test', 'cliente'), { status: 400 });
       await assert.rejects(authService.firstAccess(token, 'senha-substituta-123'), { status: 400 });
+      await assert.rejects(authService.validateToken(token), { status: 400 });
       assert.deepEqual(await store.readLocalData(), active);
 
       await withServer(async url => {
@@ -259,6 +261,25 @@ test('Persistência local funciona sem banco ou envio externo', async t => {
       });
 
       assert.deepEqual(await store.readLocalData(), active);
+    });
+
+    await t.test('Pré-validação usa o convite atual e rejeita outro perfil ou JWT expirado sem alterar JSON', async () => {
+      await resetData();
+      await adminService.inviteUser('pre-validacao@example.test', 'empresa');
+
+      const before = await store.readLocalData();
+      const token = before.users[0].invite_token!;
+
+      assert.deepEqual(await authService.validateToken(token), { email: before.users[0].email });
+      const changedToken = jwt.sign({ email: before.users[0].email, role: 'empresa', nonce: 'outro' }, process.env.JWT_INVITE_SECRET!);
+      const otherRole = jwt.sign({ email: before.users[0].email, role: 'cliente' }, process.env.JWT_INVITE_SECRET!);
+      const expired = jwt.sign({ email: before.users[0].email, role: 'empresa' }, process.env.JWT_INVITE_SECRET!, { expiresIn: -1 });
+
+      await assert.rejects(authService.validateToken(changedToken), { status: 401 });
+      await assert.rejects(authService.validateToken(otherRole), { status: 404 });
+      await assert.rejects(authService.validateToken(expired), { status: 401 });
+      await assert.rejects(authService.firstAccess(changedToken, 'senha-teste-123'), { status: 401 });
+      assert.deepEqual(await store.readLocalData(), before);
     });
 
     await t.test('Login rejeita convidados pendentes dos perfis empresa e cliente', async () => {

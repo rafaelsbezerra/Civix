@@ -5,15 +5,6 @@ import { ErrorCode } from '../../shared/errors/error.code.js';
 import { readLocalData, updateLocalData } from './local.store.js';
 
 export const authJsonRepository: AuthRepository = {
-  async getByResetToken(token) {
-    const user = (await readLocalData()).users.find(user => user.reset_password_token === token);
-
-    return user ? {
-      email: user.email,
-      reset_password_expires: user.reset_password_expires ?? null,
-    } : undefined;
-  },
-
   async getInviteUserByEmail(email, role) {
     const users = (await readLocalData()).users.filter(user => user.email === email);
 

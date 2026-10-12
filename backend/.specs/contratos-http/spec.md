@@ -1,7 +1,8 @@
 # Contratos HTTP
 
 Estado: base e adoção de erro/sucesso integradas em `staging`, referência
-`bedb73a`, pelos PRs #13/#14. Frontend consumidor permanece pendente.
+`bedb73a`, pelos PRs #13/#14. A integração posterior do frontend é parcial:
+login foi explicitamente excluído; demais consumidores existentes adaptados.
 Paginação será usada somente quando necessário, fora das pendências atuais.
 
 ## Problema inicial e escopo
@@ -58,8 +59,11 @@ incluindo `/api/v1` e as rotas auth sob `/api/auth`.
   Falha SQL de empresas usa 500; ausência usa 404; JSON inválido usa 400 e
   corpo acima do limite usa 413, com causa preservada.
 - [ ] HTTP-04-B: Migrar consumidores frontend e validar compatibilidade.
-  Explicitamente adiado na adoção backend; lib/api.ts e páginas continuam
-  lendo envelopes antigos. Não considerar a integração frontend concluída.
+  Parcial na branch codex/frontend-backend-integration, dependente do PR #16:
+  lib/api.ts, catálogo/perfil/planos, recuperação/reset e primeiro acesso
+  adotam data/message. Login continua intacto e incompatível por exclusão
+  explícita; não marcar compatibilidade integral nem fluxo autenticado completo.
+  Ver spec frontend/backend-integration para verificações e limites.
 - [x] HTTP-05: Atualizar API, padrões e decisões com exemplos/verificações.
   Evidência: docs/api.md, docs/padroes-backend.md e spec de adoção.
 
@@ -76,3 +80,11 @@ Base inicial: 14 testes de contrato. Adoção PR #14: 36 testes isolados e
 checks typecheck:foundation/typecheck:contracts aprovados pela implementação.
 O bloqueio histórico do TypeScript completo por CLI 6/configuração 7 foi corrigido pelo tooling Prisma 7 integrado. Nenhum banco remoto, envio real de e-mail ou teste frontend.
 A auditoria de status não reexecutou os testes.
+
+## Verificação da integração parcial — 2026-10-12
+
+25 testes direcionados frontend e 60 backend aprovados, com typechecks
+frontend/foundation/contratos e Vite. Build completo continua com falha
+histórica no gate de assets Sobre e lint em SignSelect preexistente.
+Não houve dependência nova, schema, banco real, alteração de login ou páginas/
+rotas novas. Home/Sobre permanecem sob AD-002.

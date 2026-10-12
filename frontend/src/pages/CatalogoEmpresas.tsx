@@ -40,7 +40,7 @@ export default function CatalogoEmpresas() {
       setEmpresas(data);
     } catch (err) {
       console.error('Erro ao carregar empresas:', err);
-      setError('Erro ao carregar empresas. Tente novamente mais tarde.');
+      setError(err instanceof Error ? err.message : 'Erro ao carregar empresas. Tente novamente mais tarde.');
     } finally {
       setLoading(false);
     }
@@ -60,7 +60,7 @@ export default function CatalogoEmpresas() {
       } catch (err) {
         console.error('Erro ao carregar empresas:', err);
         if (active) {
-          setError('Erro ao carregar empresas. Tente novamente mais tarde.');
+          setError(err instanceof Error ? err.message : 'Erro ao carregar empresas. Tente novamente mais tarde.');
         }
       } finally {
         if (active) {
@@ -100,7 +100,7 @@ export default function CatalogoEmpresas() {
       setEmpresas(result);
     } catch (err) {
       console.error('Erro ao buscar empresas filtradas:', err);
-      setError('Erro ao aplicar filtros de busca. Tente novamente.');
+      setError(err instanceof Error ? err.message : 'Erro ao aplicar filtros de busca. Tente novamente.');
     } finally {
       setLoading(false);
     }

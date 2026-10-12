@@ -1,36 +1,32 @@
 /**
- * Serviço de API do Frontend
- * Consumo dos endpoints de empresas do backend
+ * Consumidores HTTP do frontend para os contratos atuais do backend.
  */
-
 export interface Empresa {
   id: string;
   nome: string;
   cnpj: string;
   descricao: string;
-  descricaoDetalhada: string;
+  descricao_detalhada: string;
   categoria: string;
-  logo?: string;
+  logo?: string | null;
   cidade: string;
   estado: string;
-  endereco?: string;
-  telefone?: string;
-  email?: string;
-  website?: string;
-  whatsapp?: string;
+  endereco?: string | null;
+  telefone?: string | null;
+  email?: string | null;
+  website?: string | null;
+  whatsapp?: string | null;
   status: 'ativo' | 'inativo' | 'verificado';
-  dataCadastro: string;
+  data_cadastro?: string;
   verificado: boolean;
   tamanho: 'pequena' | 'media' | 'grande';
-  descritivo?: string;
-  tone?: string;
+  descritivo?: string | null;
+  tone?: string | null;
 }
 
 export interface ApiResponse<T> {
-  success: boolean;
-  data?: T;
-  message?: string;
-  error?: string;
+  data: T;
+  meta?: Record<string, unknown>;
 }
 
 export type BillingPeriod = 'monthly' | 'yearly' | 'one_time';
@@ -49,143 +45,138 @@ export interface Plan {
   displayOrder: number;
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
+export class ApiError extends Error {
+  status?: number;
 
-/**
- * Função utilitária para lidar com requisições e tratamento de erros HTTP/JSON
- */
-async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...options?.headers,
-    },
-    ...options,
-  });
-
-  if (!response.ok) {
-    throw new Error(`Erro na requisição: ${response.status} ${response.statusText}`);
+  constructor(message: string, status?: number) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
   }
-
-  const data: ApiResponse<T> = await response.json();
-
-  if (!data.success) {
-    throw new Error(data.error || data.message || 'Erro ao processar requisição');
-  }
-
-  if (data.data === undefined) {
-    throw new Error('Nenhum dado retornado pela API');
-  }
-
-  return data.data;
 }
 
-/**
- * Busca todas as empresas
- */
-export const fetchEmpresas = async (): Promise<Empresa[]> => {
-  try {
-    return await fetchApi<Empresa[]>('/empresas');
-  } catch (error) {
-    console.error('Erro ao buscar empresas:', error);
-    throw error;
+const configuredBaseUrl = import.meta.env.VITE_API_URL?.trim() || 'http://localhost:3000';
+// Aceitar a origem e a configuração anterior com prefixo de API.
+const API_BASE_URL = configuredBaseUrl.replace(/\/+$/, '').replace(/\/api(?:\/v1)?$/, '');
+
+function getResponseMessage(payload: unknown): string | undefined {
+  if (payload && typeof payload === 'object' && 'message' in payload
+    && typeof payload.message === 'string' && payload.message.trim()) {
+    return payload.message;
   }
-};
 
-/**
- * Busca uma empresa específica pelo ID
- */
-export const fetchEmpresaById = async (id: string): Promise<Empresa> => {
-  try {
-    return await fetchApi<Empresa>(`/empresas/${id}`);
-  } catch (error) {
-    console.error(`Erro ao buscar empresa ${id}:`, error);
-    throw error;
+  return undefined;
+}
+
+async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<T> {
+  const headers = new Headers(options?.headers);
+  headers.set('Accept', 'application/json');
+
+  if (!headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json');
   }
-};
 
-/**
- * Busca empresas por categoria
- */
-export const fetchEmpresasByCategoria = async (categoria: string): Promise<Empresa[]> => {
+  let response: Response;
+
   try {
-    return await fetchApi<Empresa[]>(`/empresas/categoria/${encodeURIComponent(categoria)}`);
+    response = await fetch(`${API_BASE_URL}${endpoint}`, { ...options, headers });
   } catch (error) {
-    console.error(`Erro ao buscar empresas da categoria ${categoria}:`, error);
-    throw error;
-  }
-};
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw error;
+    }
 
-/**
- * Busca empresas verificadas
- */
-export const fetchEmpresasVerificadas = async (): Promise<Empresa[]> => {
+    throw new ApiError('Não foi possível conectar à API. Tente novamente.');
+  }
+
+  let payload: unknown;
+
   try {
-    return await fetchApi<Empresa[]>('/empresas/verificadas/todas');
-  } catch (error) {
-    console.error('Erro ao buscar empresas verificadas:', error);
-    throw error;
+    payload = await response.json();
+  } catch {
+    throw new ApiError(
+      response.ok ? 'A API retornou uma resposta inválida.' : 'Não foi possível concluir a requisição.',
+      response.status,
+    );
   }
-};
 
-/**
- * Busca empresas por estado
- */
-export const fetchEmpresasByEstado = async (estado: string): Promise<Empresa[]> => {
-  try {
-    return await fetchApi<Empresa[]>(`/empresas/estado/${encodeURIComponent(estado)}`);
-  } catch (error) {
-    console.error(`Erro ao buscar empresas do estado ${estado}:`, error);
-    throw error;
+  if (!response.ok) {
+    throw new ApiError(getResponseMessage(payload) || 'Não foi possível concluir a requisição.', response.status);
   }
-};
 
-/**
- * Busca empresas por tamanho
- */
-export const fetchEmpresasByTamanho = async (
-  tamanho: 'pequena' | 'media' | 'grande'
-): Promise<Empresa[]> => {
-  try {
-    return await fetchApi<Empresa[]>(`/empresas/tamanho/${tamanho}`);
-  } catch (error) {
-    console.error(`Erro ao buscar empresas tamanho ${tamanho}:`, error);
-    throw error;
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload) || !('data' in payload)) {
+    throw new ApiError('A API retornou uma resposta inválida.', response.status);
   }
+
+  return (payload as ApiResponse<T>).data;
+}
+
+export const fetchEmpresas = (): Promise<Empresa[]> => {
+  return fetchApi<Empresa[]>('/api/v1/empresas');
 };
 
-/**
- * Busca empresas por termo de pesquisa
- */
-export const searchEmpresas = async (termo: string): Promise<Empresa[]> => {
-  try {
-    const params = new URLSearchParams({ q: termo });
-    return await fetchApi<Empresa[]>(`/empresas/buscar/query?${params.toString()}`);
-  } catch (error) {
-    console.error(`Erro ao buscar empresas com termo "${termo}":`, error);
-    throw error;
-  }
+export const fetchEmpresaById = (id: string): Promise<Empresa> => {
+  return fetchApi<Empresa>(`/api/v1/empresas/${encodeURIComponent(id)}`);
 };
 
-export const fetchPlans = async (): Promise<Plan[]> => {
-  return fetchApi<Plan[]>('/plans');
+export const fetchEmpresasByCategoria = (categoria: string): Promise<Empresa[]> => {
+  return fetchApi<Empresa[]>(`/api/v1/empresas/categoria/${encodeURIComponent(categoria)}`);
 };
 
-export const selectPlan = async (planId: string): Promise<Plan> => {
+export const fetchEmpresasVerificadas = (): Promise<Empresa[]> => {
+  return fetchApi<Empresa[]>('/api/v1/empresas/verificadas/todas');
+};
+
+export const fetchEmpresasByEstado = (estado: string): Promise<Empresa[]> => {
+  return fetchApi<Empresa[]>(`/api/v1/empresas/estado/${encodeURIComponent(estado)}`);
+};
+
+export const fetchEmpresasByTamanho = (tamanho: 'pequena' | 'media' | 'grande'): Promise<Empresa[]> => {
+  return fetchApi<Empresa[]>(`/api/v1/empresas/tamanho/${tamanho}`);
+};
+
+export const searchEmpresas = (termo: string): Promise<Empresa[]> => {
+  const params = new URLSearchParams({ q: termo });
+
+  return fetchApi<Empresa[]>(`/api/v1/empresas/buscar?${params.toString()}`);
+};
+
+export const fetchPlans = (): Promise<Plan[]> => {
+  return fetchApi<Plan[]>('/api/v1/plans');
+};
+
+export const selectPlan = (planId: string): Promise<Plan> => {
   const token = localStorage.getItem('token');
-  const response = await fetch(`${API_BASE_URL}/plans/selection`, {
+
+  return fetchApi<Plan>('/api/v1/plans/selection', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
     body: JSON.stringify({ planId }),
   });
-
-  const data: ApiResponse<Plan> = await response.json();
-  if (!response.ok || !data.success || !data.data) {
-    throw new Error(data.error || 'Não foi possível selecionar o plano.');
-  }
-
-  return data.data;
 };
+
+export function requestPasswordReset(email: string): Promise<{ message: string }> {
+  return fetchApi('/api/v1/users/esqueci-senha', {
+    method: 'POST',
+    body: JSON.stringify({ email }),
+  });
+}
+
+export function resetPassword(token: string, password: string): Promise<{ message: string }> {
+  return fetchApi('/api/v1/users/redefinir-senha', {
+    method: 'POST',
+    body: JSON.stringify({ token, password }),
+  });
+}
+
+export function validateInviteToken(token: string, signal?: AbortSignal): Promise<{ email: string }> {
+  const params = new URLSearchParams({ token });
+
+  return fetchApi(`/api/auth/validate-token?${params.toString()}`, { signal });
+}
+
+export function completeFirstAccess(token: string, password: string): Promise<{ message: string }> {
+  return fetchApi('/api/auth/first-access', {
+    method: 'POST',
+    body: JSON.stringify({ token, password }),
+  });
+}

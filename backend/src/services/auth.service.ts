@@ -5,35 +5,19 @@ import { AppError } from '../shared/errors/app.error.js';
 import { ErrorCode } from '../shared/errors/error.code.js';
 import { sendForgotPasswordEmail } from './mail.service.js';
 import type { JwtInvitePayload } from '../dtos/auth.invite.dto.js';
+import type { UserRow } from '../interfaces/auth.user.row.js';
 
-export async function validateToken(token: string): Promise<{ email: string }> {
-  const user = await authRepository.getByResetToken(token);
-
-  if (!user) {
-    throw new AppError({
-      status: 404,
-      code: ErrorCode.NOT_FOUND,
-      message: 'Este link de convite é inválido ou já foi utilizado.',
-    });
-  }
-
-  if (user.reset_password_expires && new Date(user.reset_password_expires) < new Date()) {
-    throw new AppError({
-      status: 400,
-      code: ErrorCode.VALIDATION_ERROR,
-      message: 'Este link de convite expirou.',
-    });
-  }
-
-  return { email: user.email };
-}
-
-export async function firstAccess(token: string, password: string): Promise<void> {
+async function getInviteUser(token: string): Promise<UserRow> {
   const jwtSecret = process.env.JWT_INVITE_SECRET || 'secret-chave-civix';
   let decoded: JwtInvitePayload;
 
   try {
     decoded = jwt.verify(token, jwtSecret) as JwtInvitePayload;
+
+    if (!decoded || typeof decoded !== 'object' || typeof decoded.email !== 'string'
+      || !decoded.email || (decoded.role !== 'empresa' && decoded.role !== 'cliente')) {
+      throw new Error('O token de convite não contém uma identidade válida.');
+    }
   } catch (cause) {
     throw new AppError({
       status: 401,
@@ -68,6 +52,18 @@ export async function firstAccess(token: string, password: string): Promise<void
       message: 'Este link de convite já foi utilizado ou é inválido.',
     });
   }
+
+  return user;
+}
+
+export async function validateToken(token: string): Promise<{ email: string }> {
+  const user = await getInviteUser(token);
+
+  return { email: user.email };
+}
+
+export async function firstAccess(token: string, password: string): Promise<void> {
+  const user = await getInviteUser(token);
 
   const passwordHash = await bcrypt.hash(password, 10);
 

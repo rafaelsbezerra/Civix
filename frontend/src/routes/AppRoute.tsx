@@ -8,7 +8,7 @@ import NotFound from '@/pages/PageError';
 import { PublicSmoothScroll } from '@/components/layout/PublicSmoothScroll';
 import FirstAccess from '@/pages/FirstAccess';
 import ForgotPassword from '@/pages/ForgotPassword';
-import ResetPassword from '@/pages/resetPassword';
+import ResetPassword from '@/pages/ResetPassword';
 import { TermsOfService } from '@/pages/TermsOfServices';
 import { PrivacyPolicy } from '@/pages/PrivacityPolicy';
 import HelperCenter from '@/pages/HelperCenter';

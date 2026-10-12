@@ -23,12 +23,12 @@ export function usePlans(): PlansState {
       .then((plans) => {
         if (mounted) setState({ plans, loading: false, error: null })
       })
-      .catch(() => {
+      .catch((error: unknown) => {
         if (mounted) {
           setState({
             plans: [],
             loading: false,
-            error: 'Não foi possível carregar os planos agora.',
+            error: error instanceof Error ? error.message : 'Não foi possível carregar os planos agora.',
           })
         }
       })

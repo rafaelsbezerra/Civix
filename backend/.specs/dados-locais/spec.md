@@ -145,3 +145,16 @@ O JSON anterior estava ausente. Conforme confirmação do usuário, o arquivo
 local foi recriado com cinco empresas e três planos fictícios, users vazio e
 sem legacyUsers. Arquivo ignorado pelo Git. Nenhum banco real, schema/migration
 ou envio externo executado. Entrega pelo PR #16, com destino à staging.
+
+## Integração posterior dos consumidores — 2026-10-12
+
+A restrição original de frontend intacto pertence à entrega de persistência.
+A branch codex/frontend-backend-integration, dependente do PR #16, adapta os
+consumidores existentes, exceto login explicitamente excluído. Modo JSON,
+coleções e dados locais permanecem; nenhum mock frontend oculta falhas da API.
+
+Pré-validação e ativação de convite agora verificam o mesmo JWT, perfil/status
+e users.invite_token. ResetTokenRow/consulta de reset não participam mais desse
+fluxo. Reenvio continua incompatível com recuperação por hash e exige tarefa
+própria; schema/baseline e banco real permanecem pendentes.
+Sem páginas/rotas novas, dashboard, schema ou dependências novas.

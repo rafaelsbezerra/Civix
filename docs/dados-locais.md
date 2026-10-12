@@ -142,8 +142,9 @@ Em PostgreSQL, o INSERT utiliza campos permitidos e parâmetros. Esta entrega
 não cria tabela nem valida um banco real; a tabela empresas e suas colunas
 precisam existir. Schema e baseline seguem pendentes.
 
-O dashboard/formulário e a adaptação do frontend não foram implementados nesta
-tarefa. Os consumidores frontend ainda precisam adotar os envelopes atuais.
+O dashboard/formulário não foi implementado nesta tarefa. A integração
+posterior de consumidores existentes adapta os envelopes, exceto login
+explicitamente excluído; ver [integração frontend/backend](frontend-backend.md).
 
 ## Coleções e fluxos existentes
 
@@ -243,9 +244,21 @@ Referências: [spec](../backend/.specs/dados-locais/spec.md),
 58 testes de foundation aprovados e typechecks foundation/contratos passaram.
 O code review independente exigiu proteger reconvites contra ativação concorrente;
 a correção e os testes correspondentes foram revisados e aprovados antes da entrega.
-Os protocolos de tokens e o schema/banco real permanecem pendentes.
+Na entrega da unificação, os protocolos de tokens e o schema/banco real
+continuavam pendentes. A integração posterior alinha convite/ativação;
+reenvio/reset divergente e schema permanecem pendentes.
 
 O JSON local anterior estava ausente. Por confirmação do usuário, foi recriado
 com cinco empresas e três planos fictícios, users vazio e sem legacyUsers.
 Os registros de demonstração permanecem fora do Git. Reinicie o backend para
 carregar as alterações; use mock:user:create para preparar um usuário local.
+
+## Consumo no frontend — 2026-10-12
+
+Na integração posterior, catálogo/perfil/planos, recuperação/reset e primeiro
+acesso leem data/message com configuração comum. USE_MOCK_DATA continua
+exclusivamente no backend; falhas da API não são substituídas por mocks do
+frontend. A pré-validação do convite usa o mesmo token/identidade/status da
+ativação, enquanto reenvio ainda possui protocolo divergente.
+Login foi excluído e permanece incompatível; não há dashboard/cadastro novo.
+Ver [integração frontend/backend](frontend-backend.md).

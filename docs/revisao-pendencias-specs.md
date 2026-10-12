@@ -1,14 +1,15 @@
 # Revisão das pendências das specs
 
-Revisão atualizada em 2026-10-12 na branch codex/json-postgres-repositories,
-com destino à staging pelo PR #16. Baseline de merges: bedb73a, revisada em 2026-10-10.
+Revisão atualizada em 2026-10-12 na branch codex/frontend-backend-integration,
+dependente de e229843 (PR #16), com destino à staging. Baseline de merges: bedb73a, revisada em 2026-10-10.
 Essa referência já incorpora tooling Prisma 7 pelo PR #7, tipos de auth pelo
 PR #12, adoção HTTP pelo PR #13 e auditoria documental pelo PR #14.
 
 Paginação continua sob demanda. O usuário autorizou antecipar repositories
 para permitir JSON/PostgreSQL em todos os módulos atuais. Esse modo, caixa de
 saída, comando local e cadastro de empresas foram publicados no PR #16.
-Services auth/admin também foram separados; frontend/schema continuam posteriores.
+Services auth/admin também foram separados. A integração atual adapta
+consumidores frontend existentes; login foi excluído e schema segue posterior.
 
 Um checkbox concluído indica a entrega descrita; não comprova merge ou
 execução no banco. Os estados abaixo distinguem essas situações.
@@ -42,7 +43,9 @@ branch; não afirmar merge em staging ou migração do banco. JSONs antigos são
 modificados explicitamente para reunir seus registros em users, sem conversão
 automática no carregamento.
 
-Schema/baseline e protocolos de convite/reset continuam pendentes.
+Na entrega da unificação, schema/baseline e protocolos de tokens ainda
+estavam pendentes. A integração posterior alinha pré-validação/ativação do
+convite; reenvio/reset divergente e schema permanecem pendentes.
 Login bloqueia pending e preserva contas atuais sem status; convites não
 substituem contas ativas ou atuais sem status.
 Esta atualização passou por code review independente antes da entrega no PR #16;
@@ -52,7 +55,7 @@ os resultados de testes abaixo são históricos até nova verificação.
 
 | Grupo | O que falta | Dependência ou limite |
 | --- | --- | --- |
-| Frontend consumidor (HTTP-04-B) | Ler data nos sucessos e message nos erros; retirar success e envelopes antigos | Explicitamente adiado; login, primeiro acesso, catálogo, perfil e planos afetados |
+| Frontend consumidor (HTTP-04-B) | Adaptar login ao envelope e validar fluxo autenticado completo | Parcial: catálogo/perfil/planos, recuperação/reset e primeiro acesso adaptados nesta branch; login explicitamente excluído |
 | Modelo e tipagem (TYP-01 / TYP-04) | Definir campos, vínculos, restrições, invariantes e serialização/validação canônicas | Nome users confirmado; schema completo ainda não definido |
 | Migrations (MIG-02 / MIG-03-C / MIG-04) | Decidir destino dos SQL antigos, criar schema/baseline e comandos operacionais | PostgreSQL novo, Prisma 7 SQL nativo e migration inversa já confirmados |
 | Prova em PostgreSQL (MIG-05) | Aplicação do zero, reaplicação, status, falha e recuperação/inversa em banco temporário | Testes offline não comprovam esse ciclo |
@@ -108,7 +111,8 @@ nem reabre as tarefas históricas para restauração.
 
 **Aguardando resposta:** definição dos requisitos vigentes de Home/Sobre,
 incluindo navegação, rota, assets e composição. Até essa definição, manter
-as divergências registradas; nenhuma alteração de frontend foi autorizada.
+as divergências registradas; nenhuma mudança de requisitos/layout Home/Sobre
+foi autorizada. A integração de consumidores existentes não resolve AD-002.
 
 ## Limites e próximos passos
 
@@ -119,8 +123,9 @@ foram revisados por subagentes. Guia: [dados locais](dados-locais.md).
 
 As entregas de base e adoção backend já estão integradas em staging.
 Escolher a próxima pendência atual de implementação.
-A definição do modelo é necessária antes da baseline SQL; consumidores
-frontend precisam de adaptação antes de considerar o fluxo integrado.
+A definição do modelo é necessária antes da baseline SQL; o consumidor
+frontend de login ainda precisa de adaptação antes de considerar o fluxo
+autenticado completo integrado.
 
 ## Verificação do modo local — 2026-10-12
 
@@ -136,5 +141,24 @@ persistence/postgres, com arquivos domínio.repository.ts e exports terminados
 em Repository. As interfaces existentes em repositories foram preservadas;
 implementações e seletores continuam explicitamente tipados por elas.
 Imports dos services/testes foram ajustados, sem alterar contratos ou dados.
-Esta reorganização é local na staging, sem commit. Estrutura e links em
+A reorganização inicialmente local foi publicada no PR #16, base da branch
+de integração atual. Nenhum merge em staging é presumido. Estrutura e links em
 [dados locais](dados-locais.md).
+
+## Integração parcial dos consumidores — 2026-10-12
+
+Concluídos nesta branch: data/message nos helpers e páginas existentes
+exceto login; base de API comum, prefixos corretos, busca com q, campos
+snake_case e link de recuperação. Pré-validação e ativação compartilham
+JWT de convite, perfil/status e invite_token; INT-03 resolvido para esse fluxo.
+ResetTokenRow/consulta de reset na pré-validação foram removidos.
+
+Continuam pendentes: login explicitamente excluído; reenvio com protocolo
+divergente (INT-04); dashboard/rotas ausentes; modelo/schema/migrations;
+requisitos Home/Sobre AD-002. Não marcar HTTP-04-B como concluído integralmente.
+Sem UI nova de seleção de plano ou cadastro de empresas.
+
+Passaram 25 testes direcionados frontend e 60 backend, typechecks
+frontend/foundation/contratos e Vite. Build completo falha no gate histórico
+de assets Sobre; lint falha em SignSelect preexistente. Sem dependências novas
+ou banco real. Ver [integração](frontend-backend.md).
