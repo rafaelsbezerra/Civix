@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate, useParams } from "react-router-dom";
+import { validateInviteToken, completeFirstAccess } from "@/lib/api";
 import { Eye, EyeOff, CheckCircle2, AlertCircle, Lock, Loader2 } from "lucide-react";
 
 import civixLogo from "../assets/civix/logoCivix.png";
@@ -8,7 +9,8 @@ export default function FirstAccess() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  const token = searchParams.get("token");
+  const { token: pathToken } = useParams<{ token: string }>();
+  const token = pathToken ?? searchParams.get("token");
 
   // Estados de Validação do Token
   const [isValidatingToken, setIsValidatingToken] = useState(true);
@@ -31,7 +33,15 @@ export default function FirstAccess() {
 
   // 1. Valida o token assim que o componente carrega
   useEffect(() => {
+    let active = true;
+    const controller = new AbortController();
+
     const validateToken = async () => {
+      setIsValidatingToken(true);
+      setIsTokenValid(false);
+      setUserEmail(null);
+      setError("");
+
       if (!token) {
         setError("Token de convite ausente no link.");
         setIsValidatingToken(false);
@@ -39,25 +49,29 @@ export default function FirstAccess() {
       }
 
       try {
-        const response = await fetch(`http://localhost:3000/api/v1/auth/validate-token?token=${token}`);
-        const data = await response.json();
+        const data = await validateInviteToken(token, controller.signal);
 
-        if (!response.ok) {
-          throw new Error(data.error || "Este link de convite é inválido ou já expirou.");
+        if (active) {
+          setUserEmail(data.email);
+          setIsTokenValid(true);
         }
-
-        setUserEmail(data.email);
-        setIsTokenValid(true);
       } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : "Erro ao validar o convite.";
-        setError(message);
-        setIsTokenValid(false);
+        if (active) {
+          setError(err instanceof Error ? err.message : "Erro ao validar o convite.");
+        }
       } finally {
-        setIsValidatingToken(false);
+        if (active) {
+          setIsValidatingToken(false);
+        }
       }
     };
 
-    validateToken();
+    void validateToken();
+
+    return () => {
+      active = false;
+      controller.abort();
+    };
   }, [token]);
 
   // 2. Envio da nova senha
@@ -65,24 +79,12 @@ export default function FirstAccess() {
     e.preventDefault();
     setError("");
 
-    if (!isFormValid || !token) return;
+    if (!isFormValid || !token || !isTokenValid) return;
 
     try {
       setLoading(true);
 
-      const response = await fetch("http://localhost:3000/api/v1/auth/first-access", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ token, password }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Erro ao definir a senha.");
-      }
+      await completeFirstAccess(token, password);
 
       setSuccess(true);
 

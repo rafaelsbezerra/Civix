@@ -29,12 +29,12 @@ describe('usePlans', () => {
   })
 
   it('shows an error when the plans API is unavailable without substituting data', async () => {
-    vi.mocked(fetchPlans).mockRejectedValue(new Error('API indisponível'))
+    vi.mocked(fetchPlans).mockRejectedValue(new Error('Planos indisponíveis no backend.'))
 
     render(<PlansPreview />)
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
-      'Não foi possível carregar os planos agora.',
+      'Planos indisponíveis no backend.',
     )
     expect(screen.queryByText('Plano Profissional')).not.toBeInTheDocument()
   })

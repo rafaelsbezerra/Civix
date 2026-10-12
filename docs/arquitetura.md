@@ -80,11 +80,14 @@ não é uma migration executável.
 Sobre, Plans e FAQ têm arquivos, mas não estão registrados nesse router.
 Não existe dashboard nem guard de área autenticada.
 
-Catálogo, perfil e planos usam `fetch` por [lib/api](../frontend/src/lib/api.ts).
-Login e recuperação usam instâncias Axios nas páginas; primeiro acesso
-usa URLs localhost fixas. O token de login fica em localStorage.
-Tipos são duplicados entre frontend e backend, sem contrato gerado ou
-validação de resposta em runtime. O catálogo escolhe um filtro por
+Catálogo, perfil, planos, recuperação, redefinição e primeiro acesso usam
+fetch por [lib/api](../frontend/src/lib/api.ts), com origem central e prefixos
+/api/v1 ou /api/auth por endpoint. O helper extrai data e apresenta message
+dos erros públicos, valida a presença do envelope e preserva cancelamento.
+Tipos de empresa usam os nomes snake_case efetivamente recebidos; não há
+contrato gerado nem validação completa dos campos da resposta em runtime.
+Login permanece Axios, intacto e incompatível com o envelope por exclusão
+explícita do escopo. Seu token fica em localStorage. O catálogo escolhe um filtro por
 precedência, em vez de combinar os filtros.
 
 ## Reorganização de empresas implementada
@@ -112,7 +115,8 @@ SQL está na implementação PostgreSQL; a alternativa JSON persiste em disco.
 Exemplo de fluxo: GET `/api/v1/empresas/categoria/Obras` → controller
 valida categoria não vazia → service consulta por LOWER com parâmetro →
 controller retorna { data }. Demais endpoints backend adotam o mesmo contrato.
-Frontend continua pendente e incompatível nos pontos descritos em api.md.
+Os consumidores existentes de catálogo/perfil foram adaptados nesta branch;
+login continua pendente conforme api.md.
 
 Verificação: quatro testes HTTP com Express e consulta falsa cobrem os sete
 endpoints, mensagens/status, vazios, ausência, parâmetros e falhas SQL.
@@ -147,3 +151,11 @@ A adoção HTTP está integrada em staging bedb73a. O modo local de 2026-10-12
 antecipou uso de repositories nos módulos atuais, sem commit. Ver o
 [guia de dados locais](dados-locais.md). Paginação permanece sob demanda.
 Schema e baseline continuam pendentes; não há aplicação comprovada no banco.
+
+## Integração dos consumidores existentes — 2026-10-12
+
+A branch codex/frontend-backend-integration depende do PR #16 e tem destino
+staging. Sem dashboard, páginas/rotas novas ou alteração de login. A
+pré-validação de convite usa o mesmo JWT, perfil/status e invite_token da
+ativação; o protocolo divergente de reenvio permanece pendente.
+HTTP-04-B continua parcialmente completo. Ver [integração](frontend-backend.md).

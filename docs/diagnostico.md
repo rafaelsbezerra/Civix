@@ -10,20 +10,20 @@ specs, decisão de produto ou execução dos testes.
 
 | ID | Prioridade | Evidência | Consequência |
 | --- | --- | --- | --- |
-| INT-01 | Alta | FirstAccess chama `/api/v1/auth/*`; server monta `/api/auth/*` | Validação e ativação atingem URLs inexistentes |
+| INT-01 | Resolvido nesta branch | FirstAccess usa helpers comuns sob /api/auth | Pré-validação e ativação usam as rotas existentes |
 | INT-02 | Resolvido no código da branch atual | Convite, ativação, login e recuperação usam users; JSON possui uma única coleção de usuários | Schema/baseline e aplicação no PostgreSQL permanecem pendentes |
-| INT-03 | Alta | validateToken compara token cru em users.reset_password_token; convite usa users.invite_token; reset principal usa hash | Validação de links não corresponde aos produtores; unificar users não corrige os protocolos |
+| INT-03 | Resolvido nesta branch para convite | validateToken e firstAccess compartilham verificação JWT de convite, perfil/status e users.invite_token | Pré-validação corresponde ao convite; reenvio/reset divergente permanece em INT-04 |
 | INT-04 | Alta | Reenvio grava JWT cru; reset espera SHA-256 e expiração no banco | Link reenviado não segue o fluxo principal de reset |
 | INT-05 | Alta | Login navega `/dashboard-empresa`; router não declara rota | Login empresa termina no fallback 404 |
-| INT-06 | Alta | Router importa `@/pages/resetPassword`; arquivo é `ResetPassword.tsx` | Resolução sensível a caixa pode falhar em Linux/build |
+| INT-06 | Resolvido nesta branch | Router importa ResetPassword com caixa correspondente ao arquivo | TypeScript e Vite passaram; não foi executado em Linux |
 | INT-07 | Alta | `/sobre` e `/planos` ausentes de AppRoute; testes/header esperam páginas | Features existem como arquivos, mas não como destinos navegáveis |
-| INT-08 | Alta | api.searchEmpresas usa `/empresas/buscar/query`; router usa `/empresas/buscar` | Pesquisa por termo não atinge handler correto |
-| INT-09 | Alta | lib/api espera VITE_API_URL com `/api/v1`; Axios acrescenta `/api/v1/users/*` | Uma configuração comum pode duplicar prefixo ou omiti-lo |
-| INT-10 | Média | Empresa SQL snake_case vs tipos frontend camelCase, sem transformação | Consumidores podem receber campos ausentes |
+| INT-08 | Resolvido nesta branch | searchEmpresas usa /api/v1/empresas/buscar?q= com codificação | Busca atinge o contrato existente |
+| INT-09 | Parcial nesta branch | Helpers normalizam VITE_API_URL e incluem prefixo por endpoint; login Axios foi excluído | Consumidores adaptados corrigidos; login ainda exige alinhamento |
+| INT-10 | Resolvido nos consumidores atuais | Tipos e exibição frontend usam descricao_detalhada e data_cadastro | Backend preserva snake_case, sem mapper novo |
 | INT-11 | Alta | Schema Prisma vazio, migrations apenas plans/ajuste de copy | Banco limpo não suporta as consultas existentes |
 | INT-12 | Alta | verify-about-bundle exige dashboard.png/macbook-silver.png ausentes; assets atuais usam macbook.png | Verificação de bundle está incompatível com os assets atuais |
 | INT-13 | Média | Catálogo aplica termo, categoria ou estado com else-if | Campos preenchidos juntos não são combinados |
-| INT-14 | Média | ResetPassword aponta `/esqueci-minha-senha`; router usa `/esqueci-senha` | Link de retorno termina no fallback |
+| INT-14 | Resolvido nesta branch | ResetPassword aponta /esqueci-senha | Destino de recuperação já registrado |
 
 Evidências locais: [FirstAccess](../frontend/src/pages/FirstAccess.tsx),
 [auth.controller](../backend/src/controller/auth.controller.ts),
@@ -34,8 +34,9 @@ Evidências locais: [FirstAccess](../frontend/src/pages/FirstAccess.tsx),
 [CatalogoEmpresas](../frontend/src/pages/CatalogoEmpresas.tsx),
 [ResetPassword](../frontend/src/pages/ResetPassword.tsx),
 [verificador do bundle](../frontend/scripts/verify-about-bundle.mjs).
-INT-06 e INT-12 são incompatibilidades encontradas por inspeção;
-build não foi executado para reproduzir o diagnóstico.
+Na revisão inicial, INT-06/INT-12 eram achados estáticos. Na integração atual,
+INT-06 foi corrigido; o gate de assets Sobre (INT-12) continua falhando.
+Não alterar requisitos Home/Sobre sem resolver AD-002.
 
 ## Autenticação, autorização e isolamento
 
@@ -94,9 +95,9 @@ as inconsistências dos demais módulos permanecem.
 
 A extração inicial preservou contratos legados e documentou falhas SQL
 como 200/404. A adoção atual corrige isso: infraestrutura retorna 500,
-ausência 404; sucesso usa data. INT-08/INT-10 persistem: URLs e diferenças
-snake_case/camelCase não foram resolvidas. Frontend foi explicitamente
-adiado e seus consumidores ainda exigem envelopes antigos (ver api.md).
+ausência 404; sucesso usa data. O adiamento inicial de frontend foi
+substituído pela integração autorizada dos consumidores existentes, que
+corrige INT-08/INT-10. Login continua excluído e incompatível (ver api.md).
 Nenhuma tabela/migration foi criada.
 
 Os quatro testes HTTP locais passaram com persistência simulada. O
@@ -108,3 +109,12 @@ A camada global de erro/sucesso substitui a ausência de padronização
 da revisão inicial. Stack/details/code fora de produção são sanitizados;
 produção retorna apenas status/message. Testes históricos de extração
 não substituem a validação da adoção, registrada em operacao.md.
+
+## Verificação da integração — 2026-10-12
+
+Estado acima para codex/frontend-backend-integration, dependente do PR #16,
+com destino à staging; não comprova merge. Passaram 25 testes direcionados
+frontend, 60 backend, typechecks frontend/foundation/contratos e Vite.
+O build completo continua falhando no gate histórico de assets Sobre e lint
+em SignSelect preexistente. Login, dashboard, páginas/rotas novas, schema e
+migrations estão fora desta entrega.

@@ -78,25 +78,48 @@ async function unreachableQuery(): Promise<{ rows: Record<string, unknown>[] }> 
   throw new Error('Consulta de persistência não esperada');
 }
 
-test('Validação de convite retorna envelope de sucesso e erros esperados sem diagnóstico em produção', async t => {
+test('Validação de convite consulta users pelo e-mail e perfil do JWT e retorna data', async t => {
+  const token = jwt.sign({ email: 'pessoa@example.test', role: 'empresa' }, environment.JWT_INVITE_SECRET);
   let scenario = 'valid';
   const calls: { text: string; values?: unknown[] }[] = [];
+
   await withRoutes(t, async (text, values) => {
     calls.push({ text, values });
+
     if (scenario === 'database') throw new Error('SQL confidencial');
-    return { rows: scenario === 'missing' ? [] : [{ email: 'pessoa@example.test', reset_password_expires: new Date(Date.now() + (scenario === 'expired' ? -60000 : 60000)) }] };
+
+    return { rows: scenario === 'missing' ? [] : [{ id: 'user-id', email: 'pessoa@example.test', role: 'empresa', status: scenario === 'active' ? 'active' : 'pending', invite_token: scenario === 'used' ? 'outro-convite' : token }] };
   }, async url => {
     assert.deepEqual(await request(url, '/api/v1/auth/validate-token'), { status: 400, body: { status: 400, message: 'Token de convite ausente.' } });
     assert.equal(calls.length, 0);
-    assert.deepEqual(await request(url, '/api/v1/auth/validate-token?token=convite-local'), { status: 200, body: { data: { email: 'pessoa@example.test' } } });
-    assert.deepEqual(calls.at(-1)?.values, ['convite-local']);
+    assert.deepEqual(await request(url, '/api/v1/auth/validate-token?token=' + encodeURIComponent(token)), { status: 200, body: { data: { email: 'pessoa@example.test' } } });
+    assert.deepEqual(calls.at(-1)?.values, ['pessoa@example.test', 'empresa']);
+    assert.match(calls.at(-1)!.text, /FROM users WHERE email = \$1 AND role = \$2/);
+
     for (const [nextScenario, status, message] of [
-      ['expired', 400, 'Este link de convite expirou.'],
-      ['missing', 404, 'Este link de convite é inválido ou já foi utilizado.'],
+      ['active', 400, 'Esta conta já foi ativada anteriormente.'],
+      ['used', 401, 'Este link de convite já foi utilizado ou é inválido.'],
+      ['missing', 404, 'Usuário não encontrado.'],
       ['database', 500, 'Erro interno do servidor'],
     ] as const) {
       scenario = nextScenario;
-      assert.deepEqual(await request(url, '/api/v1/auth/validate-token?token=convite-local'), { status, body: { status, message } });
+      assert.deepEqual(await request(url, '/api/v1/auth/validate-token?token=' + encodeURIComponent(token)), { status, body: { status, message } });
+    }
+  });
+});
+
+test('Pré-validação rejeita JWT inválido, expirado ou sem identidade antes da persistência', async t => {
+  const expired = jwt.sign({ email: 'pessoa@example.test', role: 'empresa' }, environment.JWT_INVITE_SECRET, { expiresIn: -1 });
+  const wrongSecret = jwt.sign({ email: 'pessoa@example.test', role: 'empresa' }, 'outra-chave-sintetica');
+  const withoutIdentity = jwt.sign({ userId: 'user-id' }, environment.JWT_INVITE_SECRET);
+
+  await withRoutes(t, unreachableQuery, async url => {
+    for (const token of ['token-invalido', expired, wrongSecret, withoutIdentity]) {
+      const response = await request(url, '/api/v1/auth/validate-token?token=' + encodeURIComponent(token));
+
+      assert.equal(response.status, 401);
+      assert.equal(response.body.status, 401);
+      assert.equal(response.body.message, 'Link de convite inválido ou expirado.');
     }
   });
 });

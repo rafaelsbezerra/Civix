@@ -2,13 +2,9 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { Mail, ArrowLeft, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
-import axios from "axios";
+import { requestPasswordReset } from "@/lib/api";
 
 import civixLogo from "../assets/civix/logoCivix.png";
-
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:3000",
-});
 
 export default function ForgotPassword() {
   const navigate = useNavigate();
@@ -29,22 +25,11 @@ export default function ForgotPassword() {
     try {
       setLoading(true);
 
-      await api.post("/api/v1/users/esqueci-senha", { email });
+      await requestPasswordReset(email);
 
       setSubmitted(true);
     } catch (err: unknown) {
-      if (axios.isAxiosError(err)) {
-        if (err.response?.status === 404) {
-          setError("Rota não encontrada no servidor. Verifique a API no backend.");
-        } else {
-          setError(
-            err.response?.data?.error ||
-              "Ocorreu um erro ao enviar o e-mail de recuperação."
-          );
-        }
-      } else {
-        setError("Ocorreu um erro inesperado. Tente novamente.");
-      }
+      setError(err instanceof Error ? err.message : "Ocorreu um erro ao enviar o e-mail de recuperação.");
     } finally {
       setLoading(false);
     }

@@ -12,8 +12,8 @@ provedores ou arquitetura novos.
 | DEC-03 | Papéis | Mapear superadmin, admin empresa, vendedor e cliente para permissões explícitas |
 | DEC-04 | Tenant | Vínculos usuário/empresa, contexto autenticado, filtros SQL, IA e acesso público |
 | DEC-05 | Persistência | Prisma 7/SQL nativo/inversa, PostgreSQL novo e nome users confirmados; campos/vínculos/restrições, baseline e SQL antigos pendentes; tooling integrado via PR #7 |
-| DEC-06 | API | Envelope, erro/status e enum backend integrados; faltam frontend e serialização/validação geral. Paginação somente quando necessário, fora das pendências atuais |
-| DEC-07 | Onboarding | Convite, primeiro acesso, reenvio, reset, expiração, uso único, sessão e revogação |
+| DEC-06 | API | Backend integrado; consumidores frontend adaptados parcialmente, com login excluído; serialização/validação geral pendentes. Paginação sob demanda |
+| DEC-07 | Onboarding | Pré-validação/ativação de convite alinhadas nesta branch; reenvio/reset divergente, sessão e revogação continuam pendentes |
 | DEC-08 | Planos/vendas | Plano por empresa ou usuário, mensalidade/setup, venda automática/manual, exclusão, cobrança e limites |
 | DEC-09 | Trial | Regra de sete dias, campos, bloqueio e conversão ao plano |
 | DEC-10 | Conversas/leads | Estados, qualificação, funil, resultado, prioridade, reabertura e concorrência ao assumir |
@@ -93,3 +93,17 @@ uma operação concorrente; nenhum schema/migration ou banco real foi executado.
 DEC-05: users e banco criado do zero confirmados. CLI/client/adapter Prisma
 fixados em 7.10.0 com migrations SQL nativas; tooling integrado à staging
 via PR #7. Campos e vínculos do schema continuam aguardando confirmação.
+
+## Integração autorizada — 2026-10-12
+
+Adaptar consumidores frontend existentes e pré-validação do convite na
+branch codex/frontend-backend-integration, dependente do PR #16, para staging.
+Login e seus destinos ficam intactos por exclusão explícita. Sem páginas,
+rotas, dashboard, cadastro de empresa ou UI nova de seleção de plano.
+Home/Sobre permanecem sob AD-002; proposta de animações separada da implementação.
+Nenhuma biblioteca nova foi instalada.
+
+HTTP-04-B é parcial: data/message e URLs/campos foram adotados nos demais
+consumidores existentes. Pré-validação e ativação usam o mesmo JWT de convite,
+perfil/status e invite_token. Reenvio de recuperação continua pendente.
+Ver [integração frontend/backend](frontend-backend.md).

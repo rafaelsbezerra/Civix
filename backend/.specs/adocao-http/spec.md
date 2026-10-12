@@ -15,7 +15,8 @@ Estado: implementado, verificado na entrega e integrado em staging via PRs
 - Falhas esperadas lançam AppError; inesperadas chegam ao handler global
   como 500. Causa original preservada, com stack/diagnóstico sanitizados
   fora de production; production contém somente status/message.
-- Frontend explicitamente adiado: documentar consumidores incompatíveis.
+- Na adoção inicial, frontend foi adiado. A integração posterior adapta
+  consumidores existentes, exceto login explicitamente excluído.
 - Na adoção HTTP inicial, repositories ficaram apenas como interfaces.
   Em 2026-10-12, o modo local autorizou adapters JSON/PostgreSQL e services
   auth/admin. Regras existentes e schema preservados; paginação sob demanda.
@@ -34,15 +35,25 @@ Estado: implementado, verificado na entrega e integrado em staging via PRs
 5. Login não possui reason nem switch; service retorna dados ou lança erro.
 6. Validar contratos, usuários, empresas, auth, planos e middleware, com
    mocks de persistência/e-mail; production sem stack e staging com stack.
-7. Docs API, padrões, operação e AGENTS atualizados. Frontend permanece
-   sem alterações; compatibilidade dos consumidores não é alegada.
+7. Na adoção inicial, docs API/padrões/operação e AGENTS foram atualizados;
+   frontend permaneceu sem alterações. Na integração posterior, atualizar
+   docs afetados sem editar AGENTS e sem alegar compatibilidade de login excluído.
 
-## Consumidores para a próxima etapa
+## Integração posterior dos consumidores — 2026-10-12
 
-lib/api.ts exige success; login lê token no topo; FirstAccess lê email no
-corpo de sucesso. Login/ForgotPassword/ResetPassword/FirstAccess leem error,
-que será message. Catálogo/perfil/planos dependem de lib/api.ts. Adaptação
-necessária antes de considerar frontend integrado ao novo backend.
+Na branch codex/frontend-backend-integration, dependente do PR #16,
+lib/api.ts extrai data, apresenta message e centraliza a origem/prefixos.
+Catálogo/perfil/planos, recuperação/reset e primeiro acesso usam esse contrato;
+busca e campos snake_case corrigidos. Login permanece intacto, lendo token
+no topo e error, por exclusão explícita. HTTP-04-B continua parcialmente completo.
+
+Pré-validação e ativação verificam o mesmo JWT de convite, perfil/status e
+users.invite_token. Consulta de reset/ResetTokenRow retirados da pré-validação;
+reenvio/reset divergente continua pendente. Sem páginas/rotas novas ou schema.
+A entrega registrou 25 testes direcionados frontend, 60 backend e typechecks
+frontend/foundation/contratos/Vite aprovados. Build completo falha em assets
+Sobre históricos; lint em SignSelect preexistente. AD-002 permanece.
+Ver [spec frontend](../../../frontend/.specs/features/backend-integration/spec.md).
 
 ## Verificação da adoção — 2026-10-10
 

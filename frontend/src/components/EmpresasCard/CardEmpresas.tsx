@@ -35,7 +35,7 @@ export default function CatalogoEmpresas() {
       } catch (err) {
         console.error('Erro ao carregar empresas para a home:', err)
         if (isMounted) {
-          setError('Erro ao carregar lista de empresas.')
+          setError(err instanceof Error ? err.message : 'Erro ao carregar lista de empresas.')
         }
       } finally {
         if (isMounted) {

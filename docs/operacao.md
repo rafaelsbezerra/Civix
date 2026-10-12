@@ -41,12 +41,12 @@ altere o .env automaticamente como parte dos testes.
 | DATABASE_URL | Conexão Neon no modo real e configuração Prisma |
 | PORT | Porta backend, default 3000 |
 | JWT_SECRET | Assinatura/verificação do access token |
-| JWT_INVITE_SECRET | Convite/ativação; código ainda tem fallback fixo |
+| JWT_INVITE_SECRET | Convite, pré-validação e ativação; código ainda tem fallback fixo |
 | JWT_RESET_SECRET | Reenvio legado; ausente do .env.example |
 | FRONTEND_URL | Links de e-mail; não controla o CORS atual |
 | RESEND_API_KEY | Cliente de e-mail Resend |
 | MAIL_FROM | Remetente configurado/verificado |
-| VITE_API_URL | URL pública embutida no frontend; significado inconsistente entre consumidores |
+| VITE_API_URL | Origem pública do backend para os helpers atuais; valor anterior com /api/v1 aceito; login excluído mantém configuração antiga |
 
 API_BASE_URL, BREVO_API_KEY, SENDER_EMAIL e SENDER_NAME aparecem no
 exemplo, mas não têm uso encontrado no fluxo ativo revisado.
@@ -99,8 +99,9 @@ sem incluir prisma.config.ts. Na extração inicial, CLI6/configuração7 ainda
 causava incompatibilidade; esse bloqueio foi corrigido pelo tooling Prisma 7.
 Nenhuma dependência nova ou acesso externo naquela extração.
 
-Interfaces de repositories não são implementações; a aplicação mantém SQL
-nos services até a etapa futura de repositories. Nenhuma migration aplicada nesta tarefa.
+Na extração histórica, repositories continha apenas interfaces e SQL ficava
+nos services. A entrega posterior do PR #16 criou/adotou os adapters
+JSON/PostgreSQL; SQL fica em persistence/postgres. Nenhuma migration aplicada.
 
 ## Execução da adoção HTTP
 
@@ -114,8 +115,11 @@ e demais valores permitem stack/details/code sanitizados. requestId é opcional
 quando recebido pelo contexto, sem geração automática nesta etapa.
 
 Nenhuma dependência, tabela ou migration foi alterada por esta adoção.
-Repositories são interfaces apenas; SQL permanece nos services. Frontend
-não foi adaptado: executar ambos não comprova compatibilidade dos envelopes.
+Nesse registro histórico da adoção HTTP, repositories continha apenas
+interfaces e SQL permanecia nos services; frontend não havia sido adaptado.
+O PR #16 substituiu esse estado de persistência, e a integração atual adapta
+consumidores existentes, exceto login. Executar ambos não comprova por si só
+compatibilidade completa.
 Os 27 testes acima são históricos; a suíte ampliada atual passou com 36 testes. O bloqueio anterior do typecheck completo foi corrigido pela integração do tooling Prisma 7.
 
 
@@ -183,3 +187,21 @@ Prisma 7.10.0 já instalado em outra worktree, sem modificar dependências.
 A node_modules desta checkout ainda tem CLI 6.12.0: o typecheck completo nela
 falha pela configuração Prisma preexistente. Os testes da API não usam Prisma.
 Sem banco real, envio externo, execução de migrations ou instalação.
+
+## Integração frontend/backend — 2026-10-12
+
+Na branch codex/frontend-backend-integration, dependente do PR #16, os
+consumidores existentes usam VITE_API_URL como origem, com padrão
+http://localhost:3000. Valores terminados em /api/v1 também são aceitos pelos
+helpers comuns sem repetir prefixo. Empresas/planos/recuperação usam /api/v1;
+convite/primeiro acesso usam /api/auth. Login permaneceu intacto e excluído,
+portanto sua configuração/envelope continuam pendentes.
+
+Verificação da entrega: 25 testes direcionados frontend, 60 backend,
+typechecks frontend/foundation/contratos e Vite aprovados. npm run build do
+frontend executa etapas adicionais: o gate de assets Sobre permanece com
+falha histórica (AD-002). npm run lint também falha em SignSelect preexistente.
+Não declarar build/lint completos aprovados. Sem instalação de dependências,
+banco real, envio externo, schema ou migrations.
+
+Procedimento e limites: [integração frontend/backend](frontend-backend.md).

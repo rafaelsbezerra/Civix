@@ -1,10 +1,10 @@
 # Integração do frontend com o backend
 
 Implementação autorizada em 2026-10-12 na branch codex/frontend-backend-integration,
-derivada do PR #16. Estado inicial: em andamento; verificações da entrega pendentes.
+derivada do PR #16. Consumidores do escopo adaptados; verificações direcionadas concluídas.
 A entrega é destinada à staging e depende do PR #16.
 
-## O que será adaptado
+## Consumidores adaptados
 
 Os consumidores já implementados passam a ler data no sucesso e message nos
 erros. O backend determina se os registros vêm do JSON ou PostgreSQL; o
@@ -27,7 +27,7 @@ A pré-validação passa a conferir o JWT de convite e users.invite_token,
 conforme a mesma identidade/perfil e status utilizados na ativação. Isso não
 altera o fluxo de reenvio que ainda usa token de recuperação.
 
-## Configuração prevista
+## Configuração
 
 No ambiente do frontend:
 
@@ -48,7 +48,7 @@ Não há dashboard, novas rotas, formulário de cadastro ou UI nova de seleção
 Plans.tsx permanece sem rota; PlanCard continua com seu link atual.
 Empresas mantêm os nomes retornados pelo backend, como descricao_detalhada.
 
-Nenhuma biblioteca ou animação será implementada nesta entrega. O planejamento
+Nenhuma biblioteca foi instalada e nenhuma animação foi implementada nesta entrega. O planejamento
 do site está em [plano de animações](plano-animacoes.md).
 
 ## Verificação
@@ -56,7 +56,21 @@ do site está em [plano de animações](plano-animacoes.md).
 Baseline anterior à implementação: 42/54 testes frontend aprovados; doze falhas
 históricas em layout, rotas, assets e localStorage do Node 25. Lint aponta
 set-state-in-effect em SignSelect; build aponta a caixa do import ResetPassword.
-Novos resultados serão registrados após os ajustes. Nenhum banco remoto,
-envio externo de e-mail ou instalação está incluído nesta verificação.
+Após os ajustes, os 25 testes direcionados de contratos/consumidores frontend e
+os 60 testes foundation backend passaram. Os typechecks backend, TypeScript e
+Vite frontend passaram. O import de ResetPassword foi corrigido; o build completo
+continua falhando no gate histórico do asset dashboard.png de Sobre. Lint mantém
+o erro preexistente react-hooks/set-state-in-effect em SignSelect. Esses limites
+não autorizam restaurar os requisitos históricos de Home/Sobre (AD-002).
+A suíte completa frontend terminou em 65/77, mantendo as mesmas doze falhas
+históricas da baseline em sete arquivos, sem novas falhas.
+
+Smoke HTTP real: nove verificações aprovadas com Express e JSON temporário
+isolado. No navegador, catálogo exibiu duas empresas, busca por “Ação + Saúde”
+retornou uma, perfil apresentou descricao_detalhada e a Home carregou empresas
+e um plano da API sem login. A verificação cobriu dados/sucesso; os estados de
+erro/cancelamento dos formulários foram cobertos pelos testes direcionados.
+Servidores e fixture foram temporários; o JSON local real foi preservado.
+Nenhum banco remoto, envio externo de e-mail ou instalação foi utilizado.
 
 Spec: [integração](../frontend/.specs/features/backend-integration/spec.md).

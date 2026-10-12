@@ -1,13 +1,9 @@
 import { useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, CheckCircle2, AlertCircle, Lock, Loader2 } from "lucide-react";
-import axios from "axios";
+import { resetPassword } from "@/lib/api";
 
 import civixLogo from "../assets/civix/logoCivix.png";
-
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:3000",
-});
 
 export default function ResetPassword() {
   const [searchParams] = useSearchParams();
@@ -47,10 +43,7 @@ export default function ResetPassword() {
       setLoading(true);
 
       // Envia o token e a nova senha para o backend
-      await api.post("/api/v1/users/redefinir-senha", {
-        token,
-        password,
-      });
+      await resetPassword(token, password);
 
       setSuccess(true);
 
@@ -59,14 +52,7 @@ export default function ResetPassword() {
         navigate("/login");
       }, 2500);
     } catch (err: unknown) {
-      if (axios.isAxiosError(err)) {
-        setError(
-          err.response?.data?.error ||
-            "Não foi possível redefinir a senha. O link pode ter expirado."
-        );
-      } else {
-        setError("Ocorreu um erro inesperado. Tente novamente.");
-      }
+      setError(err instanceof Error ? err.message : "Não foi possível redefinir a senha. O link pode ter expirado.");
     } finally {
       setLoading(false);
     }
@@ -83,7 +69,7 @@ export default function ResetPassword() {
             O token de redefinição de senha não foi encontrado. Solicite um novo link na tela de recuperação.
           </p>
           <button
-            onClick={() => navigate("/esqueci-minha-senha")}
+            onClick={() => navigate("/esqueci-senha")}
             className="w-full py-2.5 rounded-lg bg-[#061c2c] text-white text-xs font-semibold hover:bg-[#0b293d] transition"
           >
             Solicitar Novo Link

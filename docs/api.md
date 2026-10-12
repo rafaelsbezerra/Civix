@@ -45,18 +45,23 @@ ativo, vínculo tenant ou permissões do banco. Não há refresh/logout/revogaç
 Recuperação principal gera token aleatório, salva SHA-256 e expiração 1h
 em `users`; reset recalcula o hash e limpa token e expiração.
 Convite assina JWT 24h, armazena token em `users`, ativa status e limpa
-invite_token. A validação pública consulta reset_password_token em `users`
-sem calcular hash. Reenvio gera JWT de reset 1h e grava token cru sem
-atualizar expiração. Esses fluxos não compartilham um protocolo consistente, mesmo após a
-unificação em users. Login de contas com status pending retorna 401; usuários
+invite_token. Pré-validação e ativação compartilham o helper getInviteUser:
+verificam JWT com JWT_INVITE_SECRET, e-mail/perfil, status e users.invite_token.
+Token inválido/expirado retorna 401; usuário ausente 404; já ativo 400;
+token consumido ou divergente 401. A ativação consome o token de forma
+condicional por ID/token para impedir uso concorrente.
+
+Reenvio ainda gera JWT de reset 1h e grava token cru sem atualizar expiração.
+Esse protocolo não corresponde ao reset principal, que espera hash SHA-256;
+a correção de convite não resolve o reenvio. Login de contas com status pending retorna 401; usuários
 atuais sem status continuam autenticando pelas regras existentes. Convites
 não substituem contas ativas ou atuais sem status.
 
 ## Dados e respostas
 
-Empresas retornam linhas SQL sem mapper; campos como `descricao_detalhada`
-e `data_cadastro` não correspondem aos tipos frontend `descricaoDetalhada`
-e `dataCadastro`. Planos possuem mapper e retornam id e price como strings;
+Empresas retornam linhas SQL sem mapper, com `descricao_detalhada` e
+`data_cadastro`. Os consumidores frontend agora utilizam esses nomes
+snake_case; a entrega não modifica o formato de dados do backend. Planos possuem mapper e retornam id e price como strings;
 billingPeriod é monthly/yearly/one_time e limits é um objeto flexível.
 Não há moeda explícita ou enforcement dos limites no backend.
 
@@ -71,8 +76,9 @@ retorna 500; ausência retorna 404. Planos preservam 400 para plano
 inválido/inativo ou usuário ausente.
 
 Não existe paginação, metadados total/cursor ou limite de página; empresas
-não têm ordenação determinística. Não há OpenAPI versionado ou testes
-de integração de contrato frontend/backend.
+não têm ordenação determinística. Não há OpenAPI versionado. Há testes direcionados de consumidores e
+contratos com persistência/HTTP simulados; não comprovam integração no
+navegador contra um banco real.
 
 ## Contrato adotado e exemplos
 
@@ -88,28 +94,44 @@ As URLs e os protocolos de autenticação permanecem. Na branch
 codex/json-postgres-repositories, convite, ativação, login e recuperação usam
 somente users; a unificação não inclui schema ou migrations.
 
-## Frontend pendente: incompatibilidades conhecidas
+## Consumidores frontend — adoção parcial
 
-Adoção backend autorizada com frontend explicitamente adiado. Não considerar
-os consumidores integrados até adaptar:
+Na branch codex/frontend-backend-integration, dependente do PR #16, os
+consumidores existentes foram adaptados:
 
-- `lib/api.ts`: remover exigência de success em fetchApi/selectPlan; manter data
-  e ler message do corpo de erro HTTP, atualmente descartado por fetchApi.
-- `pages/login.tsx`: ler response.data.data.token e message no erro Axios.
-- `pages/FirstAccess.tsx`: ler data.data.email e message nos erros.
-- `pages/ForgotPassword.tsx` e `pages/ResetPassword.tsx`: ler message nos erros;
-  ignoram corpo de sucesso.
-- Catálogo, perfil e planos dependem de lib/api.ts.
+- lib/api.ts extrai data, aceita meta opcional e exibe message do erro público;
+  não exige success nem usa dados fictícios para substituir falhas da API.
+- Catálogo/perfil usam os campos snake_case e busca /empresas/buscar?q=.
+  IDs, categorias, estados e tokens são codificados nos parâmetros.
+- FirstAccess usa /api/auth, lê o resultado já extraído pelo helper e aceita
+  token por query ou parâmetro da rota existente.
+- ForgotPassword/ResetPassword usam os helpers comuns de /api/v1/users e
+  exibem message; o link de recuperação aponta para /esqueci-senha.
+- Planos e selectPlan usam o novo envelope; selectPlan envia o Bearer existente.
 
-requestId não existe em produção e não deve ser obrigatório no frontend.
-Persistem diferenças snake_case/camelCase e URLs anteriormente documentadas.
+VITE_API_URL representa a origem do backend (padrão http://localhost:3000).
+O helper aceita também o valor anterior terminado em /api/v1 sem duplicar
+prefixos; inclui /api/v1 ou /api/auth por endpoint.
+
+**Login permanece pendente e intacto por exclusão explícita:** login.tsx
+ainda lê token no topo e error nos erros Axios. Não declarar HTTP-04-B completo
+ou o fluxo autenticado integrado. Seus destinos, incluindo dashboard inexistente,
+foram preservados. Não há UI nova de seleção de plano, páginas ou rotas novas.
+requestId não existe em produção e não é obrigatório no frontend.
+
+Detalhes e verificações: [integração frontend/backend](frontend-backend.md).
 
 ## Histórico da extração
 
 A extração anterior preservou envelopes legados. Esta adoção substitui essa
 restrição em usuários, auth/admin, empresas, planos, root e middleware.
-A adoção HTTP está integrada em staging bedb73a. Em 2026-10-12, o modo local
-antecipou adapters e uso das interfaces em empresas/usuários/auth/planos, no
-checkout sem commit. Paginação permanece sob demanda; schema segue pendente.
-Verificação da entrega: 36 testes e typechecks isolados aprovados; detalhes
-em operacao.md. Esta atualização documental não reexecuta esses checks.
+A adoção HTTP foi integrada em staging bedb73a. O registro inicial de
+2026-10-12 descrevia o modo local ainda sem commit; depois ele foi publicado
+pelo PR #16, incluindo adapters e uso das interfaces nos módulos atuais.
+A branch de integração frontend depende desse PR, sem afirmar merge.
+Paginação permanece sob demanda; schema segue pendente.
+
+Registro histórico da adoção HTTP: 36 testes e typechecks isolados aprovados.
+A integração atual registrou 25 testes direcionados frontend e 60 backend,
+typechecks frontend/foundation/contratos e Vite aprovados. Build completo e
+lint continuam com falhas históricas; detalhes em operacao.md.

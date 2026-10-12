@@ -21,9 +21,11 @@
 ## Referência atual
 
 Adoção backend e auditoria documental integradas em staging bedb73a, em
-2026-10-10. Adaptação dos consumidores frontend continua pendente. Paginação
-será adotada somente quando necessário; repositories ficam para etapa futura,
-fora das pendências atuais. Ver o [relatório consolidado](../../docs/revisao-pendencias-specs.md).
+2026-10-10. Na branch codex/frontend-backend-integration, derivada do PR #16,
+os consumidores existentes de empresas/planos, recuperação/redefinição e primeiro
+acesso foram adaptados. Login e novos destinos continuam fora do escopo por
+orientação explícita do usuário. Paginação será adotada somente quando necessário.
+O PR #16 implementa os repositories JSON/PostgreSQL; esta entrega depende dele. Ver o [relatório consolidado](../../docs/revisao-pendencias-specs.md).
 
 ## Handoff atual — auditoria de 2026-10-10
 
@@ -36,10 +38,26 @@ fora das pendências atuais. Ver o [relatório consolidado](../../docs/revisao-p
   Header usa destinos de aplicação, incluindo /planos sem rota registrada.
 - **Next step**: confirmar se os requisitos históricos continuam obrigatórios
   ou se as alterações atuais devem ser incorporadas às specs; não escolher isso
-  automaticamente. Adaptação frontend aos contratos backend segue adiada.
+  automaticamente. A integração dos consumidores autorizados está descrita no
+  handoff abaixo; login segue adiado.
 - **Verificação atual**: leitura de source/config/testes e existência de arquivos;
   sem execução de teste, lint, build, navegador, CLS, zoom ou contraste.
 - **Referência**: [revisão consolidada](../../docs/revisao-pendencias-specs.md).
+
+## Handoff — integração e planejamento de 2026-10-12
+
+- **Feature**: [backend-integration](features/backend-integration/spec.md).
+- **Entregue**: envelopes, URLs/prefixos e snake_case nos consumidores existentes;
+  pré-validação backend alinhada ao JWT/usuário/token da ativação de convite.
+- **Preservado**: login.tsx, destinos, rotas/layouts e requisitos sob AD-002.
+- **Validação**: 25 testes frontend direcionados e 60 foundation backend passaram;
+  typechecks backend, TypeScript e Vite passaram. Fullsuite frontend: 65/77, com
+  as mesmas 12 falhas históricas. Smoke HTTP isolado: 9/9; catálogo/busca/perfil
+  e planos da Home confirmados no navegador. Build completo/lint mantêm
+  falhas históricas documentadas em [integração](../../docs/frontend-backend.md).
+- **Proposta**: [mapa de animações](../../docs/plano-animacoes.md), Motion for React
+  com CSS. Biblioteca/instalação e implementação **Aguardando resposta**.
+- **Entrega**: PR para staging, dependente do #16; sem novas dependências/schema.
 
 ## Handoff histórico — não representa aprovação da versão atual
 

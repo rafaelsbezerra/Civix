@@ -30,7 +30,7 @@ export default function PerfilEmpresa() {
         setEmpresa(data);
       } catch (err) {
         console.error('Erro ao carregar empresa:', err);
-        setError('Erro ao carregar detalhes da empresa. Tente novamente mais tarde.');
+        setError(err instanceof Error ? err.message : 'Erro ao carregar detalhes da empresa. Tente novamente mais tarde.');
       } finally {
         setLoading(false);
       }
@@ -69,12 +69,7 @@ export default function PerfilEmpresa() {
     );
   }
 
-  // Suporte a ambos os formatos de propriedade (snake_case do PG ou camelCase da API)
-  const textoDescricaoDetalhada = 
-    (empresa as unknown as { descricao_detalhada?: string }).descricao_detalhada || 
-    (empresa as unknown as { descricaoDetalhada?: string }).descricaoDetalhada || 
-    empresa.descricao || 
-    '';
+  const textoDescricaoDetalhada = empresa.descricao_detalhada || empresa.descricao || '';
 
   return (
     <div className="min-h-screen bg-[var(--color-civix-ivory)] flex flex-col font-[family-name:var(--font-body)]">
