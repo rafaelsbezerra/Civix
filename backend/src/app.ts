@@ -9,9 +9,12 @@ import firstAccessRoutes from './routes/auth.routes.js';
 import companyRoutes from './routes/company.routes.js';
 import planRoutes from './routes/plan.routes.js';
 import { createSuccessResponse } from './shared/contracts/response.contract.js';
-import { createErrorHandler, createNotFoundHandler } from './middlewares/error.handler.js';
+import { createLogMiddleware } from './middlewares/log.middleware.js';
+import { createErrorHandler, createNotFoundHandler, terminateErroredResponse } from './middlewares/error.handler.js';
 
 export const app = express();
+
+app.use(createLogMiddleware());
 
 app.use(cors({
   origin: true,
@@ -42,3 +45,4 @@ app.use(`${apiVersion}/plans`, planRoutes);
 
 app.use(createNotFoundHandler());
 app.use(createErrorHandler());
+app.use(terminateErroredResponse);

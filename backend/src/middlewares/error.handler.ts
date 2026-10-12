@@ -1,11 +1,26 @@
-import type { ErrorRequestHandler, RequestHandler } from 'express';
+import type { ErrorRequestHandler, RequestHandler, Request } from 'express';
 import { serializeError, type ErrorContext } from '../shared/contracts/error.contract.js';
 import { AppError } from '../shared/errors/app.error.js';
+import { getLogger } from '../shared/logging/log.context.js';
+import { getLogHttp } from './log.middleware.js';
 import { ErrorCode } from '../shared/errors/error.code.js';
 
+function logRequestError(error: unknown, request: Request) {
+  const status = error instanceof AppError ? error.status : 500;
+  try {
+    getLogger()[status < 500 ? 'warn' : 'error']({
+      event: 'http.request.failed', module: 'http', message: 'Falha no processamento da requisição',
+      error, http: getLogHttp(request, status),
+    });
+  } catch {
+    // Logging não deve alterar o tratamento da exceção original.
+  }
+}
+
 export function createErrorHandler(context: ErrorContext = {}): ErrorRequestHandler {
-  return (error: unknown, _request, response, next) => {
+  return (error: unknown, request, response, next) => {
     if (response.headersSent) {
+      logRequestError(error, request);
       next(error);
       return;
     }
@@ -29,6 +44,7 @@ export function createErrorHandler(context: ErrorContext = {}): ErrorRequestHand
       });
     }
 
+    logRequestError(error, request);
     const body = serializeError(error, context);
 
     response.status(body.status).json(body);
@@ -44,3 +60,13 @@ export function createNotFoundHandler(): RequestHandler {
     }));
   };
 }
+
+// Após o handler registrar e encaminhar o erro, fechar a conexão sem o console bruto do Express.
+export const terminateErroredResponse: ErrorRequestHandler = (error, _request, response, next) => {
+  if (!response.headersSent) {
+    next(error);
+    return;
+  }
+
+  response.destroy();
+};

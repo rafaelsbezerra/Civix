@@ -1,6 +1,7 @@
 # Logs estruturados — tarefas e entrega
 
-Status: implementação autorizada; configuração confirmada; execução em andamento.
+Status: fundação implementada/verificada; revisão independente concluída.
+Adoção nos services pendente, em commit separado.
 Referência: [spec](spec.md). Data: 2026-10-12.
 
 ## Fase documental atual
@@ -24,19 +25,20 @@ service e environment.
 Mensagem prevista: feat(logging): add structured logging foundation
 
 - [x] Versões e LOG_LEVEL confirmados; sem limite de tamanho dos registros.
-- [ ] Instalar e fixar libs aprovadas no manifest/lockfile do backend.
-- [ ] Criar contrato, adapter, sanitização e contexto AsyncLocalStorage.
-- [ ] Integrar middleware antes do parser; gerar requestId interno.
-- [ ] Integrar diagnóstico único no handler global, sem alterar respostas.
-- [ ] Registrar conclusão/aborto e substituir console de inicialização.
-- [ ] Testar contrato, sanitização, exceção não-Error, falha do logger,
+- [x] Instalar e fixar libs aprovadas no manifest/lockfile do backend.
+- [x] Criar contrato, adapter, sanitização e contexto AsyncLocalStorage.
+- [x] Integrar middleware antes do parser; gerar requestId interno.
+- [x] Integrar diagnóstico único no handler global, sem alterar respostas.
+- [x] Registrar conclusão/aborto e substituir console de inicialização.
+- [x] Testar contrato, sanitização, exceção não-Error, falha do logger,
   concorrência, isolamento/cleanup, parser inválido e headers já enviados.
-- [ ] Testar regressão do HTTP em production e fora dela: comparar corpos
+- [x] Testar regressão do HTTP em production e fora dela: comparar corpos
   e status anteriores; nenhum requestId/header novo exposto ao cliente.
-- [ ] Atualizar docs gerais de arquitetura/operação/API com comportamento real.
+- [x] Atualizar docs gerais de arquitetura/operação/API com comportamento real.
 
 Aceite: LOG-01/02/03/04/06. Não adotar eventos de negócio nos services ainda.
-Este commit deve funcionar e ser verificável sem o commit 2.
+A fundação funciona sem eventos de negócio do commit 2. Rodada final:
+82 testes foundation, 22 logging e dois typechecks aprovados; revisão concluída.
 
 ## Commit 2 — adoção nos services
 
@@ -56,7 +58,7 @@ Dependência: commit 1 validado, disponível na branch desta tarefa.
 
 Aceite: LOG-05/06/07. Não modificar regras de autenticação, endpoints ou schema.
 
-## Integração e evidências
+## Integração e evidências — ainda pendentes
 
 - [ ] Reunir branches dependentes na branch de integração, preservando os
   dois commits. Registrar hashes e PRs reais depois de criados.
@@ -71,3 +73,16 @@ A criação desta spec não executa testes, comandos de banco ou infraestrutura.
 Verificação documental: fonte conferida por subagente; cinco links locais da
 spec/tarefas verificados, zero ausentes; diff --check sem erros. Nenhum teste
 executável, instalação ou alteração de código realizada nesta fase.
+
+
+## Rodada da fundação
+
+- [x] Executar test:foundation (82/82 finais; primeira rodada histórica 75).
+- [x] Executar test:logging (22/22 finais).
+- [x] Executar typecheck:foundation e typecheck:contracts.
+- [x] Verificar pino-pretty em processo filho e fechamento de seu worker.
+- [x] Incorporar parecer independente e sete casos adicionais: allowlist, profundidade, fechamento, rota desconhecida, falha produção, aliases e headersSent.
+- [ ] Criar/publicar o commit 1 validado, sem juntar adoção nos services.
+
+Histórico documental de criação da spec acima permanece anterior ao código.
+Estado atual/evidências: [validation.md](validation.md).

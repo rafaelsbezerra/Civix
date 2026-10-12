@@ -9,8 +9,11 @@ conforme a evidência do item. Entrega em PR não significa merge em staging.
 ## Logs estruturados internos
 
 [Spec e contrato](features/structured-logs/spec.md) e
-[tarefas em dois commits](features/structured-logs/tasks.md). Planejamento de
-2026-10-12; não implementado. Logs internos, sem tabela e sem alterar respostas HTTP.
+[tarefas em dois commits](features/structured-logs/tasks.md). Fundação
+implementada e verificada nesta worktree; adoção nos services ainda pendente.
+Logs internos, sem tabela ou alteração de respostas HTTP. Revisão independente
+concluída; [evidências](features/structured-logs/validation.md): 82 foundation,
+22 logging, dois typechecks e processo pretty aprovados.
 
 ## Grupos e situação
 
@@ -56,7 +59,9 @@ Services utilizam seletores por ambiente; SQL fica nos adapters PostgreSQL.
 ## Padrões ainda em discussão
 
 Validação runtime geral, serialização de datas/IDs/null, filtros/ordenação,
-geração/propagação de requestId, logs sem segredos e configuração runtime/CI.
+rastreabilidade no contrato HTTP, coleta/retenção de logs e configuração runtime/CI.
+Contexto/UUID interno e logs HTTP sem segredos estão implementados na fundação;
+adoção de eventos nos services permanece separada.
 Sanitização, enum, handler e diagnóstico já estão implementados. Autorização
 nova e isolamento por empresa exigem escopo próprio; não ampliar o MVP.
 

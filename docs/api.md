@@ -68,7 +68,8 @@ Não há moeda explícita ou enforcement dos limites no backend.
 Erros agora seguem o contrato compartilhado. Produção retorna somente
 status e message; exceção desconhecida retorna 500 com "Erro interno do servidor".
 Fora de produção, code, stack e details incluem diagnóstico/cause sanitizados.
-requestId é opcional quando fornecido ao contexto; não há geração automática.
+requestId permanece opcional quando fornecido ao contexto do serializador.
+O UUID automático dos logs é interno e não é acrescentado ao corpo/header HTTP.
 ErrorCode contém VALIDATION_ERROR, UNAUTHORIZED, FORBIDDEN, NOT_FOUND, CONFLICT
 e INTERNAL_ERROR. 404 e error handler ficam após os routers em app.ts;
 Express 5 encaminha rejeições de handlers assíncronos. Falha SQL de empresas
@@ -116,3 +117,16 @@ ainda lê token no topo e error nos erros Axios. Seus destinos incluem um dashbo
 requestId não existe em produção e não é obrigatório no frontend.
 
 Detalhes e verificações: [integração frontend/backend](frontend-backend.md).
+
+
+## Diagnóstico interno e contrato público
+
+O middleware de logging gera um UUID interno antes do parser e o propaga
+nas chamadas assíncronas. Esse UUID relaciona o diagnóstico e o resumo da
+requisição; não integra o payload de sucesso/erro nem cria um header novo.
+
+O handler registra stack/causa sanitizados internamente também em produção,
+enquanto os consumidores continuam recebendo os mesmos corpos, status e
+diagnóstico público definidos acima. LOG_LEVEL e apresentação pretty alteram
+somente a saída interna. Eventos de negócio nos services continuam em etapa
+separada; a fundação HTTP não muda autenticação, rotas ou regras comerciais.

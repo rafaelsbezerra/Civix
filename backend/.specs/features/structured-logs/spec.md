@@ -1,6 +1,7 @@
 # Logs estruturados internos
 
-Status: implementação autorizada; código ainda não iniciado. Data: 2026-10-12.
+Status: fundação implementada e verificada nesta worktree; revisão independente concluída.
+Adoção de eventos nos services ainda pendente. Data: 2026-10-12.
 Base examinada: staging 258da1a. Entrega: [tarefas e commits](tasks.md).
 
 ## Objetivo e decisões confirmadas
@@ -22,12 +23,16 @@ externa; retenção e consulta futura dependem da infraestrutura de coleta.
 
 ## Estado atual e pontos de integração
 
-[app.ts](../../../src/app.ts) registra o parser e routers antes do
-[handler global](../../../src/middlewares/error.handler.ts). O handler
-serializa erros sem logging e sem gerar requestId. O contrato HTTP admite
-requestId opcional, mas sua presença não será alterada por esta feature.
-[server.ts](../../../src/server.ts) usa console.log na inicialização.
-O manifest não declara bibliotecas de logging.
+[app.ts](../../../src/app.ts) registra log.middleware antes do parser/CORS/
+routers. O [handler global](../../../src/middlewares/error.handler.ts) emite
+http.request.failed com diagnóstico original sanitizado e mantém a resposta
+serializada existente. [server.ts](../../../src/server.ts) usa server.started/
+server.failed, sem console de inicialização.
+
+O contexto AsyncLocalStorage possui UUID interno por requisição. Não é
+acrescentado requestId ao contrato HTTP ou header de resposta. A presença
+opcional de requestId no contexto do serializador continua como antes.
+Manifest/lockfile fixam pino 10.4.0, pino-http 11.0.0 e pino-pretty 13.2.0.
 
 Services e adapters JSON/PostgreSQL já existem. Preservar routes → controller
 → service e seletores de persistência; não instrumentar repositories nesta
@@ -52,7 +57,8 @@ biblioteca não deve ser importada diretamente por cada service.
 | http | Quando pertinente: method, route normalizada, statusCode e durationMs |
 | error | Quando pertinente: name, code, status, message, stack, details e cause sanitizados |
 
-Exemplo ilustrativo da saída proposta, não API já implementada:
+Exemplo do contrato interno de log. O evento company.created pertence à
+adoção futura nos services; ainda não é emitido nesta fundação:
 
 ~~~json
 {
@@ -74,11 +80,12 @@ reaproveitar AppError/ErrorCode e classificação central pelo status.
 
 ## Estrutura, middleware e erros
 
-Arquivos previstos, seguindo domínio.papel.ts:
+Arquivos implementados, seguindo domínio.papel.ts:
 
 - src/shared/logging/log.contract.ts: contrato e interface de emissão.
 - src/shared/logging/log.logger.ts: adapter Pino, nível, formato e sanitização.
 - src/shared/logging/log.context.ts: AsyncLocalStorage e acesso ao logger atual.
+- src/shared/logging/log.sanitizer.ts: allowlist e sanitização de texto/diagnóstico.
 - src/middlewares/log.middleware.ts: contexto e ciclo HTTP.
 
 Registrar o middleware antes de express.json e das demais etapas que possam
@@ -120,7 +127,7 @@ para todo texto arbitrário: cobrir tokens em URLs, e-mail e credenciais em
 causas externas. Não limitar nem truncar registros por tamanho; tratar ciclos/objetos lançados
 sem instância de Error, sem invocar getters não confiáveis.
 
-## Adoção nos services
+## Adoção nos services — próxima etapa
 
 | Service atual | Eventos e contexto permitidos |
 | --- | --- |
@@ -159,7 +166,7 @@ log, sem transformar o objeto retornado pelo service em contexto completo.
 - LOG-07: estrutura e adoção são revisáveis em commits distintos, cada qual
   com testes pertinentes e atualização da documentação principal.
 
-## Decisões pendentes
+## Configuração confirmada e infraestrutura pendente
 
 Confirmados: pino 10.4.0, pino-http 11.0.0 e pino-pretty 13.2.0; LOG_LEVEL
 padrão debug em development e info nos demais ambientes, com override validado.
@@ -175,3 +182,20 @@ Referências: [Pino](https://github.com/pinojs/pino),
 [pino-http](https://github.com/pinojs/pino-http),
 [redaction](https://github.com/pinojs/pino/blob/main/docs/redaction.md) e
 [pino-pretty](https://github.com/pinojs/pino-pretty).
+
+
+## Verificação da fundação
+
+Rodada final: 82/82 testes de foundation e 22/22 de logging aprovados;
+typecheck:foundation e typecheck:contracts passaram. Processo filho com
+pino-pretty iniciou, emitiu e encerrou sem worker pendente.
+
+Revisão independente concluída sem bloqueadores novos. Foram corrigidos
+aliases de rotas em arrays (normalização pelo primeiro alias registrado) e
+o tratamento terminal de erro após headersSent: encaminhamento/erro original
+preservados, conexão destruída e nenhum console bruto do Express. O caso
+verifica um único failed e um único aborted.
+
+Nenhum evento de negócio foi adotado nos services; o commit 2 permanece
+separado. Sem schema/migration ou alteração de respostas HTTP.
+Evidências: [validation.md](validation.md).

@@ -10,6 +10,8 @@
     "tests/user.routes.test.ts",
     "tests/http.adoption.test.ts",
     "tests/local.persistence.test.ts",
-    "scripts/mock.user.create.ts"
+    "scripts/mock.user.create.ts",
+    "tests/logging.test.ts",
+    "tests/logging.http.test.ts"
   ]
 }

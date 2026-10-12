@@ -44,7 +44,7 @@ caixa de saída, bootstrap de usuário, cadastro protegido e services auth/admin
 | BE-07 | Migrations | Confirmado: Prisma 7, SQL nativo e inversa; tooling 7.10.0 integrado via PR #7/eea5f1d; schema e banco pendentes |
 | BE-08 | Banco/baseline | Banco PostgreSQL do zero confirmado; baseline depende do schema e do destino dos SQL de planos |
 | BE-09 | Identidade/schema | Consultas e coleção JSON unificadas em users na branch codex/json-postgres-repositories; campos, vínculos, restrições e schema/baseline completos aguardam resposta |
-| BE-10 | Padrões adicionais | Sanitização/enum/diagnóstico aprovados e implementados; requestId opcional no contexto. Validação abrangente, serialização, filtros, geração de requestId/logs e configuração aguardam resposta |
+| BE-10 | Padrões adicionais | Contratos HTTP preservados; fundação de logs/UUID interno implementada e verificada nesta worktree, services pendentes. Validação abrangente, serialização, filtros, contrato HTTP de rastreabilidade e configuração/coleta futuros |
 
 ## Entregas e evidências
 
@@ -92,9 +92,17 @@ Essas condições históricas não são decisões atuais aguardando resposta.
 
 ## Logs internos — 2026-10-12
 
-Planejamento: [spec](features/structured-logs/spec.md). Confirmados Pino +
-pino-http, pino-pretty somente local e AsyncLocalStorage. Stack e causa
-sanitizados permitidos nos logs de todos os ambientes; respostas HTTP
-existentes preservadas. Sem tabela/migration. Implementação separada em
-dois commits: estrutura/contexto/middleware/handler e adoção nos services.
-Não implementado; versões, níveis e limites seguem aguardando resposta na spec.
+[Spec](features/structured-logs/spec.md): fundação implementada nesta
+worktree; revisão independente e verificação final concluídas.
+Pino 10.4.0, pino-http 11.0.0 e pino-pretty 13.2.0 fixados; debug/pretty em
+development, info/JSON nos demais, com LOG_LEVEL validado em cinco níveis.
+
+AsyncLocalStorage/UUID interno, middleware anterior ao parser, diagnóstico
+único no handler, resumo completed/aborted e logs de inicialização presentes.
+Sem schemaVersion/service/environment, limites arbitrários de JSON/profundidade,
+tabela/migration ou mudança HTTP. Services ainda pendentes no commit 2.
+
+Rodada final: 82 testes foundation e 22 logging aprovados; dois typechecks
+e processo pretty iniciado/fechado passaram. Revisão sem bloqueadores novos
+após correções de aliases/erro após headersSent;
+[validation.md](features/structured-logs/validation.md).
