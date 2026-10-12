@@ -2,51 +2,60 @@
 
 Data: 2026-10-12. Trabalho autorizado diretamente em staging.
 
-## Cards: alteração concluída
+## Cards: alterações concluídas
 
 [PlanCard](../../src/components/plans/PlanCard.tsx) usa rounded-2xl, como
 os cards de empresas. O arredondamento aplica-se às variantes comum e
-recomendada; preços, conteúdo, cores, destinos e animações são preservados.
-[Guia do produto](../../../docs/produto.md) atualizado.
+recomendada. O título recomendado agora declara a cor clara da identidade,
+sobrescrevendo somente nesse título a regra global .about-page h2 do CSS.
+About adiciona essa classe ao body da Home; sua regra com !important impunha
+texto azul também ao card de fundo azul. As demais cores e a tipografia
+foram preservadas. [Guia do produto](../../../docs/produto.md) atualizado.
 
-Verificação: PlanCard.test.tsx e PlansSection.test.tsx passaram (3 testes).
-Diff sem erros. Na Home local, os três cards exibiram border-radius de 18 px,
-conforme o tema vigente, e foi registrada captura fora do repositório.
-Não houve instalação, teste/build global ou alteração de backend/AGENTS.
+## Perfil: diagnóstico original e correção autorizada
 
-## Perfil: investigação, sem alteração de código
-
-Os cards chamam navigate('/empresa/:id') em
+No commit 87a45b2, os cards chamavam navigate('/empresa/:id') em
 [CardEmpresas](../../src/components/EmpresasCard/CardEmpresas.tsx) e
-[catálogo](../../src/pages/CatalogoEmpresas.tsx). Não reposicionam a página.
+[catálogo](../../src/pages/CatalogoEmpresas.tsx), sem reposicionar a página.
 [PublicSmoothScroll](../../src/components/layout/PublicSmoothScroll.tsx)
-retorna sem agir quando não existe hash. A instância Lenis permanece entre
-páginas públicas porque o efeito de inicialização depende de isPublicPage,
-não de pathname. Não há política global de ScrollRestoration no router.
+retornava sem agir quando não existia hash. A instância Lenis permanecia
+entre páginas públicas. stopInertiaOnNavigate atende links, mas não garante
+o topo na navegação programática dos cards. O router não usa ScrollRestoration.
 
-Na versão instalada do Lenis, stopInertiaOnNavigate atende cliques em links
-a; os cards usam navegação programática. Interromper inércia na posição
-atual tampouco significa navegar até o topo. A navegação atual não garante
-posição inicial para o perfil.
+[PerfilEmpresa](../../src/pages/PerfilEmpresa.tsx) primeiro exibe loading,
+busca a API e depois monta o conteúdo. Altura variável, posição anterior e
+inércia podem contribuir para a intermitência; o timing exato não foi comprovado.
+Na investigação original, uma tentativa terminou corretamente com scrollY=0.
+Isso não demonstrava uma política de reposicionamento no código antigo.
 
-[PerfilEmpresa](../../src/pages/PerfilEmpresa.tsx) primeiro renderiza loading
-com footer, busca a API e depois monta o conteúdo completo. A interação
-entre altura variável, posição anterior, inércia e ancoragem do navegador
-é uma hipótese para a intermitência, não um timing comprovado nesta inspeção.
+O usuário autorizou a correção nesta entrega. PUSH/REPLACE sem hash agora
+abre no topo por rolagem nativa imediata. Lenis é parado antes e sincronizado
+depois, preservando eventual estado pausado. Apenas scrollTo(immediate)
+não bastava: Lenis retorna cedo se o alvo já coincide com targetScroll,
+mesmo enquanto a posição real ainda está distante e em movimento.
 
-Observação real: Home na seção Empresas com scrollY=2062 → perfil terminou
-com scrollY=0 e título visível. A abertura na parte inferior não se reproduziu
-nessa tentativa. A ausência de reposicionamento foi confirmada no código;
-não declarar que uma correção de rolagem foi implementada.
+Âncoras iniciais/entre páginas são alinhadas com a compensação da navbar e
+acompanhadas por ResizeObserver até a primeira interação. Isso cobre a
+mudança de altura quando empresas/planos chegam da API. Voltar/Avançar
+preserva a restauração nativa, sem forçar topo ou reabrir âncora histórica.
+Preferência por movimento reduzido mantém reposicionamento nativo.
+Frames, listeners e observer são limpos em navegação/desmontagem/StrictMode.
+[Guia de operação](../../../docs/operacao.md) atualizado.
 
-## Evolução proposta
+## Verificação desta entrega
 
-**Aguardando resposta:** corrigir a política de rolagem em entrega própria:
-nova navegação sem hash abre no topo, âncoras continuam compensadas pela
-navbar e Voltar/Avançar recebe tratamento explícito de restauração.
-Considerar sincronização com Lenis e o carregamento da API; validar cliques
-com inércia ativa e respostas rápidas/lentas. Não aplicar essa proposta na
-alteração visual dos planos.
+No navegador local, o título Profissional apresentou rgb(250, 249, 246),
+as variantes comuns conservaram rgb(11, 24, 37) e os cantos arredondados
+permaneceram. Abrir diretamente /#planos terminou com a seção a 130 px do
+topo após a chegada dos dados. Um clique em Horizonte abriu o perfil com
+scrollY=0 e título visível. Voltar conservou posição diferente de zero;
+Avançar retornou ao perfil com scrollY=0. Captura visual fora do repositório.
 
-As alterações pré-existentes do usuário no backend e em docs/arquitetura.md
-foram preservadas e não pertencem ao commit desta tarefa.
+Os testes direcionados de PublicSmoothScroll, PlanCard e PlansSection
+passaram (21/21). ESLint dos dois componentes e do teste passou;
+TypeScript e diff foram conferidos antes do commit. Os testes cobrem
+PUSH/REPLACE, POP, alvo antigo do Lenis igual a zero, preferência reduzida,
+âncoras, dados tardios, interação, cleanup, estado pausado e StrictMode.
+Não houve instalação de dependências, alteração de AGENTS, backend, login,
+rotas ou dados locais. Não foram repetidos build global ou testes históricos
+alheios ao escopo; não declarar aprovação desses gates.

@@ -175,3 +175,22 @@ Não há requestId HTTP inventado para esse comando. Os prompts solicitam
 e-mail/senha, mas esses valores não fazem parte do registro estruturado.
 Logs de caixa de saída guardam tipo/modo, sem destinatário ou link de reset/
 convite. As evidências e limitações ficam na spec da feature.
+
+
+## Posição ao navegar nas páginas públicas
+
+PublicSmoothScroll abre novas navegações sem hash no topo, inclusive quando
+os cards de empresa chamam navigate programaticamente. Antes de reposicionar,
+cancela a inércia do Lenis, move a rolagem nativa imediatamente e sincroniza
+o motor. Com reduced motion, a rolagem nativa continua atendendo à regra.
+
+Uma âncora inicial ou em outra página respeita scroll-padding da navbar.
+Mudanças de altura após carregar dados realinham o destino até a primeira
+interação do visitante (roda, toque, ponteiro ou teclado). Observers, listeners
+e frames são removidos ao sair da página ou interromper esse acompanhamento.
+Âncoras na mesma página continuam atendidas por Lenis/navegador.
+
+Voltar/Avançar preserva a restauração nativa; não força o topo nem procura
+novamente uma âncora histórica. Isso não implementa um armazenamento próprio
+de posições nem garante restauração exata em páginas de altura variável.
+O destino Contato permanece como estava; nenhum ID novo foi criado.
