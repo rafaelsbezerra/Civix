@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { Writable } from 'node:stream';
 import test from 'node:test';
 import { createLogger, createRequestLogger } from '../src/shared/logging/log.logger.js';
-import { getLogger, runWithLogContext } from '../src/shared/logging/log.context.js';
+import { logger, runWithLogContext } from '../src/shared/logging/log.context.js';
 import { AppError } from '../src/shared/errors/app.error.js';
 import { ErrorCode } from '../src/shared/errors/error.code.js';
 
@@ -63,15 +63,15 @@ test('Filtro de nível não emite registros abaixo do nível selecionado', async
 
 test('Contexto assíncrono preserva o UUID após await sem herdar contexto fora da execução', async () => {
   const { destination, logger } = capture();
-  const base = getLogger();
+  const base = logger();
   const requestId = '71865dbe-8c54-4e77-b60c-40b881ca9ced';
 
   await runWithLogContext({ requestId, logger: createRequestLogger(logger, requestId), active: true }, async () => {
     await Promise.resolve();
-    getLogger().info({ event: 'company.observed', module: 'companies', message: 'Empresa observada.', context: { companyId: 'company-internal', persistenceMode: 'json' } });
+    logger().info({ event: 'company.observed', module: 'companies', message: 'Empresa observada.', context: { companyId: 'company-internal', persistenceMode: 'json' } });
   });
 
-  assert.equal(getLogger(), base);
+  assert.equal(logger(), base);
   logger.info({ event: 'server.observed', module: 'server', message: 'Operação fora de requisição.' });
   await logger.close();
   const records = destination.records();

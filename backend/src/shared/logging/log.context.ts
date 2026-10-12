@@ -14,7 +14,7 @@ export function runWithLogContext<T>(context: RequestLogContext, callback: () =>
   return contexts.run(context, callback);
 }
 
-export function getLogger(): AppLogger {
+export function logger(): AppLogger {
   const context = contexts.getStore();
   return context?.active ? context.logger : getBaseLogger();
 }

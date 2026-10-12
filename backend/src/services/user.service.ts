@@ -1,4 +1,4 @@
-import { getLogger } from '../shared/logging/log.context.js';
+import { logger } from '../shared/logging/log.context.js';
 import { USE_MOCK_DATA } from '../shared/config/data.js';
 import { AppError } from '../shared/errors/app.error.js';
 import { ErrorCode } from '../shared/errors/error.code.js';
@@ -66,7 +66,7 @@ export async function login({ email, role, password }: LoginInput): Promise<Logi
 
   const token = authService.signToken(payload, '1h');
 
-  getLogger().info({
+  logger().info({
     event: 'user.authenticated',
     module: 'users',
     message: 'Autenticação concluída',
@@ -95,7 +95,7 @@ export async function forgotPassword(email: string): Promise<void> {
 
   await userRepository.savePasswordResetToken(user.id, resetTokenHash, expiresAt);
 
-  getLogger().info({
+  logger().info({
     event: 'user.password-reset.prepared',
     module: 'users',
     message: 'Recuperação de senha preparada',
@@ -126,7 +126,7 @@ export async function resetPassword({ token, password }: PasswordResetInput): Pr
 
   await userRepository.updatePasswordAndClearResetToken(user.id, passwordHash);
 
-  getLogger().info({
+  logger().info({
     event: 'user.password.changed',
     module: 'users',
     message: 'Senha atualizada',

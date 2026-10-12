@@ -204,7 +204,7 @@ Sem schema/migration ou alteração HTTP. [Evidências](validation.md).
 
 ## Adoção e entrega separadas
 
-Os sete services usam getLogger, preservando retornos/assinaturas. Mudanças
+Os sete services usam logger, preservando retornos/assinaturas. Mudanças
 geram eventos após confirmação; consultas/validação usam debug sem termos
 de busca, e-mail, token ou objetos completos. Não instrumentar os repositories.
 

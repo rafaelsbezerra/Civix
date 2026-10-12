@@ -1,4 +1,4 @@
-import { getLogger } from '../shared/logging/log.context.js';
+import { logger } from '../shared/logging/log.context.js';
 import { randomUUID } from 'node:crypto';
 import bcrypt from 'bcrypt';
 import { z } from 'zod';
@@ -58,7 +58,7 @@ export async function createMockUser(input: unknown) {
     data.users.push(user);
   });
 
-  getLogger().info({
+  logger().info({
     event: 'mock.user.created',
     module: 'mock',
     message: 'Usuário local criado',

@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { getLogger } from '../src/shared/logging/log.context.js';
+import { logger } from '../src/shared/logging/log.context.js';
 import { createLogger } from '../src/shared/logging/log.logger.js';
 import type { AppLogger } from '../src/shared/logging/log.contract.js';
 import { createInterface } from 'node:readline/promises';
@@ -8,7 +8,7 @@ import { stdin, stderr } from 'node:process';
 let commandLogger: AppLogger | undefined;
 
 async function main(): Promise<void> {
-  commandLogger = getLogger();
+  commandLogger = logger();
   const { USE_MOCK_DATA } = await import('../src/shared/config/data.js');
 
   if (!USE_MOCK_DATA) {

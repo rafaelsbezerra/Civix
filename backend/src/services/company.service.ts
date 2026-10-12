@@ -1,4 +1,4 @@
-import { getLogger } from '../shared/logging/log.context.js';
+import { logger } from '../shared/logging/log.context.js';
 import { USE_MOCK_DATA } from '../shared/config/data.js';
 import type { Company } from '../entities/company.entity.js';
 import { randomUUID } from 'node:crypto';
@@ -29,7 +29,7 @@ export async function createCompany(input: unknown): Promise<Company> {
 
   const created = await companyRepository.create(company);
 
-  getLogger().info({
+  logger().info({
     event: 'company.created',
     module: 'companies',
     message: 'Empresa cadastrada com sucesso',
@@ -42,7 +42,7 @@ export async function createCompany(input: unknown): Promise<Company> {
 export async function getCompanies(): Promise<Company[]> {
   const companies = await companyRepository.getAll();
 
-  getLogger().debug({
+  logger().debug({
     event: 'company.queried',
     module: 'companies',
     message: 'Consulta de empresas concluída',
@@ -55,7 +55,7 @@ export async function getCompanies(): Promise<Company[]> {
 export async function getVerifiedCompanies(): Promise<Company[]> {
   const companies = await companyRepository.getVerified();
 
-  getLogger().debug({
+  logger().debug({
     event: 'company.queried',
     module: 'companies',
     message: 'Consulta de empresas concluída',
@@ -68,7 +68,7 @@ export async function getVerifiedCompanies(): Promise<Company[]> {
 export async function getCompaniesByCategory(category: string): Promise<Company[]> {
   const companies = await companyRepository.getByCategory(category);
 
-  getLogger().debug({
+  logger().debug({
     event: 'company.queried',
     module: 'companies',
     message: 'Consulta de empresas concluída',
@@ -81,7 +81,7 @@ export async function getCompaniesByCategory(category: string): Promise<Company[
 export async function getCompaniesByState(state: string): Promise<Company[]> {
   const companies = await companyRepository.getByState(state);
 
-  getLogger().debug({
+  logger().debug({
     event: 'company.queried',
     module: 'companies',
     message: 'Consulta de empresas concluída',
@@ -94,7 +94,7 @@ export async function getCompaniesByState(state: string): Promise<Company[]> {
 export async function getCompaniesBySize(size: 'pequena' | 'media' | 'grande'): Promise<Company[]> {
   const companies = await companyRepository.getBySize(size);
 
-  getLogger().debug({
+  logger().debug({
     event: 'company.queried',
     module: 'companies',
     message: 'Consulta de empresas concluída',
@@ -107,7 +107,7 @@ export async function getCompaniesBySize(size: 'pequena' | 'media' | 'grande'): 
 export async function searchCompanies(name: string): Promise<Company[]> {
   const companies = await companyRepository.searchByName(name);
 
-  getLogger().debug({
+  logger().debug({
     event: 'company.queried',
     module: 'companies',
     message: 'Consulta de empresas concluída',
@@ -128,7 +128,7 @@ export async function getCompanyById(id: string): Promise<Company> {
     });
   }
 
-  getLogger().debug({
+  logger().debug({
     event: 'company.queried',
     module: 'companies',
     message: 'Consulta de empresa concluída',

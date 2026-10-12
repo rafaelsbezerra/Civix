@@ -1,14 +1,14 @@
 import type { ErrorRequestHandler, RequestHandler, Request } from 'express';
 import { serializeError, type ErrorContext } from '../shared/contracts/error.contract.js';
 import { AppError } from '../shared/errors/app.error.js';
-import { getLogger } from '../shared/logging/log.context.js';
+import { logger } from '../shared/logging/log.context.js';
 import { getLogHttp } from './log.middleware.js';
 import { ErrorCode } from '../shared/errors/error.code.js';
 
 function logRequestError(error: unknown, request: Request) {
   const status = error instanceof AppError ? error.status : 500;
   try {
-    getLogger()[status < 500 ? 'warn' : 'error']({
+    logger()[status < 500 ? 'warn' : 'error']({
       event: 'http.request.failed', module: 'http', message: 'Falha no processamento da requisição',
       error, http: getLogHttp(request, status),
     });

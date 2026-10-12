@@ -6,7 +6,7 @@ import type { AppLogger, LogHttp } from '../shared/logging/log.contract.js';
 import { createRequestLogger, getBaseLogger, getPinoLogger } from '../shared/logging/log.logger.js';
 import { runWithLogContext } from '../shared/logging/log.context.js';
 
-export function getLogHttp(request: Request, statusCode: number, durationMs?: number): LogHttp {
+export function getLogHttp(request: Request, statusCode: number): LogHttp {
   const registeredPath = request.route?.path;
   const path = typeof registeredPath === 'string'
     ? registeredPath
@@ -18,7 +18,6 @@ export function getLogHttp(request: Request, statusCode: number, durationMs?: nu
     if (typeof value === 'string' && value) prefix = prefix.split(value).join(':' + key);
   }
   return { method: request.method, route: prefix + path, statusCode,
-    ...(durationMs !== undefined ? { durationMs } : {}),
   };
 }
 
@@ -55,7 +54,7 @@ export function createLogMiddleware(logger: AppLogger = getBaseLogger()): Reques
       requestLogger[level]({
         event: aborted ? 'http.request.aborted' : 'http.request.completed',
         module: 'http', message: aborted ? 'Requisição interrompida' : 'Requisição concluída',
-        http: getLogHttp(request, response.statusCode, performance.now() - startedAt),
+        http: getLogHttp(request, response.statusCode),
       });
       context.active = false;
     }

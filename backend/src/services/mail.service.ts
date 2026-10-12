@@ -1,4 +1,4 @@
-import { getLogger } from '../shared/logging/log.context.js';
+import { logger } from '../shared/logging/log.context.js';
 import { AppError } from '../shared/errors/app.error.js';
 import { ErrorCode } from '../shared/errors/error.code.js';
 // # Funções de envio de e-mail transacional
@@ -42,7 +42,7 @@ export async function sendInviteEmail({ email, role, token }: SendInviteParams) 
   if (USE_MOCK_DATA) {
     const result = await saveLocalMail('invite', email, inviteUrl);
 
-    getLogger().info({
+    logger().info({
       event: 'mail.outbox.saved',
       module: 'mail',
       message: 'E-mail salvo na caixa de saída local',
@@ -103,7 +103,7 @@ export async function sendInviteEmail({ email, role, token }: SendInviteParams) 
       throw new Error(result.error.message);
     }
 
-    getLogger().info({
+    logger().info({
       event: 'mail.provider.accepted',
       module: 'mail',
       message: 'E-mail aceito pelo provedor',
@@ -131,7 +131,7 @@ export async function sendResetPasswordEmail({ email, resetUrl }: SendResetPassw
   if (USE_MOCK_DATA) {
     const result = await saveLocalMail('password-reset', email, resetUrl);
 
-    getLogger().info({
+    logger().info({
       event: 'mail.outbox.saved',
       module: 'mail',
       message: 'E-mail salvo na caixa de saída local',
@@ -157,7 +157,7 @@ export async function sendResetPasswordEmail({ email, resetUrl }: SendResetPassw
       throw new Error(result.error.message);
     }
 
-    getLogger().info({
+    logger().info({
       event: 'mail.provider.accepted',
       module: 'mail',
       message: 'E-mail aceito pelo provedor',

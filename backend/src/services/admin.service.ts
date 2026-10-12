@@ -1,4 +1,4 @@
-import { getLogger } from '../shared/logging/log.context.js';
+import { logger } from '../shared/logging/log.context.js';
 import { USE_MOCK_DATA } from '../shared/config/data.js';
 import jwt from 'jsonwebtoken';
 import type { UserRole } from '../entities/user.entity.js';
@@ -23,7 +23,7 @@ export async function inviteUser(email: string, role: UserRole): Promise<void> {
 
   await authRepository.saveInvite(email, role, inviteToken, existingUser?.id);
 
-  getLogger().info({
+  logger().info({
     event: 'admin.invite.prepared',
     module: 'admin',
     message: 'Convite preparado',

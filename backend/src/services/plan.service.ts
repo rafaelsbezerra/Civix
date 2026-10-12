@@ -1,4 +1,4 @@
-import { getLogger } from '../shared/logging/log.context.js';
+import { logger } from '../shared/logging/log.context.js';
 import { USE_MOCK_DATA } from '../shared/config/data.js';
 import type { Plan } from '../entities/plan.entity.js';
 import { planRepository } from '../persistence/plan.repository.js';
@@ -10,7 +10,7 @@ export type { Plan, BillingPeriod } from '../entities/plan.entity.js';
 export async function listActivePlans(): Promise<Plan[]> {
   const plans = (await planRepository.getActive()).map(toPlan);
 
-  getLogger().debug({
+  logger().debug({
     event: 'plans.listed',
     module: 'plans',
     message: 'Consulta de planos concluída',
@@ -35,7 +35,7 @@ export async function assignPlanToUser(userId: string | number, planId: string):
 
   const assignedPlan = toPlan(plan);
 
-  getLogger().info({
+  logger().info({
     event: 'plan.assigned',
     module: 'plans',
     message: 'Plano atribuído ao usuário',

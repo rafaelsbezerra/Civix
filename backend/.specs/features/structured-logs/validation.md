@@ -66,7 +66,7 @@ logging interno não é auditoria durável. AGENTS não foi modificado.
 ## Adoção nos services — implementação verificada
 
 Services de empresas, planos, usuários, auth, admin, mail e mock.user usam
-getLogger. Eventos de criação/atribuição/troca de senha/ativação seguem a
+logger. Eventos de criação/atribuição/troca de senha/ativação seguem a
 confirmação da etapa. Autenticação é registrada após gerar o token, sem
 registrá-lo. Consultas usam debug, operação/contagem/IDs, sem termo ou objeto.
 

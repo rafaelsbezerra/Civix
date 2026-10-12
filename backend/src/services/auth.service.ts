@@ -1,4 +1,4 @@
-import { getLogger } from '../shared/logging/log.context.js';
+import { logger } from '../shared/logging/log.context.js';
 import { USE_MOCK_DATA } from '../shared/config/data.js';
 import jwt, { type SignOptions } from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
@@ -55,7 +55,7 @@ async function getInviteUser(token: string): Promise<UserRow> {
     });
   }
 
-  getLogger().debug({
+  logger().debug({
     event: 'auth.invite.validated',
     module: 'auth',
     message: 'Convite validado',
@@ -86,7 +86,7 @@ export async function firstAccess(token: string, password: string): Promise<void
     });
   }
 
-  getLogger().info({
+  logger().info({
     event: 'auth.first-access.completed',
     module: 'auth',
     message: 'Primeiro acesso concluído',
@@ -111,7 +111,7 @@ export async function resendInviteEmail(email: string): Promise<void> {
 
   await authRepository.saveResetToken(user.id, resetToken);
 
-  getLogger().info({
+  logger().info({
     event: 'auth.password-reset.prepared',
     module: 'auth',
     message: 'Recuperação de senha preparada',

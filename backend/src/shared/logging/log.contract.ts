@@ -17,7 +17,6 @@ export interface LogHttp {
   method: string;
   route: string;
   statusCode: number;
-  durationMs?: number;
 }
 
 export interface LogInput {

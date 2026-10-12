@@ -44,7 +44,6 @@ export function createLogger(options: LoggerOptions = {}): AppLogger {
       if (input.http) fields.http = {
         method: sanitizeLogText(input.http.method), route: sanitizeLogText(input.http.route),
         statusCode: input.http.statusCode,
-        ...(input.http.durationMs !== undefined ? { durationMs: input.http.durationMs } : {}),
       };
       if ('error' in input) fields.error = sanitizeLogError(input.error);
       raw[level](fields, sanitizeLogText(input.message));
