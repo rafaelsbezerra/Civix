@@ -25,7 +25,7 @@ export function PlanCard({ plan }: PlanCardProps) {
       data-motion="item"
       data-motion-step="60"
       aria-labelledby={`plan-${plan.id}-title`}
-      className={`relative flex h-full flex-col border p-6 sm:p-8 ${
+      className={`relative flex h-full flex-col rounded-2xl border p-6 sm:p-8 ${
         isFeatured
           ? 'border-[var(--color-civix-gold)] bg-[var(--color-civix-navy)] text-[var(--color-civix-ivory)]'
           : 'border-black/10 bg-white text-[var(--color-civix-ink)]'

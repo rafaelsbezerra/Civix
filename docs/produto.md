@@ -70,6 +70,9 @@ preto `#0E0E10`. As specs locais usam Urbanist e Inter e registram dourado
 acessível `#9A6500` na tela Sobre. Referências Figma são evidências
 históricas das specs; o arquivo Figma não foi revisado nesta fase.
 
+Os cards de planos compartilham os cantos arredondados (rounded-2xl) dos
+cards de empresas, mantendo as variantes comum e recomendada.
+
 ## Escopo ainda aberto
 
 O Notion descarta cadastro de serviços, mas admite até três
