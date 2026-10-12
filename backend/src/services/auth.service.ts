@@ -43,7 +43,7 @@ export async function firstAccess(token: string, password: string): Promise<void
     });
   }
 
-  const user = await authRepository.getLegacyByEmail(decoded.email);
+  const user = await authRepository.getInviteUserByEmail(decoded.email, decoded.role);
 
   if (!user) {
     throw new AppError({
@@ -71,7 +71,15 @@ export async function firstAccess(token: string, password: string): Promise<void
 
   const passwordHash = await bcrypt.hash(password, 10);
 
-  await authRepository.activateLegacy(decoded.email, passwordHash);
+  const activated = await authRepository.activateUser(user.id, passwordHash, token);
+
+  if (!activated) {
+    throw new AppError({
+      status: 401,
+      code: ErrorCode.UNAUTHORIZED,
+      message: 'Este link de convite já foi utilizado ou é inválido.',
+    });
+  }
 }
 
 export async function resendInviteEmail(email: string): Promise<void> {

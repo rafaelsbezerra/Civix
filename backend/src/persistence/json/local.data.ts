@@ -10,25 +10,17 @@ export const localUserSchema = z.object({
   role,
   name: z.string().optional(),
   password_hash: z.string().optional(),
+  status: z.string().optional(),
+  invite_token: z.string().nullable().optional(),
   reset_password_token: z.string().nullable().optional(),
   reset_password_expires: z.string().nullable().optional(),
   plan_id: identifier.nullable().optional(),
-});
-
-const legacyUserSchema = z.object({
-  id: z.string().min(1),
-  email: z.string().email(),
-  role,
-  status: z.string(),
-  invite_token: z.string().nullable(),
-  password_hash: z.string().optional(),
 });
 
 export const localDataSchema = z.object({
   version: z.literal(1),
   companies: z.array(companyDataSchema),
   users: z.array(localUserSchema),
-  legacyUsers: z.array(legacyUserSchema),
   plans: z.array(z.object({
     id: identifier,
     name: z.string(),
@@ -49,11 +41,11 @@ export const localDataSchema = z.object({
     url: z.string(),
     createdAt: z.string(),
   })),
-});
+}).strict();
 
 export type LocalData = z.infer<typeof localDataSchema>;
 export type LocalUser = z.infer<typeof localUserSchema>;
 
 export function emptyLocalData(): LocalData {
-  return { version: 1, companies: [], users: [], legacyUsers: [], plans: [], outbox: [] };
+  return { version: 1, companies: [], users: [], plans: [], outbox: [] };
 }

@@ -25,6 +25,14 @@ export async function login({ email, role, password }: LoginInput): Promise<Logi
     });
   }
 
+  if (user.status === 'pending') {
+    throw new AppError({
+      status: 401,
+      code: ErrorCode.UNAUTHORIZED,
+      message: 'Conclua o primeiro acesso antes de entrar.',
+    });
+  }
+
   if (role === 'empresa') {
     if (!user.password_hash) {
       throw new AppError({

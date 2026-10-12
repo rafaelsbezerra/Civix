@@ -1,5 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import type { AuthRepository } from '../../repositories/auth.repository.js';
+import { AppError } from '../../shared/errors/app.error.js';
+import { ErrorCode } from '../../shared/errors/error.code.js';
 import { readLocalData, updateLocalData } from './local.store.js';
 
 export const authJsonRepository: AuthRepository = {
@@ -12,19 +14,31 @@ export const authJsonRepository: AuthRepository = {
     } : undefined;
   },
 
-  async getLegacyByEmail(email) {
-    return (await readLocalData()).legacyUsers.find(user => user.email === email);
+  async getInviteUserByEmail(email, role) {
+    const users = (await readLocalData()).users.filter(user => user.email === email);
+
+    if (role !== undefined) {
+      return users.find(user => user.role === role);
+    }
+
+    // Usuários anteriores sem status mantêm o comportamento de conta ativa.
+    return users.find(user => user.status === 'active' || user.status == null) ?? users[0];
   },
 
-  async activateLegacy(email, passwordHash) {
-    await updateLocalData(data => {
-      const user = data.legacyUsers.find(user => user.email === email);
+  async activateUser(id, passwordHash, token) {
+    return updateLocalData(data => {
+      const user = data.users.find(user => String(user.id) === String(id)
+        && user.invite_token === token && user.status !== 'active');
 
-      if (user) {
-        user.password_hash = passwordHash;
-        user.status = 'active';
-        user.invite_token = null;
+      if (!user) {
+        return false;
       }
+
+      user.password_hash = passwordHash;
+      user.status = 'active';
+      user.invite_token = null;
+
+      return true;
     });
   },
 
@@ -42,16 +56,32 @@ export const authJsonRepository: AuthRepository = {
     });
   },
 
-  async saveInvite(email, role, token, existing) {
+  async saveInvite(email, role, token, existingId) {
     await updateLocalData(data => {
-      const user = data.legacyUsers.find(user => user.email === email);
+      if (existingId !== undefined) {
+        const user = data.users.find(user => String(user.id) === String(existingId));
 
-      if (existing && user) {
+        if (!user) {
+          throw new AppError({
+            status: 404,
+            code: ErrorCode.NOT_FOUND,
+            message: 'Usuário não encontrado.',
+          });
+        }
+
+        if (user.status === 'active' || user.status == null) {
+          throw new AppError({
+            status: 409,
+            code: ErrorCode.CONFLICT,
+            message: 'Não foi possível atualizar o convite. A conta foi alterada; tente novamente.',
+          });
+        }
+
         user.role = role;
         user.status = 'pending';
         user.invite_token = token;
-      } else if (!existing) {
-        data.legacyUsers.push({
+      } else {
+        data.users.push({
           id: randomUUID(),
           email,
           role,

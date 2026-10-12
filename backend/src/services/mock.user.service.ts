@@ -39,6 +39,8 @@ export async function createMockUser(input: unknown) {
     id: randomUUID(),
     email,
     role,
+    status: 'active',
+    invite_token: null,
     ...(name ? { name } : {}),
     ...(passwordHash ? { password_hash: passwordHash } : {}),
   };

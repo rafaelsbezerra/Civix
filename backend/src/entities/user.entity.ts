@@ -8,4 +8,6 @@ export interface User {
   role: UserRole;
   name?: string;
   password_hash?: string;
+  status?: string;
+  invite_token?: string | null;
 }

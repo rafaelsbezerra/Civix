@@ -168,14 +168,20 @@ test('Persistência local funciona sem banco ou envio externo', async t => {
       assert.equal((await store.readLocalData()).users[0].plan_id, 'active');
     });
 
-    await t.test('Primeiro acesso ativa a coleção legada sem alterar usuários e salva convite na caixa local', async () => {
+    await t.test('Primeiro acesso ativa users, preserva outro perfil e permite login após reinício', async () => {
       await resetData();
-      await createMockUser({ email: 'convite@example.test', role: 'cliente' });
+      const client = await createMockUser({ email: 'convite@example.test', role: 'cliente' });
+      const originalClient = (await store.readLocalData()).users[0];
+      const token = jwt.sign({ email: client.email, role: 'empresa' }, process.env.JWT_INVITE_SECRET!);
 
-      const token = jwt.sign({ email: 'convite@example.test', role: 'empresa' }, process.env.JWT_INVITE_SECRET!);
+      await authRepository.saveInvite(client.email, 'empresa', token);
+      await mailService.sendInviteEmail({ email: client.email, role: 'empresa', token });
 
-      await authRepository.saveInvite('convite@example.test', 'empresa', token, false);
-      await mailService.sendInviteEmail({ email: 'convite@example.test', role: 'empresa', token });
+      const invited = (await store.readLocalData()).users.find(user => user.role === 'empresa')!;
+
+      assert.notEqual(invited.id, client.id);
+      assert.equal(invited.status, 'pending');
+
       await withServer(async url => {
         const response = await fetch(url + '/api/auth/first-access', {
           method: 'POST',
@@ -188,34 +194,55 @@ test('Persistência local funciona sem banco ou envio externo', async t => {
       });
 
       const data = await store.readLocalData();
+      const activated = data.users.find(user => user.role === 'empresa')!;
 
-      assert.equal(data.legacyUsers[0].status, 'active');
-      assert.equal(data.legacyUsers[0].invite_token, null);
-      assert.ok(await bcrypt.compare('senha-convite-123', data.legacyUsers[0].password_hash!));
-      assert.equal(data.users[0].password_hash, undefined);
+      assert.equal(data.users.length, 2);
+      assert.equal('legacyUsers' in data, false);
+      assert.equal(activated.id, invited.id);
+      assert.equal(activated.status, 'active');
+      assert.equal(activated.invite_token, null);
+      assert.ok(await bcrypt.compare('senha-convite-123', activated.password_hash!));
+      assert.deepEqual(data.users.find(user => user.id === client.id), originalClient);
       assert.equal(data.outbox[0].kind, 'invite');
+
+      const login = await userService.login({ email: client.email, role: 'empresa', password: 'senha-convite-123' });
+
+      assert.equal(login.user.id, invited.id);
+      await assert.rejects(authService.firstAccess(token, 'senha-substituta-123'), { status: 400 });
+      assert.deepEqual(await store.readLocalData(), data);
+
+      const restarted = runChild(`
+        import assert from 'node:assert/strict';
+        const { login } = await import('./src/services/user.service.ts');
+        const result = await login({ email: 'convite@example.test', role: 'empresa', password: 'senha-convite-123' });
+        assert.equal(result.user.id, ${JSON.stringify(invited.id)});
+        console.log('Login da conta ativada preservado após reinício.');
+      `);
+
+      assert.equal(restarted.status, 0, restarted.stderr);
     });
 
-    await t.test('Convite administrativo local permite ativação e preserva conta ativa sem expor rota admin', async () => {
+    await t.test('Convite administrativo usa users e preserva conta ativa sem expor rota admin', async () => {
       await resetData();
       await adminService.inviteUser('admin-convite@example.test', 'empresa');
 
       const pending = await store.readLocalData();
       const token = new URL(pending.outbox[0].url).searchParams.get('token')!;
 
-      assert.equal(pending.users.length, 0);
-      assert.equal(pending.legacyUsers.length, 1);
-      assert.equal(pending.legacyUsers[0].status, 'pending');
-      assert.equal(pending.legacyUsers[0].invite_token, token);
+      assert.equal(pending.users.length, 1);
+      assert.equal('legacyUsers' in pending, false);
+      assert.equal(pending.users[0].status, 'pending');
+      assert.equal(pending.users[0].invite_token, token);
       assert.equal(pending.outbox[0].kind, 'invite');
       await assert.rejects(authService.validateToken(token), { status: 404 });
       await authService.firstAccess(token, 'senha-admin-convite-123');
 
       const active = await store.readLocalData();
-      const originalHash = active.legacyUsers[0].password_hash;
+      const originalHash = active.users[0].password_hash;
 
-      assert.equal(active.legacyUsers[0].status, 'active');
-      assert.equal(active.legacyUsers[0].invite_token, null);
+      assert.equal(active.users[0].id, pending.users[0].id);
+      assert.equal(active.users[0].status, 'active');
+      assert.equal(active.users[0].invite_token, null);
       assert.ok(await bcrypt.compare('senha-admin-convite-123', originalHash!));
       await assert.rejects(adminService.inviteUser('admin-convite@example.test', 'cliente'), { status: 400 });
       await assert.rejects(authService.firstAccess(token, 'senha-substituta-123'), { status: 400 });
@@ -232,6 +259,120 @@ test('Persistência local funciona sem banco ou envio externo', async t => {
       });
 
       assert.deepEqual(await store.readLocalData(), active);
+    });
+
+    await t.test('Login rejeita convidados pendentes dos perfis empresa e cliente', async () => {
+      await resetData();
+
+      for (const role of ['empresa', 'cliente'] as const) {
+        const email = role + '-pendente@example.test';
+
+        await adminService.inviteUser(email, role);
+        await assert.rejects(userService.login({ email, role, password: 'senha-nao-ativada' }), { status: 401 });
+      }
+
+      const data = await store.readLocalData();
+
+      assert.equal(data.users.length, 2);
+      assert.ok(data.users.every(user => user.status === 'pending' && !user.password_hash));
+    });
+
+    await t.test('Reconvite preserva usuários ativos do bootstrap e contas existentes sem status', async () => {
+      await resetData();
+
+      for (const role of ['empresa', 'cliente'] as const) {
+        await createMockUser({ email: role + '-existente@example.test', role, password: role === 'empresa' ? 'senha-existente-123' : undefined });
+      }
+
+      await store.updateLocalData(data => {
+        delete data.users.find(user => user.role === 'cliente')!.status;
+      });
+
+      const before = await store.readLocalData();
+
+      for (const user of before.users) {
+        await assert.rejects(adminService.inviteUser(user.email, 'empresa'), { status: 400 });
+        await assert.rejects(adminService.inviteUser(user.email, 'cliente'), { status: 400 });
+      }
+
+      assert.deepEqual(await store.readLocalData(), before);
+      assert.equal(before.outbox.length, 0);
+
+      const companyLogin = await userService.login({ email: 'empresa-existente@example.test', role: 'empresa', password: 'senha-existente-123' });
+      const clientLogin = await userService.login({ email: 'cliente-existente@example.test', role: 'cliente' });
+
+      assert.equal(companyLogin.user.id, before.users.find(user => user.role === 'empresa')!.id);
+      assert.equal(clientLogin.user.id, before.users.find(user => user.role === 'cliente')!.id);
+    });
+
+    await t.test('Consumo concorrente do convite ativa somente o ID e token correspondentes', async () => {
+      await resetData();
+      await adminService.inviteUser('concorrente@example.test', 'empresa');
+
+      const pending = (await store.readLocalData()).users[0];
+      const token = pending.invite_token!;
+      const firstHash = await bcrypt.hash('senha-primeira-123', 10);
+      const secondHash = await bcrypt.hash('senha-segunda-123', 10);
+
+      assert.equal(await authRepository.activateUser('outro-id', firstHash, token), false);
+      assert.equal(await authRepository.activateUser(pending.id, firstHash, 'outro-token'), false);
+      assert.deepEqual((await store.readLocalData()).users[0], pending);
+
+      const outcomes = await Promise.all([
+        authRepository.activateUser(pending.id, firstHash, token),
+        authRepository.activateUser(pending.id, secondHash, token),
+      ]);
+      const activated = (await store.readLocalData()).users[0];
+
+      assert.deepEqual(outcomes, [true, false]);
+      assert.equal(activated.id, pending.id);
+      assert.equal(activated.password_hash, firstHash);
+      assert.equal(activated.status, 'active');
+      assert.equal(activated.invite_token, null);
+    });
+
+    await t.test('Reconvite com leitura antiga não rebaixa a conta ativada nem envia outro e-mail', async localTest => {
+      await resetData();
+      await adminService.inviteUser('reconvite-concorrente@example.test', 'empresa');
+
+      const pending = (await store.readLocalData()).users[0];
+      const passwordHash = await bcrypt.hash('senha-preservada-123', 10);
+      const originalGetter = authRepository.getInviteUserByEmail;
+      let activeSnapshot: Awaited<ReturnType<typeof store.readLocalData>> | undefined;
+      const staleRead = localTest.mock.method(authRepository, 'getInviteUserByEmail', async () => {
+        assert.equal(await authRepository.activateUser(pending.id, passwordHash, pending.invite_token!), true);
+        activeSnapshot = await store.readLocalData();
+
+        return { ...pending };
+      });
+
+      try {
+        await assert.rejects(adminService.inviteUser(pending.email, 'cliente'), { status: 409 });
+      } finally {
+        staleRead.mock.restore();
+      }
+
+      assert.equal(authRepository.getInviteUserByEmail, originalGetter);
+      assert.ok(activeSnapshot);
+      assert.deepEqual(await store.readLocalData(), activeSnapshot);
+      assert.equal(activeSnapshot.outbox.length, 1);
+      assert.equal(activeSnapshot.users[0].role, 'empresa');
+      assert.equal(activeSnapshot.users[0].status, 'active');
+      assert.equal(activeSnapshot.users[0].password_hash, passwordHash);
+
+      const login = await userService.login({ email: pending.email, role: 'empresa', password: 'senha-preservada-123' });
+
+      assert.equal(login.user.id, pending.id);
+    });
+
+    await t.test('JSON antigo com legacyUsers é rejeitado e preservado sem conversão automática', async () => {
+      const oldData = JSON.stringify({ ...emptyLocalData(), legacyUsers: [] });
+
+      await writeFile(store.LOCAL_DATA_FILE, oldData, 'utf8');
+      await assert.rejects(store.readLocalData(), { status: 500 });
+      await assert.rejects(store.updateLocalData(() => {}), { status: 500 });
+      assert.equal(await readFile(store.LOCAL_DATA_FILE, 'utf8'), oldData);
+      await resetData();
     });
 
     await t.test('Cadastro HTTP exige perfil empresa, valida entrada e preserva consultas após reinício', async () => {

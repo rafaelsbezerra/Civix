@@ -13,11 +13,11 @@ export const userPostgresRepository: UserRepository = {
 
   async getByEmailAndRole(email, role) {
     const query = role === 'empresa' ? `
-        SELECT id, name, email, password_hash, role
+        SELECT id, name, email, password_hash, role, status
         FROM users
         WHERE email = $1 AND role = 'empresa'
       ` : `
-        SELECT id, name, email, role
+        SELECT id, name, email, role, status
         FROM users
         WHERE email = $1 AND role = 'cliente'
       `;

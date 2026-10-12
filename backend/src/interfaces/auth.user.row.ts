@@ -1,10 +1,12 @@
-/** Campos utilizados no fluxo atual de primeiro acesso. */
+import type { UserId, UserRole } from '../entities/user.entity.js';
+
+/** Campos utilizados no fluxo atual de primeiro acesso de users. */
 export interface UserRow {
-  id: string;
+  id: UserId;
   email: string;
-  role: string;
-  status: string;
-  invite_token: string | null;
+  role: UserRole;
+  status?: string;
+  invite_token?: string | null;
 }
 
 /** Resultado da consulta de validação do token de redefinição. */

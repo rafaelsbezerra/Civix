@@ -11,6 +11,7 @@ import { ErrorCode } from '../src/shared/errors/error.code.js';
 import { createErrorHandler, createNotFoundHandler } from '../src/middlewares/error.handler.js';
 import authRoutes from '../src/routes/auth.routes.js';
 import planRoutes from '../src/routes/plan.routes.js';
+import * as adminService from '../src/services/admin.service.js';
 
 const environment = {
   JWT_SECRET: 'segredo-local-teste', JWT_INVITE_SECRET: 'convite-local-teste', JWT_RESET_SECRET: 'reset-local-teste',
@@ -110,22 +111,108 @@ test('Primeiro acesso preserva validações e rejeita JWT inválido antes de con
   });
 });
 
-test('Primeiro acesso mantém tabela legada, bcrypt10 e ativação com sucesso sob data', async t => {
+test('Primeiro acesso ativa users por ID e token com bcrypt10 e sucesso sob data', async t => {
   const token = jwt.sign({ email: 'pessoa@example.test', role: 'empresa' }, environment.JWT_INVITE_SECRET);
   const calls: { text: string; values?: unknown[] }[] = [];
   await withRoutes(t, async (text, values) => {
     calls.push({ text, values });
-    return { rows: text.includes('SELECT') ? [{ id: 'user-id', status: 'pending', invite_token: token }] : [] };
+    return { rows: text.includes('SELECT') ? [{ id: 'user-id', email: 'pessoa@example.test', role: 'empresa', status: 'pending', invite_token: token }] : [], rowCount: text.includes('UPDATE') ? 1 : undefined };
   }, async url => {
     assert.deepEqual(await request(url, '/api/v1/auth/first-access', { token, password: 'senha-local' }), {
       status: 200, body: { data: { message: 'Senha cadastrada com sucesso! Sua conta está ativa.' } },
     });
-    assert.match(calls[0]!.text, /FROM "user" WHERE email = \$1/);
-    assert.deepEqual(calls[0]!.values, ['pessoa@example.test']);
+    assert.match(calls[0]!.text, /FROM users WHERE email = \$1 AND role = \$2/);
+    assert.deepEqual(calls[0]!.values, ['pessoa@example.test', 'empresa']);
     const hash = calls[1]!.values?.[0] as string;
     assert.equal(bcrypt.getRounds(hash), 10);
     assert.equal(await bcrypt.compare('senha-local', hash), true);
-    assert.deepEqual(calls[1]!.values?.slice(1), ['active', null, 'pessoa@example.test']);
+    assert.match(calls[1]!.text, /UPDATE users/);
+    assert.match(calls[1]!.text, /WHERE id = \$4 AND invite_token = \$5/);
+    assert.match(calls[1]!.text, /status IS DISTINCT FROM 'active'/);
+    assert.deepEqual(calls[1]!.values?.slice(1), ['active', null, 'user-id', token]);
+  });
+});
+
+test('Primeiro acesso rejeita consumo concorrente quando o ID e token não são atualizados', async t => {
+  const token = jwt.sign({ email: 'pessoa@example.test', role: 'empresa' }, environment.JWT_INVITE_SECRET);
+  const calls: { text: string; values?: unknown[] }[] = [];
+
+  await withRoutes(t, async (text, values) => {
+    calls.push({ text, values });
+
+    return text.includes('SELECT')
+      ? { rows: [{ id: 'user-id', email: 'pessoa@example.test', role: 'empresa', status: 'pending', invite_token: token }] }
+      : { rows: [], rowCount: 0 };
+  }, async url => {
+    const result = await request(url, '/api/v1/auth/first-access', { token, password: 'senha-local' });
+
+    assert.equal(result.status, 401);
+    assert.equal(result.body.status, 401);
+    assert.equal(calls.length, 2);
+    assert.deepEqual(calls[1]!.values?.slice(1), ['active', null, 'user-id', token]);
+  });
+});
+
+test('Reconvite concorrente que não altera users retorna conflito antes de enviar e-mail', async t => {
+  const calls: { text: string; values?: unknown[] }[] = [];
+  let mailCalls = 0;
+
+  await withRoutes(t, async (text, values) => {
+    calls.push({ text, values });
+
+    return text.includes('SELECT')
+      ? { rows: [{ id: 'user-id', email: 'pessoa@example.test', role: 'empresa', status: 'pending', invite_token: 'convite-antigo' }] }
+      : { rows: [], rowCount: 0 };
+  }, async () => {
+    await assert.rejects(adminService.inviteUser('pessoa@example.test', 'empresa'), { status: 409, code: ErrorCode.CONFLICT });
+
+    assert.equal(calls.length, 2);
+    assert.match(calls[1]!.text, /UPDATE users/);
+    assert.match(calls[1]!.text, /WHERE id = \$4/);
+    assert.match(calls[1]!.text, /status IS NOT NULL/);
+    assert.match(calls[1]!.text, /status <> 'active'/);
+    assert.match(calls[1]!.text, /RETURNING id/);
+    assert.equal(calls[1]!.values?.[3], 'user-id');
+    assert.equal(mailCalls, 0);
+  }, async () => {
+    mailCalls++;
+
+    return { data: { id: 'mail-id' }, error: null };
+  });
+});
+
+test('Reconvite atualiza users por ID para status não ativo antes de enviar e-mail', async t => {
+  const calls: { text: string; values?: unknown[] }[] = [];
+  let mailCalls = 0;
+  let status = 'pending';
+
+  await withRoutes(t, async (text, values) => {
+    calls.push({ text, values });
+
+    return text.includes('SELECT')
+      ? { rows: [{ id: 'user-id', email: 'pessoa@example.test', role: 'empresa', status, invite_token: 'convite-antigo' }] }
+      : { rows: [{ id: 'user-id' }], rowCount: 1 };
+  }, async () => {
+    for (const currentStatus of ['pending', 'inactive']) {
+      status = currentStatus;
+      await adminService.inviteUser('pessoa@example.test', 'empresa');
+
+      const update = calls.at(-1)!;
+
+      assert.match(update.text, /UPDATE users/);
+      assert.match(update.text, /WHERE id = \$4/);
+      assert.match(update.text, /status IS NOT NULL/);
+      assert.match(update.text, /status <> 'active'/);
+      assert.deepEqual(update.values?.slice(0, 2), ['empresa', 'pending']);
+      assert.equal(update.values?.[3], 'user-id');
+    }
+
+    assert.equal(mailCalls, 2);
+  }, async () => {
+    assert.match(calls.at(-1)!.text, /UPDATE users/);
+    mailCalls++;
+
+    return { data: { id: 'mail-id' }, error: null };
   });
 });
 
