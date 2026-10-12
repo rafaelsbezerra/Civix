@@ -107,7 +107,7 @@ substituir a exceção original; testar esse comportamento com destino simulado.
 Emitir JSON no destino padrão do processo, sem tabela nem arquivo local de
 logs obrigatório. Leitura formatada é restrita ao desenvolvimento; homologação
 e produção preservam JSON. Definir LOG_LEVEL com validação; inicialmente
-propor debug local e info nos demais ambientes, sem alterar NODE_ENV existente.
+usar debug em development e info nos demais ambientes, sem alterar NODE_ENV existente.
 
 Permitir IDs internos, role, contagem, tipo de operação e modo json/postgres.
 Excluir e-mail, nome, senha/hash, JWT, cookies, Authorization, tokens/hash de
@@ -117,7 +117,7 @@ respostas integrais de provedores. Não registrar originalUrl indiscriminadament
 Combinar allowlist com redaction do Pino e sanitização de strings/stack/cause.
 A sanitização HTTP atual pode ser reutilizada onde aplicável, mas é insuficiente
 para todo texto arbitrário: cobrir tokens em URLs, e-mail e credenciais em
-causas externas. Limitar profundidade/tamanho e tratar ciclos/objetos lançados
+causas externas. Não limitar nem truncar registros por tamanho; tratar ciclos/objetos lançados
 sem instância de Error, sem invocar getters não confiáveis.
 
 ## Adoção nos services
@@ -161,10 +161,13 @@ log, sem transformar o objeto retornado pelo service em contexto completo.
 
 ## Decisões pendentes
 
-**Aguardando resposta:** versão exata das bibliotecas, valores definitivos de
-LOG_LEVEL, limites de tamanho/profundidade dos registros e destino/retenção
-futura de coleta. Versões/níveis/limites foram apresentados ao usuário para
-confirmação antes da instalação e da implementação da configuração.
+Confirmados: pino 10.4.0, pino-http 11.0.0 e pino-pretty 13.2.0; LOG_LEVEL
+padrão debug em development e info nos demais ambientes, com override validado.
+O usuário dispensou limite de tamanho dos registros JSON; não aplicar truncamento
+por tamanho ou limite arbitrário de diagnóstico/contexto. Sanitizar segredos e
+representar referências circulares continua necessário.
+
+**Aguardando resposta:** destino e retenção futura de coleta.
 Destino remoto e retenção ficam para infraestrutura; não bloqueiam a saída
 JSON local, mas não prometer busca histórica antes dessa integração.
 

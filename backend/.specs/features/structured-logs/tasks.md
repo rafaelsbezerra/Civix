@@ -1,6 +1,6 @@
 # Logs estruturados — tarefas e entrega
 
-Status: implementação autorizada; execução aguarda confirmação de configuração.
+Status: implementação autorizada; configuração confirmada; execução em andamento.
 Referência: [spec](spec.md). Data: 2026-10-12.
 
 ## Fase documental atual
@@ -23,7 +23,7 @@ service e environment.
 
 Mensagem prevista: feat(logging): add structured logging foundation
 
-- [ ] Resolver versões/LOG_LEVEL/limites pendentes antes da parte afetada.
+- [x] Versões e LOG_LEVEL confirmados; sem limite de tamanho dos registros.
 - [ ] Instalar e fixar libs aprovadas no manifest/lockfile do backend.
 - [ ] Criar contrato, adapter, sanitização e contexto AsyncLocalStorage.
 - [ ] Integrar middleware antes do parser; gerar requestId interno.
