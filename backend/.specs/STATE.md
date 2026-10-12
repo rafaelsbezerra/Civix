@@ -88,3 +88,13 @@ adoção backend e adiou frontend. A correção local de empresas inicialmente
 ficou sem commit, por exceção específica; o usuário autorizou commit depois.
 Prisma 8/TS e espera de versão estável foram substituídos por Prisma 7/SQL.
 Essas condições históricas não são decisões atuais aguardando resposta.
+
+
+## Logs internos — 2026-10-12
+
+Planejamento: [spec](features/structured-logs/spec.md). Confirmados Pino +
+pino-http, pino-pretty somente local e AsyncLocalStorage. Stack e causa
+sanitizados permitidos nos logs de todos os ambientes; respostas HTTP
+existentes preservadas. Sem tabela/migration. Implementação separada em
+dois commits: estrutura/contexto/middleware/handler e adoção nos services.
+Não implementado; versões, níveis e limites seguem aguardando resposta na spec.

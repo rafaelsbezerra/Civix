@@ -6,6 +6,12 @@ merges da base Prisma 7, tipos de auth, adoção HTTP e auditoria documental.
 Checkbox marcado significa escopo implementado ou decisão confirmada,
 conforme a evidência do item. Entrega em PR não significa merge em staging.
 
+## Logs estruturados internos
+
+[Spec e contrato](features/structured-logs/spec.md) e
+[tarefas em dois commits](features/structured-logs/tasks.md). Planejamento de
+2026-10-12; não implementado. Logs internos, sem tabela e sem alterar respostas HTTP.
+
 ## Grupos e situação
 
 | Grupo | Implementado | Pendências reais |
