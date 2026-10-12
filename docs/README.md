@@ -3,13 +3,17 @@
 A revisão inicial de 2026-10-09 foi feita na staging 5db3c5b e permanece
 como histórico. A atualização de 2026-10-10 reflete staging bedb73a, que já
 incorpora base Prisma 7, tipos de auth, adoção HTTP e auditoria documental.
-Paginação será usada somente quando necessário; repositories operacionais
-ficam para uma etapa futura. Ambos estão fora das pendências atuais.
+Paginação será usada somente quando necessário, fora das pendências atuais.
+Em 2026-10-12, o modo local foi autorizado e implementado no checkout staging,
+sem commit: adapters JSON/PostgreSQL, caixa de saída e cadastro de empresas.
+Essa necessidade antecipou o uso de repositories nos módulos atuais.
 
 Consulte a [revisão de pendências das specs](revisao-pendencias-specs.md):
 itens integrados, pendências atuais, evoluções futuras e divergências do frontend.
 
 ## Guia de leitura
+
+- [Modo local persistido em JSON e configuração da flag](dados-locais.md).
 
 - [Base de padrões do backend e etapa de adoção](padroes-backend.md).
 - [Visão de produto e requisitos](produto.md).

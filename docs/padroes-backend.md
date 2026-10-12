@@ -2,8 +2,8 @@
 
 A base reutilizável de erro e sucesso agora é adotada nos endpoints backend.
 Paginação permanece como helper e será adotada somente quando necessário.
-Repositories têm interfaces prontas; implementação/uso ficam para uma etapa
-futura. Ambos estão fora das pendências atuais. Frontend consumidor continua
+Repositories têm interfaces e adapters JSON/PostgreSQL adotados no modo local
+em 2026-10-12. Frontend consumidor continua
 pendente; envelopes em [api.md](api.md).
 
 ## Contratos aprovados
@@ -71,7 +71,7 @@ Não houve teste em banco ou alteração de contratos do frontend.
 O alvo aprovado é Prisma 7/SQL nativo com migration inversa. Este checkout
 fixa CLI/client/adapter em 7.10.0; tooling integrado da staging.
 Schema comercial e baseline de banco vazio continuam pendentes.
-Pendências atuais: frontend consumidor, camadas de auth/admin, schema canônico, baseline e prova de migrations em PostgreSQL.
+Pendências atuais: frontend consumidor, schema canônico, baseline e prova de migrations em PostgreSQL. Auth/admin agora possuem services.
 
 ## Histórico da extração: usuários e repositories
 
@@ -86,9 +86,11 @@ Sempre perguntar diante de dúvida antes de implementar a parte afetada.
 
 ## Interfaces de persistência preparadas
 
-Disponíveis em repositories/{user,company,plan}.repository.ts. São apenas
-interfaces; não são importadas pelos services nem possuem implementações.
-SQL continua nos services durante esta etapa. Não há interface query
+Disponíveis em repositories/{user,company,plan,auth}.repository.ts. Interfaces
+são implementadas por repositories em persistence/json e persistence/postgres,
+com nomes domínio.repository.ts. Seletores na raiz de persistence usam a flag
+para fornecer o repository ao service. Estrutura em [dados locais](dados-locais.md).
+Services não executam SQL; o adapter PostgreSQL preserva as consultas. Não há interface query
 genérica nem novas factories. Busca sem resultado usa undefined, como
 rows[0] nas consultas atuais; atribuição de plano retorna boolean.
 
@@ -101,14 +103,14 @@ de tipos do service preservados para compatibilidade. Nenhuma query mudou.
 
 Rotas em user.routes.ts; controller em user.controller.ts exporta handlers
 independentes e importa userService diretamente; user.service.ts concentra
-login/recuperação/redefinição, sem Express. User fica em user.entity.ts e
+login/recuperação/redefinição, sem Express, usando UserRepository. User fica em user.entity.ts e
 os tipos de entrada/saída em user.auth.dto.ts. Login não expõe password_hash.
 Profile e home mantêm middleware Bearer; respostas agora são envolvidas em data.
 
 Mantidos login cliente por e-mail, empresa com bcrypt, JWT1h, recuperação
 sem enumeração, token aleatório com hash SHA-256/expiração1h, reset bcrypt10
-e limpeza dos tokens. Repositories são interfaces apenas: o SQL continua
-nos services. Na extração anterior, convite/primeiro acesso ficaram intactos.
+e limpeza dos tokens. SQL está nos adapters reais; modo local persiste JSON.
+Na extração anterior, convite/primeiro acesso ficaram intactos.
 Nesta adoção seus envelopes/erros são adequados; regras, frontend e schema permanecem.
 
 ## Adoção HTTP aprovada
@@ -127,9 +129,15 @@ extraídos em dtos/auth.invite.dto.ts e interfaces/auth.user.row.ts.
 
 A restrição inicial sem adoção é histórica. Não duplicar success, plan ou
 plans no envelope. A adoção backend já está integrada em staging bedb73a.
-Repositories ficam para uma etapa futura e paginação somente sob demanda,
-fora das pendências atuais; incompatibilidades do frontend constam em api.md.
+Repositories foram adotados no modo local autorizado de 2026-10-12; paginação
+permanece sob demanda. Incompatibilidades do frontend constam em api.md.
 
+
+## Modo local — 2026-10-12
+
+Flag global, JSON persistido, caixa de saída e novo cadastro protegido de
+empresas: ver [guia de uso](dados-locais.md) e [spec](../backend/.specs/dados-locais/spec.md).
+Esta necessidade antecipou os adapters e a separação de auth/admin em services.
 
 ## Verificação da adoção — 2026-10-10
 

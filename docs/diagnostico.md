@@ -1,6 +1,8 @@
 # Diagnóstico da staging
 
 Revisão estática do commit `5db3c5b`, em 2026-10-09.
+INT-02 atualizado em 2026-10-12 para a branch codex/json-postgres-repositories;
+isso não comprova merge em staging ou execução contra PostgreSQL.
 Prioridades abaixo indicam a ordem sugerida de tratamento; não substituem
 specs, decisão de produto ou execução dos testes.
 
@@ -9,8 +11,8 @@ specs, decisão de produto ou execução dos testes.
 | ID | Prioridade | Evidência | Consequência |
 | --- | --- | --- | --- |
 | INT-01 | Alta | FirstAccess chama `/api/v1/auth/*`; server monta `/api/auth/*` | Validação e ativação atingem URLs inexistentes |
-| INT-02 | Alta | Convite/ativação usam `"user"`; login usa `users` | A conta ativada não necessariamente é a conta autenticada |
-| INT-03 | Alta | validateToken compara token cru em users; convite usa invite_token em outra tabela; reset usa hash | Validação de links não corresponde aos produtores |
+| INT-02 | Resolvido no código da branch atual | Convite, ativação, login e recuperação usam users; JSON possui uma única coleção de usuários | Schema/baseline e aplicação no PostgreSQL permanecem pendentes |
+| INT-03 | Alta | validateToken compara token cru em users.reset_password_token; convite usa users.invite_token; reset principal usa hash | Validação de links não corresponde aos produtores; unificar users não corrige os protocolos |
 | INT-04 | Alta | Reenvio grava JWT cru; reset espera SHA-256 e expiração no banco | Link reenviado não segue o fluxo principal de reset |
 | INT-05 | Alta | Login navega `/dashboard-empresa`; router não declara rota | Login empresa termina no fallback 404 |
 | INT-06 | Alta | Router importa `@/pages/resetPassword`; arquivo é `ResetPassword.tsx` | Resolução sensível a caixa pode falhar em Linux/build |
@@ -39,7 +41,8 @@ build não foi executado para reproduzir o diagnóstico.
 
 - Login cliente concede JWT apenas pelo e-mail cadastrado, sem senha ou
   comprovação de posse. É necessário definir o propósito desse acesso.
-- Login não consulta status ativo; middleware não valida empresa vinculada.
+- Na branch atual, login bloqueia status pending e preserva usuários sem status.
+  O middleware ainda não valida empresa vinculada.
 - Não existe isolamento tenant aplicado às consultas nem contexto tenant
   autenticado. O catálogo público precisa de DTO e política próprios.
 - Convite e primeiro acesso usam segredo fallback fixo quando a variável

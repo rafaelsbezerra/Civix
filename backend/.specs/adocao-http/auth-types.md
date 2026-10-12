@@ -7,7 +7,7 @@ Estado: implementado, com tipagem verificada e integrado em staging via PR #12; 
 - Extrair `JwtInvitePayload` para `dtos/auth.invite.dto.ts`.
 - Extrair `UserRow` e o resultado `ResetTokenRow` para
   `interfaces/auth.user.row.ts`.
-- Importar os contratos no controller sem mudar regras, SQL ou respostas.
+- A extração inicial importou contratos no controller; agora service e adapters usam os tipos próprios, sem mudar regras ou schema.
 - Reutilizar `UserRole` no payload, preservando os papéis empresa/cliente.
 
 ## Verificação e limites

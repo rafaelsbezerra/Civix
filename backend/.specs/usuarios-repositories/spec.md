@@ -9,8 +9,9 @@ PRs #13/#14; respostas legadas preservadas na extração inicial são histórico
 - Refatorar userController/userRoute em user.routes.ts/user.controller.ts/
   user.service.ts; separar entidade/DTO e manter pastas por função.
 - Controllers com handlers independentes e imports diretos do service.
-- Repositories somente interfaces de usuários, empresas e planos. Manter
-  SQL nos services; implementação e adoção são tarefas futuras.
+- A extração inicial criou somente interfaces. Em 2026-10-12, o modo local
+  autorizou adapters JSON/PostgreSQL e adoção nos módulos atuais; SQL está
+  em src/persistence, sem parser genérico de consultas.
 - Não criar repository para envio de e-mail ou módulos comerciais ausentes.
 - Extração inicial manteve auth/admin, frontend, schema e regras intactos.
   A adoção posterior altera envelopes/erros de auth/admin sem novo schema.
@@ -26,17 +27,21 @@ PRs #13/#14; respostas legadas preservadas na extração inicial são histórico
   interfaces/plan.row.ts; saída PublicUser não inclui hash/senha.
 - [x] REP-01: Criar UserRepository/CompanyRepository/PlanRepository.
   repositories/*.repository.ts: métodos de domínio, ausência undefined;
-  assignPlan retorna boolean. Sem implementação ou consumo nos services.
+  assignPlan retorna boolean. Implementações/consumo foram adicionados no modo local.
 - [x] USR-03: Verificar fluxos preservados e documentar extração.
   Login empresa bcrypt/cliente atual/JWT 1h, recuperação sem enumeração,
   token aleatório/hash/expiração e reset bcrypt10; persistência/e-mail
   simulados em tests/user.routes.test.ts, documentos de arquitetura/padrões.
 
-## Evolução futura — fora das pendências atuais
+## Adoção autorizada — 2026-10-12
 
-**REP-02:** implementar e consumir repositories apenas em etapa futura,
-conforme decisão do usuário. As interfaces existentes são preservadas; SQL
-continua nos services. Essa adoção não está concluída nem integra o aceite atual.
+- [x] REP-02: Implementar e consumir repositories dos módulos atuais.
+  O modo local autorizou antecipar esta evolução. Interfaces permanecem em
+  repositories; implementações em persistence/json e persistence/postgres, com nomes domínio.repository.ts. Services usam a seleção
+  definida na inicialização. AuthRepository cobre as operações existentes de
+  convite, ativação, validação e recuperação. A evolução posterior de
+  2026-10-12 usa apenas users, sem criar schema ou executar banco real.
+  Ver [spec de dados locais](../dados-locais/spec.md).
 
 ## HTTP histórico e adoção posterior
 
@@ -44,7 +49,14 @@ A extração preservou respostas/status existentes e não adotou os envelopes.
 Depois, [a adoção HTTP](../adocao-http/spec.md) substituiu resultados com
 reason/switch por dados ou AppError e aplicou data/meta nos controllers.
 Esse código está integrado em staging via PRs #13/#14, referência bedb73a.
-A divergência users/user permanece até a etapa de schema aprovada.
+A unificação autorizada em 2026-10-12 na branch
+codex/json-postgres-repositories remove a divergência de identidade:
+consultas PostgreSQL e coleção JSON usam apenas users, preservando os campos
+existentes de convite/ativação. JSONs antigos são modificados explicitamente,
+sem conversão automática na leitura. Schema/baseline ainda dependem de aprovação.
+Os protocolos de convite/reset permanecem pendentes. Login bloqueia pending
+e preserva contas sem status; convites não substituem contas ativas ou atuais
+sem status. Ativação e atualização de convites identificam a conta pelo ID.
 
 ## Verificação registrada e entrega
 

@@ -25,3 +25,6 @@ dist-ssr
 
 
 .env
+
+# Dados e e-mails locais do backend
+backend/.local-data/

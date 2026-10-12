@@ -4,6 +4,28 @@ import { AppError } from '../shared/errors/app.error.js';
 import { ErrorCode } from '../shared/errors/error.code.js';
 import { createSuccessResponse } from '../shared/contracts/response.contract.js';
 
+export async function createCompany(req: Request, res: Response): Promise<Response> {
+  if (req.userId === undefined) {
+    throw new AppError({
+      status: 401,
+      code: ErrorCode.UNAUTHORIZED,
+      message: 'Usuário não autenticado.',
+    });
+  }
+
+  if (req.userRole !== 'empresa') {
+    throw new AppError({
+      status: 403,
+      code: ErrorCode.FORBIDDEN,
+      message: 'Apenas usuários com perfil empresa podem cadastrar empresas.',
+    });
+  }
+
+  const company = await companyService.createCompany(req.body);
+
+  return res.status(201).json(createSuccessResponse(company));
+}
+
 export async function listCompanies(req: Request, res: Response): Promise<Response> {
   const result = await companyService.getCompanies();
 

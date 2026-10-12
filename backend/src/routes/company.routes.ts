@@ -1,7 +1,10 @@
 import { Router } from 'express';
 import * as companyController from '../controller/company.controller.js';
+import authMiddleware from '../middlewares/auth.js';
 
 const router = Router();
+
+router.post('/', authMiddleware, companyController.createCompany);
 router.get('/', companyController.listCompanies);
 router.get('/verificadas/todas', companyController.listVerifiedCompanies);
 router.get('/buscar', companyController.searchCompanies);

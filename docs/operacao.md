@@ -29,9 +29,16 @@ Não executar o SQL histórico do Notion como substituto de migrations.
 
 ## Variáveis observadas
 
+USE_MOCK_DATA=true seleciona armazenamento e caixa de saída locais; false
+ou ausência mantém PostgreSQL/Resend. MOCK_DATA_DIR define o diretório JSON.
+Preparação e limites: [modo local](dados-locais.md). Não execute npm ci nem
+altere o .env automaticamente como parte dos testes.
+
 | Variável | Uso atual |
 | --- | --- |
-| DATABASE_URL | Conexão Neon e configuração Prisma |
+| USE_MOCK_DATA | true usa JSON; false ou ausência usa PostgreSQL/Resend |
+| MOCK_DATA_DIR | Diretório absoluto ou relativo à raiz do backend |
+| DATABASE_URL | Conexão Neon no modo real e configuração Prisma |
 | PORT | Porta backend, default 3000 |
 | JWT_SECRET | Assinatura/verificação do access token |
 | JWT_INVITE_SECRET | Convite/ativação; código ainda tem fallback fixo |
@@ -153,7 +160,7 @@ PR #13 foi integrado em 8548c2b e PR #14 em bedb73a. A adoção backend e a
 revisão documental já estão na staging atual; frontend consumidor permanece
 pendente. Não é necessário reaplicar os commits compartilhados do PR #15.
 
-## Escopo documental atual — 2026-10-10
+## Histórico do escopo documental — 2026-10-10
 
 Paginação será usada somente quando necessário; implementação e consumo de
 repositories ficam para uma etapa futura. Ambos estão fora das pendências
@@ -161,3 +168,18 @@ atuais. Frontend, camadas de auth/admin, schema/baseline, comandos operacionais
 e prova de migrations em PostgreSQL permanecem no relatório de pendências.
 Esta atualização altera apenas Markdown; não reexecuta testes, build ou
 migrations e não altera as evidências históricas de execução.
+
+## Persistência local — 2026-10-12
+
+USE_MOCK_DATA=true foi implementado para empresas/usuários/auth/planos e caixa
+local de e-mails. false mantém consultas PostgreSQL e Resend. SQL fica nos
+adapters, e auth/admin usam services. O adiamento anterior de repositories foi
+substituído pela autorização desta tarefa. Admin permanece sem montagem.
+Ver [configuração e cadastro](dados-locais.md).
+
+Verificação atual: 50 testes de foundation aprovados, typecheck foundation e
+contratos aprovados. TypeScript completo passou em fixture temporária com
+Prisma 7.10.0 já instalado em outra worktree, sem modificar dependências.
+A node_modules desta checkout ainda tem CLI 6.12.0: o typecheck completo nela
+falha pela configuração Prisma preexistente. Os testes da API não usam Prisma.
+Sem banco real, envio externo, execução de migrations ou instalação.

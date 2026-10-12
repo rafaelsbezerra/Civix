@@ -18,7 +18,8 @@ As rotas abaixo são as efetivamente montadas. Não são um contrato futuro.
 | GET `/api/auth/validate-token` | query token | Público | 200 `{data:{email}}` |
 | POST `/api/auth/first-access` | token, password mínimo 8 | Token de convite | 200 `{data:{message}}` |
 | POST `/api/auth/resend-invite-email` | email | Público | 200 `{data:{message}}` |
-| GET `/api/v1/empresas` | — | Público | 200 `{data:Company[]}` |
+| POST /api/v1/empresas | Campos de CompanyCreateInput | Bearer JWT, role empresa | 201 com data contendo Company |
+| GET /api/v1/empresas | — | Público | 200 com data contendo Company[] |
 | GET `/api/v1/empresas/verificadas/todas` | — | Público | 200 `{data:Company[]}` |
 | GET `/api/v1/empresas/buscar` | query q não vazio | Público | 200 `{data:Company[]}` |
 | GET `/api/v1/empresas/categoria/:categoria` | categoria | Público | 200 `{data:Company[]}` |
@@ -30,9 +31,10 @@ As rotas abaixo são as efetivamente montadas. Não são um contrato futuro.
 
 O router de convite declara POST `/admin/invite`, mas não é montado no
 servidor. Não existe endpoint público operacional de convite nessa baseline.
-Os CRUDs de usuários, empresas e vendas listados no Notion não estão
-implementados. Comentários de controller com `/api/v1/auth` não refletem
-o mount real `/api/auth`.
+O cadastro de empresas foi acrescentado nesta entrega; atualização/exclusão,
+CRUD público de usuários e vendas não foram implementados. Auth permanece
+montado em /api/auth. Detalhes do cadastro e configuração dos dois modos
+estão em [dados locais](dados-locais.md).
 
 ## Sessões e tokens
 
@@ -42,10 +44,13 @@ ativo, vínculo tenant ou permissões do banco. Não há refresh/logout/revogaç
 
 Recuperação principal gera token aleatório, salva SHA-256 e expiração 1h
 em `users`; reset recalcula o hash e limpa token e expiração.
-Convite assina JWT 24h, armazena token em `"user"`, ativa status e limpa
+Convite assina JWT 24h, armazena token em `users`, ativa status e limpa
 invite_token. A validação pública consulta reset_password_token em `users`
 sem calcular hash. Reenvio gera JWT de reset 1h e grava token cru sem
-atualizar expiração. Esses fluxos não compartilham um protocolo consistente.
+atualizar expiração. Esses fluxos não compartilham um protocolo consistente, mesmo após a
+unificação em users. Login de contas com status pending retorna 401; usuários
+atuais sem status continuam autenticando pelas regras existentes. Convites
+não substituem contas ativas ou atuais sem status.
 
 ## Dados e respostas
 
@@ -79,7 +84,9 @@ Nos demais ambientes, code/stack/details são acrescentados com sanitização.
 Os helpers permitem 200/201 e 204 sem corpo; nenhuma rota atual foi convertida
 para 204 nesta tarefa. Admin mantém router desmontado; seu handler de convite
 usará 201 com data contendo message, sem expor um endpoint novo.
-As regras comerciais, tabelas, URLs e autenticação permanecem.
+As URLs e os protocolos de autenticação permanecem. Na branch
+codex/json-postgres-repositories, convite, ativação, login e recuperação usam
+somente users; a unificação não inclui schema ou migrations.
 
 ## Frontend pendente: incompatibilidades conhecidas
 
@@ -101,8 +108,8 @@ Persistem diferenças snake_case/camelCase e URLs anteriormente documentadas.
 
 A extração anterior preservou envelopes legados. Esta adoção substitui essa
 restrição em usuários, auth/admin, empresas, planos, root e middleware.
-Repositories seguem interfaces apenas; implementação/uso ficam em etapa futura,
-fora das pendências atuais. Paginação será adotada somente quando necessário;
-schema continua pendente. A adoção HTTP está integrada em staging bedb73a.
+A adoção HTTP está integrada em staging bedb73a. Em 2026-10-12, o modo local
+antecipou adapters e uso das interfaces em empresas/usuários/auth/planos, no
+checkout sem commit. Paginação permanece sob demanda; schema segue pendente.
 Verificação da entrega: 36 testes e typechecks isolados aprovados; detalhes
 em operacao.md. Esta atualização documental não reexecuta esses checks.

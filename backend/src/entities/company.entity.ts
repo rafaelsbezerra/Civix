@@ -1,3 +1,5 @@
+import { z } from 'zod';
+
 export interface Company {
   id: string;
   nome: string;
@@ -20,3 +22,26 @@ export interface Company {
   descritivo?: string | null;
   tone?: 'blue' | 'green' | 'orange' | 'purple' | 'gray' | null;
 }
+
+export const companyDataSchema = z.object({
+  id: z.string().min(1),
+  nome: z.string().min(1),
+  cnpj: z.string().min(1),
+  descricao: z.string(),
+  descricao_detalhada: z.string(),
+  categoria: z.string().min(1),
+  cidade: z.string().min(1),
+  estado: z.string().min(1),
+  status: z.enum(['ativo', 'inativo', 'verificado']),
+  verificado: z.boolean(),
+  tamanho: z.enum(['pequena', 'media', 'grande']),
+  data_cadastro: z.string().optional(),
+  logo: z.string().nullable().optional(),
+  endereco: z.string().nullable().optional(),
+  telefone: z.string().nullable().optional(),
+  email: z.string().nullable().optional(),
+  website: z.string().nullable().optional(),
+  whatsapp: z.string().nullable().optional(),
+  descritivo: z.string().nullable().optional(),
+  tone: z.enum(['blue', 'green', 'orange', 'purple', 'gray']).nullable().optional(),
+});

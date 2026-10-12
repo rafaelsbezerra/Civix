@@ -11,12 +11,13 @@ conforme a evidência do item. Entrega em PR não significa merge em staging.
 | Grupo | Implementado | Pendências reais |
 | --- | --- | --- |
 | [Contratos HTTP](contratos-http/spec.md) | Base/helpers e erro/sucesso backend integrados em staging | Frontend consumidor |
-| [Estrutura](estrutura-modulos/spec.md) | Convenções, empresas, usuários/planos e tipos auth | SQL/regras de auth/admin para services; tipos úteis locais de admin |
-| [Tipagem](tipagem-dominio/spec.md) | Entidades/DTOs existentes, linhas auth/plan e três interfaces de repositories | Modelo canônico e validação/serialização abrangentes |
+| [Estrutura](estrutura-modulos/spec.md) | Camadas de empresas/usuários/planos; auth/admin separados em services no checkout local | Nenhuma extração atual pendente; não expor admin |
+| [Tipagem](tipagem-dominio/spec.md) | Entidades/DTOs existentes, linhas auth/plan e interfaces de persistência | Modelo canônico e validação/serialização abrangentes |
 | [Migrations](migrations/spec.md) | Prisma 7/SQL/inversa aprovados; tooling integrado via PR #7/eea5f1d | Schema/baseline, comandos a discutir, ciclo em PostgreSQL |
-| [Usuários/repositories](usuarios-repositories/spec.md) | Extração/interfaces integradas em staging | Nenhuma neste grupo; repositories fora das pendências atuais |
-| [Tipos auth](adocao-http/auth-types.md) | Extração integrada em staging via PR #12 | Não equivale a auth.service.ts |
+| [Usuários/repositories](usuarios-repositories/spec.md) | Interfaces e adapters JSON/PostgreSQL adotados localmente em 2026-10-12 | Schema/banco real seguem em spec própria |
+| [Tipos auth](adocao-http/auth-types.md) | Tipos separados; auth.service.ts implementado localmente | Protocolo canônico de identidade/reset segue para definição |
 | [Adoção HTTP](adocao-http/spec.md) | Backend integrado via PRs #13/#14 | Frontend consumidor |
+| [Dados locais](dados-locais/spec.md) | Flag global, JSON persistido, caixa de saída, comando de usuário e POST empresas | Frontend adiado; banco real não executado |
 
 Consultar [STATE.md](STATE.md) para decisões atuais e históricas superadas.
 Prisma 8/TS e espera de versão estável não são pendências atuais: o usuário
@@ -25,10 +26,10 @@ campos, vínculos e restrições do schema ainda aguardam resposta.
 
 ## Evoluções fora das pendências atuais
 
-Paginação será adotada somente quando necessário (HTTP-03-A). Implementação
-e consumo de repositories ficam para uma etapa futura (REP-02). Contratos,
-helpers e interfaces existentes permanecem disponíveis; os itens não foram
-marcados como concluídos. Ver o [relatório consolidado](../../docs/revisao-pendencias-specs.md).
+Paginação será adotada somente quando necessário (HTTP-03-A); helpers e contrato
+permanecem disponíveis. REP-02 foi antecipado pela implementação autorizada
+do modo local: interfaces e adapters foram adotados nos módulos atuais.
+Ver o [relatório consolidado](../../docs/revisao-pendencias-specs.md).
 
 ## Como trabalhar
 
