@@ -37,7 +37,7 @@ export function PlanCard({ plan }: PlanCardProps) {
         </span>
       )}
       <h2
-        className={`font-[family-name:var(--font-display)] text-2xl font-semibold ${isFeatured ? 'pr-28' : ''}`}
+        className={`font-[family-name:var(--font-display)] text-2xl font-semibold ${isFeatured ? 'pr-28 !text-[var(--color-civix-ivory)]' : ''}`}
         id={`plan-${plan.id}-title`}
       >
         {plan.name}

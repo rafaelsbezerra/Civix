@@ -71,7 +71,8 @@ acessível `#9A6500` na tela Sobre. Referências Figma são evidências
 históricas das specs; o arquivo Figma não foi revisado nesta fase.
 
 Os cards de planos compartilham os cantos arredondados (rounded-2xl) dos
-cards de empresas, mantendo as variantes comum e recomendada.
+cards de empresas, mantendo as variantes comum e recomendada. O nome do
+plano recomendado usa o branco da identidade para contrastar com o fundo azul.
 
 ## Escopo ainda aberto
 
