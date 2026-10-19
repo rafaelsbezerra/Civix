@@ -10,14 +10,10 @@ import {
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import { ApiError, login } from "../lib/api";
 
 import civixLogo from "../assets/civix/logoCivix.png";
 import civixLogoDark from "../assets/civix/logoBackground.png";
-
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:3000",
-});
 
 const AnimatedWave = ({ className = "" }: { className?: string }) => {
   return (
@@ -165,13 +161,13 @@ export default function Login() {
     try {
       setIsLoading(true);
 
-      const response = await api.post("api/v1/users/login", {
+      const result = await login({
         email,
         password: role === "empresa" ? password : undefined,
         role,
       });
 
-      localStorage.setItem("token", response.data.token);
+      localStorage.setItem("token", result.token);
 
       if (role === "empresa") {
         navigate("/dashboard-empresa");
@@ -179,14 +175,9 @@ export default function Login() {
         navigate("/");
       }
     } catch (err: unknown) {
-      if (axios.isAxiosError(err)) {
-        setError(
-          err.response?.data?.error ||
-          "Ocorreu um erro ao realizar o login. Tente novamente."
-        );
-      } else {
-        setError("Ocorreu um erro ao realizar o login. Tente novamente.");
-      }
+      setError(err instanceof ApiError
+        ? err.message
+        : "Ocorreu um erro ao realizar o login. Tente novamente.");
     } finally {
       setIsLoading(false);
     }
