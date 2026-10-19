@@ -157,3 +157,9 @@ rede, JSON inválido e resposta sem envelope devem resultar em erro legível.
 Verificação prevista: contratos dos services, login de ambos os perfis,
 mensagens públicas, falhas de rede/envelope, TypeScript e lint. Registrar os
 resultados efetivamente executados na entrega, sem reutilizar provas antigas.
+
+### Entrega HTTP de 2026-10-19
+
+Login e extração por service implementados. 29 testes direcionados, tipagem e
+lint aprovados. Vite gera bundle; build completo bloqueado pela checagem de
+asset Sobre `dashboard.png`. Ver validação de backend-integration.

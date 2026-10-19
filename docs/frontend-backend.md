@@ -11,6 +11,7 @@ frontend continua consumindo HTTP e não acessa arquivos locais diretamente.
 
 | Consumidor existente | Endpoint do backend |
 | --- | --- |
+| Login | POST /api/v1/users/login |
 | Catálogo e Home | GET /api/v1/empresas |
 | Busca | GET /api/v1/empresas/buscar?q=termo |
 | Categoria/estado/tamanho/verificadas | GETs existentes em /api/v1/empresas |
@@ -41,8 +42,8 @@ quando a configuração mudar.
 
 ## Fluxos disponíveis e limites
 
-Login ainda lê o envelope antigo e utiliza Axios; sua adaptação não está
-concluída. Não há dashboard nem formulário de cadastro de empresas no frontend.
+Login consome o envelope atual pelo service `login`, com erros públicos em
+`message` e gravação do token após validação da resposta. Não há dashboard nem formulário de cadastro de empresas no frontend.
 Plans.tsx não possui rota; PlanCard conserva seu link existente. Campos de
 empresa seguem snake_case, incluindo descricao_detalhada.
 

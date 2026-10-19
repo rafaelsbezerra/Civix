@@ -3,7 +3,7 @@
 Estado: implementação autorizada em 2026-10-12, na branch codex/frontend-backend-integration,
 criada a partir de e229843 (PR #16). Entrega para staging, dependente do PR #16.
 
-## Escopo confirmado
+## Escopo histórico confirmado — 2026-10-12
 
 - Adaptar os consumidores já existentes de empresas, planos, recuperação,
   redefinição de senha e primeiro acesso ao sucesso { data, meta? } e erro
@@ -36,7 +36,7 @@ PlanCard mantém seu link existente; o helper selectPlan é adaptado sem criar
 uma interface nova. /planos continua sem rota. Reenvio de convite/recuperação
 ainda exige alinhamento específico de protocolo, fora desta pré-validação.
 
-## Aceite
+## Aceite histórico — 2026-10-12
 
 - Catálogo, filtros, detalhe e planos leem data de respostas HTTP reais.
 - Busca utiliza /empresas/buscar e parâmetros são codificados.

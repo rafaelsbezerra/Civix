@@ -143,7 +143,7 @@ empresas e suas colunas precisam existir; o código de cadastro não cria o
 banco automaticamente. Schema e baseline completos ainda não estão definidos.
 
 O frontend não possui dashboard/formulário de cadastro. Seus consumidores
-existentes utilizam os envelopes atuais, exceto login; ver [integração frontend/backend](frontend-backend.md).
+existentes utilizam os envelopes atuais, incluindo login (adoção em 2026-10-19); ver [integração frontend/backend](frontend-backend.md).
 
 ## Coleções e fluxos existentes
 
