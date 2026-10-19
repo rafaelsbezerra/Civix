@@ -1,6 +1,7 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import Login from './login'
 import FirstAccess from './FirstAccess'
 import ForgotPassword from './ForgotPassword'
 import ResetPassword from './ResetPassword'
@@ -142,4 +143,31 @@ describe('Formulários existentes integrados ao backend', () => {
     expect(signal?.aborted).toBe(true)
     await act(async () => { finish?.(new Response(JSON.stringify({ data: { email: 'pessoa@example.test' } }))) })
   })
+  it.each(['empresa', 'cliente'] as const)('Login %s armazena token do envelope e mantém destino', async role => {
+    const setItem = vi.fn()
+    vi.stubGlobal('localStorage', { setItem })
+    respond({ data: { token: 'token-sintetico', user: { id: 'user-1', name: 'Teste', email: 'pessoa@example.test', role } } })
+    renderPage(<Login />, '/login')
+    if (role === 'cliente') fireEvent.click(screen.getByRole('button', { name: /Sou cliente/ }))
+    fireEvent.change(screen.getByPlaceholderText('seu_email@email.com'), { target: { value: 'pessoa@example.test' } })
+    if (role === 'empresa') fireEvent.change(screen.getByPlaceholderText('••••••••'), { target: { value: 'senha-teste' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Login' }))
+    await waitFor(() => expect(setItem).toHaveBeenCalledWith('token', 'token-sintetico'))
+    expect(navigate).toHaveBeenCalledWith(role === 'empresa' ? '/dashboard-empresa' : '/')
+  })
+
+  it('Login com falha mostra mensagem pública sem gravar token ou navegar', async () => {
+    const setItem = vi.fn()
+    vi.stubGlobal('localStorage', { setItem })
+    respond({ status: 401, message: 'Credenciais inválidas.', stack: 'diagnóstico privado' }, 401)
+    renderPage(<Login />, '/login')
+    fireEvent.change(screen.getByPlaceholderText('seu_email@email.com'), { target: { value: 'pessoa@example.test' } })
+    fireEvent.change(screen.getByPlaceholderText('••••••••'), { target: { value: 'senha-teste' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Login' }))
+    expect(await screen.findByText('Credenciais inválidas.')).toBeInTheDocument()
+    expect(screen.queryByText(/diagnóstico privado/)).not.toBeInTheDocument()
+    expect(setItem).not.toHaveBeenCalled()
+    expect(navigate).not.toHaveBeenCalled()
+  })
+
 })

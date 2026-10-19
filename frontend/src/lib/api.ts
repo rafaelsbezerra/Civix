@@ -68,7 +68,7 @@ function getResponseMessage(payload: unknown): string | undefined {
   return undefined;
 }
 
-async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<T> {
+async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<ApiResponse<T>> {
   const headers = new Headers(options?.headers);
   headers.set('Accept', 'application/json');
 
@@ -107,76 +107,117 @@ async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<T> 
     throw new ApiError('A API retornou uma resposta inválida.', response.status);
   }
 
-  return (payload as ApiResponse<T>).data;
+  return payload as ApiResponse<T>;
 }
 
-export const fetchEmpresas = (): Promise<Empresa[]> => {
-  return fetchApi<Empresa[]>('/api/v1/empresas');
+export const fetchEmpresas = async (): Promise<Empresa[]> => {
+  const response = await fetchApi<Empresa[]>('/api/v1/empresas');
+  return response.data;
 };
 
-export const fetchEmpresaById = (id: string): Promise<Empresa> => {
-  return fetchApi<Empresa>(`/api/v1/empresas/${encodeURIComponent(id)}`);
+export const fetchEmpresaById = async (id: string): Promise<Empresa> => {
+  const response = await fetchApi<Empresa>(`/api/v1/empresas/${encodeURIComponent(id)}`);
+  return response.data;
 };
 
-export const fetchEmpresasByCategoria = (categoria: string): Promise<Empresa[]> => {
-  return fetchApi<Empresa[]>(`/api/v1/empresas/categoria/${encodeURIComponent(categoria)}`);
+export const fetchEmpresasByCategoria = async (categoria: string): Promise<Empresa[]> => {
+  const response = await fetchApi<Empresa[]>(`/api/v1/empresas/categoria/${encodeURIComponent(categoria)}`);
+  return response.data;
 };
 
-export const fetchEmpresasVerificadas = (): Promise<Empresa[]> => {
-  return fetchApi<Empresa[]>('/api/v1/empresas/verificadas/todas');
+export const fetchEmpresasVerificadas = async (): Promise<Empresa[]> => {
+  const response = await fetchApi<Empresa[]>('/api/v1/empresas/verificadas/todas');
+  return response.data;
 };
 
-export const fetchEmpresasByEstado = (estado: string): Promise<Empresa[]> => {
-  return fetchApi<Empresa[]>(`/api/v1/empresas/estado/${encodeURIComponent(estado)}`);
+export const fetchEmpresasByEstado = async (estado: string): Promise<Empresa[]> => {
+  const response = await fetchApi<Empresa[]>(`/api/v1/empresas/estado/${encodeURIComponent(estado)}`);
+  return response.data;
 };
 
-export const fetchEmpresasByTamanho = (tamanho: 'pequena' | 'media' | 'grande'): Promise<Empresa[]> => {
-  return fetchApi<Empresa[]>(`/api/v1/empresas/tamanho/${tamanho}`);
+export const fetchEmpresasByTamanho = async (tamanho: 'pequena' | 'media' | 'grande'): Promise<Empresa[]> => {
+  const response = await fetchApi<Empresa[]>(`/api/v1/empresas/tamanho/${tamanho}`);
+  return response.data;
 };
 
-export const searchEmpresas = (termo: string): Promise<Empresa[]> => {
+export const searchEmpresas = async (termo: string): Promise<Empresa[]> => {
   const params = new URLSearchParams({ q: termo });
 
-  return fetchApi<Empresa[]>(`/api/v1/empresas/buscar?${params.toString()}`);
+  const response = await fetchApi<Empresa[]>(`/api/v1/empresas/buscar?${params.toString()}`);
+  return response.data;
 };
 
-export const fetchPlans = (): Promise<Plan[]> => {
-  return fetchApi<Plan[]>('/api/v1/plans');
+export const fetchPlans = async (): Promise<Plan[]> => {
+  const response = await fetchApi<Plan[]>('/api/v1/plans');
+  return response.data;
 };
 
-export const selectPlan = (planId: string): Promise<Plan> => {
+export const selectPlan = async (planId: string): Promise<Plan> => {
   const token = localStorage.getItem('token');
 
-  return fetchApi<Plan>('/api/v1/plans/selection', {
+  const response = await fetchApi<Plan>('/api/v1/plans/selection', {
     method: 'POST',
     headers: token ? { Authorization: `Bearer ${token}` } : {},
     body: JSON.stringify({ planId }),
   });
+  return response.data;
 };
 
-export function requestPasswordReset(email: string): Promise<{ message: string }> {
-  return fetchApi('/api/v1/users/esqueci-senha', {
+export async function requestPasswordReset(email: string): Promise<{ message: string }> {
+  const response = await fetchApi<{ message: string }>('/api/v1/users/esqueci-senha', {
     method: 'POST',
     body: JSON.stringify({ email }),
   });
+  return response.data;
 }
 
-export function resetPassword(token: string, password: string): Promise<{ message: string }> {
-  return fetchApi('/api/v1/users/redefinir-senha', {
+export async function resetPassword(token: string, password: string): Promise<{ message: string }> {
+  const response = await fetchApi<{ message: string }>('/api/v1/users/redefinir-senha', {
     method: 'POST',
     body: JSON.stringify({ token, password }),
   });
+  return response.data;
 }
 
-export function validateInviteToken(token: string, signal?: AbortSignal): Promise<{ email: string }> {
+export async function validateInviteToken(token: string, signal?: AbortSignal): Promise<{ email: string }> {
   const params = new URLSearchParams({ token });
 
-  return fetchApi(`/api/auth/validate-token?${params.toString()}`, { signal });
+  const response = await fetchApi<{ email: string }>(`/api/auth/validate-token?${params.toString()}`, { signal });
+  return response.data;
 }
 
-export function completeFirstAccess(token: string, password: string): Promise<{ message: string }> {
-  return fetchApi('/api/auth/first-access', {
+export async function completeFirstAccess(token: string, password: string): Promise<{ message: string }> {
+  const response = await fetchApi<{ message: string }>('/api/auth/first-access', {
     method: 'POST',
     body: JSON.stringify({ token, password }),
   });
+  return response.data;
+}
+
+export interface LoginInput {
+  email: string;
+  password?: string;
+  role: 'empresa' | 'cliente';
+}
+
+export interface LoginResult {
+  user: { id: string; name: string; email: string; role: 'empresa' | 'cliente' };
+  token: string;
+}
+
+export async function login(input: LoginInput): Promise<LoginResult> {
+  const response = await fetchApi<LoginResult>('/api/v1/users/login', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+  const result = response.data;
+
+  if (!result || typeof result.token !== 'string' || !result.token.trim()
+    || !result.user || typeof result.user.id !== 'string'
+    || typeof result.user.name !== 'string' || typeof result.user.email !== 'string'
+    || (result.user.role !== 'empresa' && result.user.role !== 'cliente')) {
+    throw new ApiError('A API retornou uma resposta de login inválida.');
+  }
+
+  return result;
 }

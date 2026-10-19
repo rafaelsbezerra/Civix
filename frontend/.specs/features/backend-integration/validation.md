@@ -75,3 +75,27 @@ staging. Sem dashboard, páginas/rotas novas ou alteração de login. A
 pré-validação de convite usa o mesmo JWT, perfil/status e invite_token da
 ativação; o protocolo divergente de reenvio permanece pendente.
 HTTP-04-B continua parcialmente completo. Ver [integração](../../../../docs/frontend-backend.md).
+
+## Adoção HTTP e login — 2026-10-19
+
+Implementação na branch `codex/frontend-http-adoption`, a partir da staging
+`3fe5868`. O transporte retorna o envelope validado; cada service extrai
+`data`. Login usa a origem comum, retorna token/usuário e apresenta somente
+a mensagem pública, preservando papéis e destinos existentes.
+
+Verificações executadas:
+
+- 29 testes direcionados passaram: `npm test -- src/lib/api.test.ts
+  src/pages/BackendConsumers.test.tsx --maxWorkers=1`. Incluem login dos dois
+  perfis, gravação do token, navegação, erro público sem diagnóstico, rede e
+  envelope inválido, além dos consumidores anteriores.
+- `node node_modules/typescript/bin/tsc -b`: aprovado.
+- `npm run lint` e lint direcionado aos quatro arquivos alterados: aprovados.
+- `npm run build`: TypeScript e Vite aprovados; verificador posterior falha
+  em `Missing About asset in build manifest: dashboard.png`. Essa checagem
+  e os assets Sobre não foram alterados nesta tarefa.
+- Revisão independente do código e documentação concluída; `git diff --check`
+  aprovado. Dependências existentes reutilizadas, sem instalação.
+
+Não executados: suíte completa, navegador com backend real e banco remoto.
+Dashboard de empresa segue fora do escopo; o destino existente foi preservado.

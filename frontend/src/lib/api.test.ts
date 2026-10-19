@@ -156,4 +156,27 @@ describe('Contratos dos consumidores de API', () => {
     expect(fetchMock.mock.calls[1][0]).toBe('https://backend.example.test/api/auth/first-access')
     expect(JSON.parse(String(fetchMock.mock.calls[1][1]?.body))).toEqual({ token, password: 'senha-teste-123' })
   })
+  it.each(['empresa', 'cliente'] as const)('Login %s extrai token e usuário do envelope', async role => {
+    const input = { email: 'pessoa@example.test', role, ...(role === 'empresa' ? { password: 'senha-teste' } : {}) }
+    const result = { user: { id: 'user-1', name: 'Teste', email: input.email, role }, token: 'token-sintetico' }
+    respond({ data: result })
+    const { login } = await import('./api')
+    expect(await login(input)).toEqual(result)
+    expect(fetchMock.mock.calls[0][0]).toBe('https://backend.example.test/api/v1/users/login')
+    expect(JSON.parse(String(fetchMock.mock.calls[0][1]?.body))).toEqual(input)
+  })
+
+  it('Login apresenta message público e rejeita token inválido, formato antigo e falha de rede', async () => {
+    const { login } = await import('./api')
+    const input = { email: 'pessoa@example.test', role: 'empresa' as const, password: 'senha-teste' }
+    respond({ status: 401, message: 'Credenciais inválidas', stack: 'diagnóstico privado' }, 401)
+    await expect(login(input)).rejects.toThrow('Credenciais inválidas')
+    respond({ data: { token: '', user: {} } })
+    await expect(login(input)).rejects.toThrow('resposta de login inválida')
+    respond({ token: 'formato-antigo' })
+    await expect(login(input)).rejects.toThrow('resposta inválida')
+    fetchMock.mockRejectedValueOnce(new TypeError('Falha de rede'))
+    await expect(login(input)).rejects.toThrow('Não foi possível conectar')
+  })
+
 })
