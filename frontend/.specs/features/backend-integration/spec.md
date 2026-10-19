@@ -47,3 +47,21 @@ ainda exige alinhamento específico de protocolo, fora desta pré-validação.
 - Nenhum diff em login.tsx, nenhum novo destino ou biblioteca.
 - Verificar testes de contrato/consumidores, tipagem, build e regressões,
   distinguindo falhas históricas de problemas introduzidos.
+
+## Adoção HTTP no frontend — 2026-10-19
+
+Autorizado incluir o login na integração, superando sua exclusão histórica.
+Cada service de API extrai `data` do envelope `{ data, meta? }`; o transporte
+comum valida o envelope e trata erros públicos por `message` e status HTTP.
+Não haverá interceptor que remova o envelope. Telas recebem dados de domínio,
+sem depender de `code`, `details` ou `stack`, ausentes em produção.
+
+Login envia email, role e password quando empresa a `/api/v1/users/login`.
+O service retorna `{ user: { id, name, email, role }, token }`. A tela grava
+o token somente após sucesso válido e mantém os destinos existentes. Não
+criar dashboard, sessão nova, refresh token, endpoints ou paginação. Falhas de
+rede, JSON inválido e resposta sem envelope devem resultar em erro legível.
+
+Verificação prevista: contratos dos services, login de ambos os perfis,
+mensagens públicas, falhas de rede/envelope, TypeScript e lint. Registrar os
+resultados efetivamente executados na entrega, sem reutilizar provas antigas.
