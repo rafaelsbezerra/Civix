@@ -2,6 +2,11 @@ import type { CompanyRepository } from '../../repositories/company.repository.js
 import { readLocalData, updateLocalData } from './local.store.js';
 
 export const companyJsonRepository: CompanyRepository = {
+  // Estrutura inicial: implementar persistência local antes de usar.
+  async updateCoverKey(_id: string, _coverKey: string | null): Promise<void> {},
+
+  async updateLogoKey(_id: string, _logoKey: string | null): Promise<void> {},
+
   async create(company) {
     return updateLocalData(data => {
       data.companies.push(company);

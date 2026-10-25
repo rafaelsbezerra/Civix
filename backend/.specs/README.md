@@ -1,5 +1,12 @@
 # Specs do backend
 
+## Storage de imagens
+
+[Estrutura e contratos](features/storage/spec.md) e
+[tarefas](features/storage/task.md). Scaffold sem handlers implementados;
+router não montado e migrations não executadas. Integração de empresas,
+persistência e autorização continuam pendentes.
+
 ## Planejamento dos dashboards — 2026-10-12
 
 Novo [plano ordenado](roadmaps/dashboards/README.md), com specs por entrega,

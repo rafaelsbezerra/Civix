@@ -7,6 +7,11 @@ import { companyRepository } from '../persistence/company.repository.js';
 import { AppError } from '../shared/errors/app.error.js';
 import { ErrorCode } from '../shared/errors/error.code.js';
 
+// Estrutura inicial: chamadas futuras pelo storage; sem atualização persistida.
+export async function updateCompanyCoverKey(companyId: string, coverKey: string | null): Promise<void> { }
+
+export async function updateCompanyLogoKey(companyId: string, logoKey: string | null): Promise<void> { }
+
 export async function createCompany(input: unknown): Promise<Company> {
   const parsed = companyCreateSchema.safeParse(input, { error: () => 'Valor inválido para este campo.' });
 

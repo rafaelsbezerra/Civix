@@ -8,6 +8,8 @@ export interface Company {
   descricao_detalhada: string;
   categoria: string;
   logo?: string | null;
+  cover_key?: string | null;
+  logo_key?: string | null;
   cidade: string;
   estado: string;
   endereco?: string | null;
@@ -37,6 +39,8 @@ export const companyDataSchema = z.object({
   tamanho: z.enum(['pequena', 'media', 'grande']),
   data_cadastro: z.string().optional(),
   logo: z.string().nullable().optional(),
+  cover_key: z.string().nullable().optional(),
+  logo_key: z.string().nullable().optional(),
   endereco: z.string().nullable().optional(),
   telefone: z.string().nullable().optional(),
   email: z.string().nullable().optional(),

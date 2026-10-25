@@ -3,6 +3,11 @@ import type { CompanyRepository } from '../../repositories/company.repository.js
 import { db } from '../../shared/config/data.js';
 
 export const companyPostgresRepository: CompanyRepository = {
+  // Estrutura inicial: implementar UPDATE e concorrência antes de usar.
+  async updateCoverKey(_id: string, _coverKey: string | null): Promise<void> {},
+
+  async updateLogoKey(_id: string, _logoKey: string | null): Promise<void> {},
+
   async create(company) {
     const columns = [
       'id', 'nome', 'cnpj', 'descricao', 'descricao_detalhada', 'categoria',

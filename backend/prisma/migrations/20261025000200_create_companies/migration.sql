@@ -14,6 +14,8 @@ CREATE TABLE companies (
   size TEXT NOT NULL CHECK (size IN ('pequena', 'media', 'grande')),
   created_at TIMESTAMPTZ,
   logo TEXT,
+  cover_key TEXT,
+  logo_key TEXT,
   address TEXT,
   phone TEXT,
   email TEXT,
