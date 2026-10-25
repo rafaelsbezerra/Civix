@@ -9,8 +9,15 @@ Entrega somente backend; não há UI nova nesta spec.
 
 ## Baseline e escopo
 
+Atualização de 2026-10-25: autorizada a baseline limitada às tabelas atuais
+`users` e `empresas`, preservando as migrations de planos. UUID de usuário,
+CNPJ único e e-mail único sem distinção de caixa em cada tabela confirmados.
+Ver [escopo específico](../migrations/users-companies.md). Essa entrega não
+conclui os vínculos/perfis abaixo nem autoriza execução em banco.
+
 [schema.prisma](../../../prisma/schema.prisma) não declara models. Tooling
-Prisma 7 existe, mas migrations de planos não criam users/empresas. Complementar
+Prisma 7 existe; as migrations históricas de planos não criam users/empresas.
+A baseline limitada de 2026-10-25 acrescenta essas criações. Complementar
 [spec atual de migrations](../migrations/spec.md), sem trocar runner/versão.
 PostgreSQL novo, SQL nativo e nova migration inversa estão aprovados.
 

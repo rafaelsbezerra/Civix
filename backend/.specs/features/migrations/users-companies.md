@@ -59,3 +59,24 @@ separadas. Unicidade em LOWER(email) não normaliza buscas atuais com `=`.
 
 Esta baseline não conclui a [spec 02](../identity-data-model/spec.md): vínculo,
 permissões e migração do legado permanecem dependentes das decisões E2E.
+
+## Evidências da entrega
+
+Em 2026-10-25, revisão independente do SQL sem bloqueadores concretos.
+Conferência estática encontrou as dez colunas exigidas de users e as vinte
+de empresas, unicidade por LOWER(email), CNPJ único, FK, UUID e transações.
+`git diff --check` passou. Comparação com staging confirmou que os dois SQL
+históricos de planos não foram alterados.
+
+`npm run test:prisma`, executado no backend com as dependências existentes,
+passou em três testes offline: validate/generate de fixture, geração de SQL
+de criação/inversa de fixture e versões fixadas. Não valida a execução ou
+as restrições das novas migrations; nenhum SQL foi aplicado em banco.
+
+Arquivos criados:
+
+- [Usuários](../../../prisma/migrations/20261025000100_create_users/migration.sql).
+- [Empresas](../../../prisma/migrations/20261025000200_create_companies/migration.sql).
+
+Validação real de aplicação, unicidade concorrente, nulabilidade, geração de
+UUID, FK e recuperação em PostgreSQL temporário permanece não executada.

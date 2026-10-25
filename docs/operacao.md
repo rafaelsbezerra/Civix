@@ -23,8 +23,12 @@ npm run dev
 
 Backend usa PORT ou 3000. O proxy Vite encaminha `/api` para localhost:3000.
 O pool exige DATABASE_URL e as tabelas esperadas pelos services/controllers.
-As migrations atuais não criam essas tabelas integralmente. Portanto,
-não há procedimento de provisionamento de banco vazio validado.
+As migrations de 2026-10-25 acrescentam `users` e `empresas` ao histórico de
+planos, mas sua aplicação em PostgreSQL ainda não foi validada. Exigem
+PostgreSQL com `gen_random_uuid()` disponível (nativa a partir da versão 13).
+Não aplicá-las automaticamente; tabelas já existentes exigem inspeção e plano
+próprio, pois as novas criações não convertem schemas legados. Ver a
+[baseline e recuperação](../backend/.specs/features/migrations/users-companies.md).
 Não executar o SQL histórico do Notion como substituto de migrations.
 
 ## Variáveis observadas

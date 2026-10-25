@@ -21,9 +21,12 @@ A decisão anterior por Prisma 8/TS e espera de versão estável foi substituíd
 
 ## Situação e requisitos
 
-prisma/schema.prisma não possui models. As duas migrations SQL de planos
-não constituem uma baseline completa. Seu destino deve ser definido junto
-com o schema; não apagar ou reexecutar esse histórico incidentalmente.
+prisma/schema.prisma não possui models. Em 2026-10-25, o usuário confirmou
+preservar as duas migrations de planos e acrescentar a criação de users e
+empresas, com UUID de usuário, CNPJ único e e-mail único sem distinção de caixa
+em cada tabela. A [baseline limitada](users-companies.md) atende ao código
+atual; não conclui identidade empresarial nem comprova aplicação em banco.
+Não apagar ou reexecutar o histórico incidentalmente.
 
 Cada migration deve ter identificação/ordem e registro de aplicação pelo
 Prisma Migrate. Reexecução não deve duplicar mudanças; falha não deve ser

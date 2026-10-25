@@ -53,9 +53,14 @@ somente em helpers, com adoção apenas quando necessária, fora das pendências
 ## Modelo de dados observado
 
 [schema.prisma](../backend/prisma/schema.prisma) não declara entidades.
-As migrations versionadas criam `plans` e atualizam suas descrições;
-adicionam `users.plan_id` somente se `users` já existir. Não criam `users`
-ou `empresas`. Um banco vazio não é reconstruído por esse histórico.
+As migrations versionadas criam `plans` e atualizam suas descrições. As novas
+migrations de 2026-10-25 criam `users` e `empresas`, com IDs UUID e unicidade
+de e-mail por `LOWER(email)` em cada tabela; CNPJ é único pelo valor armazenado.
+A criação de `users` inclui `plan_id` e sua FK, completando o bloco condicional
+da migration histórica de planos em bancos vazios. Os campos correspondem aos
+adapters atuais, sem vínculo usuário–empresa ou novos perfis de dashboard.
+O ciclo de aplicação em PostgreSQL ainda não foi executado nesta entrega.
+Ver [baseline e limites](../backend/.specs/features/migrations/users-companies.md).
 
 | Entidade | Expectativa do código | Divergência documental |
 | --- | --- | --- |
