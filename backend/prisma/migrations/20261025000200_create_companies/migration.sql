@@ -1,29 +1,29 @@
 BEGIN;
 
-CREATE TABLE empresas (
+CREATE TABLE companies (
   id UUID PRIMARY KEY,
-  nome TEXT NOT NULL,
-  cnpj TEXT NOT NULL,
-  descricao TEXT NOT NULL,
-  descricao_detalhada TEXT NOT NULL,
-  categoria TEXT NOT NULL,
-  cidade TEXT NOT NULL,
-  estado TEXT NOT NULL,
+  name TEXT NOT NULL,
+  tax_id TEXT NOT NULL,
+  description TEXT NOT NULL,
+  detailed_description TEXT NOT NULL,
+  category TEXT NOT NULL,
+  city TEXT NOT NULL,
+  state TEXT NOT NULL,
   status TEXT NOT NULL CHECK (status IN ('ativo', 'inativo', 'verificado')),
-  verificado BOOLEAN NOT NULL,
-  tamanho TEXT NOT NULL CHECK (tamanho IN ('pequena', 'media', 'grande')),
-  data_cadastro TIMESTAMPTZ,
+  is_verified BOOLEAN NOT NULL,
+  size TEXT NOT NULL CHECK (size IN ('pequena', 'media', 'grande')),
+  created_at TIMESTAMPTZ,
   logo TEXT,
-  endereco TEXT,
-  telefone TEXT,
+  address TEXT,
+  phone TEXT,
   email TEXT,
   website TEXT,
   whatsapp TEXT,
-  descritivo TEXT,
+  additional_description TEXT,
   tone TEXT CHECK (tone IN ('blue', 'green', 'orange', 'purple', 'gray')),
-  CONSTRAINT empresas_cnpj_key UNIQUE (cnpj)
+  CONSTRAINT companies_tax_id_key UNIQUE (tax_id)
 );
 
-CREATE UNIQUE INDEX empresas_email_unique_idx ON empresas (LOWER(email));
+CREATE UNIQUE INDEX companies_email_unique_idx ON companies (LOWER(email));
 
 COMMIT;

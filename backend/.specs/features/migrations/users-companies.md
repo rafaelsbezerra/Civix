@@ -62,6 +62,44 @@ permissões e migração do legado permanecem dependentes das decisões E2E.
 
 ## Evidências da entrega
 
+### Alteração de nomenclatura — 2026-10-25
+
+Autorizada alteração direta na staging, sem commit, dos nomes de tabelas e
+colunas para inglês. A migration de users já usa inglês e não requer alteração.
+A criação empresarial passa a usar companies, sem renomear banco existente.
+Tipos, nulabilidade, UUID, unicidade e valores de papéis/estados são preservados.
+As duas migrations históricas de planos permanecem intactas.
+
+| Campo anterior | Coluna SQL atual |
+| --- | --- |
+| nome | name |
+| cnpj | tax_id |
+| descricao | description |
+| descricao_detalhada | detailed_description |
+| categoria | category |
+| cidade | city |
+| estado | state |
+| verificado | is_verified |
+| tamanho | size |
+| data_cadastro | created_at |
+| endereco | address |
+| telefone | phone |
+| descritivo | additional_description |
+
+Demais colunas já estavam em inglês. tax_id armazena o CNPJ, sem modificar
+normalização ou unicidade literal. description, detailed_description e
+additional_description continuam campos distintos. created_at mantém a
+nulabilidade anterior, sem acrescentar DEFAULT NOW() nesta alteração.
+
+**Aguardando resposta:** alinhamento do adapter PostgreSQL, que ainda consulta
+empresas e colunas portuguesas. Esta alteração de migrations não adapta API,
+entidades ou JSON e não entrega integração PostgreSQL compatível. Se a versão
+anterior destas migrations já tiver sido aplicada em algum ambiente, não
+reaplicá-las editadas; será necessária nova migration de renomeação e análise
+do histórico/checksums. Nenhuma migration foi executada nesta tarefa.
+
+As evidências abaixo correspondem à criação original, antes da tradução.
+
 Em 2026-10-25, revisão independente do SQL sem bloqueadores concretos.
 Conferência estática encontrou as dez colunas exigidas de users e as vinte
 de empresas, unicidade por LOWER(email), CNPJ único, FK, UUID e transações.

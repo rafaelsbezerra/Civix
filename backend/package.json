@@ -12,6 +12,10 @@
     "test:foundation": "node scripts/test.runner.mjs tests/contracts.test.ts tests/company.routes.test.ts tests/user.routes.test.ts tests/http.adoption.test.ts tests/local.persistence.test.ts tests/logging.test.ts tests/logging.http.test.ts tests/logging.services.test.ts",
     "typecheck:foundation": "tsc -p tsconfig.foundation.json",
     "test:prisma": "node --test tests/prisma.tooling.test.mjs",
+    "prisma:generate": "prisma generate",
+    "prisma:validate": "prisma validate",
+    "prisma:show": "prisma migrate status",
+    "prisma:apply": "prisma migrate deploy",
     "mock:user:create": "tsx scripts/mock.user.create.ts",
     "test:local": "node --import tsx --test tests/local.persistence.test.ts",
     "test:logging": "node scripts/test.runner.mjs tests/logging.test.ts tests/logging.http.test.ts tests/logging.services.test.ts"
