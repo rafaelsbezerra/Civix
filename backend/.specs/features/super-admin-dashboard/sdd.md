@@ -1,10 +1,13 @@
 # SDD — telas e backend do superadmin
 
 Data: 2026-11-02. Complementa a [spec](spec.md) e orienta [tarefas](task.md).
-Tudo descrito como criação/alteração é planejamento, não código entregue.
+G0 a G4 e equivalentes frontend autorizados para implementação em 2026-11-02;
+checklists/evidências distinguem o que foi concluído. G5–G8 não estão autorizados
+nesta rodada. Configurações globais continuam fora do escopo.
 Caminhos são relativos à raiz do repositório. Escolhas novas de contrato,
-schema e mecanismo transacional estão **Aguardando resposta — SA-P07** antes
-de código. A organização nos módulos existentes e nas pastas frontend foi
+schema e mecanismo transacional foram aprovados no escopo de G0–G4 pela
+revisão e autorização de implementação do usuário. Detalhes abaixo registram
+as escolhas concretas desta rodada, sem implementar grupos posteriores. A organização nos módulos existentes e nas pastas frontend foi
 confirmada em SA-D13/14; não está pendente nem autoriza arquivos separados
 para os casos de usuários ou cadastro coordenado.
 Os casos de negócio confirmados estão na tabela SA-D da spec, incluindo as
@@ -67,20 +70,25 @@ PATCH silenciosamente, que o CORS atual não permite.
 | POST /companies | Dados empresariais permitidos + planId; identificador de operação idempotente | 201 data contendo company e sale |
 | GET /companies/:companyId | UUID | 200 data de empresa/plano/estado; sem conteúdo de conversas |
 | PUT /companies/:companyId | Campos editáveis e planId, conforme DTO | 200 empresa atualizada; nenhuma venda automática na edição |
-| POST /companies/:companyId/suspension | Motivo se aprovado | 200 estado atualizado |
+| POST /companies/:companyId/suspension | Motivo obrigatório, não vazio | 200 estado atualizado; motivo persistido |
+| POST /companies/:companyId/reactivation | Empresa desativada e transição permitida | 200 empresa reativada e novamente elegível a catálogo/acesso |
+| POST /companies/:companyId/restoration | Empresa arquivada por soft delete | 200 empresa restaurada ainda desativada; exige reativação explícita |
 | DELETE /companies/:companyId | UUID | 204 após soft delete; nunca exclusão física |
 | GET /companies/:companyId/users | Empresa e filtros de papel/estado | 200 equipe daquela empresa |
 | POST /companies/:companyId/users/invitations | email e role empresarial permitido | 201 estado do convite; nunca senha/token bruto |
 | PUT /companies/:companyId/users/:userId | Somente campos aprovados | 200 projeção pública do funcionário |
-| POST /companies/:companyId/users/:userId/suspension | Usuário do contexto | 200 estado do acesso |
+| POST /companies/:companyId/users/:userId/suspension | Usuário do contexto e motivo obrigatório | 200 estado do acesso; motivo persistido |
 | GET /plans e GET /plans/:planId | Incluem inativos no administrativo | 200 projeção de plano |
 | POST /plans e PUT /plans/:planId | Campos comerciais validados | 201/200 plano |
 | POST /plans/:planId/activation | active boolean | 200 plano; sem alterar vendas antigas |
 | GET /sales e GET /sales/:saleId | Filtros de empresa/plano/origem/data, paginação | 200 vendas comerciais; valor decimal string + currency BRL |
-| POST /sales | companyId, planId, motivo e demais campos aprovados em SA-P04 | 201 venda manual; repetição segura |
+| POST /sales | companyId, modo de preço e data UTC; modo plano atual usa preço do banco, modo valor manual exige amount e descrição/motivo | 201 venda registrada; repetição segura |
 | DELETE /sales/:saleId | UUID de uma venda existente; superadmin vigente | 204 após exclusão definitiva; não altera empresa/plano nem relança venda |
 | GET /administrators | Superadmins e estados, sem campos secretos | 200 lista administrativa |
-| POST /administrators/invitations e PUT /administrators/:userId | Pendentes de SA-P05 | Não publicar até ciclo/permissões definidos |
+| POST /administrators/invitations e PUT /administrators/:userId | Convite para definir senha e campos permitidos; mesmos poderes | 201 convite preparado / 200 dados atualizados, sem senha/token na resposta |
+| POST /administrators/:userId/suspension | Motivo obrigatório; alvo distinto do ator e proteção do último ativo | 200 após desativação; recusar violações mesmo com motivo |
+| POST /administrators/:userId/reactivation | Outro superadmin ativo como ator | 200 conta reativada; sem elevar permissões além do papel existente |
+| DELETE /companies/:companyId/users/:userId | Atendente do contexto, finalizar atendimentos atribuídos | 204 após exclusão conforme mecanismo que preserve referências aprovado em SA-P07 |
 
 Não criar edição de vendas, DELETE físico de plano, APIs de pagamento, endpoints
 genéricos para configurações ou endpoint universal de dashboard.
@@ -171,7 +179,12 @@ arquivos; não criar arquivos novos para a coordenação.
 3. Formulário sempre exibe a observação confirmada sobre venda manual; ao
    salvar a troca, oferecer navegação para nova venda com empresa/plano
    pré-selecionados. Nada é lançado apenas por abrir essa tela.
-4. Suspensão altera estado administrativo persistido. Auth verifica empresa
+4. Desativação/suspensão exige motivo textual não vazio após remover espaços
+   nas extremidades; recusar 400 sem motivo, antes de qualquer alteração.
+   Salvar motivo e estado juntos, com identificação do ator/data na projeção
+   administrativa conforme campos aprovados em SA-P07. Invalidar os convites
+   vigentes dos usuários da empresa; retomada não recupera token anterior.
+   Auth verifica empresa
    a cada acesso de admin/atendente, impedindo uso de tokens anteriores.
    Preservar status individual de funcionários: não reativá-los em lote.
 5. Todas as consultas públicas de empresa, filtros, busca e detalhe precisam
@@ -181,12 +194,20 @@ arquivos; não criar arquivos novos para a coordenação.
 6. DELETE arquiva por marcador persistido, sem apagar vendas/equipe/imagens.
    Arquivada não é candidata a venda nova, convite ou troca de plano. Proposta
    de repetir arquivamento sem efeito adicional deve ser aprovada em SA-P07.
-7. Preservar unicidade de e-mail/CNPJ de arquivados até haver política
+7. Reativação e restauração são permitidas. Implementá-las em company.service.ts
+   e CompanyRepository existentes, por exemplo reactivateCompany e restoreCompany.
+   Validar ator, existência e estado de origem; não reativar usuários que
+   estavam bloqueados individualmente nem recriar venda. Restaurar remove o
+   arquivamento, mas mantém desativação: sem login, catálogo ou capa pública.
+   Somente reativação explícita recupera elegibilidade. Convites antigos
+   continuam inválidos; novo convite/reenvio deve gerar token novo.
+8. Preservar unicidade de e-mail/CNPJ de arquivados até haver política
    explícita de reutilização; não criar índice parcial silenciosamente.
 
 Proposta de schema: companies.plan_id FK plans + estado administrativo
 separado do status/is_verified existente, deleted_at e dados de alteração
-necessários. Nomes/valores finais e restauração dependem de SA-P02/SA-P07.
+necessários, incluindo motivo da desativação. Nomes/valores finais dependem
+de SA-P07; restauração para estado desativado e reativação explícita estão confirmadas.
 Soft delete não é estado de pagamento nem informação de verificação.
 
 Código: company.service.ts, CompanyRepository/adapters, auth/user service,
@@ -202,16 +223,40 @@ storage.service.ts e consultas públicas; DTOs público/administrativo distintos
    primeiro acesso, purpose, prazo e reenvio; não promover conta existente.
 3. Listagem/detalhe retornam id, nome, e-mail, papel, estado e companyId,
    nunca hash, reset/invite token. Formulários não escrevem JWT ou senha.
-4. Alterações de dados/papel empresarial só após SA-P03 definir campos e
-   transições. Não transferir funcionário entre empresas implicitamente.
-5. Suspensão individual impede novas chamadas autenticadas. Remoção ou
-   transferência de futuras atribuições não é implementada sem definição.
+4. Permitir alterar role entre admin_empresa e atendente no mesmo vínculo.
+   Não transferir funcionário entre empresas ou promover superadmin. Campos
+   de dados seguem DTO estrito, conforme desenho SA-P07. A mudança de papel
+   invalida claims divergentes nas chamadas seguintes.
+5. Desativação individual exige motivo textual não vazio e persistido na
+   mesma gravação do estado. Isso vale para todos os papéis gerenciados,
+   incluindo superadmin. Sem motivo, retornar 400 sem mudar acesso.
+   Suspensão individual impede novas chamadas autenticadas. Atendentes podem
+   ser desativados ou excluídos; seus atendimentos atribuídos devem ser
+   finalizados, sem transferência automática para outro funcionário.
+   Quando esse domínio existir, integrar ao módulo responsável pela finalização,
+   sem manipular tabelas desconhecidas ou criar o módulo completo de atendimento
+   por antecipação. Não deixar atendimentos abertos após sucesso dessa operação.
+   Preservação de referências/forma SQL da exclusão pertence ao desenho SA-P07.
 6. Gestão global busca apenas role super_admin e company_id nulo, em funções
-   específicas do user.service.ts existente. Confirmar SA-P05 antes de convite/bloqueio sensíveis; não permitir
-   que um endpoint genérico altere qualquer role para super_admin.
-7. Antes de alterar acesso, revalidar ator e aplicar proteção de último
-   administrador/autoalteração que for aprovada, inclusive sob concorrência.
-   Sem decisão, ação fica bloqueada, não implicitamente liberada.
+   específicas do user.service.ts existente. Superadmins ativos podem criar
+   outros por convite para definir a senha e desativá-los com motivo. Adaptar
+   validação do convite global nos arquivos de user/auth existentes, com
+   company_id nulo, token individual e consumo único. Não promover conta já
+   existente por um endpoint genérico nem enviar senha pronta.
+7. Para desativar superadmin, buscar ator e alvo persistidos e validar os
+   papéis/estados. Se alvo e ator forem a mesma conta, negar sem escrita.
+   Verificar quantidade de superadmins ativos e impedir retirar o último.
+   Contagem, revalidação e atualização devem ser consistentes sob concorrência,
+   na transação/bloqueio aprovada em SA-P07. Não basta contar antes da transação.
+   Duas tentativas simultâneas não podem deixar a plataforma sem conta ativa.
+8. Reutilizar suspendSuperAdmin no user.service.ts e UserRepository/adapters;
+   não criar serviço de superadmin. UI pode desabilitar ações, mas o backend
+   deve recusar chamadas diretas inválidas. Proteções empresariais do último
+   admin da empresa não se aplicam: o usuário permitiu desativar o último
+   admin empresarial. Somente superadmins mantêm a proteção de último ativo.
+9. Outro superadmin ativo pode reativar conta superadmin desativada. Todos
+   compartilham os mesmos poderes; não implementar níveis ou editor individual
+   de permissões. O início com uma conta não elimina criação/reativação futuras.
 
 Código: user.controller.ts → funções com escopo em user.service.ts →
 UserRepository/adapters existentes; reutilizar admin.service.ts/auth.service.ts
@@ -225,15 +270,28 @@ Plano comercial: buscar inclusive inativos no administrativo; validar nome,
 slug único, descrição, preço decimal positivo, período permitido e campos
 descritivos existentes. Desativar impede novo uso, sem remover referências.
 Não permitir que frontend faça concessão de capacidades com features/limits.
-Não modificar seed Inicial gratuito com preço inventado; definir SA-P01
-antes da migration/seed versionado. Banco vazio não requer backfill real.
+Usar os planos demo com preço que o frontend já exibe como referência.
+Não inventar catálogo nem exigir registros ativos no banco para desenvolver
+os módulos. Testar contratos com fixtures e validar plano real apenas ao
+executar cadastro/troca/venda. Cadastro/seed de planos é preparação de dados,
+não uma pendência funcional bloqueante SA-P01.
 
-Venda manual: validar superadmin, empresa elegível, plano e campos SA-P04;
-copiar snapshot e BRL. Gerar ID/datas no backend e deduplicar tentativas
-conforme SA-P07. Cadastro manual não muda plano da empresa automaticamente.
-Troca de plano e registro manual são operações explícitas distintas nesta
-fase. Aceitar diferença entre plano atual e histórico é natural após troca;
-regras de seleção de plano histórico em venda manual aguardam SA-P04.
+Venda manual: validar superadmin e empresa elegível; selecionar explicitamente
+o modo de preço. No modo plano, buscar o plano atual pelo vínculo persistido
+da empresa e usar seu preço do banco, sem motivo obrigatório ou sobrescrita
+de amount. Não confiar no planId do navegador como prova de plano atual.
+No modo valor manual, validar montante decimal positivo em BRL e exigir
+descrição/motivo não vazio; esse modo atende também o lançamento por plano
+antigo, sem precisar alterar o plano atual da empresa.
+Registrar modo/origem do preço e snapshot correspondente; modo manual não
+deve copiar o nome/preço do plano atual como se tivesse sido a fonte do valor.
+Proposta de contrato: pricingMode = company_plan ou manual_amount; campos
+exatos seguem SA-P07. Vínculo/snapshot de plano pode ser opcional no modo
+manual, conforme DDL aprovado, sem forçar plano antigo inexistente no catálogo.
+Permitir data passada em UTC; separar data comercial da venda do instante
+real de criação do registro. Gerar ID/created_at no backend e deduplicar
+tentativas conforme SA-P07. Cadastro manual não muda plano da empresa.
+Troca de plano e registro manual continuam operações explícitas distintas.
 
 Vendas são imutáveis enquanto existirem. Não oferecer UPDATE/PUT/PATCH para
 trocar plano, valor, data, empresa ou autor da venda. Correções são exclusão
@@ -245,22 +303,26 @@ validar superadmin vigente e UUID, buscar venda, retornar 404 se inexistente,
 excluir definitivamente apenas sales pelo ID e responder 204 após confirmação.
 Usar um método de domínio como deleteSaleById; não aplicar soft delete, não
 apagar plano/empresa e não criar venda automaticamente. UI confirma a exclusão
-definitiva e oferece o formulário de novo lançamento. Cadastro manual repete
-as validações de plano/preço/empresa; excluir não dispensa essas verificações.
+definitiva e oferece o formulário de novo lançamento. Novo lançamento repete
+as validações da empresa e do modo de preço escolhido; somente o modo plano
+exige o plano atual como origem do preço. Excluir não dispensa essas verificações.
 
-Proposta de tabela sales: id UUID, company_id FK, plan_id FK, origin,
+Proposta de tabela sales: id UUID, company_id FK, plan_id FK nullable no modo
+manual, origin,
 plan_name/plan_price/plan_billing_period snapshots, amount NUMERIC,
-currency BRL, created_by FK users, created_at e motivo para venda manual;
+currency BRL, created_by FK users, created_at, data comercial UTC e modo de
+preço; descrição/motivo obrigatório somente no modo de valor manual;
 identificador de operação para repetição segura. Constraints de valor > 0,
 origem conhecida e venda inicial única; referências sem cascata destrutiva.
-Formato final e preço manual exigem aprovação. Interface SaleRow espelha SQL;
+Formato final dos campos e vínculo opcional de plano no modo manual seguem SA-P07.
+Interface SaleRow espelha SQL;
 DTO usa montante decimal string e timestamps ISO, não float JS ou Date cru.
 
 Listar vendas com filtros validados e ordenação estável; totais, se aprovados,
 representam valor comercial registrado por BRL, nunca receita recebida.
 Não expor edição de venda ou operações de cancelamento/estorno financeiro.
-SA-P04 ainda define campos da venda manual, não a política de imutabilidade
-ou exclusão já confirmada. Ao arquivar empresa, preservar vendas que não
+SA-P04 está resolvida: modo plano atual ou valor manual justificado,
+retroatividade permitida e UTC. Ao arquivar empresa, preservar vendas que não
 tenham sido excluídas explicitamente pelo superadmin.
 
 Código: plan.controller.ts, plan.service.ts e adapters existentes; sale.service,
@@ -288,12 +350,19 @@ estado de sessão ou bibliotecas. Cancelar/ignorar respostas antigas ao trocar
 companyId e limpar dados ao perder acesso. Componentes SuperAdminLayout e
 pages/dashboard-super-admin usam UI existente; não redesenhar o site institucional.
 
+Datas do sistema em UTC: timestamps ISO 8601 com Z na API, persistência de
+instantes em UTC e filtros/entrada/exibição identificados como UTC. Formulários
+não devem interpretar silenciosamente datetime-local no fuso do navegador.
+Intervalos de relatório devem converter seus limites explicitamente para UTC;
+regra de limites de intervalo é detalhe de contrato em SA-P07.
+
 ## 8.1. Layout raiz, temas e configurações do próprio perfil
 
 Confirmação de 2026-11-02: criar sidebar/header compartilhados e configurações
 de perfil com edição de nome/e-mail. Senha fica em backlog. A especificação
 visual está em [design frontend](../../../../frontend/.specs/features/super-admin-dashboard/design.md).
-Layout raiz significa SuperAdminLayout com Outlet em rotas aninhadas, não
+Layout raiz é exclusivo do dashboard superadmin, compartilhado apenas entre
+suas telas. Significa SuperAdminLayout com Outlet em rotas aninhadas, não
 substituição da raiz pública do React. Sidebar/header ficam em
 frontend/src/components/dashboard-super-admin/layout/{SuperAdminLayout,SuperAdminSidebar,SuperAdminHeader}.tsx.
 
@@ -334,6 +403,18 @@ tentativa de alterar outro usuário e integridade da sessão nos dois temas.
   de edição de venda e que repetir cadastro não recria a venda excluída.
 - Negativas: sem token, admin, atendente, cliente, usuário suspenso, token
   com papel/vínculo alterado e tentativa direta por URL/API administrativa.
+- Desativações: motivo ausente/vazio/espaços recusado sem escrita; motivo
+  válido persistido com o estado. Superadmin não desativa a própria conta
+  nem o último ativo; testar concorrência, inclusive com só uma conta inicial.
+- Empresa reativada/restaurada não gera venda nem reativa usuário bloqueado
+  individualmente; restaurada permanece desativada e só volta ao catálogo após
+  reativação explícita. Tokens de convite anteriores não voltam a funcionar.
+- Venda por plano usa plano atual/preço do backend sem motivo obrigatório;
+  valor manual exige motivo. Cobrir plano antigo, amount adulterado no modo
+  plano, datas passadas UTC e snapshot imutável após mudar preço do catálogo.
+- Usuários: troca de papel empresarial, último admin da empresa desativável,
+  finalização de atendimentos atribuídos na desativação/exclusão de atendente;
+  superadmin por convite/reativação e poderes iguais, mantendo suas proteções.
 - Integridade: empresa A/B; e-mails por caixa; CNPJ duplicado; plano inativo
   ou zero; tentativa concorrente; falha parcial de SQL; repetição de envio;
   histórico após mudar nome/preço/plano e arquivar empresa.
@@ -352,3 +433,20 @@ contratos/permissões, acessibilidade e evidências; registrar revisor e resulta
 no task.md. Propostas de commit não autorizam commit automático. Pendência
 de negócio mantém tarefa afetada aberta. Aplicação de SQL, instalação de
 pacotes e publicação de endpoints exigem a autorização pertinente.
+
+## Contratos adotados na implementação G0–G4
+
+- Cadastro: operationId UUID no body, sem header novo; hash canônico dos campos
+  validados, único por ator/operação. Mesmo payload retorna o mesmo company/sale;
+  payload diferente retorna 409. Se a venda original não existir, não recriar.
+- PostgreSQL: uma conexão e transação para plano bloqueado, empresa, venda e
+  recibo de operação. JSON: uma atualização bloqueada do snapshot inteiro.
+- Perfil: nome/e-mail do ator; mudança de e-mail salva e exige novo login,
+  sem confirmação de endereço nesta etapa, conforme resposta do usuário.
+- Tema: primeiro uso claro, preferência claro/escuro guardada neste navegador,
+  conforme resposta do usuário. Tema exclusivo do dashboard.
+- Listagem administrativa de planos sem paginação desnecessária nesta etapa;
+  ordenação displayOrder/id. Paginação de empresas/vendas pertence a G5.
+- Novo schema incrementa companies com plan_id/estado administrativo e cria
+  sales e recibos de operação, sem executar migrations. Perfis/vínculos usam
+  migration existente. Não criar endpoints de G5–G7 ou menus sem funcionalidade.

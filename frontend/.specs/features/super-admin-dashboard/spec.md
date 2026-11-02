@@ -27,7 +27,8 @@ implementado nesta atualização documental.
 
 ### Layout raiz: sidebar e header
 
-Criar um layout raiz compartilhado da área autenticada, sem substituir o
+Criar um layout raiz exclusivo do dashboard superadmin, compartilhado somente
+entre suas telas, sem substituir o
 App.tsx do site. SuperAdminLayout.tsx envolve as rotas filhas com sidebar,
 header e região principal renderizada por Outlet. Navegar entre telas
 preserva essa estrutura; nenhuma página recria seu próprio menu/header.
@@ -78,8 +79,8 @@ frontend/src/components/auth/ProtectedRoute.tsx. Montagem em AppRoute.tsx.
 | Funcionários | Users.tsx | Admins/atendentes somente da empresa da rota, convite/estados e ações aprovadas. |
 | Planos | Plans.tsx | Consulta/administração de dados comerciais, inclusive inativos. Sem trial/limites operacionais. |
 | Vendas | Sales.tsx | Registros imutáveis, valores BRL e exclusão definitiva com confirmação; sem edição ou apresentação como pagamento. |
-| Nova venda | SaleCreate.tsx | Registro manual conforme SA-P04, empresa/plano pré-preenchíveis após edição. |
-| Administradores | Users.tsx | Mesma tela de usuários com contexto global; superadmins separados por filtro/permissões, mutações dependem de SA-P05. |
+| Nova venda | SaleCreate.tsx | Modo pelo plano atual ou valor manual justificado, com data comercial UTC retroativa permitida. |
+| Administradores | Users.tsx | Mesma tela com contexto global: convite para senha, desativação com motivo e reativação por outro ativo; todos com poderes iguais. |
 | Configurações do perfil | ProfileSettings.tsx | Nome/e-mail do próprio usuário; sem senha ou configurações globais. |
 
 Formulários em frontend/src/components/dashboard-super-admin/CompanyForm.tsx,
@@ -109,8 +110,10 @@ compartilhada atual (por exemplo components/ui), sem duplicação nessa pasta.
    plano não gera uma venda automática. Registre a venda manualmente na área
    de vendas.” Após sucesso, oferecer a ação; navegar não envia venda sozinho.
 4. Suspender/arquivar exige confirmação com empresa e consequência visíveis.
-   Arquivar informa preservação do histórico. Reativar/restaurar não é
-   oferecido antes de SA-P02.
+   Desativar exige formulário de motivo obrigatório; não enviar motivo vazio
+   ou só espaços. Arquivar informa preservação do histórico. Restaurar mantém
+   empresa desativada; somente reativação explícita devolve catálogo/acesso.
+   Convites anteriores à desativação não voltam a funcionar.
 5. Ao abrir equipe, usar ID da empresa da rota; limpar respostas antigas ao
    trocar contexto. Erro de vínculo não permite editar outro funcionário.
 6. Formulários mostram mensagens públicas, erros por campo quando disponíveis,
@@ -122,6 +125,25 @@ compartilhada atual (por exemplo components/ui), sem duplicação nessa pasta.
    errado, orientar corrigir o plano da empresa, excluir a venda automática
    e cadastrar nova venda. Nenhuma dessas ações ocorre por simples navegação.
    A troca de plano posterior continua somente com aviso de venda manual.
+9. Formulário de venda oferece modo pelo plano atual e modo por valor manual.
+   Pelo plano, preço somente leitura vindo do backend e motivo não obrigatório.
+   Por valor manual, exigir montante e descrição/motivo; usar esse modo para
+   plano antigo. Permitir data comercial passada. Entradas, filtros e exibição
+   de todas as datas usam UTC identificado, sem conversão local silenciosa.
+10. Gestão de usuários exige motivo ao desativar, inclusive superadmins.
+    Superadmins podem criar outros; o ambiente deve suportar esse caso mesmo
+    se começar com uma conta só. Não permitir desativar a própria conta nem
+    o último superadmin ativo. Mostrar o bloqueio na UI e tratar a recusa da
+    API; esconder botão não substitui validação no backend.
+11. Superadmin é criado por convite para definir senha e pode ser reativado
+    por outro ativo; todos têm os mesmos poderes. Não criar editor de permissões.
+    Na equipe, permitir trocar admin_empresa/atendente e desativar o último
+    admin empresarial; essa permissão não se aplica ao último superadmin.
+    Atendentes podem ser excluídos/desativados, finalizando atendimentos atribuídos.
+
+Os três planos demo com preços atuais são referência, não pré-requisito de
+implementação. Sem planos cadastrados na API, mostrar estado vazio/ação de
+cadastro apropriada; não impedir acesso aos demais módulos nem inventar dados.
 
 ## Aceite e limites
 

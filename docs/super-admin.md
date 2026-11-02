@@ -21,7 +21,8 @@ explicitamente. Gestão não dá acesso a conversas empresariais.
 Assinaturas, cobrança e pagamentos ficam em backlog. Também ficam em
 backlog a arquitetura de teste gratuito e as capacidades, limites de uso e
 regras específicas por plano. Configurações globais aguardam definição.
-Preços e algumas políticas administrativas continuam pendentes na spec.
+As decisões funcionais SA-P01 a SA-P05 estão resolvidas. Configurações
+globais (SA-P06) e o desenho técnico final (SA-P07) continuam pendentes.
 
 A ordem parte da coerência de autenticação/schema, depois shell, planos,
 cadastro com venda, gestão de empresas/vendas, equipe, superadmins e E2E.
@@ -34,3 +35,20 @@ company; usuários empresariais e superadmins nos arquivos existentes de user,
 com funções nomeadas por operação/escopo. API frontend permanece em lib/api.ts.
 Arquivos exclusivos do dashboard usam pages/dashboard-super-admin e
 components/dashboard-super-admin; elementos compartilháveis mantêm a estrutura atual.
+
+Decisões complementares: empresas podem ser reativadas/restauradas; desativar
+empresa ou usuário exige motivo. Superadmins podem criar/desativar outros,
+mesmo que a plataforma comece com uma só conta, mas não podem desativar a
+própria conta nem o último superadmin ativo. Backend deve garantir essas duas
+proteções sob concorrência. Venda pelo plano atual usa seu preço; venda por
+valor manual exige descrição/motivo, inclusive para plano antigo. Data passada
+é permitida e todas as datas do sistema usam UTC.
+Layout raiz é exclusivo das telas do dashboard superadmin.
+
+SA-P01 a SA-P05 resolvidas: planos demo com preços atuais são referência,
+sem bloquear módulos por dados de banco; restaurar empresa mantém desativação
+até reativação explícita e convites antigos não voltam a valer; papel
+admin_empresa/atendente pode mudar e último admin empresarial pode ser
+desativado. Atendentes podem ser excluídos/desativados, finalizando atendimentos
+atribuídos. Superadmins entram por convite para definir senha, podem ser
+reativados por outro ativo e têm poderes iguais, sem editor individual.

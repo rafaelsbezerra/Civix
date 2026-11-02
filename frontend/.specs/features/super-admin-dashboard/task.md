@@ -82,6 +82,12 @@ Completar frontend/src/lib/api.ts. Sugestões (G3/G4):
   definitiva e acesso a novo lançamento; explicar correção de plano errado
   no cadastro sem disparar venda automática após editar empresa.
 - [ ] Confirmar suspensão/arquivamento e preservar histórico visível no admin.
+- [ ] Exigir motivo ao desativar empresa, oferecer reativação/restauração
+  permitidas; restaurada continua desativada até reativar explicitamente.
+  Convites antigos inválidos e motivo vazio/espaços não envia.
+- [ ] Venda por plano atual com preço somente leitura e motivo opcional;
+  venda por valor manual com montante e descrição/motivo obrigatórios.
+  Permitir data comercial passada e UTC em entrada/exibição/filtros.
 - [ ] Integrar filtros/paginação aprovados, loading/vazio/erro e conflito;
   testar troca de plano sem venda, exclusão e relançamento manual, além dos
   valores históricos das vendas preservadas. Revisar antes de commit.
@@ -95,7 +101,16 @@ Sugestões (G5): `feat(companies): add platform lifecycle management` e
   em frontend/src/components/dashboard-super-admin, reutilizados pelos contextos
   de empresa e superadmins sem duplicar tela/formulário por papel.
 - [ ] Validar contexto empresarial, estados de convites e campos permitidos;
-  mutações globais dependem de SA-P05. Não editar permissões indefinidas.
+  exigir motivo para desativar usuários/superadmins. Criação por outro
+  superadmin usa convite para definir senha; permitir reativação por outro
+  ativo, com poderes iguais. Sem editor de permissões individuais.
+- [ ] Permitir troca admin_empresa/atendente e desativar último admin da
+  empresa; exclusão/desativação de atendente finaliza seus atendimentos
+  atribuídos quando o domínio existir. Não duplicar módulo de atendimento.
+- [ ] Impedir pela UI desativação da própria conta superadmin e do último
+  superadmin ativo, tratando também recusa da API sob concorrência. Testar
+  motivo vazio e início com somente uma conta. Não editar permissões indefinidas.
+  A proteção do último ativo é de superadmin, não de admin empresarial.
 - [ ] Testar empresa A/B, retirada de acesso e informações não secretas;
   revisar grupos separadamente.
 
@@ -123,3 +138,7 @@ nomes que indiquem ação e escopo. Componentes exclusivos usam
 frontend/src/components/dashboard-super-admin; compartilháveis por outros
 dashboards (busca, botões, campos genéricos) seguem a estrutura atual do
 projeto. Não criar pastas/arquivos novos apenas por papel de usuário.
+
+Planos demo atuais são referência; dados/planos ativos no banco não bloqueiam
+construção dos módulos. Testes usam fixtures; cadastro real valida existência
+do plano e a UI trata catálogo vazio sem bloquear navegação administrativa.
