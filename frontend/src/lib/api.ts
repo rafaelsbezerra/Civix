@@ -359,3 +359,33 @@ export async function createManualSale(input: ManualSaleInput): Promise<{ sale: 
 export async function deletePlatformSale(id: string): Promise<void> {
   await fetchApi('/api/v1/platform/sales/' + encodeURIComponent(id), authenticatedOptions('DELETE'));
 }
+
+export interface ManagedUser {
+  id:string|number;name:string;email:string;role:AuthenticatedRole;status:'active'|'pending'|'blocked';
+  companyId:string|null;deactivationReason:string|null;invitationStatus:'accepted'|'pending'|'invalidated';
+}
+export interface ManagedUserInput { name:string;email:string;role?:'admin_empresa'|'atendente' }
+function userAdministrationPath(companyId:string|null) {
+  return companyId === null ? '/api/v1/platform/administrators' : '/api/v1/platform/companies/' + encodeURIComponent(companyId) + '/users';
+}
+function requireManagedUser(user:ManagedUser):ManagedUser {
+  if (!user || !['string','number'].includes(typeof user.id) || typeof user.email !== 'string'
+    || !['super_admin','admin_empresa','atendente'].includes(user.role) || !['active','pending','blocked'].includes(user.status)
+    || !['accepted','pending','invalidated'].includes(user.invitationStatus)) throw new ApiError('Usuário inválido na resposta.');
+  return user;
+}
+export async function getManagedUsers(companyId:string|null, query:{ q?:string;role?:string;status?:string;page?:number;limit?:number } = {}):Promise<PageResult<ManagedUser>> {
+  const params = new URLSearchParams(Object.entries(query).filter(([,value]) => value !== undefined && value !== '').map(([key,value]) => [key,String(value)]));
+  return requirePage(await fetchApi<ManagedUser[]>(userAdministrationPath(companyId) + '?' + params,authenticatedOptions()),requireManagedUser);
+}
+export async function inviteManagedUser(companyId:string|null,input:ManagedUserInput):Promise<ManagedUser> {
+  const response = await fetchApi<{ user:ManagedUser;message:string }>(userAdministrationPath(companyId)+'/invitations',authenticatedOptions('POST',input));
+  return requireManagedUser(response.data?.user);
+}
+export async function updateManagedUser(companyId:string|null,id:string|number,input:ManagedUserInput):Promise<ManagedUser> {
+  return requireManagedUser((await fetchApi<ManagedUser>(userAdministrationPath(companyId)+'/'+encodeURIComponent(String(id)),authenticatedOptions('PUT',input))).data);
+}
+export async function changeManagedUserState(companyId:string|null,id:string|number,action:'suspension'|'reactivation'|'delete',reason?:string):Promise<ManagedUser|undefined> {
+  const response = await fetchApi<ManagedUser>(userAdministrationPath(companyId)+'/'+encodeURIComponent(String(id))+(action === 'delete' ? '' : '/'+action),authenticatedOptions(action === 'delete' ? 'DELETE' : 'POST',reason === undefined ? {} : { reason }));
+  return action === 'delete' ? undefined : requireManagedUser(response.data);
+}

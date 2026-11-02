@@ -25,6 +25,7 @@ export default function CompanyDetail() {
         {company.deleted_at && <p>Restauração preserva a empresa inativa. Reative explicitamente para liberar catálogo e acesso.</p>}
         <div className="sa-inline-actions">{company.deleted_at ? <button onClick={() => setAction('restoration')}>Restaurar empresa</button> : <>
           <Link to={'/super-admin/companies/' + company.id + '/edit'}>Editar empresa</Link>
+          <Link to={'/super-admin/companies/' + company.id + '/users'}>Gerenciar equipe</Link>
           <button onClick={() => setAction(company.status === 'inativo' ? 'reactivation' : 'suspension')}>{company.status === 'inativo' ? 'Reativar empresa' : 'Desativar empresa'}</button>
           <button onClick={() => setAction('archive')}>Arquivar empresa</button>
         </>}</div>

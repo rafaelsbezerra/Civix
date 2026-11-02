@@ -16,6 +16,7 @@ import CompanyDetail from '@/pages/dashboard-super-admin/CompanyDetail';
 import CompanyEdit from '@/pages/dashboard-super-admin/CompanyEdit';
 import Sales from '@/pages/dashboard-super-admin/Sales';
 import SaleCreate from '@/pages/dashboard-super-admin/SaleCreate';
+import Users from '@/pages/dashboard-super-admin/Users';
 import ProfileSettings from '@/pages/dashboard-super-admin/ProfileSettings';
 import CatalogoEmpresas from '@/pages/CatalogoEmpresas';
 import PerfilEmpresa from '@/pages/PerfilEmpresa';
@@ -41,6 +42,7 @@ export const AppRoutes: React.FC = () => (
                     <Route path="companies" element={<Companies />} />
                     <Route path="companies/:companyId" element={<CompanyDetail />} />
                     <Route path="companies/:companyId/edit" element={<CompanyEdit />} />
+                    <Route path="companies/:companyId/users" element={<Users />} />
                     <Route path="sales" element={<Sales />} />
                     <Route path="sales/new" element={<SaleCreate />} />
                     <Route path="settings/profile" element={<ProfileSettings />} />

@@ -4,9 +4,16 @@ import { requireSuperAdmin } from '../middlewares/super.admin.js';
 import * as planController from '../controller/plan.controller.js';
 import * as companyController from '../controller/company.controller.js';
 import * as saleController from '../controller/sale.controller.js';
+import * as userController from '../controller/user.controller.js';
 
 const router = Router();
 router.use(authMiddleware, requireSuperAdmin);
+router.get('/companies/:companyId/users', userController.getUsersByCompanyId);
+router.post('/companies/:companyId/users/invitations', userController.inviteCompanyUser);
+router.put('/companies/:companyId/users/:userId', userController.updateCompanyUser);
+router.post('/companies/:companyId/users/:userId/suspension', userController.suspendCompanyUser);
+router.post('/companies/:companyId/users/:userId/reactivation', userController.reactivateCompanyUser);
+router.delete('/companies/:companyId/users/:userId', userController.deleteCompanyAttendant);
 router.get('/sales', saleController.listPlatformSales);
 router.get('/sales/:saleId', saleController.getPlatformSale);
 router.post('/sales', saleController.createManualSale);
