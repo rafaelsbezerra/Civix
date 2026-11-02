@@ -13,6 +13,7 @@ Planos, decisões, revisões de entrega e evidências de execução ficam nas sp
 - [Tipos e fluxo de autenticação](auth-types.md).
 - [Dados locais, flag e cadastros](dados-locais.md).
 - [Configuração e execução](operacao.md).
+- [Seed de staging usando os dados locais](staging-seed.md).
 - [Consumo HTTP pelo frontend](frontend-backend.md).
 - [Snapshot integral do Notion](fontes/notion-civix.md).
 
