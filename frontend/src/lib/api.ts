@@ -327,3 +327,35 @@ export async function changePlatformCompanyState(id: string, action: 'suspension
   await fetchApi('/api/v1/platform/companies/' + encodeURIComponent(id) + (action === 'archive' ? '' : '/' + action),
     authenticatedOptions(action === 'archive' ? 'DELETE' : 'POST', reason === undefined ? {} : { reason }));
 }
+
+export interface PlatformSale {
+  id: string; companyId: string; companyName?: string; planId: string | null; planName: string | null;
+  origin: 'company_creation'|'manual'; pricingMode: 'company_plan'|'manual_amount';
+  planPrice: string | null; planBillingPeriod: BillingPeriod | null;
+  amount: string; currency: 'BRL'; description: string | null;
+  soldAt: string; createdAt: string; createdBy: string;
+}
+export type ManualSaleDraft = { companyId: string; soldAt: string } &
+  ({ pricingMode: 'company_plan'; description?: string } | { pricingMode: 'manual_amount'; amount: string; description: string });
+export type ManualSaleInput = ManualSaleDraft & { operationId: string };
+function requireSale(value: PlatformSale): PlatformSale {
+  if (!value || typeof value.id !== 'string' || typeof value.companyId !== 'string' || typeof value.amount !== 'string'
+    || value.currency !== 'BRL' || !['company_creation','manual'].includes(value.origin)
+    || !['company_plan','manual_amount'].includes(value.pricingMode) || !Number.isFinite(Date.parse(value.soldAt))) throw new ApiError('Venda inválida na resposta.');
+  return value;
+}
+export async function getPlatformSales(query: { companyId?: string; planId?: string; origin?: string; from?: string; to?: string; page?: number; limit?: number } = {}): Promise<PageResult<PlatformSale>> {
+  const params = new URLSearchParams(Object.entries(query).filter(([,value]) => value !== undefined && value !== '').map(([key,value]) => [key,String(value)]));
+  return requirePage(await fetchApi<PlatformSale[]>('/api/v1/platform/sales?' + params, authenticatedOptions()), requireSale);
+}
+export async function getPlatformSale(id: string): Promise<PlatformSale> {
+  return requireSale((await fetchApi<PlatformSale>('/api/v1/platform/sales/' + encodeURIComponent(id), authenticatedOptions())).data);
+}
+export async function createManualSale(input: ManualSaleInput): Promise<{ sale: PlatformSale; replayed: boolean }> {
+  const result = (await fetchApi<{ sale: PlatformSale; replayed: boolean }>('/api/v1/platform/sales', authenticatedOptions('POST', input))).data;
+  if (!result || typeof result.replayed !== 'boolean') throw new ApiError('Resultado de venda inválido.');
+  return { ...result, sale: requireSale(result.sale) };
+}
+export async function deletePlatformSale(id: string): Promise<void> {
+  await fetchApi('/api/v1/platform/sales/' + encodeURIComponent(id), authenticatedOptions('DELETE'));
+}

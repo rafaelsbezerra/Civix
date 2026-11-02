@@ -1,4 +1,7 @@
 export interface SaleRow {
+  company_name?: string;
+  operation_id?: string | null;
+  fingerprint?: string | null;
   id: string; company_id: string; plan_id: string | number | null;
   origin: 'company_creation' | 'manual'; pricing_mode: 'company_plan' | 'manual_amount';
   plan_name: string | null; plan_price: string | null;

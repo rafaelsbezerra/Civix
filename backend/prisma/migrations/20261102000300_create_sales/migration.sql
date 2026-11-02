@@ -14,12 +14,16 @@ CREATE TABLE sales (
   sold_at TIMESTAMPTZ NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   created_by UUID NOT NULL REFERENCES users(id),
+  operation_id UUID,
+  fingerprint TEXT CHECK (fingerprint IS NULL OR fingerprint ~ '^[0-9a-f]{64}$'),
+  CHECK ((operation_id IS NULL) = (fingerprint IS NULL)),
   CHECK (pricing_mode <> 'manual_amount' OR description IS NOT NULL AND length(trim(description)) > 0),
   CHECK (pricing_mode <> 'company_plan' OR plan_id IS NOT NULL AND plan_name IS NOT NULL
     AND plan_price IS NOT NULL AND plan_billing_period IS NOT NULL AND amount = plan_price)
 );
 CREATE UNIQUE INDEX sales_initial_company_key ON sales (company_id) WHERE origin = 'company_creation';
 CREATE INDEX sales_company_id_idx ON sales (company_id);
+CREATE UNIQUE INDEX sales_manual_operation_key ON sales (created_by, operation_id) WHERE operation_id IS NOT NULL;
 CREATE TABLE company_registration_operations (
   actor_id UUID NOT NULL REFERENCES users(id),
   operation_id UUID NOT NULL,

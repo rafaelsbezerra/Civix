@@ -3,9 +3,14 @@ import authMiddleware from '../middlewares/auth.js';
 import { requireSuperAdmin } from '../middlewares/super.admin.js';
 import * as planController from '../controller/plan.controller.js';
 import * as companyController from '../controller/company.controller.js';
+import * as saleController from '../controller/sale.controller.js';
 
 const router = Router();
 router.use(authMiddleware, requireSuperAdmin);
+router.get('/sales', saleController.listPlatformSales);
+router.get('/sales/:saleId', saleController.getPlatformSale);
+router.post('/sales', saleController.createManualSale);
+router.delete('/sales/:saleId', saleController.deleteSaleById);
 router.post('/companies', companyController.createCompany);
 router.get('/companies', companyController.listPlatformCompanies);
 router.get('/companies/:companyId', companyController.getPlatformCompany);

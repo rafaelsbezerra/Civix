@@ -16,6 +16,7 @@ import { validatePlanId } from './plan.service.js';
 import { requireSuperAdminActor } from './user.service.js';
 import { parsePagination, createPaginationMeta } from '../shared/contracts/pagination.contract.js';
 import type { CompanyAdministrationChange } from '../dtos/company.create.dto.js';
+import { presentSale } from './sale.service.js';
 
 function presentPlatformCompany(company: Company) {
   const { cover_key: _cover, logo_key: _logo, ...result } = company;
@@ -64,7 +65,8 @@ export async function createCompanyWithInitialSale(input: unknown, actorId: User
   validatePlanId(planId);
   const fingerprint = createHash('sha256').update(JSON.stringify({ ...fields, planId })).digest('hex');
   const company: Company = { ...fields, id: randomUUID(), data_cadastro: new Date().toISOString(), status: 'ativo', verificado: false };
-  return companyRepository.createCompanyWithInitialSale({ company, planId, operationId, fingerprint, actorId });
+  const result = await companyRepository.createCompanyWithInitialSale({ company, planId, operationId, fingerprint, actorId });
+  return { ...result, sale: presentSale(result.sale) };
 }
 
 export async function updateCompanyCoverKey(companyId: string, key: string | null, expectedKey: string | null): Promise<void> {

@@ -27,7 +27,7 @@ export function SuperAdminLayout() {
     return error instanceof Error ? error.message : 'Não foi possível concluir a operação.';
   }, [logout]);
   const title = pathname.endsWith('/plans') ? 'Planos comerciais' : pathname.endsWith('/companies/new') ? 'Cadastrar empresa'
-    : pathname.includes('/companies') ? 'Empresas' : pathname.endsWith('/settings/profile') ? 'Meu perfil' : 'Visão geral';
+    : pathname.includes('/companies') ? 'Empresas' : pathname.includes('/sales') ? 'Vendas comerciais' : pathname.endsWith('/settings/profile') ? 'Meu perfil' : 'Visão geral';
   return <div className={`super-admin-root${theme === 'dark' ? ' dark' : ''}`} data-theme={theme}>
     <a className="sa-skip-link" href="#admin-content">Pular para o conteúdo</a>
     <aside className="sa-sidebar"><SuperAdminSidebar /></aside>

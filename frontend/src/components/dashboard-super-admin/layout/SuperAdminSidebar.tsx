@@ -1,11 +1,12 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Building2, Layers3, UserRound } from 'lucide-react';
+import { LayoutDashboard, Building2, Layers3, UserRound, Receipt } from 'lucide-react';
 
 const items = [
   { to: '/super-admin', label: 'Visão geral', Icon: LayoutDashboard, end: true },
   { to: '/super-admin/companies', label: 'Empresas', Icon: Building2, end: true },
   { to: '/super-admin/companies/new', label: 'Cadastrar empresa', Icon: Building2 },
   { to: '/super-admin/plans', label: 'Planos', Icon: Layers3 },
+  { to: '/super-admin/sales', label: 'Vendas', Icon: Receipt },
   { to: '/super-admin/settings/profile', label: 'Meu perfil', Icon: UserRound },
 ];
 export function SuperAdminSidebar({ onNavigate }: { onNavigate?: () => void }) {
