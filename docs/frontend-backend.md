@@ -66,22 +66,25 @@ Consultas públicas de empresa incluem cover_image_url e cover_image_url_expires
 
 Os links de login do site continuam apontando para /login, que agora mostra
 somente as opções Empresa e Cliente. Empresa abre /login/empresa, com e-mail
-e senha; Cliente abre /login/cliente, com apenas e-mail. O popup da Home já
+e senha; Cliente abre /login/cliente, somente com a mensagem de área em
+construção, sem campos ou botão de login. O popup da Home já
 abre a rota específica escolhida, sem repetir a seleção. As três telas
 reutilizam o visual de login existente.
 
 Login empresarial envia e-mail/senha, sem papel imposto pelo frontend, e
 continua retornando à Home enquanto os dashboards não existem. No acesso de
-cliente, o helper requestClientAccess envia e-mail e role cliente ao endpoint
-de login atual. O backend nega com 403, sem emitir sessão; a tela apresenta
-“A área logada do cliente está sendo construída.” Outros erros continuam
-visíveis, sem simular sucesso, salvar token ou liberar área privada.
+cliente, a tela apresenta diretamente “A área logada do cliente está sendo
+construída.” Não solicita e-mail, não chama a API e não cria sessão.
+
+Simplificação verificada com 22 testes direcionados, TypeScript, lint e
+git diff --check aprovados. Revisão independente por final_review sem
+bloqueadores; suíte completa e inspeção visual não repetidas nesta mudança.
 
 Arquivos: pages/AccessChoice.tsx, pages/ClientAccess.tsx e pages/login.tsx,
 rotas em routes/AppRoute.tsx, helpers em lib/api.ts e navegação direta em
 components/pop-up/SignSelect.tsx, todos sob frontend/src.
 
-Verificação desta alteração: 25 testes direcionados aprovados em AccessChoice,
+Evidência anterior à simplificação da tela cliente: 25 testes direcionados aprovados em AccessChoice,
 SignSelect e BackendConsumers; TypeScript, lint e git diff --check aprovados.
 Suíte completa: 141 testes passaram e 11 falharam, em Home, Sobre, Planos,
 ActionButton e identidade de assets. Essas falhas não foram corrigidas nesta

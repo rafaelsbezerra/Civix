@@ -18,13 +18,6 @@ function respond(body: unknown, status: number) {
   }))
 }
 
-function submitClient() {
-  render(<MemoryRouter initialEntries={['/login/cliente']}><ClientAccess /></MemoryRouter>)
-  expect(screen.queryByLabelText('Senha')).not.toBeInTheDocument()
-  fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'cliente@example.test' } })
-  fireEvent.click(screen.getByRole('button', { name: 'Login' }))
-}
-
 beforeEach(() => {
   fetchMock.mockReset()
   navigate.mockReset()
@@ -49,39 +42,13 @@ describe('Escolha e formulários de acesso', () => {
     expect(fetchMock).not.toHaveBeenCalled()
   })
 
-  it('cliente envia somente e-mail e perfil, apresenta construção no 403 e não inicia sessão', async () => {
-    respond({ status: 403, message: 'Acesso indisponível.' }, 403)
-    submitClient()
-    expect(await screen.findByRole('alert')).toHaveTextContent('A área logada do cliente está sendo construída.')
-    expect(String(fetchMock.mock.calls[0][0])).toMatch(/\/api\/v1\/users\/login$/)
-    expect(fetchMock.mock.calls[0][1]?.method).toBe('POST')
-    expect(JSON.parse(String(fetchMock.mock.calls[0][1]?.body))).toEqual({ email: 'cliente@example.test', role: 'cliente' })
-    expect(setItem).not.toHaveBeenCalled()
-    expect(navigate).not.toHaveBeenCalled()
-  })
-
-  it('cliente preserva erro público de servidor sem apresentá-lo como construção', async () => {
-    respond({ status: 500, message: 'Serviço temporariamente indisponível.' }, 500)
-    submitClient()
-    expect(await screen.findByRole('alert')).toHaveTextContent('Serviço temporariamente indisponível.')
-    expect(screen.queryByText(/está sendo construída/)).not.toBeInTheDocument()
-    expect(setItem).not.toHaveBeenCalled()
-    expect(navigate).not.toHaveBeenCalled()
-  })
-
-  it('cliente preserva falha de rede sem apresentá-la como construção', async () => {
-    fetchMock.mockRejectedValueOnce(new TypeError('Failed to fetch'))
-    submitClient()
-    expect(await screen.findByRole('alert')).toHaveTextContent('Não foi possível conectar à API. Tente novamente.')
-    expect(screen.queryByText(/está sendo construída/)).not.toBeInTheDocument()
-    expect(setItem).not.toHaveBeenCalled()
-    expect(navigate).not.toHaveBeenCalled()
-  })
-
-  it('cliente rejeita sucesso inesperado sem armazenar token nem navegar', async () => {
-    respond({ data: { token: 'token-indevido' } }, 200)
-    submitClient()
-    expect(await screen.findByRole('alert')).toHaveTextContent('A API retornou uma resposta inesperada para o acesso de cliente.')
+  it('cliente mostra a mensagem diretamente, sem formulário, requisição ou sessão', () => {
+    const { container } = render(<MemoryRouter initialEntries={['/login/cliente']}><ClientAccess /></MemoryRouter>)
+    expect(screen.getByRole('heading', { name: 'A área logada do cliente está sendo construída.' })).toBeInTheDocument()
+    expect(container.querySelector('form')).toBeNull()
+    expect(screen.queryByRole('textbox')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Login' })).not.toBeInTheDocument()
+    expect(fetchMock).not.toHaveBeenCalled()
     expect(setItem).not.toHaveBeenCalled()
     expect(navigate).not.toHaveBeenCalled()
   })

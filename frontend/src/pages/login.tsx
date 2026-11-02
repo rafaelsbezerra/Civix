@@ -10,7 +10,7 @@ import {
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import { ApiError, login, requestClientAccess } from "../lib/api";
+import { ApiError, login } from "../lib/api";
 
 import civixLogo from "../assets/civix/logoCivix.png";
 import civixLogoDark from "../assets/civix/logoBackground.png";
@@ -151,10 +151,6 @@ export default function Login({ access = "empresa" }: { access?: "empresa" | "cl
     try {
       setIsLoading(true);
 
-      if (role === "cliente") {
-        await requestClientAccess(email);
-        return;
-      }
 
       const result = await login({
         email,
@@ -165,11 +161,9 @@ export default function Login({ access = "empresa" }: { access?: "empresa" | "cl
 
       navigate("/");
     } catch (err: unknown) {
-      setError(role === "cliente" && err instanceof ApiError && err.status === 403
-        ? "A área logada do cliente está sendo construída."
-        : err instanceof ApiError
-          ? err.message
-          : "Ocorreu um erro ao realizar o login. Tente novamente.");
+      setError(err instanceof ApiError
+        ? err.message
+        : "Ocorreu um erro ao realizar o login. Tente novamente.");
     } finally {
       setIsLoading(false);
     }
@@ -209,8 +203,10 @@ export default function Login({ access = "empresa" }: { access?: "empresa" | "cl
                 id="login-title"
                 className="font-sans text-[clamp(24px,1.5vw,30px)] leading-[1.1] font-semibold text-[#071b2b] text-center mb-[clamp(18px,2vh,30px)]"
               >
-                {access === "selection" ? "Escolha seu acesso" : "Faça login para ter acesso"}
-                {access !== "selection" && <><br />ao sistema</>}
+                {access === "selection" ? "Escolha seu acesso" : access === "cliente"
+                  ? "A área logada do cliente está sendo construída."
+                  : "Faça login para ter acesso"}
+                {access === "empresa" && <><br />ao sistema</>}
               </h1>
 
               {access === "selection" && <div className="space-y-[clamp(8px,0.7vw,14px)] mb-[clamp(18px,2vh,30px)]">
@@ -279,7 +275,7 @@ export default function Login({ access = "empresa" }: { access?: "empresa" | "cl
                 </div>
               )}
 
-              {access !== "selection" && <form
+              {access === "empresa" && <form
                 onSubmit={handleSubmit}
                 className="space-y-[clamp(10px,1.2vh,18px)]"
               >
