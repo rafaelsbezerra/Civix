@@ -9,6 +9,7 @@ export interface Empresa {
   descricao_detalhada: string;
   categoria: string;
   logo?: string | null;
+  cover_image_url?: string | null;
   cidade: string;
   estado: string;
   endereco?: string | null;
@@ -197,11 +198,11 @@ export async function completeFirstAccess(token: string, password: string): Prom
 export interface LoginInput {
   email: string;
   password?: string;
-  role: 'empresa' | 'cliente';
+  role?: 'admin_empresa' | 'super_admin' | 'atendente';
 }
 
 export interface LoginResult {
-  user: { id: string; name: string; email: string; role: 'empresa' | 'cliente' };
+  user: { id: string | number; name?: string; email: string; role: 'admin_empresa' | 'super_admin' | 'atendente'; companyId: string | null };
   token: string;
 }
 
@@ -213,11 +214,34 @@ export async function login(input: LoginInput): Promise<LoginResult> {
   const result = response.data;
 
   if (!result || typeof result.token !== 'string' || !result.token.trim()
-    || !result.user || typeof result.user.id !== 'string'
-    || typeof result.user.name !== 'string' || typeof result.user.email !== 'string'
-    || (result.user.role !== 'empresa' && result.user.role !== 'cliente')) {
+    || !result.user || (typeof result.user.id !== 'string' && typeof result.user.id !== 'number')
+    || (result.user.name != null && typeof result.user.name !== 'string') || typeof result.user.email !== 'string'
+    || !['admin_empresa', 'super_admin', 'atendente'].includes(result.user.role)
+    || (result.user.role === 'super_admin' ? result.user.companyId !== null : typeof result.user.companyId !== 'string' || !result.user.companyId)) {
     throw new ApiError('A API retornou uma resposta de login inválida.');
   }
 
   return result;
+}
+
+export type AuthenticatedRole = 'admin_empresa' | 'super_admin' | 'atendente';
+
+export interface SessionProfile {
+  user: LoginResult['user'];
+  permissions: { uploadCompanyCover: boolean };
+}
+
+export async function getSessionProfile(): Promise<SessionProfile> {
+  const token = localStorage.getItem('token');
+  if (!token) throw new ApiError('Faça login para continuar.', 401);
+  const response = await fetchApi<SessionProfile>('/api/v1/users/profile', {
+    headers: { Authorization: 'Bearer ' + token },
+  });
+  const profile = response.data;
+  if (!profile?.user || !['admin_empresa', 'super_admin', 'atendente'].includes(profile.user.role)
+    || typeof profile.permissions?.uploadCompanyCover !== 'boolean'
+    || (profile.user.role === 'super_admin' ? profile.user.companyId !== null : typeof profile.user.companyId !== 'string' || !profile.user.companyId)) {
+    throw new ApiError('Sessão inválida.', 401);
+  }
+  return profile;
 }

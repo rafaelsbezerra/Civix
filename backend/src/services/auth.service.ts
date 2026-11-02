@@ -6,18 +6,22 @@ import { authRepository } from '../persistence/auth.repository.js';
 import { AppError } from '../shared/errors/app.error.js';
 import { ErrorCode } from '../shared/errors/error.code.js';
 import { sendForgotPasswordEmail } from './mail.service.js';
+import { isAuthenticatedRole } from '../entities/user.entity.js';
+import { companyRepository } from '../persistence/company.repository.js';
 import type { JwtInvitePayload } from '../dtos/auth.invite.dto.js';
 import type { UserRow } from '../interfaces/auth.user.row.js';
 
 async function getInviteUser(token: string): Promise<UserRow> {
-  const jwtSecret = process.env.JWT_INVITE_SECRET || 'secret-chave-civix';
+  const jwtSecret = process.env.JWT_INVITE_SECRET;
+  if (!jwtSecret) throw new AppError({ status: 500, code: ErrorCode.INTERNAL_ERROR, message: 'Erro interno do servidor' });
   let decoded: JwtInvitePayload;
 
   try {
     decoded = jwt.verify(token, jwtSecret) as JwtInvitePayload;
 
     if (!decoded || typeof decoded !== 'object' || typeof decoded.email !== 'string'
-      || !decoded.email || (decoded.role !== 'empresa' && decoded.role !== 'cliente')) {
+      || !decoded.email || (!isAuthenticatedRole(decoded.role) || decoded.role === 'super_admin')
+      || decoded.purpose !== 'invite' || typeof decoded.companyId !== 'string') {
       throw new Error('O token de convite não contém uma identidade válida.');
     }
   } catch (cause) {
@@ -39,7 +43,8 @@ async function getInviteUser(token: string): Promise<UserRow> {
     });
   }
 
-  if (user.status === 'active') {
+  if (user.status !== 'pending' || user.company_id !== decoded.companyId
+    || !await companyRepository.getById(decoded.companyId)) {
     throw new AppError({
       status: 400,
       code: ErrorCode.VALIDATION_ERROR,
@@ -96,29 +101,9 @@ export async function firstAccess(token: string, password: string): Promise<void
 
 export async function resendInviteEmail(email: string): Promise<void> {
   const user = await authRepository.getResetUserByEmail(email);
-
-  // Não revelar se o endereço está cadastrado.
-  if (!user) {
-    return;
-  }
-
-  const jwtSecret = process.env.JWT_RESET_SECRET || 'secret-reset-civix';
-  const resetToken = jwt.sign(
-    { userId: user.id, email: user.email },
-    jwtSecret,
-    { expiresIn: '1h' },
-  );
-
-  await authRepository.saveResetToken(user.id, resetToken);
-
-  logger().info({
-    event: 'auth.password-reset.prepared',
-    module: 'auth',
-    message: 'Recuperação de senha preparada',
-    context: { userId: user.id, persistenceMode: USE_MOCK_DATA ? 'json' : 'postgres' },
-  });
-
-  await sendForgotPasswordEmail({ email: user.email, token: resetToken });
+  if (!user || user.status !== 'pending' || !isAuthenticatedRole(user.role) || user.role === 'super_admin' || !user.company_id) return;
+  const adminService = await import('./admin.service.js');
+  await adminService.inviteUser(email, user.role, user.company_id);
 }
 
 export function signToken(

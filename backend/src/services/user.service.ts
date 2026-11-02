@@ -7,74 +7,36 @@ import { userRepository } from '../persistence/user.repository.js';
 import * as mailService from './mail.service.js';
 import * as authService from './auth.service.js';
 import type { LoginInput, LoginResult, PasswordResetInput } from '../dtos/user.auth.dto.js';
+import { AuthenticatedUser, isAuthenticatedRole } from '../entities/user.entity.js';
+import { companyRepository } from '../persistence/company.repository.js';
 
 export async function login({ email, role, password }: LoginInput): Promise<LoginResult> {
-  if (role === 'empresa' && !password) {
-    throw new AppError({
-      status: 400,
-      code: ErrorCode.VALIDATION_ERROR,
-      message: 'Senha é obrigatória para empresas',
-    });
+  if (role === 'cliente') {
+    throw new AppError({ status: 403, code: ErrorCode.FORBIDDEN, message: 'Cliente não possui acesso à área logada.' });
   }
-
-  const user = await userRepository.getByEmailAndRole(email, role);
-
-  if (!user) {
-    throw new AppError({
-      status: 401,
-      code: ErrorCode.UNAUTHORIZED,
-      message: 'Usuário não encontrado.',
-    });
+  if (typeof email !== 'string' || !email.trim() || typeof password !== 'string' || !password) {
+    throw new AppError({ status: 400, code: ErrorCode.VALIDATION_ERROR, message: 'E-mail e senha são obrigatórios.' });
   }
-
-  if (user.status === 'pending') {
-    throw new AppError({
-      status: 401,
-      code: ErrorCode.UNAUTHORIZED,
-      message: 'Conclua o primeiro acesso antes de entrar.',
-    });
+  const user = await userRepository.getForLogin(email.trim());
+  if (!user || (role !== undefined && user.role !== role)) {
+    throw new AppError({ status: 401, code: ErrorCode.UNAUTHORIZED, message: 'Credenciais inválidas.' });
   }
-
-  if (role === 'empresa') {
-    if (!user.password_hash) {
-      throw new AppError({
-        status: 500,
-        code: ErrorCode.INTERNAL_ERROR,
-        message: 'Erro interno do servidor',
-        details: { message: 'Usuário da empresa não possui senha cadastrada.' },
-      });
-    }
-
-    if (!password) {
-      throw new AppError({
-        status: 400,
-        code: ErrorCode.VALIDATION_ERROR,
-        message: 'Senha é obrigatória para empresas',
-      });
-    }
-
-    if (!await authService.comparePassword(password, user.password_hash)) {
-      throw new AppError({
-        status: 401,
-        code: ErrorCode.UNAUTHORIZED,
-        message: 'Senha incorreta.',
-      });
-    }
+  if (user.role === 'cliente') {
+    throw new AppError({ status: 403, code: ErrorCode.FORBIDDEN, message: 'Cliente não possui acesso à área logada.' });
   }
-
-  const payload = { id: user.id, email: user.email, role: user.role };
-
-  const token = authService.signToken(payload, '1h');
-
-  logger().info({
-    event: 'user.authenticated',
-    module: 'users',
-    message: 'Autenticação concluída',
-    context: { userId: user.id, role: user.role, persistenceMode: USE_MOCK_DATA ? 'json' : 'postgres' },
-  });
-
+  const current = await getAuthenticatedUser(user.id);
+  if (!await authService.comparePassword(password, current.password_hash!)) {
+    throw new AppError({ status: 401, code: ErrorCode.UNAUTHORIZED, message: 'Credenciais inválidas.' });
+  }
+  const token = authService.signToken({
+    id: current.id, email: current.email, role: current.role,
+    companyId: current.company_id, tokenVersion: 2,
+  }, '1h');
+  logger().info({ event: 'user.authenticated', module: 'users', message: 'Autenticação concluída',
+    context: { userId: current.id, role: current.role, companyId: current.company_id ?? undefined, persistenceMode: USE_MOCK_DATA ? 'json' : 'postgres' } });
   return {
-    user: { id: user.id, name: user.name, email: user.email, role: user.role },
+    user: { id: current.id, name: current.name ?? undefined, email: current.email,
+      role: current.role, companyId: current.company_id },
     token,
   };
 }
@@ -133,4 +95,24 @@ export async function resetPassword({ token, password }: PasswordResetInput): Pr
     context: { userId: user.id, persistenceMode: USE_MOCK_DATA ? 'json' : 'postgres' },
   });
 
+}
+
+export async function getAuthenticatedUser(id: string): Promise<AuthenticatedUser> {
+  const user = await userRepository.getById(id);
+  if (!user || !isAuthenticatedRole(user.role)
+    || (user.status != null && user.status !== 'active') || !user.password_hash) {
+    throw new AppError({ status: 401, code: ErrorCode.UNAUTHORIZED, message: 'Acesso inválido. Faça login novamente.' });
+  }
+  const companyId = user.company_id ?? null;
+  if (user.role === 'super_admin') {
+    if (companyId !== null) {
+      throw new AppError({ status: 401, code: ErrorCode.UNAUTHORIZED, message: 'Vínculo de acesso inválido.' });
+    }
+  } else {
+    const company = companyId ? await companyRepository.getById(companyId) : undefined;
+    if (!company || company.status === 'inativo') {
+      throw new AppError({ status: 401, code: ErrorCode.UNAUTHORIZED, message: 'Empresa indisponível ou vínculo inválido.' });
+    }
+  }
+  return { ...user, role: user.role, company_id: companyId };
 }

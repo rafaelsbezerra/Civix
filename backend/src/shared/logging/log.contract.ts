@@ -1,11 +1,11 @@
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error' | 'fatal';
-export type LogModule = 'http' | 'server' | 'companies' | 'plans' | 'users' | 'auth' | 'mail' | 'admin' | 'mock';
+export type LogModule = 'http' | 'server' | 'companies' | 'plans' | 'users' | 'auth' | 'mail' | 'admin' | 'mock' | 'storage';
 
 export interface LogContext {
   userId?: string | number;
   companyId?: string;
   planId?: string | number;
-  role?: 'empresa' | 'cliente';
+  role?: import('../../entities/user.entity.js').UserRole;
   count?: number;
   operation?: string;
   persistenceMode?: 'json' | 'postgres';

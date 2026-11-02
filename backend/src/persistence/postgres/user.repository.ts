@@ -3,26 +3,25 @@ import type { UserRepository } from '../../repositories/user.repository.js';
 import { db } from '../../shared/config/data.js';
 
 export const userPostgresRepository: UserRepository = {
+  async create(user) {
+    return (await db.query<User>(
+      'INSERT INTO users (id, email, name, role, company_id, status, password_hash) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *',
+      [user.id, user.email, user.name ?? null, user.role, user.company_id ?? null, user.status ?? 'active', user.password_hash ?? null],
+    )).rows[0];
+  },
   async getById(id) {
     return (await db.query<User>('SELECT * FROM users WHERE id = $1', [id])).rows[0];
   },
 
   async getByEmail(email) {
-    return (await db.query<Pick<User, 'id' | 'name' | 'email'>>('SELECT id, name, email FROM users WHERE email = $1', [email])).rows[0];
+    return (await db.query<Pick<User, 'id' | 'name' | 'email'>>('SELECT id, name, email FROM users WHERE LOWER(email) = LOWER($1)', [email])).rows[0];
   },
 
+  async getForLogin(email) {
+    return (await db.query<User>('SELECT * FROM users WHERE LOWER(email) = LOWER($1)', [email])).rows[0];
+  },
   async getByEmailAndRole(email, role) {
-    const query = role === 'empresa' ? `
-        SELECT id, name, email, password_hash, role, status
-        FROM users
-        WHERE email = $1 AND role = 'empresa'
-      ` : `
-        SELECT id, name, email, role, status
-        FROM users
-        WHERE email = $1 AND role = 'cliente'
-      `;
-
-    return (await db.query<User>(query, [email])).rows[0];
+    return (await db.query<User>('SELECT * FROM users WHERE LOWER(email) = LOWER($1) AND role = $2', [email, role])).rows[0];
   },
 
   async getByValidResetTokenHash(tokenHash) {

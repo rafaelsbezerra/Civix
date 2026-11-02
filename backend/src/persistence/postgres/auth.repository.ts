@@ -8,8 +8,8 @@ import { ErrorCode } from '../../shared/errors/error.code.js';
 export const authPostgresRepository: AuthRepository = {
   async getInviteUserByEmail(email, role) {
     const query = role === undefined
-      ? 'SELECT * FROM users WHERE email = $1'
-      : 'SELECT * FROM users WHERE email = $1 AND role = $2';
+      ? 'SELECT * FROM users WHERE LOWER(email) = LOWER($1)'
+      : 'SELECT * FROM users WHERE LOWER(email) = LOWER($1) AND role = $2';
     const values = role === undefined ? [email] : [email, role];
     const { rows } = await db.query<UserRow>(query, values);
 
@@ -25,7 +25,7 @@ export const authPostgresRepository: AuthRepository = {
     const result = await db.query(
       `UPDATE users
        SET password_hash = $1, status = $2, invite_token = $3
-       WHERE id = $4 AND invite_token = $5 AND status IS DISTINCT FROM 'active'
+       WHERE id = $4 AND invite_token = $5 AND status = 'pending'
        RETURNING id`,
       [passwordHash, 'active', null, id, token],
     );
@@ -34,21 +34,21 @@ export const authPostgresRepository: AuthRepository = {
   },
 
   async getResetUserByEmail(email) {
-    return (await db.query<User>('SELECT * FROM users WHERE email = $1', [email])).rows[0];
+    return (await db.query<User>('SELECT * FROM users WHERE LOWER(email) = LOWER($1)', [email])).rows[0];
   },
 
   async saveResetToken(id, token) {
     await db.query('UPDATE users SET reset_password_token = $1 WHERE id = $2', [token, id]);
   },
 
-  async saveInvite(email, role, token, existingId) {
+  async saveInvite(email, role, token, existingId, companyId) {
     if (existingId !== undefined) {
       const result = await db.query(
         `UPDATE users
          SET role = $1, status = $2, invite_token = $3
-         WHERE id = $4 AND status IS NOT NULL AND status <> 'active'
+         WHERE id = $4 AND status = 'pending' AND company_id = $5 AND role = $1
          RETURNING id`,
-        [role, 'pending', token, existingId],
+        [role, 'pending', token, existingId, companyId],
       );
 
       if (result.rowCount !== 1) {
@@ -63,9 +63,9 @@ export const authPostgresRepository: AuthRepository = {
     }
 
     await db.query(
-      `INSERT INTO users (email, role, status, invite_token)
-       VALUES ($1, $2, $3, $4)`,
-      [email, role, 'pending', token],
+      `INSERT INTO users (email, role, status, invite_token, company_id)
+       VALUES ($1, $2, $3, $4, $5)`,
+      [email, role, 'pending', token, companyId],
     );
   },
 };

@@ -6,7 +6,7 @@ import { readLocalData, updateLocalData } from './local.store.js';
 
 export const authJsonRepository: AuthRepository = {
   async getInviteUserByEmail(email, role) {
-    const users = (await readLocalData()).users.filter(user => user.email === email);
+    const users = (await readLocalData()).users.filter(user => user.email.toLowerCase() === email.toLowerCase());
 
     if (role !== undefined) {
       return users.find(user => user.role === role);
@@ -19,7 +19,7 @@ export const authJsonRepository: AuthRepository = {
   async activateUser(id, passwordHash, token) {
     return updateLocalData(data => {
       const user = data.users.find(user => String(user.id) === String(id)
-        && user.invite_token === token && user.status !== 'active');
+        && user.invite_token === token && user.status === 'pending');
 
       if (!user) {
         return false;
@@ -34,7 +34,7 @@ export const authJsonRepository: AuthRepository = {
   },
 
   async getResetUserByEmail(email) {
-    return (await readLocalData()).users.find(user => user.email === email);
+    return (await readLocalData()).users.find(user => user.email.toLowerCase() === email.toLowerCase());
   },
 
   async saveResetToken(id, token) {
@@ -47,7 +47,7 @@ export const authJsonRepository: AuthRepository = {
     });
   },
 
-  async saveInvite(email, role, token, existingId) {
+  async saveInvite(email, role, token, existingId, companyId) {
     await updateLocalData(data => {
       if (existingId !== undefined) {
         const user = data.users.find(user => String(user.id) === String(existingId));
@@ -60,7 +60,7 @@ export const authJsonRepository: AuthRepository = {
           });
         }
 
-        if (user.status === 'active' || user.status == null) {
+        if (user.status !== 'pending' || user.role !== role || user.company_id !== companyId) {
           throw new AppError({
             status: 409,
             code: ErrorCode.CONFLICT,
@@ -78,6 +78,7 @@ export const authJsonRepository: AuthRepository = {
           role,
           status: 'pending',
           invite_token: token,
+          company_id: companyId ?? null,
         });
       }
     });

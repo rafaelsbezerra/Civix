@@ -7,5 +7,5 @@ export interface AuthRepository {
   activateUser(id: UserId, passwordHash: string, token: string): Promise<boolean>;
   getResetUserByEmail(email: string): Promise<User | undefined>;
   saveResetToken(id: UserId, token: string): Promise<void>;
-  saveInvite(email: string, role: UserRole, token: string, existingId?: UserId): Promise<void>;
+  saveInvite(email: string, role: UserRole, token: string, existingId?: UserId, companyId?: string | null): Promise<void>;
 }

@@ -35,19 +35,25 @@ test('Endpoints do catálogo preservam respostas, ordem das rotas e consultas pa
   const calls: { query: string; values?: string[] }[] = [];
   await withCatalog(t, async (query, values) => { calls.push({ query, values }); return { rows: [company] }; }, async url => {
     const cases = [
-      ['', 'SELECT * FROM "empresas"', undefined, 'Empresas carregadas com sucesso'],
-      ['/verificadas/todas', 'SELECT * FROM "empresas" WHERE verificado = TRUE', undefined, '1 empresas verificadas encontradas'],
-      ['/buscar?q=Obra%27', 'SELECT * FROM "empresas" WHERE nome ILIKE $1', ["%Obra'%"], `1 empresas encontradas para a busca "Obra'"`],
-      ['/categoria/Obras', 'SELECT * FROM "empresas" WHERE LOWER(categoria) = LOWER($1)', ['Obras'], '1 empresas encontradas na categoria Obras'],
-      ['/estado/ce', 'SELECT * FROM "empresas" WHERE UPPER(estado) = UPPER($1)', ['ce'], '1 empresas encontradas em ce'],
-      ['/tamanho/media', 'SELECT * FROM "empresas" WHERE tamanho = $1', ['media'], '1 empresas medias encontradas'],
-      ['/catalog-id', 'SELECT * FROM "empresas" WHERE id = $1', ['catalog-id'], 'Empresa carregada com sucesso'],
+      ['', ' FROM companies', undefined],
+      ['/verificadas/todas', ' FROM companies WHERE is_verified = TRUE', undefined],
+      ['/buscar?q=Obra%27', ' FROM companies WHERE name ILIKE $1', ["%Obra'%"]],
+      ['/categoria/Obras', ' FROM companies WHERE LOWER(category) = LOWER($1)', ['Obras']],
+      ['/estado/ce', ' FROM companies WHERE UPPER(state) = UPPER($1)', ['ce']],
+      ['/tamanho/media', ' FROM companies WHERE size = $1', ['media']],
+      ['/catalog-id', ' FROM companies WHERE id = $1', ['catalog-id']],
     ] as const;
     for (const [path, query, values] of cases) {
       const response = await fetch(url + path);
       assert.equal(response.status, 200);
-      assert.deepEqual(await response.json(), { data: path === '/catalog-id' ? company : [company] });
-      assert.deepEqual(calls.at(-1), { query, values });
+      const presented = { ...company, cover_image_url: null, cover_image_url_expires_in: null };
+      assert.deepEqual(await response.json(), { data: path === '/catalog-id' ? presented : [presented] });
+      const lastCall = calls.at(-1)!;
+      assert.ok(lastCall.query.startsWith('SELECT '));
+      assert.ok(lastCall.query.endsWith(query));
+      assert.ok(lastCall.query.includes('name AS nome'));
+      assert.ok(lastCall.query.includes('tax_id AS cnpj'));
+      assert.deepEqual(lastCall.values, values);
     }
   });
 });

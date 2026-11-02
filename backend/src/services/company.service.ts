@@ -6,11 +6,20 @@ import { companyCreateSchema } from '../dtos/company.create.dto.js';
 import { companyRepository } from '../persistence/company.repository.js';
 import { AppError } from '../shared/errors/app.error.js';
 import { ErrorCode } from '../shared/errors/error.code.js';
+import { getPresignedImageUrl } from './storage.service.js';
+import { storageRepository } from '../persistence/storage.repository.js';
 
-// Estrutura inicial: chamadas futuras pelo storage; sem atualização persistida.
-export async function updateCompanyCoverKey(companyId: string, coverKey: string | null): Promise<void> { }
+export async function updateCompanyCoverKey(companyId: string, key: string | null, expectedKey: string | null): Promise<void> {
+  if (!await companyRepository.updateCoverKey(companyId, key, expectedKey)) {
+    throw new AppError({ status: 409, code: ErrorCode.CONFLICT, message: 'A capa foi alterada por outra operação. Atualize e tente novamente.' });
+  }
+}
 
-export async function updateCompanyLogoKey(companyId: string, logoKey: string | null): Promise<void> { }
+export async function updateCompanyLogoKey(companyId: string, key: string | null, expectedKey: string | null): Promise<void> {
+  if (!await companyRepository.updateLogoKey(companyId, key, expectedKey)) {
+    throw new AppError({ status: 409, code: ErrorCode.CONFLICT, message: 'A logo foi alterada por outra operação.' });
+  }
+}
 
 export async function createCompany(input: unknown): Promise<Company> {
   const parsed = companyCreateSchema.safeParse(input, { error: () => 'Valor inválido para este campo.' });
@@ -141,4 +150,25 @@ export async function getCompanyById(id: string): Promise<Company> {
   });
 
   return company;
+}
+
+export async function presentCompany(company: Company) {
+  const { cover_key, logo_key: _logoKey, ...publicCompany } = company;
+  if (!cover_key || company.status === 'inativo') {
+    return { ...publicCompany, cover_image_url: null };
+  }
+  const image = await storageRepository.getByObjectKey(cover_key);
+  if (!image || image.resource_id !== company.id || image.module !== 'companies' || image.purpose !== 'cover') {
+    return { ...publicCompany, cover_image_url: null };
+  }
+  try {
+    const signed = await getPresignedImageUrl(image.id);
+    return { ...publicCompany, cover_image_url: signed.url, cover_image_url_expires_in: signed.expiresInSeconds };
+  } catch (error) {
+    // Uma troca concorrente pode invalidar a imagem, mas não a empresa consultada.
+    if (error instanceof AppError && error.status === 404) {
+      return { ...publicCompany, cover_image_url: null };
+    }
+    throw error;
+  }
 }

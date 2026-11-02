@@ -5,7 +5,7 @@ import { Writable } from 'node:stream';
 import test from 'node:test';
 import express, { type Express } from 'express';
 import { createLogger } from '../src/shared/logging/log.logger.js';
-import { logger } from '../src/shared/logging/log.context.js';
+import { logger as getLogger } from '../src/shared/logging/log.context.js';
 import { createLogMiddleware } from '../src/middlewares/log.middleware.js';
 import { createErrorHandler, createNotFoundHandler, terminateErroredResponse } from '../src/middlewares/error.handler.js';
 import { AppError } from '../src/shared/errors/app.error.js';
@@ -51,7 +51,7 @@ test('Logs HTTP geram UUID interno, normalizam rota e preservam resposta sem nov
   const { app, destination, logger } = setup();
   const router = express.Router();
   router.get('/:id', (_req, res) => {
-    logger().info({ event: 'company.observed', module: 'companies', message: 'Empresa consultada.', context: { companyId: 'company-internal' } });
+    getLogger().info({ event: 'company.observed', module: 'companies', message: 'Empresa consultada.', context: { companyId: 'company-internal' } });
     res.json({ data: { nome: 'Empresa de teste' } });
   });
   app.use('/api/v1/empresas', router);
@@ -81,9 +81,9 @@ test('Requisições concorrentes não misturam contexto após await', async () =
   const { app, destination, logger } = setup();
   app.get('/concurrent/:id', async (req, res) => {
     const companyId = req.params.id;
-    logger().debug({ event: 'company.started', module: 'companies', message: 'Consulta iniciada.', context: { companyId } });
+    getLogger().debug({ event: 'company.started', module: 'companies', message: 'Consulta iniciada.', context: { companyId } });
     await new Promise(resolve => setTimeout(resolve, companyId === 'first' ? 30 : 5));
-    logger().debug({ event: 'company.finished', module: 'companies', message: 'Consulta finalizada.', context: { companyId } });
+    getLogger().debug({ event: 'company.finished', module: 'companies', message: 'Consulta finalizada.', context: { companyId } });
     res.json({ data: true });
   });
   await withServer(app, async origin => {
@@ -105,11 +105,11 @@ test('Requisições concorrentes não misturam contexto após await', async () =
 
 test('Contexto encerrado não acompanha trabalho assíncrono tardio', async () => {
   const { app, logger } = setup();
-  const base = logger();
+  const base = getLogger();
   let resolveLate!: (value: unknown) => void;
   const late = new Promise(resolve => { resolveLate = resolve; });
   app.get('/late', (_req, res) => {
-    setTimeout(() => resolveLate(logger()), 30);
+    setTimeout(() => resolveLate(getLogger()), 30);
     res.json({ data: true });
   });
   await withServer(app, async origin => {

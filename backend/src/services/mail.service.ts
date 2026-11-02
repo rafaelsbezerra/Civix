@@ -1,3 +1,4 @@
+import type { UserRole } from '../entities/user.entity.js';
 import { logger } from '../shared/logging/log.context.js';
 import { AppError } from '../shared/errors/app.error.js';
 import { ErrorCode } from '../shared/errors/error.code.js';
@@ -30,7 +31,7 @@ function getMailFrom() {
 
 interface SendInviteParams {
   email: string;
-  role: 'empresa' | 'cliente';
+  role: UserRole;
   token: string;
 }
 
@@ -52,7 +53,7 @@ export async function sendInviteEmail({ email, role, token }: SendInviteParams) 
     return result;
   }
 
-  const roleText = role === 'empresa' ? 'Organização/Empresa' : 'Cliente/Usuário';
+  const roleText = role === 'admin_empresa' ? 'Organização/Empresa' : 'Cliente/Usuário';
 
   try {
     const result = await getResendClient().emails.send({

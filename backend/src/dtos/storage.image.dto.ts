@@ -27,7 +27,7 @@ export interface UploadImageInput extends ImageTarget {
 
 export type CreateImageInput = Omit<Image, 'id' | 'created_at'>;
 
-/** Contratos futuros; os services desta estrutura ainda não retornam esses DTOs. */
+/** Resposta de upload após armazenamento e vínculo confirmados. */
 export interface UploadImageResult {
   imageId: string;
   target: ImageTarget;

@@ -156,9 +156,9 @@ describe('Contratos dos consumidores de API', () => {
     expect(fetchMock.mock.calls[1][0]).toBe('https://backend.example.test/api/auth/first-access')
     expect(JSON.parse(String(fetchMock.mock.calls[1][1]?.body))).toEqual({ token, password: 'senha-teste-123' })
   })
-  it.each(['empresa', 'cliente'] as const)('Login %s extrai token e usuário do envelope', async role => {
-    const input = { email: 'pessoa@example.test', role, ...(role === 'empresa' ? { password: 'senha-teste' } : {}) }
-    const result = { user: { id: 'user-1', name: 'Teste', email: input.email, role }, token: 'token-sintetico' }
+  it.each(['admin_empresa', 'super_admin', 'atendente'] as const)('Login %s extrai token e usuário do envelope', async role => {
+    const input = { email: 'pessoa@example.test', role, password: 'senha-teste' }
+    const result = { user: { id: 'user-1', name: 'Teste', email: input.email, role, companyId: role === 'super_admin' ? null : 'company-1' }, token: 'token-sintetico' }
     respond({ data: result })
     const { login } = await import('./api')
     expect(await login(input)).toEqual(result)
@@ -168,7 +168,7 @@ describe('Contratos dos consumidores de API', () => {
 
   it('Login apresenta message público e rejeita token inválido, formato antigo e falha de rede', async () => {
     const { login } = await import('./api')
-    const input = { email: 'pessoa@example.test', role: 'empresa' as const, password: 'senha-teste' }
+    const input = { email: 'pessoa@example.test', role: 'admin_empresa' as const, password: 'senha-teste' }
     respond({ status: 401, message: 'Credenciais inválidas', stack: 'diagnóstico privado' }, 401)
     await expect(login(input)).rejects.toThrow('Credenciais inválidas')
     respond({ data: { token: '', user: {} } })

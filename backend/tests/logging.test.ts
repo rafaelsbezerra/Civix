@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { Writable } from 'node:stream';
 import test from 'node:test';
 import { createLogger, createRequestLogger } from '../src/shared/logging/log.logger.js';
-import { logger, runWithLogContext } from '../src/shared/logging/log.context.js';
+import { logger as getLogger, runWithLogContext } from '../src/shared/logging/log.context.js';
 import { AppError } from '../src/shared/errors/app.error.js';
 import { ErrorCode } from '../src/shared/errors/error.code.js';
 
@@ -63,15 +63,15 @@ test('Filtro de nível não emite registros abaixo do nível selecionado', async
 
 test('Contexto assíncrono preserva o UUID após await sem herdar contexto fora da execução', async () => {
   const { destination, logger } = capture();
-  const base = logger();
+  const base = getLogger();
   const requestId = '71865dbe-8c54-4e77-b60c-40b881ca9ced';
 
   await runWithLogContext({ requestId, logger: createRequestLogger(logger, requestId), active: true }, async () => {
     await Promise.resolve();
-    logger().info({ event: 'company.observed', module: 'companies', message: 'Empresa observada.', context: { companyId: 'company-internal', persistenceMode: 'json' } });
+    getLogger().info({ event: 'company.observed', module: 'companies', message: 'Empresa observada.', context: { companyId: 'company-internal', persistenceMode: 'json' } });
   });
 
-  assert.equal(logger(), base);
+  assert.equal(getLogger(), base);
   logger.info({ event: 'server.observed', module: 'server', message: 'Operação fora de requisição.' });
   await logger.close();
   const records = destination.records();
@@ -148,7 +148,7 @@ test('Contexto aceita somente campos permitidos e não executa getters nem regis
   const { destination, logger } = capture();
   let getterCalls = 0;
   const context = {
-    userId: 17, companyId: 'company-internal', role: 'empresa' as const,
+    userId: 17, companyId: 'company-internal', role: 'admin_empresa' as const,
     persistenceMode: 'json' as const, count: 5,
     email: 'pessoa@example.test', body: { password: 'segredo-sintetico' },
     authorization: 'Bearer segredo-sintetico', name: 'Pessoa confidencial',
@@ -158,7 +158,7 @@ test('Contexto aceita somente campos permitidos e não executa getters nem regis
   logger.info({ event: 'company.observed', module: 'companies', message: 'Consulta confirmada.', context });
   await logger.close();
   assert.deepEqual(destination.records()[0].context, {
-    userId: 17, companyId: 'company-internal', role: 'empresa', persistenceMode: 'json', count: 5,
+    userId: 17, companyId: 'company-internal', role: 'admin_empresa', persistenceMode: 'json', count: 5,
   });
   assert.equal(getterCalls, 0);
   for (const sensitive of ['pessoa@example.test', 'segredo-sintetico', 'Pessoa confidencial']) {
