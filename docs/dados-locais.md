@@ -92,22 +92,16 @@ npm run mock:user:create
 npm run dev
 ```
 
-O primeiro comando solicita e-mail, perfil (empresa ou cliente), nome opcional
-e senha para perfil empresa (mínimo de oito caracteres). Apenas o hash bcrypt
-é persistido. O usuário é criado em users; não é criado um cadastro público.
-Duplicidade do mesmo e-mail/perfil retorna conflito, sem sobrescrever o registro.
+O comando aceita os quatro papéis: admin_empresa, super_admin, atendente e cliente. Os três primeiros exigem senha; admin/atendente exigem empresa existente. Somente o hash bcrypt é persistido. E-mail é único independentemente do papel e de maiúsculas/minúsculas. Não há cadastro público de cliente.
 
-O arquivo começa com coleções vazias; não são inseridos dados comerciais ou
-senhas padrão. O comando cria a estrutura para depois cadastrar empresas pela API.
+Para preparar um ambiente vazio, use primeiro npm run user:bootstrap-super-admin em terminal interativo, faça login e cadastre a empresa pela API. Depois crie usuários vinculados. Não há dados comerciais nem senhas padrão.
 
-Para obter o token, use POST /api/v1/users/login com email, role e password
-quando role=empresa. O token está em data.token. O fluxo de login cliente por
-e-mail e as demais regras existentes foram preservados.
+Login recebe email/password; role é filtro opcional. Cliente não autentica. O token está em data.token e tokens antigos exigem novo login. Para conversão explícita de JSON legado com backup, consulte o [guia de usuários e storage](storage.md).
 
 ## Cadastrar empresa em qualquer modo
 
 POST /api/v1/empresas exige Authorization: Bearer com token de login válido
-e role empresa. O mesmo endpoint grava JSON ou PostgreSQL conforme a flag.
+e role super_admin. O mesmo endpoint grava JSON ou PostgreSQL conforme a flag.
 
 Exemplo de corpo aceito, verificado pelos testes:
 
@@ -139,7 +133,7 @@ Falhas usam AppError e o handler global. GETs de catálogo passam a consultar
 os registros gravados, incluindo filtros, busca e detalhe.
 
 Em PostgreSQL, o INSERT utiliza campos permitidos e parâmetros. A tabela
-empresas e suas colunas precisam existir; o código de cadastro não cria o
+companies e suas colunas precisam existir; o código de cadastro não cria o
 banco automaticamente. Schema e baseline completos ainda não estão definidos.
 
 O frontend não possui dashboard/formulário de cadastro. Seus consumidores
@@ -178,7 +172,7 @@ completa do JSON. Exemplo de registro local de teste:
 ```
 
 GET /api/v1/plans retorna somente ativos; POST /api/v1/plans/selection mantém
-a autorização empresa e grava plan_id no usuário. A saída pública continua
+a autorização admin_empresa e grava plan_id no usuário. A saída pública continua
 mapeada para camelCase, com id e price como strings.
 
 Na recuperação, outbox guarda o link que contém o token; users armazena seu
