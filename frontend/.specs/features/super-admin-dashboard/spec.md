@@ -43,7 +43,7 @@ controle claro/escuro, identificação do usuário, acesso ao próprio perfil
 e saída da sessão. Não incluir busca global, notificações ou seletor de
 empresa sem caso de uso aprovado. Aplicar temas a ambos e aos seus portais.
 
-Arquivos a criar em frontend/src/components/layout: SuperAdminLayout.tsx,
+Arquivos a criar em frontend/src/components/dashboard-super-admin/layout: SuperAdminLayout.tsx,
 SuperAdminSidebar.tsx e SuperAdminHeader.tsx. Montagem de rotas aninhadas em
 frontend/src/routes/AppRoute.tsx; páginas renderizam apenas seu conteúdo.
 
@@ -55,8 +55,8 @@ integra o escopo aprovado. Não confundir configurações pessoais com regras
 globais da plataforma nem com gestão de outros administradores.
 
 Proposta: /super-admin/settings/profile em
-frontend/src/pages/super-admin/ProfileSettings.tsx e formulário em
-frontend/src/components/super-admin/ProfileForm.tsx. Carregar dados reais
+frontend/src/pages/dashboard-super-admin/ProfileSettings.tsx e formulário em
+frontend/src/components/dashboard-super-admin/ProfileForm.tsx. Carregar dados reais
 do perfil, validar campos e e-mail único sem distinção de caixa no backend,
 salvar somente campos permitidos e atualizar identificação do header.
 Exibir loading, erros por campo/conflito e confirmação de sucesso.
@@ -65,27 +65,38 @@ reconciliar sessão conforme política aprovada no SDD, pois o JWT atual inclui
 e-mail. Não tratar edição apenas local como persistência concluída.
 
 Rotas/contratos são propostas SA-P07. Prefixo /super-admin, com layout em
-frontend/src/components/layout/SuperAdminLayout.tsx, protegido por
+frontend/src/components/dashboard-super-admin/layout/SuperAdminLayout.tsx, protegido por
 frontend/src/components/auth/ProtectedRoute.tsx. Montagem em AppRoute.tsx.
 
-| Tela | Arquivo sugerido em frontend/src/pages/super-admin | Comportamento |
+| Tela | Arquivo sugerido em frontend/src/pages/dashboard-super-admin | Comportamento |
 | --- | --- | --- |
 | Início | Overview.tsx | Navegação administrativa real; sem cards financeiros fictícios. |
 | Empresas | Companies.tsx | Lista, filtros/estado/plano, loading/vazio/erro. |
 | Nova empresa | CompanyCreate.tsx | Cadastro com plano comercial ativo e positivo; resultado empresa/venda inicial. |
 | Empresa | CompanyDetail.tsx | Dados, plano, estado e acesso à equipe; sem conversas. |
 | Editar empresa | CompanyEdit.tsx | Campos permitidos e troca de plano, com aviso obrigatório de venda manual. |
-| Funcionários | CompanyUsers.tsx | Admins/atendentes somente da empresa da rota, convite/estados e ações aprovadas. |
+| Funcionários | Users.tsx | Admins/atendentes somente da empresa da rota, convite/estados e ações aprovadas. |
 | Planos | Plans.tsx | Consulta/administração de dados comerciais, inclusive inativos. Sem trial/limites operacionais. |
-| Vendas | Sales.tsx | Registros comerciais, origem e valores BRL, sem apresentar como pagamentos. |
+| Vendas | Sales.tsx | Registros imutáveis, valores BRL e exclusão definitiva com confirmação; sem edição ou apresentação como pagamento. |
 | Nova venda | SaleCreate.tsx | Registro manual conforme SA-P04, empresa/plano pré-preenchíveis após edição. |
-| Administradores | Administrators.tsx | Superadmins separados dos funcionários; mutações dependem de SA-P05. |
+| Administradores | Users.tsx | Mesma tela de usuários com contexto global; superadmins separados por filtro/permissões, mutações dependem de SA-P05. |
 | Configurações do perfil | ProfileSettings.tsx | Nome/e-mail do próprio usuário; sem senha ou configurações globais. |
 
-Formulários em frontend/src/components/super-admin/CompanyForm.tsx,
-CompanyUserForm.tsx, PlanForm.tsx, SaleForm.tsx e AdministratorForm.tsx.
-Consumo em frontend/src/lib/platform.api.ts, reutilizando contrato HTTP de
-api.ts. Não antecipar estado/cache/biblioteca novo para essas telas.
+Formulários em frontend/src/components/dashboard-super-admin/CompanyForm.tsx,
+UserForm.tsx, PlanForm.tsx e SaleForm.tsx. UserForm atende usuários da empresa
+e superadmins com campos/ações próprios do contexto autorizado, sem conceder
+permissões pela apresentação visual.
+Consumo concentrado no frontend/src/lib/api.ts existente; acrescentar funções
+com nomes claros, sem criar outro arquivo de API. Não antecipar estado/cache/
+biblioteca novo para essas telas.
+
+### Organização e reuso
+
+Páginas exclusivas ficam em frontend/src/pages/dashboard-super-admin e
+componentes exclusivos em frontend/src/components/dashboard-super-admin,
+incluindo layout, sidebar e header. Elementos com uso provável em outros
+dashboards, como busca, botões e campos genéricos, permanecem na estrutura
+compartilhada atual (por exemplo components/ui), sem duplicação nessa pasta.
 
 ## Fluxos de UI
 
@@ -106,6 +117,11 @@ api.ts. Não antecipar estado/cache/biblioteca novo para essas telas.
    conflitos e opção de tentar novamente. Produção não depende de code/stack.
 7. Perda de sessão limpa dados; erro de rede mantém estado de tentativa sem
    expor conteúdo anterior a usuário não autorizado. Logout segue Bearer atual.
+8. Venda não tem botão/formulário de edição. Correção exige confirmação de
+   exclusão definitiva e novo lançamento manual. Se o cadastro usou plano
+   errado, orientar corrigir o plano da empresa, excluir a venda automática
+   e cadastrar nova venda. Nenhuma dessas ações ocorre por simples navegação.
+   A troca de plano posterior continua somente com aviso de venda manual.
 
 ## Aceite e limites
 

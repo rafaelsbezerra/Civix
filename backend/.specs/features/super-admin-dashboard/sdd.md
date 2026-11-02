@@ -3,8 +3,12 @@
 Data: 2026-11-02. Complementa a [spec](spec.md) e orienta [tarefas](task.md).
 Tudo descrito como criação/alteração é planejamento, não código entregue.
 Caminhos são relativos à raiz do repositório. Escolhas novas de contrato,
-schema e coordenação estão **Aguardando resposta — SA-P07** antes de código.
-Os casos de negócio confirmados estão em SA-D01 a SA-D10 da spec.
+schema e mecanismo transacional estão **Aguardando resposta — SA-P07** antes
+de código. A organização nos módulos existentes e nas pastas frontend foi
+confirmada em SA-D13/14; não está pendente nem autoriza arquivos separados
+para os casos de usuários ou cadastro coordenado.
+Os casos de negócio confirmados estão na tabela SA-D da spec, incluindo as
+decisões posteriores de reuso de arquivos e vendas imutáveis.
 
 ## 1. Organização e responsabilidade
 
@@ -19,19 +23,36 @@ esta spec. Prisma 7 continua com migrations SQL nativas versionadas.
 | --- | --- |
 | Sessão e autorização | Alterar backend/src/middlewares/auth.ts e backend/src/services/user.service.ts; criar backend/src/middlewares/super.admin.ts se aprovado. Resolver import ausente sem criar uma segunda fonte de identidade. |
 | Entrada administrativa | Criar backend/src/routes/platform.routes.ts; montagem futura em backend/src/app.ts somente após handlers/autorização completos. Não simplesmente montar admin.routes legado. |
-| Empresas | Alterar backend/src/services/company.service.ts, backend/src/repositories/company.repository.ts e adapters json/postgres/company.repository.ts; criar backend/src/controller/platform.company.controller.ts e backend/src/dtos/company.admin.dto.ts. |
-| Cadastro coordenado | Criar backend/src/services/company.onboarding.service.ts para coordenar empresa/plano/venda; responsabilidade de gravação conjunta em backend/src/persistence/company.onboarding.ts e contrato de domínio backend/src/repositories/company.onboarding.repository.ts, se a proposta de transação for aprovada. |
-| Equipe empresarial | Criar backend/src/controller/company.user.controller.ts, backend/src/services/company.user.service.ts e backend/src/dtos/company.user.dto.ts; estender UserRepository/adapters e reutilizar admin.service/auth.service para convites aprovados. |
-| Planos | Estender backend/src/services/plan.service.ts, backend/src/repositories/plan.repository.ts, backend/src/persistence/{json,postgres}/plan.repository.ts; criar backend/src/controller/platform.plan.controller.ts e backend/src/dtos/plan.admin.dto.ts. |
+| Empresas e cadastro com venda | Alterar backend/src/controller/company.controller.ts, backend/src/services/company.service.ts, backend/src/dtos/company.create.dto.ts, backend/src/repositories/company.repository.ts e backend/src/persistence/{json,postgres}/company.repository.ts. A coordenação e a gravação conjunta fazem parte de company, sem módulo/arquivos separados de onboarding. |
+| Usuários da empresa | Estender backend/src/controller/user.controller.ts, backend/src/services/user.service.ts, backend/src/dtos/user.auth.dto.ts, backend/src/repositories/user.repository.ts e backend/src/persistence/{json,postgres}/user.repository.ts. Reutilizar admin.service.ts/auth.service.ts nos convites, sem novos controller/service/repository por perfil. |
+| Planos | Estender backend/src/controller/plan.controller.ts, backend/src/services/plan.service.ts, backend/src/entities/plan.entity.ts, backend/src/repositories/plan.repository.ts e backend/src/persistence/{json,postgres}/plan.repository.ts. |
 | Vendas | Criar backend/src/entities/sale.entity.ts, backend/src/interfaces/sale.row.ts, backend/src/dtos/sale.dto.ts, backend/src/repositories/sale.repository.ts, backend/src/services/sale.service.ts, backend/src/controller/sale.controller.ts e backend/src/persistence/{sale.repository.ts,json/sale.repository.ts,postgres/sale.repository.ts}. |
-| Superadmins | Criar backend/src/controller/platform.user.controller.ts, backend/src/services/platform.user.service.ts e backend/src/dtos/platform.user.dto.ts; estender users sem criar tabela paralela de identidade. |
+| Superadmins | Usar os mesmos user.controller.ts, user.service.ts, user.auth.dto.ts e UserRepository/adapters existentes, com funções nomeadas pelo escopo global. Não criar módulo/arquivos de superadmin ou tabela paralela de identidade. |
 | Schema e modo local | Alterar backend/src/persistence/json/local.data.ts e tipos de Company/User; criar migrations incrementais sob backend/prisma/migrations/<timestamp>_<change>/migration.sql após aprovação. |
-| Shell frontend | Alterar frontend/src/routes/AppRoute.tsx e frontend/src/pages/login.tsx; criar frontend/src/components/layout/SuperAdminLayout.tsx e frontend/src/pages/super-admin/*.tsx. |
-| Consumo e formulários | Criar frontend/src/lib/platform.api.ts e frontend/src/components/super-admin/*; reutilizar frontend/src/lib/api.ts e frontend/src/components/auth/ProtectedRoute.tsx. |
+| Shell frontend | Alterar frontend/src/routes/AppRoute.tsx e frontend/src/pages/login.tsx; criar frontend/src/components/dashboard-super-admin/layout/SuperAdminLayout.tsx e frontend/src/pages/dashboard-super-admin/*.tsx. |
+| Consumo e formulários | Estender frontend/src/lib/api.ts, sem outro arquivo de transporte/API; criar componentes exclusivos em frontend/src/components/dashboard-super-admin/* e reutilizar frontend/src/components/auth/ProtectedRoute.tsx. |
 
 Configurações globais e billing não ganham arquivos de implementação antes
 da definição. Os nomes acima indicam onde colocar código, não autorizam
 criar abstrações vazias ou todos os arquivos de uma vez.
+
+### Nomenclatura e reuso confirmados
+
+Funções usam camelCase, com ação e escopo claros: getUsersByCompanyId,
+getUserByCompanyId(userId, companyId), findActiveUserByCompanyId(userId,
+companyId), inviteCompanyUser, updateCompanyUser e suspendCompanyUser.
+Para plataforma, usar getSuperAdmins, inviteSuperAdmin, updateSuperAdmin e
+suspendSuperAdmin nos mesmos arquivos de user, conforme permissões aprovadas.
+Os nomes são sugestões, não métodos já existentes. Singular retorna usuário
+específico; plural lista usuários. Não confiar apenas no nome: validar ator,
+papel e vínculo em cada operação. Shared files não significam acesso genérico.
+
+No frontend, Users.tsx e UserForm.tsx podem atender contextos empresarial e
+global com campos/ações autorizados, sem duplicar formulários por papel.
+Componentes realmente reutilizáveis por outros dashboards (busca, botões,
+campos e tabelas genéricas) seguem frontend/src/components/ui ou a pasta
+compartilhada já adotada; não criar uma nova pasta shared por antecipação.
+Sidebar/header/layout exclusivos ficam em components/dashboard-super-admin/layout.
 
 ## 2. Rotas e contratos propostos
 
@@ -57,10 +78,11 @@ PATCH silenciosamente, que o CORS atual não permite.
 | POST /plans/:planId/activation | active boolean | 200 plano; sem alterar vendas antigas |
 | GET /sales e GET /sales/:saleId | Filtros de empresa/plano/origem/data, paginação | 200 vendas comerciais; valor decimal string + currency BRL |
 | POST /sales | companyId, planId, motivo e demais campos aprovados em SA-P04 | 201 venda manual; repetição segura |
+| DELETE /sales/:saleId | UUID de uma venda existente; superadmin vigente | 204 após exclusão definitiva; não altera empresa/plano nem relança venda |
 | GET /administrators | Superadmins e estados, sem campos secretos | 200 lista administrativa |
 | POST /administrators/invitations e PUT /administrators/:userId | Pendentes de SA-P05 | Não publicar até ciclo/permissões definidos |
 
-Não criar DELETE físico de vendas ou plano, APIs de pagamento, endpoints
+Não criar edição de vendas, DELETE físico de plano, APIs de pagamento, endpoints
 genéricos para configurações ou endpoint universal de dashboard.
 Resumo inicial usa dados administrativos aprovados. Contagens/indicadores
 extras exigem fonte e regra explícitas; não somar venda como dinheiro recebido.
@@ -115,7 +137,15 @@ ProtectedRoute.tsx, SuperAdminLayout.tsx, AppRoute.tsx e login.tsx.
 7. Primeiro admin empresarial pode ser convidado pelo fluxo separado de equipe
    após criação. Falha de e-mail não desfaz venda nem induz recadastro;
    persistir convite e permitir reenvio. Não introduzir outbox de produção
-   ou conta administrativa automática sem decisão de onboarding adicional.
+   ou conta administrativa automática sem decisão adicional de cadastro.
+
+Se o plano usado nesse cadastro estiver errado, corrigir o plano em company,
+excluir definitivamente a venda automática e lançar nova venda manual. Não
+editar snapshot da venda original e não disparar outra venda automática pela
+edição da empresa. Excluir a venda não pode apagar a empresa. Repetir a
+requisição original de cadastro não pode ressuscitar a venda excluída; o
+mecanismo aprovado em SA-P07 precisa manter a identidade da operação de
+cadastro independente da existência posterior do registro de venda.
 
 PostgreSQL: escopo de transação precisa compartilhar uma conexão/contexto
 entre gravações de domínio; não tratar db.query independentes como transação.
@@ -123,10 +153,13 @@ JSON: uma mutação sob o bloqueio existente valida e grava todo o snapshot,
 incluindo empresa/plano/venda/idempotência. Falha preserva arquivo anterior.
 Simular JSON não comprova atomicidade PostgreSQL.
 
-Código: platform.company.controller.ts → company.onboarding.service.ts →
-contrato company.onboarding.repository.ts e implementação transacional;
-plan.service.ts/sale.service.ts fornecem regras reaproveitáveis sem depender
-de Express. Forma exata da coordenação precisa de SA-P07.
+Código: company.controller.ts → company.service.ts → CompanyRepository e
+adapters existentes de company. O service coordena plano e venda; o contrato
+pode receber um método de domínio como createCompanyWithInitialSale, com
+gravação conjunta na implementação de company e sem novo repository de
+onboarding. PlanService/SaleService fornecem regras reaproveitáveis, sem
+Express. A API de domínio/transação permanece sujeita a SA-P07, dentro desses
+arquivos; não criar arquivos novos para a coordenação.
 
 ## 5. Consulta, edição, suspensão e arquivamento
 
@@ -173,16 +206,18 @@ storage.service.ts e consultas públicas; DTOs público/administrativo distintos
    transições. Não transferir funcionário entre empresas implicitamente.
 5. Suspensão individual impede novas chamadas autenticadas. Remoção ou
    transferência de futuras atribuições não é implementada sem definição.
-6. Gestão global busca apenas role super_admin e company_id nulo, em service
-   separado. Confirmar SA-P05 antes de convite/bloqueio sensíveis; não permitir
+6. Gestão global busca apenas role super_admin e company_id nulo, em funções
+   específicas do user.service.ts existente. Confirmar SA-P05 antes de convite/bloqueio sensíveis; não permitir
    que um endpoint genérico altere qualquer role para super_admin.
 7. Antes de alterar acesso, revalidar ator e aplicar proteção de último
    administrador/autoalteração que for aprovada, inclusive sob concorrência.
    Sem decisão, ação fica bloqueada, não implicitamente liberada.
 
-Código: company.user.service.ts + admin/auth service e repositories de users;
-platform.user.service.ts para escopo global. Não publicar admin.routes legado
-com middleware comentado. Dashboard não oferece impersonação/conversas.
+Código: user.controller.ts → funções com escopo em user.service.ts →
+UserRepository/adapters existentes; reutilizar admin.service.ts/auth.service.ts
+para convites e primeiro acesso. Não criar módulos separados por tipo de
+usuário. Não publicar admin.routes legado com middleware comentado.
+Dashboard não oferece impersonação/conversas.
 
 ## 7. Planos e vendas manuais
 
@@ -200,6 +235,19 @@ Troca de plano e registro manual são operações explícitas distintas nesta
 fase. Aceitar diferença entre plano atual e histórico é natural após troca;
 regras de seleção de plano histórico em venda manual aguardam SA-P04.
 
+Vendas são imutáveis enquanto existirem. Não oferecer UPDATE/PUT/PATCH para
+trocar plano, valor, data, empresa ou autor da venda. Correções são exclusão
+definitiva e novo POST manual, em ações explícitas; não apresentar como
+estorno, cancelamento financeiro ou pagamento.
+
+Fluxo de exclusão em sale.controller.ts → sale.service.ts → SaleRepository:
+validar superadmin vigente e UUID, buscar venda, retornar 404 se inexistente,
+excluir definitivamente apenas sales pelo ID e responder 204 após confirmação.
+Usar um método de domínio como deleteSaleById; não aplicar soft delete, não
+apagar plano/empresa e não criar venda automaticamente. UI confirma a exclusão
+definitiva e oferece o formulário de novo lançamento. Cadastro manual repete
+as validações de plano/preço/empresa; excluir não dispensa essas verificações.
+
 Proposta de tabela sales: id UUID, company_id FK, plan_id FK, origin,
 plan_name/plan_price/plan_billing_period snapshots, amount NUMERIC,
 currency BRL, created_by FK users, created_at e motivo para venda manual;
@@ -210,9 +258,12 @@ DTO usa montante decimal string e timestamps ISO, não float JS ou Date cru.
 
 Listar vendas com filtros validados e ordenação estável; totais, se aprovados,
 representam valor comercial registrado por BRL, nunca receita recebida.
-Não expor edição/cancelamento/estorno até definir política SA-P04.
+Não expor edição de venda ou operações de cancelamento/estorno financeiro.
+SA-P04 ainda define campos da venda manual, não a política de imutabilidade
+ou exclusão já confirmada. Ao arquivar empresa, preservar vendas que não
+tenham sido excluídas explicitamente pelo superadmin.
 
-Código: plan.service/adapters + platform.plan.controller; sale.service,
+Código: plan.controller.ts, plan.service.ts e adapters existentes; sale.service,
 sale.controller, SaleRepository e adapters; migrations versionadas próprias.
 
 ## 8. Telas e integração
@@ -230,11 +281,12 @@ Confirmar suspensão/arquivamento com nome da empresa e efeito visível; botões
 não representam API ainda não implementada. Tabelas e diálogos suportam
 teclado, rótulos, foco, confirmação e mensagem de resultado acessível.
 
-platform.api.ts extrai data via contrato comum e valida respostas; não criar
-fetch paralelo que exponha envelope às telas. Não duplicar cache global,
+frontend/src/lib/api.ts reúne os métodos de empresas, usuários, planos e
+vendas, extrai data via contrato comum e valida respostas. Não criar outro
+arquivo de API ou fetch paralelo que exponha envelope às telas. Não duplicar cache global,
 estado de sessão ou bibliotecas. Cancelar/ignorar respostas antigas ao trocar
 companyId e limpar dados ao perder acesso. Componentes SuperAdminLayout e
-pages/super-admin usam UI existente; não redesenhar o site institucional.
+pages/dashboard-super-admin usam UI existente; não redesenhar o site institucional.
 
 ## 8.1. Layout raiz, temas e configurações do próprio perfil
 
@@ -243,7 +295,7 @@ de perfil com edição de nome/e-mail. Senha fica em backlog. A especificação
 visual está em [design frontend](../../../../frontend/.specs/features/super-admin-dashboard/design.md).
 Layout raiz significa SuperAdminLayout com Outlet em rotas aninhadas, não
 substituição da raiz pública do React. Sidebar/header ficam em
-frontend/src/components/layout/{SuperAdminLayout,SuperAdminSidebar,SuperAdminHeader}.tsx.
+frontend/src/components/dashboard-super-admin/layout/{SuperAdminLayout,SuperAdminSidebar,SuperAdminHeader}.tsx.
 
 Fluxo de perfil:
 
@@ -259,7 +311,7 @@ Fluxo de perfil:
 4. Repository de users consulta unicidade de e-mail sem caixa e atualiza os
    campos atomicamente com constraints do banco; duplicidade retorna 409.
    Estender contrato/adapters JSON/PostgreSQL e DTO de perfil em
-   backend/src/dtos/user.profile.dto.ts, se aprovado. Não criar tabela de perfil.
+   backend/src/dtos/user.auth.dto.ts existente. Não criar arquivo ou tabela de perfil.
 5. Responder com projeção sanitizada persistida; frontend atualiza header e
    formulário pelo resultado. Não indicar sucesso antes da gravação.
 6. JWT atual carrega e-mail e middleware compara ao registro vigente.
@@ -277,6 +329,9 @@ tentativa de alterar outro usuário e integridade da sessão nos dois temas.
 
 - E2E real isolado: superadmin login → empresa com plano → uma venda → equipe
   → edição/troca sem venda automática → venda manual → suspensão/soft delete.
+- Correção comercial: cadastro com plano errado → corrigir empresa → excluir
+  venda automática definitivamente → novo lançamento manual. Confirmar ausência
+  de edição de venda e que repetir cadastro não recria a venda excluída.
 - Negativas: sem token, admin, atendente, cliente, usuário suspenso, token
   com papel/vínculo alterado e tentativa direta por URL/API administrativa.
 - Integridade: empresa A/B; e-mails por caixa; CNPJ duplicado; plano inativo

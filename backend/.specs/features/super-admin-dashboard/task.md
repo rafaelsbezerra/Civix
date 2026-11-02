@@ -66,8 +66,9 @@ negadas no backend para outros papéis. SQL real só em ambiente autorizado.
 
 Arquivos: alterar frontend/src/routes/AppRoute.tsx,
 frontend/src/pages/login.tsx e frontend/src/components/auth/ProtectedRoute.tsx
-apenas se necessário; criar frontend/src/components/layout/SuperAdminLayout.tsx,
-frontend/src/pages/super-admin/Overview.tsx e frontend/src/lib/platform.api.ts.
+apenas se necessário; criar frontend/src/components/dashboard-super-admin/layout/SuperAdminLayout.tsx,
+frontend/src/pages/dashboard-super-admin/Overview.tsx; estender o arquivo existente
+frontend/src/lib/api.ts.
 Detalhes e testes planejados estão no task frontend.
 Sugestão de commit: `feat(super-admin): add protected administration shell`.
 
@@ -85,8 +86,8 @@ Sugestão de commit: `feat(super-admin): add protected administration shell`.
 
 Alterar backend/src/controller/user.controller.ts, services/user.service.ts,
 routes/user.routes.ts, repositories/user.repository.ts e adapters JSON/SQL.
-Criar backend/src/dtos/user.profile.dto.ts se o contrato for aprovado;
-sem nova tabela. Frontend: arquivos do FE-SA-01D/01L/01P no task pareado.
+Estender backend/src/dtos/user.auth.dto.ts existente, sem arquivo/tabela de
+perfil. Frontend: arquivos do FE-SA-01D/01L/01P no task pareado.
 Sugestões após revisão: `feat(super-admin): add brand-aligned light and dark themes`,
 `feat(super-admin): add shared sidebar and header layout` e
 `feat(profile): add personal name and email settings`.
@@ -104,11 +105,11 @@ Sugestões após revisão: `feat(super-admin): add brand-aligned light and dark 
 
 Arquivos: alterar backend/src/services/plan.service.ts,
 backend/src/repositories/plan.repository.ts, backend/src/persistence/
-{json,postgres}/plan.repository.ts e plan.mapper.ts conforme campos; criar
-backend/src/controller/platform.plan.controller.ts,
-backend/src/dtos/plan.admin.dto.ts; rotas em platform.routes.ts após prontas.
-Frontend: pages/super-admin/Plans.tsx, components/super-admin/PlanForm.tsx
-e lib/platform.api.ts. Migration de seed/dados somente após SA-P01.
+{json,postgres}/plan.repository.ts e plan.mapper.ts conforme campos; alterar
+backend/src/controller/plan.controller.ts e tipos em entities/plan.entity.ts
+existentes; rotas em platform.routes.ts após prontas.
+Frontend: pages/dashboard-super-admin/Plans.tsx, components/dashboard-super-admin/PlanForm.tsx
+e lib/api.ts. Migration de seed/dados somente após SA-P01.
 Testes: backend/tests/platform.plans.test.ts e frontend de planos.
 Sugestão de commit: `feat(plans): add commercial plan administration`.
 
@@ -124,17 +125,18 @@ Sugestão de commit: `feat(plans): add commercial plan administration`.
   testar falha parcial, dois envios e concorrência. Revisar SQL e grupo.
 
 Criar backend/src/entities/sale.entity.ts, interfaces/sale.row.ts,
-dtos/sale.dto.ts, repositories/sale.repository.ts,
-services/sale.service.ts e services/company.onboarding.service.ts;
-repositories/company.onboarding.repository.ts e persistence/company.onboarding.ts
-se coordenação aprovada. Criar adapters sale em persistence/json e postgres,
-selector persistence/sale.repository.ts e controller/platform.company.controller.ts.
-Alterar entities/company.entity.ts, dtos/company.admin.dto.ts (criar),
-repositories/adapters de companies e JSON schema. Criar SQL em
+dtos/sale.dto.ts, repositories/sale.repository.ts e services/sale.service.ts;
+adapters sale em persistence/json e postgres e selector persistence/sale.repository.ts.
+Alterar controller/company.controller.ts, services/company.service.ts,
+entities/company.entity.ts, dtos/company.create.dto.ts e repositories/adapters
+existentes de company para coordenar e gravar empresa/plano/venda. Não criar
+arquivos de onboarding; o método de gravação conjunta pertence a CompanyRepository.
+Atualizar JSON schema. Criar SQL em
 backend/prisma/migrations/<timestamp>_company_administration/migration.sql e
 <timestamp>_create_sales/migration.sql, conforme dependências aprovadas.
-Frontend: pages/super-admin/CompanyCreate.tsx, components/super-admin/CompanyForm.tsx.
-Testes previstos: backend/tests/company.onboarding.test.ts e SQL isolado.
+Frontend: pages/dashboard-super-admin/CompanyCreate.tsx, components/dashboard-super-admin/CompanyForm.tsx.
+Testes previstos: estender backend/tests/company.routes.test.ts e conferir
+atomicidade em SQL isolado, sem criar uma implementação de onboarding separada.
 Sugestão de commit: `feat(companies): register company and initial sale atomically`.
 
 ## G5 — Gestão de empresas e vendas manuais
@@ -144,23 +146,30 @@ Sugestão de commit: `feat(companies): register company and initial sale atomica
 - [ ] SA-20: Implementar suspensão/soft delete e aplicar elegibilidade em
   auth, catálogo completo e storage. Não apagar histórico/imagens.
 - [ ] SA-21: Implementar consulta de vendas e lançamento manual conforme
-  SA-P04/SA-P07; proteger repetição; não criar cobrança ou pagamento.
+  SA-P04/SA-P07; proteger repetição; não criar cobrança ou pagamento. Não
+  implementar edição: correção exige DELETE definitivo e novo POST manual.
 - [ ] SA-22: Integrar telas, confirmações e aviso de venda manual na edição;
   navegação após troca não registra venda sozinha.
 - [ ] SA-23: Testar suspensa/arquivada, tokens anteriores, dois tenants,
-  URL de capa e histórico. Revisar interfaces, UI e grupo antes de commit.
+  URL de capa e histórico. Cobrir plano errado no cadastro → excluir venda
+  automática → relançar manualmente; troca posterior de plano não gera venda.
+  Testar DELETE sem apagar empresa/plano e impedir que repetição do cadastro
+  recrie a venda excluída. Revisar interfaces, UI e grupo antes de commit.
 
 Alterar company.service.ts, CompanyRepository e adapters, public
 company.controller.ts, storage.service.ts e auth/user service; criar
 controller/sale.controller.ts e completar services/dtos de venda e empresa.
 Rotas futuras em backend/src/routes/platform.routes.ts e montagem em app.ts.
-Frontend: pages/super-admin/{Companies,CompanyDetail,CompanyEdit,Sales,SaleCreate}.tsx,
-components/super-admin/{CompanyForm,SaleForm}.tsx e lib/platform.api.ts.
+Frontend: pages/dashboard-super-admin/{Companies,CompanyDetail,CompanyEdit,Sales,SaleCreate}.tsx,
+components/dashboard-super-admin/{CompanyForm,SaleForm}.tsx e lib/api.ts.
 Testes previstos: backend/tests/platform.companies.test.ts,
 backend/tests/platform.sales.test.ts e testes frontend dos formulários.
 Sugestões de commits, cada qual revisado:
 `feat(companies): add platform lifecycle management` e
 `feat(sales): add commercial sales and manual registration`.
+Exclusão definitiva fica no sale.controller.ts/sale.service.ts e
+SaleRepository/adapters propostos, com método deleteSaleById; sem updateSale,
+sem soft delete de venda e sem exclusão automática na troca de plano.
 
 ## G6 — Equipe de cada empresa
 
@@ -173,14 +182,16 @@ Sugestões de commits, cada qual revisado:
 - [ ] SA-27: Testar duas empresas, e-mail único, convite repetido, vínculo
   divergente, usuário suspenso e payload sem segredos; revisar grupo.
 
-Criar backend/src/controller/company.user.controller.ts,
-backend/src/services/company.user.service.ts e backend/src/dtos/company.user.dto.ts.
-Alterar UserRepository/adapters, admin.service.ts e auth.service.ts apenas
-para reaproveitar regras. Rotas administrativas explícitas em platform.routes.ts.
-Frontend: pages/super-admin/CompanyUsers.tsx e
-components/super-admin/CompanyUserForm.tsx. Testes:
-backend/tests/platform.company.users.test.ts e testes frontend da equipe.
-Sugestão de commit: `feat(company-users): add platform team administration`.
+Alterar backend/src/controller/user.controller.ts, services/user.service.ts,
+dtos/user.auth.dto.ts e UserRepository/adapters existentes. Nomear funções
+pelo contexto, por exemplo getUsersByCompanyId, findActiveUserByCompanyId,
+inviteCompanyUser e suspendCompanyUser. Reutilizar admin.service.ts e
+auth.service.ts nos convites. Sem controller/service/DTO próprio de equipe.
+Rotas administrativas explícitas em platform.routes.ts.
+Frontend: pages/dashboard-super-admin/Users.tsx e
+components/dashboard-super-admin/UserForm.tsx compartilhados com G7.
+Testes: estender backend/tests/user.routes.test.ts e testes frontend de usuários.
+Sugestão de commit: `feat(users): add company-scoped administration`.
 
 ## G7 — Administradores da plataforma
 
@@ -191,13 +202,15 @@ Sugestão de commit: `feat(company-users): add platform team administration`.
 - [ ] SA-30: Integrar tela e testar escalação indevida, vínculo nulo,
   duplicidade e retirada de acesso; revisar grupo.
 
-Criar backend/src/controller/platform.user.controller.ts,
-backend/src/services/platform.user.service.ts e backend/src/dtos/platform.user.dto.ts;
-estender users repositories/adapters e mecanismos de convite aprovados.
-Frontend: pages/super-admin/Administrators.tsx e
-components/super-admin/AdministratorForm.tsx; rotas em platform.routes.ts.
-Testes: backend/tests/platform.users.test.ts e frontend correspondente.
-Sugestão de commit: `feat(platform-users): add reviewed administrator management`.
+Estender backend/src/controller/user.controller.ts, services/user.service.ts,
+dtos/user.auth.dto.ts e UserRepository/adapters existentes com operações
+como getSuperAdmins, inviteSuperAdmin, updateSuperAdmin e suspendSuperAdmin,
+sem arquivos/módulo por perfil. Mecanismos de convite seguem SA-P05.
+Frontend: reutilizar pages/dashboard-super-admin/Users.tsx e
+components/dashboard-super-admin/UserForm.tsx com escopo global autorizado;
+rotas em platform.routes.ts. Testes: estender user.routes.test.ts e frontend
+de usuários, com casos globais separados dos casos por empresa.
+Sugestão de commit: `feat(users): add reviewed superadmin management`.
 
 ## G8 — Integração, revisão e entrega
 
@@ -232,6 +245,7 @@ Sugestão de commit: `test(super-admin): verify platform workflows end to end`.
 | --- | --- | --- | --- |
 | G0 documentação | Subagente final_review, mesmo modelo do agente principal, em 2026-11-02 | Nove Markdown revisados contra código/decisões; sem bloqueadores. Links dos seis documentos novos resolvem e os três índices foram conferidos; git diff --check aprovado. | Sim, somente documentação |
 | Extensão de design/layout/perfil | Subagente final_review, mesmo modelo do agente principal, em 2026-11-02 | Seis Markdown revisados na staging; links, cabeçalhos, tokens de cores, escopo do perfil e decisões pendentes conferidos; git diff --check aprovado. | Sim, somente documentação |
+| Reuso de módulos e vendas imutáveis | Subagente final_review, mesmo modelo do agente principal, em 2026-11-02 | Sete Markdown revisados; company/user existentes, API única, pastas exclusivas, DELETE definitivo e relançamento manual coerentes; links e git diff --check aprovados. Sem testes executáveis ou SQL nesta tarefa. | Sim, somente documentação |
 | G1–G8 implementação | Não executada | Planejamento somente; nenhum teste ou SQL executado. | Não |
 
 A revisão documental não aprova preços, contratos ou schema pendentes e não

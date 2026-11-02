@@ -11,8 +11,12 @@ Superadmin administra empresas e seus funcionários, planos comerciais,
 registros de venda e usuários administrativos da plataforma. Cadastrar
 empresa gera uma venda inicial; trocar plano exige venda manual, com aviso
 no formulário. Valores são BRL, sem planos gratuitos nesta entrega.
-Suspensão bloqueia acesso empresarial e catálogo. Exclusão preserva o
-histórico por soft delete. Gestão não dá acesso a conversas empresariais.
+Vendas não podem ser editadas: correção exige exclusão definitiva e
+relançamento manual, inclusive quando a venda automática nasceu com plano
+errado. A exclusão de uma venda não apaga a empresa nem altera seu plano.
+Suspensão bloqueia acesso empresarial e catálogo. Exclusão de empresa preserva
+o histórico por soft delete, incluindo vendas que não foram excluídas
+explicitamente. Gestão não dá acesso a conversas empresariais.
 
 Assinaturas, cobrança e pagamentos ficam em backlog. Também ficam em
 backlog a arquitetura de teste gratuito e as capacidades, limites de uso e
@@ -24,3 +28,9 @@ cadastro com venda, gestão de empresas/vendas, equipe, superadmins e E2E.
 As propostas de URLs/schema/transação exigem revisão antes da implementação.
 **Não commitar sem revisão.** Nenhuma migration ou teste executável foi
 criado/aplicado para produzir esses documentos.
+
+Organização confirmada: cadastro com plano/venda nos arquivos existentes de
+company; usuários empresariais e superadmins nos arquivos existentes de user,
+com funções nomeadas por operação/escopo. API frontend permanece em lib/api.ts.
+Arquivos exclusivos do dashboard usam pages/dashboard-super-admin e
+components/dashboard-super-admin; elementos compartilháveis mantêm a estrutura atual.

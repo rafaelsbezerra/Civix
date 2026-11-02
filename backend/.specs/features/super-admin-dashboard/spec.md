@@ -36,6 +36,10 @@ anterior; os demais casos de uso continuam nas specs de origem.
 | SA-D10 | Banco informado vazio: não há registros existentes de planos a converter. Não aplicar migrations automaticamente. |
 | SA-D11 | Dashboard terá layout raiz compartilhado com sidebar/header e configurações do próprio perfil para nome/e-mail; alteração de senha fica em backlog. |
 | SA-D12 | Design segue branco/azul/amarelo do site, modo claro padrão e modo escuro com azul principal; detalhes na spec frontend. |
+| SA-D13 | Cadastro com plano/venda fica nos arquivos existentes de company. Gestão empresarial e global de usuários fica nos arquivos existentes de user, com nomes que expressem operação e escopo. |
+| SA-D14 | Frontend mantém um único frontend/src/lib/api.ts. Páginas e componentes exclusivos usam dashboard-super-admin; componentes compartilháveis mantêm a estrutura atual. |
+| SA-D15 | Vendas são imutáveis: não existe edição. Correção exige exclusão definitiva no banco e novo lançamento manual. |
+| SA-D16 | Empresa cadastrada com plano errado exige corrigir o plano da empresa, excluir a venda automática incorreta e lançar nova venda manualmente. Troca posterior de plano mantém SA-D03, sem venda automática e com aviso obrigatório. |
 
 Papéis técnicos, vínculo único e cliente sem área logada continuam conforme
 [users-roles](../users-roles/spec.md). Bearer atual é preservado; não acrescentar
@@ -112,7 +116,12 @@ Listagem/detalhe apresentam empresa, plano registrado, origem, valor BRL,
 período comercial, data e autor, sem chamar o registro de pagamento.
 Venda manual exige empresa, plano, valor e motivo validados; preenchimento
 pode sugerir o preço do plano, sem confiar no valor fornecido pelo navegador.
-Definir diferenças permitidas de preço, datas e correções em SA-P04.
+Definir diferenças permitidas de preço e datas em SA-P04. Venda não pode ser
+editada. Para corrigir qualquer venda, inclusive a automática de um cadastro
+com plano errado, excluir definitivamente o registro e lançar outro
+manualmente. Exclusão de venda não exclui empresa nem altera seu plano.
+O formulário de edição da empresa e a área de vendas devem orientar esse
+fluxo sem executar exclusão/novo lançamento implicitamente.
 
 Trocar plano atualiza o vínculo empresarial e mostra permanentemente no
 formulário: “A alteração do plano não gera uma venda automática. Registre
@@ -146,7 +155,7 @@ ambiente/credenciais ou formulário aparentemente funcional.
 | SA-P01 | Nomes, preços positivos e períodos dos planos iniciais; política para o seed Inicial zero existente no SQL. | Seed final, publicação dos planos e teste de cadastro com planos finais. Banco vazio não autoriza inventar preços. |
 | SA-P02 | Reativação/restauração permitida? Estado e motivo de suspensão, efeitos em convites, restauração de visibilidade. | Transições além de suspender/arquivar e DDL definitivo. |
 | SA-P03 | Dados editáveis, proteção do último admin empresarial, remoção de atendentes e destino de futuras atribuições. | Exclusão/transferência de equipe e mutações não definidas. |
-| SA-P04 | Venda manual sempre pelo preço do plano ou valor ajustável? Motivo, data retroativa, correção/cancelamento e precisão de filtros temporais/fuso. | Contrato final da venda manual, relatórios e correções. |
+| SA-P04 | Venda manual sempre pelo preço do plano ou valor ajustável? Motivo, data retroativa e precisão de filtros temporais/fuso. Correção por exclusão definitiva e relançamento já confirmada em SA-D15/16. | Campos/preço/data finais da venda manual e relatórios; imutabilidade e exclusão não estão pendentes. |
 | SA-P05 | Provisionamento de novos superadmins, proteção do último superadmin, autoexclusão/autossuspensão e catálogo de permissões globais. | Mutações sensíveis de superadmins e permissões. |
 | SA-P06 | Quais configurações globais e regras serão editáveis? | Área de configurações e sua persistência/API. |
 | SA-P07 | Aprovar desenho proposto no SDD: URLs, contratos, transação/idempotência, campos incrementais, paginação e auditoria mínima. | Implementação das escolhas técnicas propostas. |

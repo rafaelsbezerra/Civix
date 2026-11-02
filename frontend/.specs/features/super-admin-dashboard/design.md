@@ -82,11 +82,11 @@ identidade por página. Layout não redesenha a navegação do site público.
 
 - frontend/src/index.css: mapear tokens de tema e variantes escopadas ao
   dashboard, preservando os tokens de marca e o site público.
-- frontend/src/components/layout/SuperAdminLayout.tsx: aplicar contexto
+- frontend/src/components/dashboard-super-admin/layout/SuperAdminLayout.tsx: aplicar contexto
   visual e renderizar o controle de tema.
-- frontend/src/components/super-admin/ThemeToggle.tsx: controle de alternância
+- frontend/src/components/dashboard-super-admin/ThemeToggle.tsx: controle de alternância
   se extração for necessária, sem instalar biblioteca apenas para isso.
-- frontend/src/pages/super-admin/*.tsx e components/super-admin/*.tsx:
+- frontend/src/pages/dashboard-super-admin/*.tsx e components/dashboard-super-admin/*.tsx:
   consumir tokens semânticos, sem duplicar paletas por tela.
 
 ## Aceite visual
