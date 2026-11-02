@@ -4,6 +4,7 @@ import { AppError } from '../shared/errors/app.error.js';
 import { ErrorCode } from '../shared/errors/error.code.js';
 import { createSuccessResponse } from '../shared/contracts/response.contract.js';
 import { isUserRole } from '../entities/user.entity.js';
+import { SESSION_COOKIE, sessionCookieOptions } from '../config/cookies.js';
 
 export async function login(req: Request, res: Response): Promise<Response> {
   const { email, password, role } = req.body ?? {};
@@ -24,9 +25,19 @@ export async function login(req: Request, res: Response): Promise<Response> {
     });
   }
 
-  const result = await userService.login({ email, password, role });
+  const { token, ...result } = await userService.login({ email, password, role });
+
+  res.cookie(SESSION_COOKIE, token, sessionCookieOptions);
 
   return res.status(200).json(createSuccessResponse(result));
+}
+
+export function logout(_req: Request, res: Response): Response {
+  const { maxAge: _maxAge, ...clearOptions } = sessionCookieOptions;
+  res.clearCookie(SESSION_COOKIE, clearOptions);
+  return res.status(200).json(createSuccessResponse({
+    message: 'Logout realizado com sucesso.',
+  }));
 }
 
 export async function forgotPassword(req: Request, res: Response): Promise<Response> {

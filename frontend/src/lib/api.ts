@@ -213,8 +213,7 @@ export async function login(input: LoginInput): Promise<LoginResult> {
   });
   const result = response.data;
 
-  if (!result || typeof result.token !== 'string' || !result.token.trim()
-    || !result.user || (typeof result.user.id !== 'string' && typeof result.user.id !== 'number')
+  if (!result || !result.user || (typeof result.user.id !== 'string' && typeof result.user.id !== 'number')
     || (result.user.name != null && typeof result.user.name !== 'string') || typeof result.user.email !== 'string'
     || !['admin_empresa', 'super_admin', 'atendente'].includes(result.user.role)
     || (result.user.role === 'super_admin' ? result.user.companyId !== null : typeof result.user.companyId !== 'string' || !result.user.companyId)) {

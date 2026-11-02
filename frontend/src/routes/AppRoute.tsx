@@ -16,11 +16,13 @@ import ResetPassword from '@/pages/ResetPassword';
 import { TermsOfService } from '@/pages/TermsOfServices';
 import { PrivacyPolicy } from '@/pages/PrivacityPolicy';
 import HelperCenter from '@/pages/HelperCenter';
+import CookieBanner from '@/components/Cookie/CookieBanner';
 
 export const AppRoutes: React.FC = () => (
     <MotionRoot>
         <PublicSmoothScroll />
         <CompanyPageTransition />
+        <CookieBanner />
         <Routes>
             <Route path='/' element={<HomePage />} />
             <Route path="/login" element={<AccessChoice />} />
