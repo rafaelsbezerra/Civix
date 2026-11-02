@@ -1,7 +1,45 @@
 import type { PlanRepository } from '../../repositories/plan.repository.js';
-import { readLocalData } from './local.store.js';
+import { readLocalData, updateLocalData } from './local.store.js';
+import { randomUUID } from 'node:crypto';
+import type { PlanInput } from '../../entities/plan.entity.js';
+import { AppError } from '../../shared/errors/app.error.js';
+import { ErrorCode } from '../../shared/errors/error.code.js';
+
+function toRow(input: PlanInput) {
+  return { name: input.name, slug: input.slug, description: input.description, price: input.price,
+    billing_period: input.billingPeriod, features: input.features, limits: input.limits,
+    is_featured: input.isFeatured, is_active: input.isActive, display_order: input.displayOrder };
+}
 
 export const planJsonRepository: PlanRepository = {
+  async getAll() {
+    return (await readLocalData()).plans.sort((a, b) => a.display_order - b.display_order || String(a.id).localeCompare(String(b.id)));
+  },
+  async getById(id) { return (await readLocalData()).plans.find(plan => String(plan.id) === id); },
+  async create(input) {
+    return updateLocalData(data => {
+      if (data.plans.some(plan => plan.slug === input.slug)) throw new AppError({ status: 409, code: ErrorCode.CONFLICT, message: 'Identificador do plano já cadastrado.' });
+      const plan = { id: randomUUID(), ...toRow(input) };
+      data.plans.push(plan);
+      return plan;
+    });
+  },
+  async update(id, input) {
+    return updateLocalData(data => {
+      const plan = data.plans.find(item => String(item.id) === id);
+      if (!plan) return undefined;
+      if (data.plans.some(item => String(item.id) !== id && item.slug === input.slug)) throw new AppError({ status: 409, code: ErrorCode.CONFLICT, message: 'Identificador do plano já cadastrado.' });
+      Object.assign(plan, toRow(input));
+      return plan;
+    });
+  },
+  async setActive(id, active) {
+    return updateLocalData(data => {
+      const plan = data.plans.find(item => String(item.id) === id);
+      if (plan) plan.is_active = active;
+      return plan;
+    });
+  },
   async getActive() {
     return (await readLocalData()).plans
       .filter(plan => plan.is_active)

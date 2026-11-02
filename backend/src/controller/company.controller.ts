@@ -21,9 +21,8 @@ export async function createCompany(req: Request, res: Response): Promise<Respon
     });
   }
 
-  const company = await companyService.createCompany(req.body);
-
-  return res.status(201).json(createSuccessResponse(await companyService.presentCompany(company)));
+  const result = await companyService.createCompanyWithInitialSale(req.body, req.userId);
+  return res.status(201).json(createSuccessResponse(result));
 }
 
 export async function listCompanies(req: Request, res: Response): Promise<Response> {

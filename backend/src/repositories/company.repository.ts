@@ -1,7 +1,9 @@
 import type { Company } from '../entities/company.entity.js';
+import type { CompanyRegistration, CompanyRegistrationResult } from '../dtos/sale.dto.js';
 
 /** Consultas de catálogo sem dependência do driver ou do contrato HTTP. */
 export interface CompanyRepository {
+  createCompanyWithInitialSale(input: CompanyRegistration): Promise<CompanyRegistrationResult>;
   isImageKeyReferenced(key: string): Promise<boolean>;
   create(company: Company): Promise<Company>;
   getAll(): Promise<Company[]>;

@@ -1,4 +1,5 @@
 export type BillingPeriod = 'monthly' | 'yearly' | 'one_time';
+export type PlanInput = Omit<Plan, 'id'>;
 
 export interface Plan {
   id: string;

@@ -8,6 +8,27 @@ import { AppError } from '../shared/errors/app.error.js';
 import { ErrorCode } from '../shared/errors/error.code.js';
 import { getPresignedImageUrl } from './storage.service.js';
 import { storageRepository } from '../persistence/storage.repository.js';
+import { z } from 'zod';
+import { createHash } from 'node:crypto';
+import type { UserId } from '../entities/user.entity.js';
+import { getAuthenticatedUser } from './user.service.js';
+import { validatePlanId } from './plan.service.js';
+
+const registrationSchema = companyCreateSchema.extend({
+  planId: z.string().trim().min(1).max(128), operationId: z.string().uuid().transform(value => value.toLowerCase()),
+}).strict();
+
+export async function createCompanyWithInitialSale(input: unknown, actorId: UserId) {
+  const actor = await getAuthenticatedUser(actorId);
+  if (actor.role !== 'super_admin') throw new AppError({ status: 403, code: ErrorCode.FORBIDDEN, message: 'Acesso exclusivo da administração da Civix.' });
+  const parsed = registrationSchema.safeParse(input);
+  if (!parsed.success) throw new AppError({ status: 400, code: ErrorCode.VALIDATION_ERROR, message: 'Dados da empresa, plano ou operação inválidos.' });
+  const { planId, operationId, ...fields } = parsed.data;
+  validatePlanId(planId);
+  const fingerprint = createHash('sha256').update(JSON.stringify({ ...fields, planId })).digest('hex');
+  const company: Company = { ...fields, id: randomUUID(), data_cadastro: new Date().toISOString(), status: 'ativo', verificado: false };
+  return companyRepository.createCompanyWithInitialSale({ company, planId, operationId, fingerprint, actorId });
+}
 
 export async function updateCompanyCoverKey(companyId: string, key: string | null, expectedKey: string | null): Promise<void> {
   if (!await companyRepository.updateCoverKey(companyId, key, expectedKey)) {
@@ -153,7 +174,9 @@ export async function getCompanyById(id: string): Promise<Company> {
 }
 
 export async function presentCompany(company: Company) {
-  const { cover_key, logo_key: _logoKey, ...publicCompany } = company;
+  const { cover_key, logo_key: _logoKey, plan_id: _planId,
+    deleted_at: _deletedAt, deactivation_reason: _reason, deactivated_at: _deactivatedAt,
+    deactivated_by: _actor, ...publicCompany } = company;
   if (!cover_key || company.status === 'inativo') {
     return { ...publicCompany, cover_image_url: null };
   }
@@ -163,7 +186,7 @@ export async function presentCompany(company: Company) {
   }
   try {
     const signed = await getPresignedImageUrl(image.id);
-    return { ...publicCompany, cover_image_url: signed.url, cover_image_url_expires_in: signed.expiresInSeconds };
+    return { ...publicCompany, cover_image_url: signed.url };
   } catch (error) {
     // Uma troca concorrente pode invalidar a imagem, mas não a empresa consultada.
     if (error instanceof AppError && error.status === 404) {
