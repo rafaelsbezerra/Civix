@@ -4,6 +4,12 @@ import { randomUUID } from 'node:crypto';
 import type { PlanInput } from '../../entities/plan.entity.js';
 import { AppError } from '../../shared/errors/app.error.js';
 import { ErrorCode } from '../../shared/errors/error.code.js';
+import type { User, UserId } from '../../entities/user.entity.js';
+
+function requirePlanActor(users: readonly User[], actorId: UserId) {
+  const actor = users.find(user => String(user.id) === String(actorId));
+  if (!actor || actor.role !== 'super_admin' || actor.company_id !== null || !actor.password_hash || actor.deleted_at || actor.status != null && actor.status !== 'active') throw new AppError({ status:403,code:ErrorCode.FORBIDDEN,message:'Acesso administrativo alterado.' });
+}
 
 function toRow(input: PlanInput) {
   return { name: input.name, slug: input.slug, description: input.description, price: input.price,
@@ -16,16 +22,18 @@ export const planJsonRepository: PlanRepository = {
     return (await readLocalData()).plans.sort((a, b) => a.display_order - b.display_order || String(a.id).localeCompare(String(b.id)));
   },
   async getById(id) { return (await readLocalData()).plans.find(plan => String(plan.id) === id); },
-  async create(input) {
+  async create(input, actorId) {
     return updateLocalData(data => {
+      requirePlanActor(data.users,actorId);
       if (data.plans.some(plan => plan.slug === input.slug)) throw new AppError({ status: 409, code: ErrorCode.CONFLICT, message: 'Identificador do plano já cadastrado.' });
       const plan = { id: randomUUID(), ...toRow(input) };
       data.plans.push(plan);
       return plan;
     });
   },
-  async update(id, input) {
+  async update(id, input, actorId) {
     return updateLocalData(data => {
+      requirePlanActor(data.users,actorId);
       const plan = data.plans.find(item => String(item.id) === id);
       if (!plan) return undefined;
       if (data.plans.some(item => String(item.id) !== id && item.slug === input.slug)) throw new AppError({ status: 409, code: ErrorCode.CONFLICT, message: 'Identificador do plano já cadastrado.' });
@@ -33,8 +41,9 @@ export const planJsonRepository: PlanRepository = {
       return plan;
     });
   },
-  async setActive(id, active) {
+  async setActive(id, active, actorId) {
     return updateLocalData(data => {
+      requirePlanActor(data.users,actorId);
       const plan = data.plans.find(item => String(item.id) === id);
       if (plan) plan.is_active = active;
       return plan;

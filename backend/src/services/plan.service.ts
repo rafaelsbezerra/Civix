@@ -54,7 +54,7 @@ export async function savePlatformPlan(actorId: UserId, input: unknown, id?: str
   const parsed = planInputSchema.safeParse(input);
   if (!parsed.success) throw new AppError({ status: 400, code: ErrorCode.VALIDATION_ERROR, message: 'Dados do plano inválidos.' });
   const value = { ...parsed.data, price: normalizePlanPrice(parsed.data.price) };
-  return requirePlan(id ? await planRepository.update(id, value) : await planRepository.create(value));
+  return requirePlan(id ? await planRepository.update(id, value, actorId) : await planRepository.create(value, actorId));
 }
 export async function activatePlatformPlan(actorId: UserId, id: string, input: unknown) {
   await requirePlatformActor(actorId);
@@ -62,7 +62,7 @@ export async function activatePlatformPlan(actorId: UserId, id: string, input: u
   const parsed = z.object({ active: z.boolean() }).strict().safeParse(input);
   if (!parsed.success) throw new AppError({ status: 400, code: ErrorCode.VALIDATION_ERROR, message: 'Estado do plano inválido.' });
   if (parsed.data.active) normalizePlanPrice(requirePlan(await planRepository.getById(id)).price);
-  return requirePlan(await planRepository.setActive(id, parsed.data.active));
+  return requirePlan(await planRepository.setActive(id, parsed.data.active, actorId));
 }
 
 export type { Plan, BillingPeriod } from '../entities/plan.entity.js';

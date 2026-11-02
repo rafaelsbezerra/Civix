@@ -7,6 +7,7 @@ const items = [
   { to: '/super-admin/companies/new', label: 'Cadastrar empresa', Icon: Building2 },
   { to: '/super-admin/plans', label: 'Planos', Icon: Layers3 },
   { to: '/super-admin/sales', label: 'Vendas', Icon: Receipt },
+  { to: '/super-admin/administrators', label: 'Superadmins', Icon: UserRound },
   { to: '/super-admin/settings/profile', label: 'Meu perfil', Icon: UserRound },
 ];
 export function SuperAdminSidebar({ onNavigate }: { onNavigate?: () => void }) {

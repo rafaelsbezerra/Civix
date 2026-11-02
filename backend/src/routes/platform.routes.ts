@@ -14,6 +14,11 @@ router.put('/companies/:companyId/users/:userId', userController.updateCompanyUs
 router.post('/companies/:companyId/users/:userId/suspension', userController.suspendCompanyUser);
 router.post('/companies/:companyId/users/:userId/reactivation', userController.reactivateCompanyUser);
 router.delete('/companies/:companyId/users/:userId', userController.deleteCompanyAttendant);
+router.get('/administrators', userController.getSuperAdmins);
+router.post('/administrators/invitations', userController.inviteSuperAdmin);
+router.put('/administrators/:userId', userController.updateSuperAdmin);
+router.post('/administrators/:userId/suspension', userController.suspendSuperAdmin);
+router.post('/administrators/:userId/reactivation', userController.reactivateSuperAdmin);
 router.get('/sales', saleController.listPlatformSales);
 router.get('/sales/:saleId', saleController.getPlatformSale);
 router.post('/sales', saleController.createManualSale);
