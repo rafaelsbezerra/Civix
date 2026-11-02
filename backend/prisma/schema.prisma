@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -10,4 +5,95 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
+model companies {
+  id                                 String    @id @db.Uuid
+  name                               String
+  tax_id                             String    @unique
+  description                        String
+  detailed_description               String
+  category                           String
+  city                               String
+  state                              String
+  status                             String
+  is_verified                        Boolean
+  size                               String
+  created_at                         DateTime? @db.Timestamptz(6)
+  logo                               String?
+  cover_key                          String?
+  logo_key                           String?
+  address                            String?
+  phone                              String?
+  email                              String?
+  website                            String?
+  whatsapp                           String?
+  additional_description             String?
+  tone                               String?
+  images_companies_cover_keyToimages images?   @relation("companies_cover_keyToimages", fields: [cover_key], references: [object_key], onDelete: NoAction, onUpdate: NoAction)
+  images_companies_logo_keyToimages  images?   @relation("companies_logo_keyToimages", fields: [logo_key], references: [object_key], onDelete: NoAction, onUpdate: NoAction)
+  users                              users[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model images {
+  id                                    String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  object_key                            String      @unique
+  original_name                         String
+  mime_type                             String
+  size_bytes                            Int
+  module                                String
+  resource_id                           String      @db.Uuid
+  purpose                               String
+  uploaded_by                           String      @db.Uuid
+  created_at                            DateTime    @default(now()) @db.Timestamptz(6)
+  companies_companies_cover_keyToimages companies[] @relation("companies_cover_keyToimages")
+  companies_companies_logo_keyToimages  companies[] @relation("companies_logo_keyToimages")
+  users                                 users       @relation(fields: [uploaded_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([module, resource_id, purpose], map: "images_resource_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model plans {
+  id             BigInt   @id @default(autoincrement())
+  name           String   @db.VarChar(120)
+  slug           String   @unique @db.VarChar(120)
+  description    String   @default("")
+  price          Decimal  @default(0) @db.Decimal(12, 2)
+  billing_period String   @default("monthly") @db.VarChar(20)
+  features       Json     @default("[]")
+  limits         Json     @default("{}")
+  is_featured    Boolean  @default(false)
+  is_active      Boolean  @default(true)
+  display_order  Int      @default(0)
+  created_at     DateTime @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime @default(now()) @db.Timestamptz(6)
+  users          users[]
+
+  @@index([is_active, display_order, id], map: "plans_active_order_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
+model users {
+  id                     String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                   String?
+  email                  String
+  role                   String
+  password_hash          String?
+  status                 String?
+  invite_token           String?
+  reset_password_token   String?
+  reset_password_expires DateTime?  @db.Timestamptz(6)
+  plan_id                BigInt?
+  company_id             String?    @db.Uuid
+  images                 images[]
+  companies              companies? @relation(fields: [company_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  plans                  plans?     @relation(fields: [plan_id], references: [id], onUpdate: NoAction)
+
+  @@index([company_id])
+  @@index([plan_id])
 }
