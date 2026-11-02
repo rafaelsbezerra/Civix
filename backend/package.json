@@ -17,6 +17,8 @@
     "prisma:show": "prisma migrate status",
     "prisma:apply": "prisma migrate deploy",
     "mock:user:create": "tsx scripts/mock.user.create.ts",
+    "seed:staging": "tsx scripts/seed.staging.ts",
+    "test:seed": "node --import tsx --test tests/staging.seed.test.ts",
     "test:local": "node --import tsx --test tests/local.persistence.test.ts",
     "test:logging": "node scripts/test.runner.mjs tests/logging.test.ts tests/logging.http.test.ts tests/logging.services.test.ts",
     "user:bootstrap-super-admin": "tsx scripts/bootstrap.super.admin.ts",

@@ -14,7 +14,7 @@ Empresas/usuários preexistentes também interrompem, sem sobrescrever.
 ## Preparação
 
 Aplicar as migrations é uma ação separada, não executada pelo seed.
-A migration incremental user_company_scope acrescenta users.company_id, FK
+A [migration incremental user_company_scope](../backend/prisma/migrations/20261102000100_user_company_scope/migration.sql) acrescenta users.company_id, FK
 e regras de vínculo: admin_empresa/atendente exigem empresa; super_admin/
 cliente não possuem vínculo. Não edita migrations anteriores. Dados antigos
 incompatíveis fazem a migration falhar, sem associação inferida.
@@ -63,11 +63,14 @@ hashes, e-mails, tokens, parâmetros SQL ou URL de conexão.
 ## Verificação
 
 Prévia executada com a origem local: 3 planos, 5 empresas e 1 usuário,
-sem conexão ao banco. Revisão independente por final_review em 2026-11-02
-conferiu o desenho, SQL e documentação. Testes offline serão registrados
-após conclusão. Não houve conexão, importação ou aplicação de migration
-em staging nesta entrega.
+sem conexão ao banco. Os 40 testes de npm run test:seed passaram com conexão
+substituta, incluindo mapeamento BIGINT sem perda de precisão, validações,
+igualdade dos planos, rollback e descarte de tokens. TypeScript strict
+isolado do CLI, biblioteca e teste passou. git diff --check aprovado.
+Revisão independente por final_review em 2026-11-02 liberou o commit limitado
+após conferir código, SQL, testes e documentação. Não houve conexão,
+importação ou aplicação de migration em staging nesta entrega.
 
 O TypeScript completo do backend ainda aponta erros em módulos anteriores
-(UserId, adapters e imports ausentes de storage/provisionamento). A validação
-isolada deste seed será registrada separadamente, sem declarar a base aprovada.
+(UserId, adapters e imports ausentes de storage/provisionamento). A aprovação
+isolada deste seed não significa aprovação do typecheck completo da base.
