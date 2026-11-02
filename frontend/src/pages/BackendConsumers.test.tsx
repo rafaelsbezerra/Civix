@@ -143,17 +143,16 @@ describe('Formulários existentes integrados ao backend', () => {
     expect(signal?.aborted).toBe(true)
     await act(async () => { finish?.(new Response(JSON.stringify({ data: { email: 'pessoa@example.test' } }))) })
   })
-  it.each(['empresa', 'cliente'] as const)('Login %s armazena token do envelope e mantém destino', async role => {
+  it.each(['admin_empresa', 'super_admin', 'atendente'] as const)('Login %s armazena token do envelope e mantém destino', async role => {
     const setItem = vi.fn()
     vi.stubGlobal('localStorage', { setItem })
-    respond({ data: { token: 'token-sintetico', user: { id: 'user-1', name: 'Teste', email: 'pessoa@example.test', role } } })
+    respond({ data: { token: 'token-sintetico', user: { id: 'user-1', name: 'Teste', email: 'pessoa@example.test', role, companyId: role === 'super_admin' ? null : 'company-1' } } })
     renderPage(<Login />, '/login')
-    if (role === 'cliente') fireEvent.click(screen.getByRole('button', { name: /Sou cliente/ }))
     fireEvent.change(screen.getByPlaceholderText('seu_email@email.com'), { target: { value: 'pessoa@example.test' } })
-    if (role === 'empresa') fireEvent.change(screen.getByPlaceholderText('••••••••'), { target: { value: 'senha-teste' } })
+    fireEvent.change(screen.getByPlaceholderText('••••••••'), { target: { value: 'senha-teste' } })
     fireEvent.click(screen.getByRole('button', { name: 'Login' }))
     await waitFor(() => expect(setItem).toHaveBeenCalledWith('token', 'token-sintetico'))
-    expect(navigate).toHaveBeenCalledWith(role === 'empresa' ? '/dashboard-empresa' : '/')
+    expect(navigate).toHaveBeenCalledWith('/')
   })
 
   it('Login com falha mostra mensagem pública sem gravar token ou navegar', async () => {

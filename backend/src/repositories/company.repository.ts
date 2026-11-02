@@ -2,6 +2,7 @@ import type { Company } from '../entities/company.entity.js';
 
 /** Consultas de catálogo sem dependência do driver ou do contrato HTTP. */
 export interface CompanyRepository {
+  isImageKeyReferenced(key: string): Promise<boolean>;
   create(company: Company): Promise<Company>;
   getAll(): Promise<Company[]>;
   getById(id: string): Promise<Company | undefined>;
@@ -10,4 +11,6 @@ export interface CompanyRepository {
   getByState(state: string): Promise<Company[]>;
   getBySize(size: Company['tamanho']): Promise<Company[]>;
   searchByName(name: string): Promise<Company[]>;
+  updateCoverKey(id: string, coverKey: string | null, expectedKey: string | null): Promise<boolean>;
+  updateLogoKey(id: string, logoKey: string | null, expectedKey: string | null): Promise<boolean>;
 }

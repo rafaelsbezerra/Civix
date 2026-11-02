@@ -8,6 +8,7 @@ Planos, decisões, revisões de entrega e evidências de execução ficam nas sp
 - [Produto e requisitos documentados](produto.md).
 - [Arquitetura, módulos e persistência](arquitetura.md).
 - [API e contratos](api.md).
+- [Usuários e capas de empresas: contratos e operação](storage.md).
 - [Padrões do backend](padroes-backend.md).
 - [Tipos e fluxo de autenticação](auth-types.md).
 - [Dados locais, flag e cadastros](dados-locais.md).

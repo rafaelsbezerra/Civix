@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { randomUUID } from 'node:crypto';
 import { spawn, spawnSync } from 'node:child_process';
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -40,8 +41,9 @@ const { db } = await import('../src/shared/config/data.js');
 const privateEmail = 'pessoa-confidencial@example.test';
 const privatePassword = 'senha-exclusiva-do-teste';
 const passwordHash = await bcrypt.hash(privatePassword, 10);
+const companyId = randomUUID();
 const activeUser = {
-  id: 'user-internal', email: privateEmail, role: 'empresa' as const,
+  id: randomUUID(), email: privateEmail, role: 'admin_empresa' as const, company_id: companyId,
   name: 'Nome confidencial', status: 'active', password_hash: passwordHash,
 };
 const companyInput = {
@@ -102,6 +104,10 @@ test.beforeEach(t => {
   const context = t as TestContext;
   context.mock.method(db, 'query', async () => { throw new Error('Consulta externa não autorizada no teste.'); });
   context.mock.method(Resend.prototype, 'post', async () => { throw new Error('Envio externo não autorizado no teste.'); });
+  context.mock.method(userRepository, 'getById', async () => activeUser);
+  context.mock.method(companyRepository, 'getById', async () => ({
+    ...companyInput, id: companyId, status: 'ativo' as const, verificado: false,
+  }));
 });
 
 test('Empresa registra criação somente após persistência confirmada e preserva a instância de erro', async t => {
@@ -192,15 +198,17 @@ test('Listagem de planos registra apenas contagem após leitura confirmada', asy
 
 test('Login registra sucesso após credenciais e JWT; rejeições não registram identidade nem sucesso', async t => {
   const capture = recording(t);
-  t.mock.method(userRepository, 'getByEmailAndRole', async () => undefined);
-  await assert.rejects(capture.run(() => userService.login({ email: privateEmail, role: 'empresa', password: privatePassword })));
-  t.mock.method(userRepository, 'getByEmailAndRole', async () => ({ ...activeUser, status: 'pending' }));
-  await assert.rejects(capture.run(() => userService.login({ email: privateEmail, role: 'empresa', password: privatePassword })));
-  t.mock.method(userRepository, 'getByEmailAndRole', async () => activeUser);
-  await assert.rejects(capture.run(() => userService.login({ email: privateEmail, role: 'empresa', password: 'senha-incorreta' })));
+  t.mock.method(userRepository, 'getForLogin', async () => undefined);
+  await assert.rejects(capture.run(() => userService.login({ email: privateEmail, role: 'admin_empresa', password: privatePassword })));
+  t.mock.method(userRepository, 'getForLogin', async () => ({ ...activeUser, status: 'pending' }));
+  t.mock.method(userRepository, 'getById', async () => ({ ...activeUser, status: 'pending' }));
+  await assert.rejects(capture.run(() => userService.login({ email: privateEmail, role: 'admin_empresa', password: privatePassword })));
+  t.mock.method(userRepository, 'getForLogin', async () => activeUser);
+  t.mock.method(userRepository, 'getById', async () => activeUser);
+  await assert.rejects(capture.run(() => userService.login({ email: privateEmail, role: 'admin_empresa', password: 'senha-incorreta' })));
   assert.equal(capture.records().length, 0);
 
-  const result = await capture.run(() => userService.login({ email: privateEmail, role: 'empresa', password: privatePassword }));
+  const result = await capture.run(() => userService.login({ email: privateEmail, role: 'admin_empresa', password: privatePassword }));
   assert.equal(result.user.id, activeUser.id);
   assert.equal(typeof result.token, 'string');
   assert.deepEqual(capture.records().map(record => record.event), ['user.authenticated']);
@@ -262,7 +270,7 @@ test('Recuperação e troca de senha registram etapas confirmadas sem token ou h
 
 test('Convite validado não equivale a ativação; primeiro acesso só conclui após atualização confirmada', async t => {
   const capture = recording(t);
-  const token = jwt.sign({ email: privateEmail, role: 'empresa' }, process.env.JWT_INVITE_SECRET!, { expiresIn: '1h' });
+  const token = jwt.sign({ email: privateEmail, role: 'admin_empresa', companyId, purpose: 'invite' }, process.env.JWT_INVITE_SECRET!, { expiresIn: '1h' });
   const pendingUser = { ...activeUser, status: 'pending', invite_token: token };
   t.mock.method(authRepository, 'getInviteUserByEmail', async () => pendingUser);
   t.mock.method(authRepository, 'activateUser', async () => false);
@@ -278,7 +286,7 @@ test('Convite validado não equivale a ativação; primeiro acesso só conclui a
   assertPrivateDataAbsent(capture.destination.text, [token]);
 });
 
-test('Reenvio prepara reset após persistência e delegação de e-mail emite um único aceite', async t => {
+test('Reenvio renova convite pendente sem misturar reset e emite um único aceite', async t => {
   const capture = recording(t);
   t.mock.method(authRepository, 'getResetUserByEmail', async () => undefined);
   await capture.run(() => authService.resendInviteEmail(privateEmail));
@@ -286,10 +294,20 @@ test('Reenvio prepara reset após persistência e delegação de e-mail emite um
 
   let savedToken = '';
   t.mock.method(authRepository, 'getResetUserByEmail', async () => activeUser);
-  t.mock.method(authRepository, 'saveResetToken', async (_id: unknown, token: string) => { savedToken = token; });
+  await capture.run(() => authService.resendInviteEmail(privateEmail));
+  assert.equal(capture.records().length, 0);
+  const pendingUser = { ...activeUser, status: 'pending' };
+  t.mock.method(authRepository, 'getResetUserByEmail', async () => pendingUser);
+  t.mock.method(authRepository, 'getInviteUserByEmail', async () => pendingUser);
+  t.mock.method(authRepository, 'saveInvite', async (_email: string, _role: unknown, token: string) => { savedToken = token; });
+  const reset = t.mock.method(authRepository, 'saveResetToken', async () => {});
   t.mock.method(Resend.prototype, 'post', async () => ({ data: { id: 'provider-private' }, error: null }));
   await capture.run(() => authService.resendInviteEmail(privateEmail));
-  assert.deepEqual(capture.records().map(record => record.event), ['auth.password-reset.prepared', 'mail.provider.accepted']);
+  assert.deepEqual(capture.records().map(record => record.event), ['admin.invite.prepared', 'mail.provider.accepted']);
+  assert.equal(reset.mock.callCount(), 0);
+  const claims = jwt.verify(savedToken, process.env.JWT_INVITE_SECRET!) as jwt.JwtPayload;
+  assert.equal(claims.purpose, 'invite');
+  assert.equal(claims.companyId, companyId);
   assertPrivateDataAbsent(capture.destination.text, [savedToken]);
 });
 
@@ -298,12 +316,12 @@ test('Convite administrativo registra preparação após persistir e separa a et
   const original = new Error('Falha simulada do convite');
   t.mock.method(authRepository, 'getInviteUserByEmail', async () => undefined);
   t.mock.method(authRepository, 'saveInvite', async () => { throw original; });
-  await assert.rejects(capture.run(() => adminService.inviteUser(privateEmail, 'empresa')), error => error === original);
+  await assert.rejects(capture.run(() => adminService.inviteUser(privateEmail, 'admin_empresa', companyId)), error => error === original);
   assert.equal(capture.records().length, 0);
 
   t.mock.method(authRepository, 'saveInvite', async () => {});
   t.mock.method(Resend.prototype, 'post', async () => ({ data: { id: 'provider-private' }, error: null }));
-  await capture.run(() => adminService.inviteUser(privateEmail, 'empresa'));
+  await capture.run(() => adminService.inviteUser(privateEmail, 'admin_empresa', companyId));
   assert.deepEqual(capture.records().map(record => record.event), ['admin.invite.prepared', 'mail.provider.accepted']);
   assertPrivateDataAbsent(capture.destination.text, ['provider-private']);
 });
@@ -312,7 +330,7 @@ test('Erro retornado pelo provedor não registra aceite e mantém sua causa no A
   const capture = recording(t);
   t.mock.method(Resend.prototype, 'post', async () => ({ data: null, error: { message: 'Falha privada do provedor' } }));
 
-  await assert.rejects(capture.run(() => mailService.sendInviteEmail({ email: privateEmail, role: 'empresa', token: 'token-convite-privado' })), error => {
+  await assert.rejects(capture.run(() => mailService.sendInviteEmail({ email: privateEmail, role: 'admin_empresa', token: 'token-convite-privado' })), error => {
     assert.ok(error instanceof Error);
     assert.ok(error.cause instanceof Error);
     assert.equal(error.cause.message, 'Falha privada do provedor');
@@ -345,15 +363,15 @@ test('Modo JSON registra gravações confirmadas e caixa de saída isolada sem r
       import { createCompany } from './src/services/company.service.ts';
       import { sendInviteEmail, sendResetPasswordEmail, sendForgotPasswordEmail } from './src/services/mail.service.ts';
       import { readLocalData } from './src/persistence/json/local.store.ts';
-      const user = await createMockUser({ email: 'local-private@example.test', role: 'empresa', name: 'Nome local privado', password: 'senha-local-privada' });
+      const user = await createMockUser({ email: 'local-private@example.test', role: 'super_admin', name: 'Nome local privado', password: 'senha-local-privada' });
       const company = await createCompany(${JSON.stringify(companyInput)});
-      await sendInviteEmail({ email: 'local-private@example.test', role: 'empresa', token: 'convite-local-privado' });
+      await sendInviteEmail({ email: 'local-private@example.test', role: 'admin_empresa', token: 'convite-local-privado' });
       await sendResetPasswordEmail({ email: 'local-private@example.test', resetUrl: 'http://frontend.example.test/reset?token=reset-local-privado' });
       await sendForgotPasswordEmail({ email: 'local-private@example.test', token: 'delegado-local-privado' });
-      await assert.rejects(createMockUser({ email: 'local-private@example.test', role: 'empresa', password: 'senha-local-privada' }));
+      await assert.rejects(createMockUser({ email: 'local-private@example.test', role: 'super_admin', password: 'senha-local-privada' }));
       const lock = join(process.env.MOCK_DATA_DIR, 'data.lock');
       await writeFile(lock, 'fixture');
-      try { await assert.rejects(sendInviteEmail({ email: 'local-private@example.test', role: 'empresa', token: 'falha-local-privada' })); }
+      try { await assert.rejects(sendInviteEmail({ email: 'local-private@example.test', role: 'admin_empresa', token: 'falha-local-privada' })); }
       finally { await unlink(lock); }
       const data = await readLocalData();
       assert.equal(data.users.length, 1);
@@ -411,7 +429,7 @@ test('Comando local interativo preserva stdout como JSON e envia perguntas para 
     let answered = 0;
     const answers = [
       { prompt: 'E-mail do usuário local: ', value: 'cli-private@example.test' },
-      { prompt: 'Perfil (empresa ou cliente): ', value: 'cliente' },
+      { prompt: 'Perfil (admin_empresa, super_admin, atendente ou cliente): ', value: 'cliente' },
       { prompt: 'Nome (opcional): ', value: 'Nome cli privado' },
     ];
     const timeout = setTimeout(() => child.kill(), 10000);

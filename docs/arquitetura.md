@@ -28,7 +28,7 @@ de configuração de persistência.
 
 ## Backend
 
-O servidor monta routers de usuários, primeiro acesso, empresas e planos.
+O servidor monta routers de usuários, primeiro acesso, empresas, planos e storage.
 Usuários agora separam handlers HTTP e validação no controller de login,
 recuperação e redefinição no user.service;
 primeiro acesso possui controller próprio. Empresas utilizam controller com
@@ -40,11 +40,11 @@ somente em helpers, com adoção apenas quando necessária, fora das pendências
 
 | Domínio | Estado |
 | --- | --- |
-| Autenticação | Parcial: JWT de 1h, empresa com senha, cliente por e-mail |
+| Autenticação | JWT de 1h, três papéis com senha, cliente sem login; identidade vigente consultada |
 | Convites | Controller/service e router existem; router admin não montado |
-| Empresas/tenants | Catálogo de leitura; sem gestão e isolamento tenant demonstrados |
-| Usuários/equipes | Sem CRUD completo, papéis internos ou gestão de vendedores |
-| Planos | Listagem ativa e seleção por usuário empresa |
+| Empresas/tenants | Catálogo e criação por superadmin; capa com escopo de empresa |
+| Usuários/equipes | Quatro papéis e vínculo único; sem CRUD completo ou gestão de equipe |
+| Planos | Listagem ativa e seleção por usuário admin_empresa |
 | Vendas/cobrança | Ausente; seleção de plano não processa pagamento |
 | Leads/conversas/mensagens | Ausentes |
 | IA/WhatsApp/handoff | Desenho n8n/WAHA no Notion; sem workflow ou integração versionada |
@@ -54,18 +54,18 @@ somente em helpers, com adoção apenas quando necessária, fora das pendências
 
 [schema.prisma](../backend/prisma/schema.prisma) não declara entidades.
 As migrations versionadas criam `plans` e atualizam suas descrições. As novas
-migrations de 2026-10-25 criam `users` e `empresas`, com IDs UUID e unicidade
+migrations de 2026-10-25 criam `users`, `companies` e `images`, com IDs UUID e unicidade
 de e-mail por `LOWER(email)` em cada tabela; CNPJ é único pelo valor armazenado.
 A criação de `users` inclui `plan_id` e sua FK, completando o bloco condicional
 da migration histórica de planos em bancos vazios. Os campos correspondem aos
-adapters atuais, sem vínculo usuário–empresa ou novos perfis de dashboard.
+adapters atuais. A migration de 2026-11-01 adiciona company_id e restrições de papel/vínculo. Dashboards não foram implementados.
 O ciclo de aplicação em PostgreSQL ainda não foi executado nesta entrega.
 Ver [baseline e limites](../backend/.specs/features/migrations/users-companies.md).
 
 | Entidade | Expectativa do código | Divergência documental |
 | --- | --- | --- |
 | `users` | id, name, email, role, password_hash, reset_password_token, reset_password_expires, plan_id; convite/ativação também usam status e invite_token | Notion usa USERS com nome, empresa_id, is_active e quatro papéis; schema canônico completo pendente |
-| `empresas` | categoria, cnpj, descricao_detalhada, verificado, tamanho, status e contatos | Notion usa segmento_id, plano_id, slug, media_preco, welcome_message e is_active |
+| `companies` (DTO público em português) | categoria, cnpj, descricao_detalhada, verificado, tamanho, status e contatos | Notion usa segmento_id, plano_id, slug, media_preco, welcome_message e is_active |
 | `plans` | BIGSERIAL, slug, price, billing_period, features/limits JSONB, flags e ordem | Notion usa UUID e separa preço único e mensalidade |
 
 Fontes: [company.service](../backend/src/services/company.service.ts),
@@ -199,3 +199,7 @@ aceite do provedor, não entrega ao destinatário. A função delegadora de mail
 não repete o evento. Falhas são diagnosticadas no handler HTTP ou fronteira
 CLI, sem catch-log-throw nos services. Admin permanece desmontado.
 [Spec e evidências](../backend/.specs/features/structured-logs/spec.md).
+
+## Capas e identidade vigente
+
+Storage recebe multipart, valida conteúdo e permissões, grava metadados e integra R2. Consultas públicas retornam URLs de 300 segundos. Contratos e limites de homologação estão no [guia de storage e usuários](storage.md).

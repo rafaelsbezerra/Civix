@@ -75,7 +75,7 @@ login/recuperação/redefinição, sem Express, usando UserRepository. User fica
 os tipos de entrada/saída em user.auth.dto.ts. Login não expõe password_hash.
 Profile e home mantêm middleware Bearer; respostas agora são envolvidas em data.
 
-Mantidos login cliente por e-mail, empresa com bcrypt, JWT1h, recuperação
+Login exige senha bcrypt para admin_empresa, super_admin e atendente; cliente não autentica. JWT de 1h inclui versão e vínculo, validados contra a identidade vigente. Mantida recuperação
 sem enumeração, token aleatório com hash SHA-256/expiração1h, reset bcrypt10
 e limpeza dos tokens. SQL está nos adapters reais; modo local persiste JSON.
 Convite/primeiro acesso também utilizam envelopes e erros compartilhados;
@@ -85,7 +85,7 @@ pré-validação e ativação conferem o mesmo token/perfil/status.
 
 Todos os endpoints atuais do backend adotam AppError e { data, meta? },
 com ErrorCode centralizado e handler global. Stack/diagnóstico sanitizados
-fora de production; somente status/message em production. Frontend de login ainda não lê esse envelope. A spec de adoção está em
+fora de production; somente status/message em production. Frontend de login utiliza esse envelope. A spec de adoção está em
 [backend/.specs/adocao-http](../backend/.specs/adocao-http/spec.md).
 
 ErrorCode contém VALIDATION_ERROR, UNAUTHORIZED, FORBIDDEN, NOT_FOUND,

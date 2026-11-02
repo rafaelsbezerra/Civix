@@ -3,7 +3,7 @@
 **Estado:** planejada, não implementada. Autorização somente para documentar.
 **Ordem:** 01. Tarefas novas permanecem abertas.
 
-## Baseline observada
+## Baseline histórica anterior à adoção HTTP de 2026-10-19
 
 Login usa os papéis empresa/cliente e token em localStorage. Lê
 response.data.token, embora o backend retorne data; /dashboard-empresa não
@@ -27,14 +27,17 @@ Fontes: [rotas](../../../src/routes/AppRoute.tsx), [API](../../../src/lib/api.ts
 - Atendente acessa somente atendimentos atribuídos.
 - Superadmin gerencia Civix/empresas/vendas/métricas/custos IA, nunca conversas.
 - Civix cria empresa e convida dono; não propor autocadastro de empresa.
-- Contato promocional é só e-mail, sem conta, senha, sessão ou dashboard.
+- Atualização de 2026-11-01: papéis admin_empresa, super_admin, cliente e
+  atendente confirmados. Dashboards previstos para os três perfis operacionais;
+  cliente em backlog, sem dashboard, área logada ou casos de uso adicionais.
 
 ## Contrato frontend/backend
 
 Planejar a evolução de GET /api/v1/users/profile para o bootstrap.
 Identidade, vínculo e permissões precisam de campos canônicos; não inferir
-autoridade do papel selecionado visualmente no login. Nomes/valores novos
-dos perfis e URLs privadas também permanecem propostas.
+autoridade do papel selecionado visualmente no login. Os quatro nomes de
+papéis estão confirmados; URLs privadas e campos restantes seguem pendentes.
+Ver [papéis backend e tarefas](../../../../backend/.specs/features/users-roles/spec.md).
 Sucesso usa { data, meta? }; erro público em produção usa status/message.
 Não depender de code/stack/details em produção nem exibi-los ao usuário.
 Paginação só quando necessária; caminhos/identificadores/DTOs novos
@@ -45,7 +48,8 @@ são propostas, **Aguardando resposta**, até sua aprovação canônica.
 1. Na 03/04, fixtures geram os perfis/vínculos definidos neste modelo.
 2. Na 03, login/profile reais fornecem bootstrap; na 06, UI mostra área permitida.
 3. Na 04/06, provar negativas de acesso; conversas reais somente na 07.
-4. Na 09, contato promocional não recebe token ou área privada.
+4. Cliente não recebe área privada ou sessão de acesso; seus casos de uso
+   permanecem no backlog, sem exigir entrega promocional nesta evolução.
 São cenários previstos, não requisitos operacionais para concluir a definição 01.
 Planejar navegador → frontend → backend real → armazenamento isolado →
 resposta/UI. Mock do frontend sozinho não comprova essa comunicação.
@@ -63,11 +67,13 @@ Não acessar produção; dados/e-mails de teste são isolados.
 - DTOs/matriz/estados são coerentes entre frontend e backend, sem UI implementada.
 - Matriz não concede conversas/mensagens ao superadmin.
 - Contrato prevê vínculo único/autoridade backend, não escolha arbitrária na UI.
-- Modelo distingue contato promocional de conta e não depende do E2E operacional.
+- Modelo reserva cliente sem área logada, sem antecipar seus casos de uso;
+  não depende do E2E operacional para concluir a definição dos papéis.
 
 ## Definições pendentes
 
-**Aguardando resposta:** nomes/campos canônicos dos perfis e bootstrap.
+**Aguardando resposta:** campos restantes dos perfis/vínculos e bootstrap.
+Identificadores dos quatro papéis já confirmados em 2026-11-01.
 Sessão depende da etapa 03; quem atribui/transfere depende da etapa 07.
 Não tomar essas decisões ao desenhar o modelo comum.
 

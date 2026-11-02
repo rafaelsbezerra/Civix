@@ -1,6 +1,4 @@
 import {
-  Building2,
-  User,
   Eye,
   ArrowRight,
   EyeOff,
@@ -121,7 +119,6 @@ const AnimatedWave = ({ className = "" }: { className?: string }) => {
 };
 
 export default function Login() {
-  const [role, setRole] = useState<"empresa" | "cliente">("empresa");
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -133,16 +130,6 @@ export default function Login() {
 
   const navigate = useNavigate();
 
-  const handleRoleChange = (newRole: "empresa" | "cliente") => {
-    setRole(newRole);
-    setError(null);
-
-    if (newRole === "cliente") {
-      setPassword("");
-      setShowPassword(false);
-    }
-  };
-
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
@@ -153,7 +140,7 @@ export default function Login() {
       return;
     }
 
-    if (role === "empresa" && !password) {
+    if (!password) {
       setError("Por favor, informe sua senha.");
       return;
     }
@@ -163,17 +150,12 @@ export default function Login() {
 
       const result = await login({
         email,
-        password: role === "empresa" ? password : undefined,
-        role,
+        password,
       });
 
       localStorage.setItem("token", result.token);
 
-      if (role === "empresa") {
-        navigate("/dashboard-empresa");
-      } else {
-        navigate("/");
-      }
+      navigate("/");
     } catch (err: unknown) {
       setError(err instanceof ApiError
         ? err.message
@@ -222,74 +204,7 @@ export default function Login() {
                 ao sistema
               </h1>
 
-              <div className="space-y-[clamp(8px,0.7vw,14px)] mb-[clamp(18px,2vh,30px)]">
-                <button
-                  type="button"
-                  onClick={() => handleRoleChange("empresa")}
-                  className={`w-full h-[clamp(70px,2vh,72px)] rounded-[6px] transition flex items-center px-[clamp(12px,1vw,20px)] text-left border ${
-                    role === "empresa"
-                      ? "bg-[#d0d0d0] border-[#b5b5b5]"
-                      : "bg-[#dedede] border-transparent hover:bg-[#d5d5d5]"
-                  }`}
-                >
-                  <div className="w-[clamp(30px,2.2vw,42px)] h-[clamp(30px,2.2vw,42px)] rounded-[5px] flex items-center justify-center mr-[clamp(10px,0.8vw,16px)] shrink-0 bg-[#c0c0c0]">
-                    <Building2
-                      size={18}
-                      className="w-[clamp(15px,1vw,20px)] h-[clamp(15px,1vw,20px)] text-[#35404a]"
-                      strokeWidth={1.5}
-                    />
-                  </div>
-
-                  <div>
-                    <p className="text-[clamp(14px,0.55vw,12px)] font-semibold text-[#101010]">
-                      Sou empresa
-                    </p>
-
-                    <p className="text-[clamp(12px,0.48vw,11px)] leading-[1.25] text-[#626262]">
-                      Acesse o painel administrativo da
-                      <br />
-                      sua organização.
-                    </p>
-                  </div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handleRoleChange("cliente")}
-                  className={`w-full h-[clamp(70px,5vh,72px)] rounded-[6px] transition flex items-center px-[clamp(12px,1vw,20px)] text-left border ${
-                    role === "cliente"
-                      ? "bg-[#d0d0d0] border-[#b5b5b5]"
-                      : "bg-[#dedede] border-transparent hover:bg-[#d5d5d5]"
-                  }`}
-                >
-                  <div className="w-[clamp(30px,2.2vw,42px)] h-[clamp(30px,2.2vw,42px)] rounded-[5px] flex items-center justify-center mr-[clamp(10px,0.8vw,16px)] shrink-0 bg-[#c0c0c0]">
-                    <User
-                      size={18}
-                      className="w-[clamp(15px,1vw,20px)] h-[clamp(15px,1vw,20px)] text-[#35404a]"
-                      strokeWidth={1.5}
-                    />
-                  </div>
-
-                  <div>
-                    <p className="text-[clamp(14px,0.55vw,12px)] font-semibold text-[#101010]">
-                      Sou cliente
-                    </p>
-
-                    <p className="text-[clamp(12px,0.48vw,11px)] leading-[1.25] text-[#626262]">
-                      Entre para acompanhar seus dados
-                      <br />
-                      e serviços.
-                    </p>
-                  </div>
-                </button>
-              </div>
-
-              {error && (
-                <div className="mb-4 p-3 rounded bg-red-100 border border-red-300 text-red-700 text-xs">
-                  {error}
-                </div>
-              )}
-
+              {error && <p role="alert" className="mb-4 text-sm text-red-700">{error}</p>}
               <form
                 onSubmit={handleSubmit}
                 className="space-y-[clamp(10px,1.2vh,18px)]"
@@ -312,7 +227,7 @@ export default function Login() {
                   />
                 </div>
 
-                {role === "empresa" && (
+                {(
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
                       <label

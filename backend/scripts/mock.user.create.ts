@@ -20,12 +20,13 @@ async function main(): Promise<void> {
 
   try {
     const email = await input.question('E-mail do usuário local: ');
-    const role = await input.question('Perfil (empresa ou cliente): ');
+    const role = await input.question('Perfil (admin_empresa, super_admin, atendente ou cliente): ');
     const name = await input.question('Nome (opcional): ');
-    const password = role === 'empresa'
+    const companyId = role === 'admin_empresa' || role === 'atendente' ? await input.question('ID da empresa: ') : null;
+    const password = role !== 'cliente'
       ? await input.question('Senha (mínimo de 8 caracteres): ')
       : undefined;
-    await createMockUser({ email, role, name, password });
+    await createMockUser({ email, role, name, password, companyId });
   } finally {
     input.close();
   }

@@ -13,7 +13,7 @@ import { createErrorHandler, createNotFoundHandler } from '../src/middlewares/er
 type QueryCall = { text: string; values?: unknown[] };
 type Query = (text: string, values?: unknown[]) => Promise<{ rows: Record<string, unknown>[] }>;
 type Mail = (path: string, payload: Record<string, unknown>) => Promise<unknown>;
-const user = { id: 'user-id', name: 'Pessoa', email: 'pessoa@example.test', role: 'empresa' };
+const user = { id: 'user-id', name: 'Pessoa', email: 'pessoa@example.test', role: 'super_admin', company_id: null, status: 'active', password_hash: await bcrypt.hash('senha-local', 4) };
 const recoveryMessage = 'Se o e-mail existir no sistema, as instruções serão enviadas.';
 const environment = { JWT_SECRET: 'segredo-local-exclusivo-dos-testes', RESEND_API_KEY: 're_local_test', MAIL_FROM: 'Civix <noreply@example.test>', FRONTEND_URL: 'http://frontend.example.test/' };
 
@@ -53,59 +53,29 @@ function unreachableQuery(): Promise<{ rows: Record<string, unknown>[] }> {
   throw new Error('Consulta de persistência não esperada neste teste');
 }
 
-test('Login mantém bcrypt para empresas, acesso de clientes e JWT com validade de uma hora', async t => {
-  const passwordHash = await bcrypt.hash('senha-local', 10);
-  const calls: QueryCall[] = [];
-  await withUsers(t, async (text, values) => {
-    calls.push({ text, values });
-    return { rows: [{ ...user, role: text.includes("role = 'cliente'") ? 'cliente' : 'empresa', password_hash: passwordHash }] };
-  }, async url => {
-    for (const role of ['empresa', 'cliente']) {
-      const result = await post(url, '/login', { email: user.email, role, ...(role === 'empresa' ? { password: 'senha-local' } : {}) });
-      assert.equal(result.status, 200);
-      assert.deepEqual(result.body.data.user, { ...user, role });
-      assert.equal('password_hash' in result.body.data.user, false);
-      const payload = jwt.verify(result.body.data.token, environment.JWT_SECRET) as jwt.JwtPayload;
-      assert.equal(payload.id, user.id);
-      assert.equal(payload.email, user.email);
-      assert.equal(payload.role, role);
-      assert.equal(payload.exp! - payload.iat!, 3600);
-      assert.deepEqual(calls.at(-1)?.values, [user.email]);
-      assert.match(calls.at(-1)!.text, /FROM users/);
-      assert.match(calls.at(-1)!.text, new RegExp(`role = '${role}'`));
-    }
+test('Login exige senha para perfis operacionais e não autentica cliente', async t => {
+  let account = { ...user };
+  await withUsers(t, async () => ({ rows: [account] }), async url => {
+    const success = await post(url, '/login', { email: user.email.toUpperCase(), password: 'senha-local' });
+    assert.equal(success.status, 200);
+    assert.equal(success.body.data.user.role, 'super_admin');
+    assert.equal(success.body.data.user.companyId, null);
+    assert.equal(success.body.data.user.password_hash, undefined);
+    const claims = jwt.verify(success.body.data.token, environment.JWT_SECRET) as jwt.JwtPayload;
+    assert.equal(claims.tokenVersion, 2);
+    assert.equal(claims.exp! - claims.iat!, 3600);
+    assert.equal((await post(url, '/login', { email: user.email, password: 'senha-errada' })).status, 401);
+    assert.equal((await post(url, '/login', { email: user.email, password: 'senha-local', role: 'atendente' })).status, 401);
+    assert.equal((await post(url, '/login', { email: user.email, role: 'cliente' })).status, 403);
   });
 });
 
-test('Login rejeita entradas ausentes ou perfil inválido antes de consultar a persistência', async t => {
+test('Login valida entradas antes da persistência e preserva falha interna', async t => {
   await withUsers(t, unreachableQuery, async url => {
-    for (const [body, message] of [
-      [{ role: 'cliente' }, 'Email é obrigatório'],
-      [{ email: user.email, role: 'outro' }, 'Tipo de usuário inválido'],
-      [{ email: user.email, role: 'empresa' }, 'Senha é obrigatória para empresas'],
-    ] as const) assert.deepEqual(await post(url, '/login', body), { status: 400, body: { status: 400, message } });
-  });
-});
-
-test('Login preserva erros de credenciais, ausência de hash/segredo e falha de persistência', async t => {
-  const passwordHash = await bcrypt.hash('senha-correta', 10);
-  let scenario = 'missing';
-  await withUsers(t, async () => {
-    if (scenario === 'database') throw new Error('Falha simulada na persistência');
-    return { rows: scenario === 'missing' ? [] : [{ ...user, ...(scenario === 'hash' ? {} : { password_hash: passwordHash }) }] };
-  }, async url => {
-    for (const [nextScenario, status, message] of [
-      ['missing', 401, 'Usuário não encontrado.'],
-      ['password', 401, 'Senha incorreta.'],
-      ['hash', 500, 'Erro interno do servidor'],
-      ['secret', 500, 'Erro interno do servidor'],
-      ['database', 500, 'Erro interno do servidor'],
-    ] as const) {
-      scenario = nextScenario;
-      if (scenario === 'secret') delete process.env.JWT_SECRET;
-      else process.env.JWT_SECRET = environment.JWT_SECRET;
-      assert.deepEqual(await post(url, '/login', { email: user.email, role: 'empresa', password: scenario === 'password' ? 'senha-errada' : 'senha-correta' }), { status, body: { status, message } });
+    for (const body of [{}, { email: user.email }, { email: user.email, password: 'senha-local', role: 'root' }]) {
+      assert.equal((await post(url, '/login', body)).status, 400);
     }
+    assert.equal((await post(url, '/login', { email: user.email, password: 'senha-local' })).status, 500);
   });
 });
 
@@ -118,7 +88,7 @@ test('Aliases de recuperação preservam validação e resposta que evita enumer
     }
     assert.equal(calls.length, 2);
     for (const call of calls) {
-      assert.match(call.text, /SELECT id, name, email FROM users WHERE email = \$1/);
+      assert.match(call.text, /SELECT id, name, email FROM users WHERE LOWER\(email\) = LOWER\(\$1\)/);
       assert.deepEqual(call.values, [user.email]);
     }
   });
@@ -210,22 +180,23 @@ test('Redefinição mantém entradas obrigatórias, senha mínima, token inváli
   });
 });
 
-test('Perfil e home mantêm proteção Bearer e respostas públicas existentes', async t => {
-  await withUsers(t, unreachableQuery, async url => {
-    const token = jwt.sign({ id: user.id, role: user.role }, environment.JWT_SECRET, { expiresIn: '1h' });
-    for (const [path, method, body] of [
-      ['/profile', 'GET', { message: 'Acesso permitido à rota protegida', userId: user.id }],
-      ['/home', 'POST', { message: 'Acesso permitido à rota home', userId: user.id, userRole: user.role }],
-    ] as const) {
-      const absent = await fetch(url + path, { method });
-      assert.equal(absent.status, 401);
-      assert.deepEqual(await absent.json(), { status: 401, message: 'Token não fornecido.' });
-      const invalid = await fetch(url + path, { method, headers: { Authorization: 'Bearer invalido' } });
-      assert.equal(invalid.status, 401);
-      assert.deepEqual(await invalid.json(), { status: 401, message: 'Token inválido ou expirado.' });
-      const success = await fetch(url + path, { method, headers: { Authorization: `Bearer ${token}` } });
+test('Perfil e home exigem sessão vigente e retornam identidade e permissões', async t => {
+  await withUsers(t, async () => ({ rows: [user] }), async url => {
+    const token = jwt.sign({ id: user.id, email: user.email, role: user.role, companyId: null, tokenVersion: 2 }, environment.JWT_SECRET, { expiresIn: '1h' });
+    for (const [path, method] of [['/profile', 'GET'], ['/home', 'POST']]) {
+      assert.equal((await fetch(url + path, { method })).status, 401);
+      assert.equal((await fetch(url + path, { method, headers: { Authorization: 'Bearer invalido' } })).status, 401);
+      const success = await fetch(url + path, { method, headers: { Authorization: 'Bearer ' + token } });
       assert.equal(success.status, 200);
-      assert.deepEqual(await success.json(), { data: body });
+      const body = await success.json();
+      if (path === '/profile') {
+        assert.equal(body.data.user.id, user.id);
+        assert.equal(body.data.user.role, user.role);
+        assert.ok(body.data.permissions);
+      } else {
+        assert.equal(body.data.userId, user.id);
+        assert.equal(body.data.userRole, user.role);
+      }
     }
   });
 });

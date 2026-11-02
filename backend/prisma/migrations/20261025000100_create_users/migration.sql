@@ -4,7 +4,7 @@ CREATE TABLE users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT,
   email TEXT NOT NULL,
-  role TEXT NOT NULL CHECK (role IN ('empresa', 'cliente')),
+  role TEXT NOT NULL CHECK (role IN ('admin_empresa', 'super_admin', 'cliente', 'atendente')),
   password_hash TEXT,
   status TEXT,
   invite_token TEXT,

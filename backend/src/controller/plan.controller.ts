@@ -29,7 +29,7 @@ export async function selectPlan(req: Request, res: Response): Promise<Response>
     });
   }
 
-  if (req.userRole !== 'empresa') {
+  if (req.userRole !== 'admin_empresa') {
     throw new AppError({
       status: 403,
       code: ErrorCode.FORBIDDEN,

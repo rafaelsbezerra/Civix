@@ -24,8 +24,7 @@ frontend continua consumindo HTTP e não acessa arquivos locais diretamente.
 | Primeiro acesso | POST /api/auth/first-access |
 
 A pré-validação passa a conferir o JWT de convite e users.invite_token,
-conforme a mesma identidade/perfil e status utilizados na ativação. Isso não
-altera o fluxo de reenvio que ainda usa token de recuperação.
+conforme a mesma identidade/perfil e status utilizados na ativação. O reenvio renova o convite com propósito e vínculo explícitos.
 
 ## Configuração
 
@@ -59,12 +58,8 @@ comum valida o envelope e trata erros públicos por `message` e status HTTP.
 Não haverá interceptor que remova o envelope. Telas recebem dados de domínio,
 sem depender de `code`, `details` ou `stack`, ausentes em produção.
 
-Login envia email, role e password quando empresa a `/api/v1/users/login`.
-O service retorna `{ user: { id, name, email, role }, token }`. A tela grava
-o token somente após sucesso válido e mantém os destinos existentes. Não
-criar dashboard, sessão nova, refresh token, endpoints ou paginação. Falhas de
-rede, JSON inválido e resposta sem envelope devem resultar em erro legível.
+Login envia e-mail e senha; o backend determina admin_empresa, super_admin ou atendente e retorna user com companyId. Cliente não autentica. A tela valida a resposta, armazena o token e retorna à Home. ProtectedRoute consulta profile e verifica permissões; será ligado às futuras rotas de dashboard. Tokens antigos exigem novo login.
 
-Verificação prevista: contratos dos services, login de ambos os perfis,
-mensagens públicas, falhas de rede/envelope, TypeScript e lint. Registrar os
-resultados efetivamente executados na entrega, sem reutilizar provas antigas.
+Consultas públicas de empresa incluem cover_image_url e cover_image_url_expires_in. O formulário de upload não faz parte desta entrega. Ver [guia de storage e usuários](storage.md).
+
+Verificação atual: 35 testes direcionados, TypeScript e lint aprovados. O bundle Vite passou; o gate final do build ainda acusa dashboard.png ausente.

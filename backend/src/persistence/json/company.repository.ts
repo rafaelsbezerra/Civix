@@ -1,9 +1,35 @@
 import type { CompanyRepository } from '../../repositories/company.repository.js';
 import { readLocalData, updateLocalData } from './local.store.js';
+import { AppError } from '../../shared/errors/app.error.js';
+import { ErrorCode } from '../../shared/errors/error.code.js';
 
 export const companyJsonRepository: CompanyRepository = {
+  async updateCoverKey(id, key, expectedKey) {
+    return updateLocalData(data => {
+      const company = data.companies.find(company => company.id === id);
+      if (!company || (company.cover_key ?? null) !== expectedKey) return false;
+      company.cover_key = key;
+      return true;
+    });
+  },
+  async updateLogoKey(id, key, expectedKey) {
+    return updateLocalData(data => {
+      const company = data.companies.find(company => company.id === id);
+      if (!company || (company.logo_key ?? null) !== expectedKey) return false;
+      company.logo_key = key;
+      return true;
+    });
+  },
+  async isImageKeyReferenced(key) {
+    return (await readLocalData()).companies.some(company => company.cover_key === key || company.logo_key === key);
+  },
+
   async create(company) {
     return updateLocalData(data => {
+      if (data.companies.some(existing => existing.cnpj === company.cnpj
+        || (company.email != null && existing.email?.toLowerCase() === company.email.toLowerCase()))) {
+        throw new AppError({ status: 409, code: ErrorCode.CONFLICT, message: 'CNPJ ou e-mail de empresa já cadastrado.' });
+      }
       data.companies.push(company);
 
       return company;

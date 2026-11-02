@@ -23,7 +23,7 @@ npm run dev
 
 Backend usa PORT ou 3000. O proxy Vite encaminha `/api` para localhost:3000.
 O pool exige DATABASE_URL e as tabelas esperadas pelos services/controllers.
-As migrations de 2026-10-25 acrescentam `users` e `empresas` ao histórico de
+As migrations de 2026-10-25 acrescentam `users`, `companies` e `images` ao histórico de
 planos, mas sua aplicação em PostgreSQL ainda não foi validada. Exigem
 PostgreSQL com `gen_random_uuid()` disponível (nativa a partir da versão 13).
 Não aplicá-las automaticamente; tabelas já existentes exigem inspeção e plano
@@ -199,3 +199,7 @@ Voltar/Avançar preserva a restauração nativa; não força o topo nem procura
 novamente uma âncora histórica. Isso não implementa um armazenamento próprio
 de posições nem garante restauração exata em páginas de altura variável.
 O destino Contato permanece como estava; nenhum ID novo foi criado.
+
+## Usuários e storage
+
+A migration de 2026-11-01 acrescenta o vínculo único users.company_id e as restrições dos quatro papéis. Não foi aplicada. Bootstrap, conversão JSON com backup, configuração R2 e homologação pendente estão no [guia de usuários e capas](storage.md). Use as quatro variáveis R2_* consumidas pelo provider; os nomes CLOUDFLARE_R2_* do scaffold não são lidos por ele.

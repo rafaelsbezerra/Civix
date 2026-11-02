@@ -3,11 +3,12 @@ import * as userService from '../services/user.service.js';
 import { AppError } from '../shared/errors/app.error.js';
 import { ErrorCode } from '../shared/errors/error.code.js';
 import { createSuccessResponse } from '../shared/contracts/response.contract.js';
+import { isUserRole } from '../entities/user.entity.js';
 
 export async function login(req: Request, res: Response): Promise<Response> {
   const { email, password, role } = req.body ?? {};
 
-  if (!email) {
+  if (typeof email !== 'string' || !email.trim()) {
     throw new AppError({
       status: 400,
       code: ErrorCode.VALIDATION_ERROR,
@@ -15,7 +16,7 @@ export async function login(req: Request, res: Response): Promise<Response> {
     });
   }
 
-  if (role !== 'empresa' && role !== 'cliente') {
+  if (role !== undefined && !isUserRole(role)) {
     throw new AppError({
       status: 400,
       code: ErrorCode.VALIDATION_ERROR,
@@ -73,9 +74,10 @@ export async function resetPassword(req: Request, res: Response): Promise<Respon
 }
 
 export function profile(req: Request, res: Response): Response {
+  const user = req.authenticatedUser!;
   return res.status(200).json(createSuccessResponse({
-    message: 'Acesso permitido à rota protegida',
-    userId: req.userId,
+    user: { id: user.id, name: user.name, email: user.email, role: user.role, companyId: user.company_id },
+    permissions: { uploadCompanyCover: user.role === 'admin_empresa' || user.role === 'super_admin' },
   }));
 }
 

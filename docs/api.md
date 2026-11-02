@@ -10,15 +10,15 @@ As rotas abaixo são as efetivamente montadas. Não são um contrato futuro.
 | Método e URL | Entrada | Autorização | Retorno de sucesso |
 | --- | --- | --- | --- |
 | GET `/` | — | Público | 200 `{data:{message}}` |
-| POST `/api/v1/users/login` | email, role; password para empresa | Público | 200 `{data:{user,token}}` |
+| POST `/api/v1/users/login` | email e password; role opcional como filtro | Público | 200 `{data:{user,token}}` |
 | POST `/api/v1/users/forgot-password` ou `/esqueci-senha` | email | Público | 200 `{data:{message}}` |
 | POST `/api/v1/users/reset-password` ou `/redefinir-senha` | token, password mínimo 8 | Público | 200 `{data:{message}}` |
-| GET `/api/v1/users/profile` | — | Bearer JWT | 200 `{data:{message,userId}}` |
+| GET `/api/v1/users/profile` | — | Bearer JWT | 200 `{data:{user,permissions}}` |
 | POST `/api/v1/users/home` | — | Bearer JWT | 200 `{data:{message,userId,userRole}}` |
 | GET `/api/auth/validate-token` | query token | Público | 200 `{data:{email}}` |
 | POST `/api/auth/first-access` | token, password mínimo 8 | Token de convite | 200 `{data:{message}}` |
 | POST `/api/auth/resend-invite-email` | email | Público | 200 `{data:{message}}` |
-| POST /api/v1/empresas | Campos de CompanyCreateInput | Bearer JWT, role empresa | 201 com data contendo Company |
+| POST /api/v1/empresas | Campos de CompanyCreateInput | Bearer JWT, role super_admin | 201 com data contendo Company |
 | GET /api/v1/empresas | — | Público | 200 com data contendo Company[] |
 | GET `/api/v1/empresas/verificadas/todas` | — | Público | 200 `{data:Company[]}` |
 | GET `/api/v1/empresas/buscar` | query q não vazio | Público | 200 `{data:Company[]}` |
@@ -27,7 +27,7 @@ As rotas abaixo são as efetivamente montadas. Não são um contrato futuro.
 | GET `/api/v1/empresas/tamanho/:tamanho` | pequena/media/grande | Público | 200 `{data:Company[]}` |
 | GET `/api/v1/empresas/:id` | id | Público | 200 `{data:Company}` |
 | GET `/api/v1/plans` | — | Público | 200 `{data:Plan[]}` |
-| POST `/api/v1/plans/selection` | planId | Bearer, role empresa | 200 `{data:Plan}` |
+| POST `/api/v1/plans/selection` | planId | Bearer, role admin_empresa | 200 `{data:Plan}` |
 
 O router de convite declara POST `/admin/invite`, mas não é montado no
 servidor. Não existe endpoint público operacional de convite nessa baseline.
@@ -38,9 +38,7 @@ estão em [dados locais](dados-locais.md).
 
 ## Sessões e tokens
 
-Login assina `{id,email,role}` com `JWT_SECRET`, expiração 1h.
-Middleware valida Bearer e injeta `userId`/`userRole`; não carrega usuário
-ativo, vínculo tenant ou permissões do banco. Não há refresh/logout/revogação.
+Login assina `{id,email,role,companyId,tokenVersion:2}` com JWT_SECRET e expiração de 1h. O middleware valida Bearer e consulta a identidade persistida: estado, papel, empresa e e-mail devem continuar válidos. Tokens antigos exigem novo login. Cliente não autentica; admin_empresa, super_admin e atendente exigem senha. Não há refresh ou logout remoto.
 
 Recuperação principal gera token aleatório, salva SHA-256 e expiração 1h
 em `users`; reset recalcula o hash e limpa token e expiração.
@@ -51,15 +49,11 @@ Token inválido/expirado retorna 401; usuário ausente 404; já ativo 400;
 token consumido ou divergente 401. A ativação consome o token de forma
 condicional por ID/token para impedir uso concorrente.
 
-Reenvio ainda gera JWT de reset 1h e grava token cru sem atualizar expiração.
-Esse protocolo não corresponde ao reset principal, que espera hash SHA-256;
-a correção de convite não resolve o reenvio. Login de contas com status pending retorna 401; usuários
-atuais sem status continuam autenticando pelas regras existentes. Convites
-não substituem contas ativas ou atuais sem status.
+Reenvio renova o convite com propósito explícito, papel e companyId. Convites não substituem contas ativas ou de outro papel/empresa. O router admin permanece desmontado.
 
 ## Dados e respostas
 
-Empresas retornam linhas SQL sem mapper, com `descricao_detalhada` e
+Empresas usam aliases SQL para preservar o contrato público em português, com `descricao_detalhada` e
 `data_cadastro`. Os consumidores frontend agora utilizam esses nomes
 snake_case; o backend mantém esse formato de dados. Planos possuem mapper e retornam id e price como strings;
 billingPeriod é monthly/yearly/one_time e limits é um objeto flexível.
@@ -83,7 +77,7 @@ navegador contra um banco real.
 
 ## Contrato adotado e exemplos
 
-Login retorna `{ "data": { "user": { "id": "id", "email": "pessoa@example.test", "role": "cliente" }, "token": "token" } }`.
+Login retorna `{ "data": { "user": { "id": "id", "email": "pessoa@example.test", "role": "super_admin", "companyId": null }, "token": "token" } }`.
 Recuperação retorna `{ "data": { "message": "Se o e-mail existir no sistema, as instruções serão enviadas." } }`.
 Erro inesperado em produção retorna `{ "status": 500, "message": "Erro interno do servidor" }`.
 Nos demais ambientes, code/stack/details são acrescentados com sanitização.
@@ -112,8 +106,7 @@ VITE_API_URL representa a origem do backend (padrão http://localhost:3000).
 O helper aceita também o valor anterior terminado em /api/v1 sem duplicar
 prefixos; inclui /api/v1 ou /api/auth por endpoint.
 
-**Login ainda utiliza o envelope antigo:** login.tsx
-ainda lê token no topo e error nos erros Axios. Seus destinos incluem um dashboard ainda inexistente. Não há interface de seleção de plano no frontend.
+Login utiliza o envelope atual, exige e-mail/senha e retorna à Home. O guard consulta profile; dashboards ainda não possuem rotas. Não há formulário de seleção de plano.
 requestId não existe em produção e não é obrigatório no frontend.
 
 Detalhes e verificações: [integração frontend/backend](frontend-backend.md).
@@ -133,3 +126,7 @@ sem mudar autenticação, retornos, rotas ou regras comerciais. Falhas propagada
 continuam pertencendo ao handler; não são registradas repetidamente pelos
 services. Preparação de token, outbox salva e aceite do provedor são eventos
 distintos, sem expor identidade/segredos ao consumidor. Admin continua desmontado.
+
+## Capas de empresas
+
+POST /api/v1/storage/images recebe multipart autenticado; GET /api/v1/storage/images/:imageId/url é público para a capa vigente. Consultas de empresa incluem cover_image_url e cover_image_url_expires_in, sem chaves internas. Contratos, validações, status e preparação estão no [guia de storage](storage.md) e na [spec](../backend/.specs/features/storage/spec.md).
