@@ -55,13 +55,16 @@ anterior; os demais casos de uso continuam nas specs de origem.
 | SA-D28 | Usar somente companies.status para ativar/desativar; não criar administrative_status. Verificação permanece em verificado. |
 | SA-D27 | Criar superadmin por convite para definir senha; superadmin desativado pode ser reativado por outro ativo. Todos possuem os mesmos poderes. |
 | SA-D29 | Excluir atendentes por soft delete em users.deleted_at: impedir acesso, retirar da lista normal e preservar o registro e suas referências. |
-| SA-D30 | Na estrutura de users, acrescentar apenas deleted_at e alterar a migration existente de criação de usuários. Não foram aprovados session_version nem novos campos de motivo/data/autor da desativação. Não aplicar migrations automaticamente. |
+| SA-D30 | Alterar a migration existente de criação de users para incluir deleted_at. A decisão posterior SA-D37 também autoriza deactivation_reason TEXT. A resolução posterior de SA-P09 autoriza tokens_revoked_at; não adicionar session_version ou campos de autor. Não aplicar migrations automaticamente. |
 | SA-D31 | Não criar tabela de operações de vendas manuais. Usar a própria sales para distinguir o tipo/origem da venda; origin já permite manual e company_creation. Os campos exatos de controle de repetição ainda precisam de definição. |
 | SA-D32 | Paginação administrativa com page e limit, padrão de 20 registros, máximo de 100, ordenação estável e metadados. |
 | SA-D33 | Superadmin pode reativar usuários empresariais; se ainda não possuem senha, exigir novo convite para defini-la. |
 | SA-D34 | Arquivamento de empresa reutiliza o motivo de desativação; não criar motivo/campo separado de arquivamento. |
 | SA-D35 | Para venda manual ainda existente, repetir a mesma operação/dados retorna a original; mesma operação com dados diferentes retorna 409. Vendas já excluídas não entram na decisão de criação de vendas manuais e não impedem novo lançamento. Não manter recibo de exclusão para esse fluxo. A proteção da venda inicial do cadastro continua distinta. |
 | SA-D36 | Alterações administrativas usam transações e bloqueio para revalidar ator, alvo e quantidade de superadmins ativos dentro da mesma operação. O usuário sugeriu permist_write como possível solução; isso não aprova instalar ORM ou uma biblioteca nova. |
+| SA-D37 | Acrescentar deactivation_reason TEXT em users, na migration existente, para persistir o motivo da desativação. Resolve SA-P08 e complementa SA-D30. |
+| SA-D38 | Ao desativar usuário, invalidar todas as suas sessões. Após reativar, exigir novo login para gerar token válido; tokens anteriores não voltam a funcionar. Usar tokens_revoked_at conforme resolução de SA-P09. |
+| SA-D39 | Usar fingerprint para comparar os dados de tentativas de venda manual. Fingerprint não foi definido como identificador único de uma venda; combinar com operation_id foi aprovado na resolução de SA-P10. |
 
 Papéis técnicos, vínculo único e cliente sem área logada continuam conforme
 [users-roles](../users-roles/spec.md). Bearer atual é preservado; não acrescentar
@@ -205,15 +208,23 @@ ambiente/credenciais ou formulário aparentemente funcional.
 Detalhes de contrato, campos e execução transacional continuam em SA-P07,
 sem reabrir estas decisões funcionais nem exigir dados reais para implementar.
 
+## Decisão resolvida — SA-P08
+
+O usuário autorizou users.deactivation_reason do tipo TEXT em SA-D37.
+A persistência do motivo deixa de ser impedimento de schema. Implementar
+validação de motivo obrigatório junto da desativação em G6/G7.
+
+## Decisões resolvidas — SA-P07, SA-P09 e SA-P10
+
+SA-P07: contratos dos grupos restantes adotados conforme SDD e decisões
+confirmadas. SA-P09: tokens_revoked_at, sem session_version. SA-P10:
+operation_id + fingerprint em sales, sem tabela adicional.
+
 ## Aguardando resposta
 
 | ID | Decisão pendente | Parte impedida |
 | --- | --- | --- |
 | SA-P06 | Quais configurações globais e regras serão editáveis? | Área de configurações e sua persistência/API. |
-| SA-P07 | Contratos técnicos dos grupos restantes. Paginação e proteção transacional aprovadas em SA-D32/36; restrições de schema e vendas em SA-D29–35. | Não reabrir decisões resolvidas; pendências concretas em SA-P08–10. |
-| SA-P08 | Como persistir o motivo obrigatório de desativação dos usuários com a autorização de acrescentar somente deleted_at? A tabela users atual não possui campo para esse motivo. | Persistência da desativação individual em G6/G7. A exigência funcional de motivo não foi removida. |
-| SA-P09 | Qual mecanismo invalidará tokens de acesso antigos após reativação sem session_version ou novo campo de data/versão? | Garantia de revogação persistente nesse ciclo. Não reutilizar outros campos para essa finalidade sem decisão. |
-| SA-P10 | Quais campos da própria sales identificarão a operação e os dados para repetição segura, sem tabela adicional? origin distingue a origem, mas não identifica uma tentativa específica. | Persistência da idempotência de vendas manuais em G5. |
 
 Pendências não bloqueiam a escrita desta spec; bloqueiam a implementação
 do trecho afetado. Não interpretar a aprovação deste planejamento como
@@ -242,3 +253,24 @@ autorizar o commit. Mensagens no task.md são sugestões, não commits feitos.
 Se não houver revisor disponível, manter alterações sem commit e informar.
 Não executar migrations automaticamente, não fazer merge sem revisão e não
 publicar endpoints com handlers vazios ou autorização pendente.
+
+## Resolução final de sessões e vendas — 2026-11-02
+
+Usuário escolheu data de revogação: usar users.tokens_revoked_at TIMESTAMPTZ,
+sem session_version. Ao desativar, gravar o instante e invalidar todas as
+sessões. Reativar não apaga o marcador; novo login emite token com instante
+de emissão posterior. Middleware compara a cada requisição. Tokens anteriores
+ou sem instante válido diante de marcador persistido são recusados.
+Precisão de milissegundos no contrato de emissão evita reutilização de token
+gerado no mesmo segundo. Alteração e marcador são gravados na mesma operação.
+
+Usuário aprovou sales.operation_id UUID e sales.fingerprint TEXT. Escopo de
+operação por ator; fingerprint de dados validados/normalizados. Mesma operação
+com dados iguais reutiliza venda existente, dados diferentes gera 409. Vendas
+excluídas não são consultadas e não deixam recibo para o fluxo manual.
+Acrescentar os campos à migration existente de sales e alinhar SQL/JSON/TS;
+não criar tabela adicional. A proteção da venda inicial permanece separada.
+
+SA-P08 resolvida por deactivation_reason TEXT; SA-P09 resolvida por data de
+revogação; SA-P10 resolvida por operation_id + fingerprint na própria sales.
+Nenhuma dessas decisões autoriza executar migrations automaticamente.

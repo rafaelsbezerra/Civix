@@ -465,20 +465,23 @@ estão consolidadas em SA-D29–36 na [spec](spec.md).
 1. Buscar o atendente no vínculo empresarial correto e validar o ator.
 2. Excluir logicamente usando users.deleted_at. Impedir autenticação e
    retirar o usuário da listagem normal, preservando imagens e referências.
-3. Alterar somente a migration existente
+3. Alterar a migration existente
    backend/prisma/migrations/20261025000100_create_users/migration.sql
-   para acrescentar deleted_at. Não criar migration incremental de users
-   nem acrescentar session_version ou metadados novos de desativação.
+   para acrescentar deleted_at e deactivation_reason TEXT, conforme SA-D37.
+   Acrescentar também tokens_revoked_at TIMESTAMPTZ, aprovado na resolução
+   de SA-P09. Não criar session_version ou campo de autor.
 4. Alinhar User, UserRow, schema JSON e filtros dos repositories ao campo,
    durante a implementação; esta atualização documental não altera SQL/TS.
 5. Reativar usuário empresarial pelo superadmin conforme SA-D33. Se ainda
    não há senha, preparar novo convite e não conceder sessão antecipada.
 
-A exigência anterior de motivo para desativar usuários continua vigente.
-**Aguardando resposta — SA-P08:** persistência desse motivo sem novo campo
-aprovado em users. A tabela atual não possui esse campo.
-**Aguardando resposta — SA-P09:** revogação permanente de tokens de acesso
-anteriores à reativação, sem session_version ou novo marcador temporal.
+SA-P08 resolvida: persistir o motivo em users.deactivation_reason TEXT.
+Ao desativar, exigir motivo não vazio e invalidar todas as sessões do usuário.
+Reativar exige novo login; um token antigo não pode voltar a funcionar.
+SA-P09 resolvida: usar tokens_revoked_at TIMESTAMPTZ e instante de emissão
+com precisão de milissegundos no token. O middleware recusa token anterior
+ao marcador; novo login emite instante posterior. Não basta limpar
+o token no navegador ou apenas verificar status enquanto a conta está inativa.
 Não substituir essas decisões por campos de recuperação/convite nem limpar
 senhas por inferência.
 
@@ -516,9 +519,13 @@ Fluxo de repetição aprovado para POST manual:
 Exemplo: registrar venda manual, excluí-la definitivamente e reenviar a
 operação não é recusado apenas pela venda excluída. Uma venda manual ainda
 existente continua sujeita à verificação de operação/dados descrita acima.
-**Aguardando resposta — SA-P10:** campos de identificação da operação e
-comparação dos dados dentro de sales; origin sozinho não identifica uma
-requisição específica. Não implementar a persistência antes dessa definição.
+Usar fingerprint para comparar dados normalizados da requisição (SA-D39).
+Ele verifica se os dados mudaram, mas sozinho não distingue uma tentativa
+repetida de uma nova venda legítima com os mesmos dados.
+SA-P10 resolvida: usar operation_id UUID junto de fingerprint TEXT na
+própria sales. Buscar por ator/operação e comparar fingerprint para replay
+ou 409. A exclusão física da venda remove também esses campos; não há
+recibo de exclusão manual ou tabela nova.
 
 Essa decisão não altera company_registration_operations nem a proteção
 já implementada da venda inicial: repetir o cadastro da empresa não recria
@@ -543,3 +550,24 @@ O usuário sugeriu permist_write como possível solução para a proteção de
 escrita. Registrar como sugestão, sem afirmar que essa API existe ou está
 implementada no projeto. A base usa SQL/driver; não há autorização para
 instalar ORM, alterar a persistência ou introduzir dependências por isso.
+
+## Resolução final de sessões e vendas — 2026-11-02
+
+Usuário escolheu data de revogação: usar users.tokens_revoked_at TIMESTAMPTZ,
+sem session_version. Ao desativar, gravar o instante e invalidar todas as
+sessões. Reativar não apaga o marcador; novo login emite token com instante
+de emissão posterior. Middleware compara a cada requisição. Tokens anteriores
+ou sem instante válido diante de marcador persistido são recusados.
+Precisão de milissegundos no contrato de emissão evita reutilização de token
+gerado no mesmo segundo. Alteração e marcador são gravados na mesma operação.
+
+Usuário aprovou sales.operation_id UUID e sales.fingerprint TEXT. Escopo de
+operação por ator; fingerprint de dados validados/normalizados. Mesma operação
+com dados iguais reutiliza venda existente, dados diferentes gera 409. Vendas
+excluídas não são consultadas e não deixam recibo para o fluxo manual.
+Acrescentar os campos à migration existente de sales e alinhar SQL/JSON/TS;
+não criar tabela adicional. A proteção da venda inicial permanece separada.
+
+SA-P08 resolvida por deactivation_reason TEXT; SA-P09 resolvida por data de
+revogação; SA-P10 resolvida por operation_id + fingerprint na própria sales.
+Nenhuma dessas decisões autoriza executar migrations automaticamente.

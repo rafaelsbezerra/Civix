@@ -325,11 +325,11 @@ sua implementação. Revisar cada grupo antes do commit e não aplicar SQL.
   exclusão seguida de novo lançamento e repetição do cadastro inicial.
 - [ ] SA-24D: Aplicar page/limit, padrão 20, máximo 100, ordenação estável
   e metadados às listas administrativas previstas (SA-D32).
-- [ ] SA-25D: Acrescentar somente deleted_at à migration existente
+- [ ] SA-25D: Acrescentar deleted_at e deactivation_reason TEXT à migration existente
   backend/prisma/migrations/20261025000100_create_users/migration.sql;
   alinhar User, UserRow, JSON e repositories. Excluir atendente logicamente,
   retirar da lista normal e impedir acesso sem destruir referências
-  (SA-D29/30). Não executar migration nem criar campos não aprovados.
+  (SA-D29/30/37). Não executar migration nem criar campos não aprovados.
 - [ ] SA-25R: Permitir reativar usuário empresarial pelo superadmin; quando
   ainda não possuir senha, exigir novo convite (SA-D33).
 - [ ] SA-29D: Proteger alterações administrativas por transação/bloqueio,
@@ -341,13 +341,12 @@ sua implementação. Revisar cada grupo antes do commit e não aplicar SQL.
 
 ### Impedimentos técnicos remanescentes
 
-- **Aguardando resposta — SA-P08:** persistência do motivo de desativação
-  individual com somente deleted_at autorizado em users. Afeta G6/G7.
-- **Aguardando resposta — SA-P09:** revogação permanente de tokens antigos
-  após reativação, sem session_version ou novo marcador. Afeta o ciclo de
-  acesso e os testes correspondentes.
-- **Aguardando resposta — SA-P10:** campos de operação/comparação dentro de
-  sales para repetição segura manual, sem nova tabela. Afeta G5.
+- **SA-P08 resolvida:** campo users.deactivation_reason TEXT aprovado em
+  SA-D37. Implementar gravação e validação junto de G6/G7.
+- **SA-P09 resolvida:** usar tokens_revoked_at TIMESTAMPTZ; desativar
+  invalida todas as sessões, reativar exige novo login. Não usar session_version.
+- **SA-P10 resolvida:** operation_id UUID e fingerprint TEXT na própria
+  sales, sem tabela adicional e sem considerar vendas excluídas.
 
 Não existe módulo de atendimento no backend atual. Preservar essa limitação;
 quando o domínio existir, integrar a finalização dos atendimentos atribuídos.
@@ -360,3 +359,24 @@ SA-D29–36 e SA-P08–10 sem bloqueadores documentais; commit liberado.
 22 links relativos válidos e git diff --check aprovado. Nenhum SQL ou teste
 foi executado para esta atualização documental. Alterações de código/teste
 já em andamento antes dela foram preservadas e não integram este commit.
+
+## Resolução final de sessões e vendas — 2026-11-02
+
+Usuário escolheu data de revogação: usar users.tokens_revoked_at TIMESTAMPTZ,
+sem session_version. Ao desativar, gravar o instante e invalidar todas as
+sessões. Reativar não apaga o marcador; novo login emite token com instante
+de emissão posterior. Middleware compara a cada requisição. Tokens anteriores
+ou sem instante válido diante de marcador persistido são recusados.
+Precisão de milissegundos no contrato de emissão evita reutilização de token
+gerado no mesmo segundo. Alteração e marcador são gravados na mesma operação.
+
+Usuário aprovou sales.operation_id UUID e sales.fingerprint TEXT. Escopo de
+operação por ator; fingerprint de dados validados/normalizados. Mesma operação
+com dados iguais reutiliza venda existente, dados diferentes gera 409. Vendas
+excluídas não são consultadas e não deixam recibo para o fluxo manual.
+Acrescentar os campos à migration existente de sales e alinhar SQL/JSON/TS;
+não criar tabela adicional. A proteção da venda inicial permanece separada.
+
+SA-P08 resolvida por deactivation_reason TEXT; SA-P09 resolvida por data de
+revogação; SA-P10 resolvida por operation_id + fingerprint na própria sales.
+Nenhuma dessas decisões autoriza executar migrations automaticamente.
