@@ -3,7 +3,6 @@ import * as companyService from '../services/company.service.js';
 import { AppError } from '../shared/errors/app.error.js';
 import { ErrorCode } from '../shared/errors/error.code.js';
 import { createSuccessResponse } from '../shared/contracts/response.contract.js';
-import { presentCompany } from '../services/company.image.service.js';
 
 export async function createCompany(req: Request, res: Response): Promise<Response> {
   if (req.userId === undefined) {
@@ -24,19 +23,19 @@ export async function createCompany(req: Request, res: Response): Promise<Respon
 
   const company = await companyService.createCompany(req.body);
 
-  return res.status(201).json(createSuccessResponse(await presentCompany(company)));
+  return res.status(201).json(createSuccessResponse(await companyService.presentCompany(company)));
 }
 
 export async function listCompanies(req: Request, res: Response): Promise<Response> {
   const result = await companyService.getCompanies();
 
-  return res.status(200).json(createSuccessResponse(Array.isArray(result) ? await Promise.all(result.map(presentCompany)) : await presentCompany(result)));
+  return res.status(200).json(createSuccessResponse(Array.isArray(result) ? await Promise.all(result.map(companyService.presentCompany)) : await companyService.presentCompany(result)));
 }
 
 export async function listVerifiedCompanies(req: Request, res: Response): Promise<Response> {
   const result = await companyService.getVerifiedCompanies();
 
-  return res.status(200).json(createSuccessResponse(Array.isArray(result) ? await Promise.all(result.map(presentCompany)) : await presentCompany(result)));
+  return res.status(200).json(createSuccessResponse(Array.isArray(result) ? await Promise.all(result.map(companyService.presentCompany)) : await companyService.presentCompany(result)));
 }
 
 export async function searchCompanies(req: Request, res: Response): Promise<Response> {
@@ -52,7 +51,7 @@ export async function searchCompanies(req: Request, res: Response): Promise<Resp
 
   const result = await companyService.searchCompanies(q);
 
-  return res.status(200).json(createSuccessResponse(Array.isArray(result) ? await Promise.all(result.map(presentCompany)) : await presentCompany(result)));
+  return res.status(200).json(createSuccessResponse(Array.isArray(result) ? await Promise.all(result.map(companyService.presentCompany)) : await companyService.presentCompany(result)));
 }
 
 export async function listCompaniesByCategory(req: Request, res: Response): Promise<Response> {
@@ -68,7 +67,7 @@ export async function listCompaniesByCategory(req: Request, res: Response): Prom
 
   const result = await companyService.getCompaniesByCategory(category);
 
-  return res.status(200).json(createSuccessResponse(Array.isArray(result) ? await Promise.all(result.map(presentCompany)) : await presentCompany(result)));
+  return res.status(200).json(createSuccessResponse(Array.isArray(result) ? await Promise.all(result.map(companyService.presentCompany)) : await companyService.presentCompany(result)));
 }
 
 export async function listCompaniesByState(req: Request, res: Response): Promise<Response> {
@@ -84,7 +83,7 @@ export async function listCompaniesByState(req: Request, res: Response): Promise
 
   const result = await companyService.getCompaniesByState(state);
 
-  return res.status(200).json(createSuccessResponse(Array.isArray(result) ? await Promise.all(result.map(presentCompany)) : await presentCompany(result)));
+  return res.status(200).json(createSuccessResponse(Array.isArray(result) ? await Promise.all(result.map(companyService.presentCompany)) : await companyService.presentCompany(result)));
 }
 
 export async function listCompaniesBySize(req: Request, res: Response): Promise<Response> {
@@ -100,7 +99,7 @@ export async function listCompaniesBySize(req: Request, res: Response): Promise<
 
   const result = await companyService.getCompaniesBySize(size);
 
-  return res.status(200).json(createSuccessResponse(Array.isArray(result) ? await Promise.all(result.map(presentCompany)) : await presentCompany(result)));
+  return res.status(200).json(createSuccessResponse(Array.isArray(result) ? await Promise.all(result.map(companyService.presentCompany)) : await companyService.presentCompany(result)));
 }
 
 export async function getCompany(req: Request, res: Response): Promise<Response> {
@@ -116,5 +115,5 @@ export async function getCompany(req: Request, res: Response): Promise<Response>
 
   const result = await companyService.getCompanyById(id);
 
-  return res.status(200).json(createSuccessResponse(Array.isArray(result) ? await Promise.all(result.map(presentCompany)) : await presentCompany(result)));
+  return res.status(200).json(createSuccessResponse(Array.isArray(result) ? await Promise.all(result.map(companyService.presentCompany)) : await companyService.presentCompany(result)));
 }

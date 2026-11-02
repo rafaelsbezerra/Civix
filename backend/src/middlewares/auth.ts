@@ -1,9 +1,9 @@
 import type { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import type { AuthenticatedUser, AuthenticatedRole } from '../entities/user.entity.js';
-import { getAuthenticatedUser } from '../services/user.access.service.js';
 import { AppError } from '../shared/errors/app.error.js';
 import { ErrorCode } from '../shared/errors/error.code.js';
+import { getAuthenticatedUser } from '../services/user.service.js';
 
 declare global {
   namespace Express {
