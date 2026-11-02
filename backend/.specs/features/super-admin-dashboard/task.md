@@ -5,7 +5,7 @@ Data: 2026-11-02. [Spec](spec.md) · [SDD](sdd.md) ·
 
 G0 a G4 e equivalentes frontend, incluindo G2P, foram concluídos.
 Em 2026-11-02 o usuário autorizou a continuação G5 a G8 e equivalentes frontend;
-as decisões técnicas novas abaixo aguardam confirmação antes da parte afetada.
+as decisões técnicas dessa entrega estão resolvidas; SA-P06 segue em backlog.
 **Não commitar sem revisão de cada grupo.** Os commits abaixo são sugestões
 em inglês, no padrão Conventional Commits, e orientam os commits da implementação revisada.
 Paths são relativos à raiz do repositório; SDD detalha a lógica por arquivo.
@@ -148,22 +148,22 @@ Sugestão de commit: `feat(companies): register company and initial sale atomica
 
 ## G5 — Gestão de empresas e vendas manuais
 
-- [ ] SA-19: Implementar listagem/detalhe/edição administrativos e troca de
+- [x] SA-19: Implementar listagem/detalhe/edição administrativos e troca de
   plano sem venda automática; preservar snapshot de vendas antigas.
-- [ ] SA-20: Implementar desativação com motivo obrigatório, soft delete,
+- [x] SA-20: Implementar desativação com motivo obrigatório, soft delete,
   reativação e restauração permitidas; aplicar elegibilidade em auth, catálogo
   e storage. Restaurada permanece desativada até reativação explícita;
   invalidar convites anteriores, sem recuperá-los ao reativar.
   Não apagar histórico/imagens nem reativar funcionários bloqueados individualmente.
-- [ ] SA-21: Implementar consulta de vendas e lançamento manual conforme
+- [x] SA-21: Implementar consulta de vendas e lançamento manual conforme
   decisões resolvidas SA-P04 e contratos SA-P07; proteger repetição; não criar cobrança ou pagamento. Não
   implementar edição: correção exige DELETE definitivo e novo POST manual.
   Modo plano atual usa preço consultado pelo backend sem motivo obrigatório;
   modo valor manual exige descrição/motivo e atende plano antigo. Permitir
   data comercial passada, distinta de created_at, e UTC em todas as datas.
-- [ ] SA-22: Integrar telas, confirmações e aviso de venda manual na edição;
+- [x] SA-22: Integrar telas, confirmações e aviso de venda manual na edição;
   navegação após troca não registra venda sozinha.
-- [ ] SA-23: Testar suspensa/arquivada, tokens anteriores, dois tenants,
+- [x] SA-23: Testar suspensa/arquivada, tokens anteriores, dois tenants,
   URL de capa e histórico. Cobrir plano errado no cadastro → excluir venda
   automática → relançar manualmente; troca posterior de plano não gera venda.
   Testar DELETE sem apagar empresa/plano e impedir que repetição do cadastro
@@ -188,16 +188,16 @@ a proteção contra recriar venda inicial pelo cadastro permanece distinta.
 
 ## G6 — Equipe de cada empresa
 
-- [ ] SA-24: Consultar funcionários por empresa e permitir convite dos
+- [x] SA-24: Consultar funcionários por empresa e permitir convite dos
   papéis empresariais aprovados usando primeiro acesso/reenvio existentes.
-- [ ] SA-25: Permitir troca admin_empresa/atendente e desativar o último admin
+- [x] SA-25: Permitir troca admin_empresa/atendente e desativar o último admin
   empresarial. Validar empresa da URL/vínculo e motivo obrigatório. Atendentes
   podem ser desativados/excluídos logicamente por deleted_at, finalizando atendimentos atribuídos; integrar
   ao domínio de atendimento quando disponível, sem criá-lo por antecipação.
   Não promover superadmin nem transferir empresa implicitamente.
-- [ ] SA-26: Integrar lista/formulário e estados do convite; tratar falha de
+- [x] SA-26: Integrar lista/formulário e estados do convite; tratar falha de
   e-mail sem duplicar conta/empresa/venda.
-- [ ] SA-27: Testar duas empresas, e-mail único, convite repetido, vínculo
+- [x] SA-27: Testar duas empresas, e-mail único, convite repetido, vínculo
   divergente, usuário suspenso e payload sem segredos; revisar grupo.
 
 Alterar backend/src/controller/user.controller.ts, services/user.service.ts,
@@ -213,13 +213,13 @@ Sugestão de commit: `feat(users): add company-scoped administration`.
 
 ## G7 — Administradores da plataforma
 
-- [ ] SA-28: Implementar criação de superadmins por outros ativos via convite
+- [x] SA-28: Implementar criação de superadmins por outros ativos via convite
   para definir senha, listagem e reativação por outro superadmin ativo.
   Usar user existente, com motivo ao desativar e poderes iguais para todos.
-- [ ] SA-29: Impedir desativar a própria conta de superadmin e o último
+- [x] SA-29: Impedir desativar a própria conta de superadmin e o último
   superadmin ativo, inclusive sob concorrência. Testar chamadas diretas,
   motivo ausente e cenário com uma única conta; não expor editor de permissões.
-- [ ] SA-30: Integrar tela e testar escalação indevida, vínculo nulo,
+- [x] SA-30: Integrar tela e testar escalação indevida, vínculo nulo,
   duplicidade, motivo persistido, convite/consumo único, reativação e poderes
   iguais; revisar grupo. SA-P05 funcionalmente resolvida, sem editor de permissões.
 
@@ -236,19 +236,19 @@ Sugestão de commit: `feat(users): add reviewed superadmin management`.
 
 ## G8 — Integração, revisão e entrega
 
-- [ ] SA-31: Executar E2E UI/API/persistência isolada dos casos do SDD;
+- [x] SA-31: Executar E2E UI/API/persistência isolada dos casos do SDD;
   confirmar negativas, rollback e histórico; separar provas simuladas/reais.
-- [ ] SA-32: Conferir scripts reais e executar checks relevantes; documentar
+- [x] SA-32: Conferir scripts reais e executar checks relevantes; documentar
   falhas herdadas sem reaproveitar resultado antigo como sucesso atual.
-- [ ] SA-33: Atualizar docs/api.md, docs/operacao.md, docs/storage.md,
+- [x] SA-33: Atualizar docs/api.md, docs/operacao.md, docs/storage.md,
   docs/frontend-backend.md e specs impactadas com o resultado implementado.
 - [ ] SA-34: Revisar grupo e diff de integração; registrar aprovação antes
   de commit, push e PR para staging. Incluir SQL versionado no PR.
 
 Arquivos previstos: backend/tests/platform.e2e.test.ts,
-frontend/tests/super-admin.e2e.ts se o runner escolhido suportar o local,
-specs desta entrega e guias listados. Não criar teste executável nesta fase.
-Confirmar runner/local antes da implementação; não adicionar pacote sem aprovação.
+frontend/scripts/verify-super-admin-browser.mjs,
+specs desta entrega e guias listados. Runner adotado: scripts locais Node/tsx e Chrome headless com Playwright
+já instalado. Não adicionar pacote sem aprovação.
 Sugestão de commit: `test(super-admin): verify platform workflows end to end`.
 
 ## Backlog, sem inclusão automática na implementação
@@ -283,6 +283,8 @@ Não há código, configuração ou teste executável alterado nesta entrega.
 
 ## Evidências da implementação — 2026-11-02
 
+Histórico da rodada G0 a G4; a validação de G5 a G8 está registrada ao fim.
+
 Revisão secundária: final_review, sem bloqueadores após corrigir privacidade
 das consultas públicas e ativação de plano legado com preço zero.
 Revisões de testes: storage_tests e review_http.
@@ -310,36 +312,37 @@ review_http aprovou o delta visual, além dos fluxos reais já registrados.
 G5 a G8 e equivalentes frontend foram autorizados em 2026-11-02, na branch
 feat/super-admin-dashboard. Respostas às seis perguntas registradas como
 SA-D29–36 na [spec](spec.md); lógica e arquivos no [SDD](sdd.md).
-As tarefas G5 a G8 continuam abertas: documentar uma decisão não comprova
-sua implementação. Revisar cada grupo antes do commit e não aplicar SQL.
+G5 a G7 implementados e testados; verificação local G8 concluída.
+SA-34 permanece aberta somente para a criação do PR em staging.
+Documentar uma decisão não comprova sua implementação. Revisar cada grupo antes do commit e não aplicar SQL.
 
 ### Ajustes de tasks pelas decisões respondidas
 
-- [ ] SA-20D: Arquivar empresa reutilizando o motivo/campo de desativação,
+- [x] SA-20D: Arquivar empresa reutilizando o motivo/campo de desativação,
   sem criar campo próprio de arquivamento (SA-D34).
-- [ ] SA-21D: Diferenciar venda manual na própria sales, sem tabela de
+- [x] SA-21D: Diferenciar venda manual na própria sales, sem tabela de
   operações manuais. Validar operação/dados somente entre vendas existentes;
   venda excluída não impede novo lançamento. Manter distinta a proteção da
   venda inicial em company_registration_operations (SA-D31/35).
-- [ ] SA-23D: Cobrir replay de venda manual existente, dados divergentes,
+- [x] SA-23D: Cobrir replay de venda manual existente, dados divergentes,
   exclusão seguida de novo lançamento e repetição do cadastro inicial.
-- [ ] SA-24D: Aplicar page/limit, padrão 20, máximo 100, ordenação estável
+- [x] SA-24D: Aplicar page/limit, padrão 20, máximo 100, ordenação estável
   e metadados às listas administrativas previstas (SA-D32).
-- [ ] SA-25D: Acrescentar deleted_at e deactivation_reason TEXT à migration existente
-  backend/prisma/migrations/20261025000100_create_users/migration.sql;
+- [x] SA-25D: Acrescentar deleted_at e deactivation_reason TEXT por migration incremental
+  backend/prisma/migrations/20261102000400_user_administration/migration.sql;
   alinhar User, UserRow, JSON e repositories. Excluir atendente logicamente,
   retirar da lista normal e impedir acesso sem destruir referências
   (SA-D29/30/37). Não executar migration nem criar campos não aprovados.
-- [ ] SA-25R: Permitir reativar usuário empresarial pelo superadmin; quando
+- [x] SA-25R: Permitir reativar usuário empresarial pelo superadmin; quando
   ainda não possuir senha, exigir novo convite (SA-D33).
-- [ ] SA-29D: Proteger alterações administrativas por transação/bloqueio,
+- [x] SA-29D: Proteger alterações administrativas por transação/bloqueio,
   revalidando ator, alvo e último ativo dentro da operação. Testar solicitações
   concorrentes. permist_write foi uma sugestão, sem autorizar ORM/pacote
   (SA-D36).
-- [ ] SA-31D: Incluir os casos acima na validação G8 e registrar separadamente
+- [x] SA-31D: Incluir os casos acima na validação G8 e registrar separadamente
   evidências simuladas/reais. Não afirmar entrega dos grupos antes dos checks.
 
-### Impedimentos técnicos remanescentes
+### Decisões técnicas resolvidas
 
 - **SA-P08 resolvida:** campo users.deactivation_reason TEXT aprovado em
   SA-D37. Implementar gravação e validação junto de G6/G7.
@@ -380,3 +383,54 @@ não criar tabela adicional. A proteção da venda inicial permanece separada.
 SA-P08 resolvida por deactivation_reason TEXT; SA-P09 resolvida por data de
 revogação; SA-P10 resolvida por operation_id + fingerprint na própria sales.
 Nenhuma dessas decisões autoriza executar migrations automaticamente.
+
+## Política de migrations atualizada — 2026-11-02
+
+O usuário informou que users já existe no banco. Alterações em users e nas
+demais tabelas criadas antes da migration create_images devem ser versionadas
+como novas migrations de alteração, sem editar as migrations originais de
+criação. Esta decisão substitui a orientação anterior de editar create_users.
+
+Para os campos aprovados de users, usar
+backend/prisma/migrations/20261102000400_user_administration/migration.sql:
+ALTER TABLE para deleted_at TIMESTAMPTZ, deactivation_reason TEXT e
+tokens_revoked_at TIMESTAMPTZ. A criação original de users foi preservada.
+Nenhuma migration é executada automaticamente.
+
+## Validação G5 a G8 — 2026-11-02
+
+- Revisão backend: security_review (gpt-6.1-sol, high), leitura estática
+  aprovada após corrigir corridas de login/reconvite/revogação, proteção de
+  convite pendente e edição de dados mantendo plano atual inativo. Planos
+  também revalidam o ator na transação. Sem bloqueadores remanescentes.
+- Backend: test:foundation 124/124; test:platform 67/67; test:seed 40/40;
+  test:prisma 3/3 offline. TypeScript completo aprovado. scope_review
+  (gpt-6-luna, max) verificou testes, SQL simulado e preservação das migrations.
+- Frontend: 55/55 testes direcionados (dashboard, guard e consumidores),
+  TypeScript e lint aprovados. company_ui_tests (gpt-6-luna, max) implementou
+  a cobertura de empresas/vendas/usuários e executou o E2E.
+- Suíte completa frontend atual: 176 aprovados e 11 falhas em App, About/assets,
+  rotas públicas Sobre/Planos, Hero e ActionButton. Essas falhas já existiam
+  fora do escopo; não considerar a suíte completa aprovada.
+- npm run build: TypeScript e bundle Vite concluídos; gate final existente
+  falha por dashboard.png ausente no manifest da página Sobre.
+- npm run test:e2e:super-admin aprovado em Chrome headless, com API Express
+  real, Vite e fixture JSON sintética em portas/diretórios temporários. Cobriu
+  planos, cadastro/replay, edição sem venda, venda manual e DELETE, filtros,
+  suspensão/revogação/reativação, convites/primeiro acesso e exclusão lógica,
+  administração global, perfil, arquivamento/restauração e navegação móvel.
+  Sete screenshots gerados, com inspeção de desktop e móvel; diálogo mobile centralizado em 390×844,
+  sem overflow e com teclado/Escape. Fixture e processos encerrados.
+- Não houve acesso a PostgreSQL/R2 reais, aplicação de migrations, instalação
+  de pacotes ou modificação de dados locais pessoais. SQL dos adapters usa
+  conexão simulada nos testes; a homologação real permanece operacionalmente
+  pendente, sem alegação de prova de transação no provedor.
+
+Commits funcionais separados conforme sugestões, com snapshots staged
+verificados por TypeScript antes de cada commit: gestão de empresas, vendas,
+equipe empresarial e superadmins. O commit G8 reúne testes, runner e guias.
+
+SA-34: o conector GitHub retorna 404 para rafaelsbe/Civix (busca 422); o
+GitHub CLI não está instalado e o navegador disponível não possui sessão
+autenticada. Concluir commits/push e deixar a descrição/SQL do PR pronta,
+sem afirmar PR criado. A abertura depende de acesso autorizado ao repositório.

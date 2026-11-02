@@ -3,7 +3,7 @@
 [Spec](spec.md) · [SDD](../../../../backend/.specs/features/super-admin-dashboard/sdd.md) ·
 [Plano E2E e revisão](../../../../backend/.specs/features/super-admin-dashboard/task.md).
 G0 a G4 e equivalentes concluídos. G5 a G8 autorizados para continuação,
-com decisões pendentes no SDD/task backend. Não commitar sem revisão. Commits abaixo são sugestões;
+com decisões resolvidas; G5 a G7 implementados, G8 validado localmente; abertura do PR depende de acesso ao GitHub. Não commitar sem revisão. Commits abaixo são sugestões;
 não repetir commits para os mesmos grupos do plano backend.
 
 ## FE-SA-01 — Shell, após G1
@@ -74,22 +74,22 @@ Completar frontend/src/lib/api.ts. Sugestões (G3/G4):
 
 ## FE-SA-03 — Empresas e vendas, junto de G5
 
-- [ ] Criar Companies.tsx, CompanyDetail.tsx, CompanyEdit.tsx, Sales.tsx e
+- [x] Criar Companies.tsx, CompanyDetail.tsx, CompanyEdit.tsx, Sales.tsx e
   SaleCreate.tsx em frontend/src/pages/dashboard-super-admin; SaleForm.tsx em
   frontend/src/components/dashboard-super-admin.
-- [ ] Mostrar aviso de venda manual ao editar empresa; link contextual não
+- [x] Mostrar aviso de venda manual ao editar empresa; link contextual não
   cria venda. Diferenciar valor comercial de pagamento recebido.
-- [ ] Não criar edição de venda. Implementar confirmação de exclusão
+- [x] Não criar edição de venda. Implementar confirmação de exclusão
   definitiva e acesso a novo lançamento; explicar correção de plano errado
   no cadastro sem disparar venda automática após editar empresa.
-- [ ] Confirmar suspensão/arquivamento e preservar histórico visível no admin.
-- [ ] Exigir motivo ao desativar empresa, oferecer reativação/restauração
+- [x] Confirmar suspensão/arquivamento e preservar histórico visível no admin.
+- [x] Exigir motivo ao desativar empresa, oferecer reativação/restauração
   permitidas; restaurada continua desativada até reativar explicitamente.
   Convites antigos inválidos e motivo vazio/espaços não envia.
-- [ ] Venda por plano atual com preço somente leitura e motivo opcional;
+- [x] Venda por plano atual com preço somente leitura e motivo opcional;
   venda por valor manual com montante e descrição/motivo obrigatórios.
   Permitir data comercial passada e UTC em entrada/exibição/filtros.
-- [ ] Integrar filtros/paginação aprovados, loading/vazio/erro e conflito;
+- [x] Integrar filtros/paginação aprovados, loading/vazio/erro e conflito;
   testar troca de plano sem venda, exclusão e relançamento manual, além dos
   valores históricos das vendas preservadas. Revisar antes de commit.
 
@@ -98,21 +98,21 @@ Sugestões (G5): `feat(companies): add platform lifecycle management` e
 
 ## FE-SA-04 — Equipe e superadmins, junto de G6/G7
 
-- [ ] Criar Users.tsx em frontend/src/pages/dashboard-super-admin e UserForm.tsx
+- [x] Criar Users.tsx em frontend/src/pages/dashboard-super-admin e UserForm.tsx
   em frontend/src/components/dashboard-super-admin, reutilizados pelos contextos
   de empresa e superadmins sem duplicar tela/formulário por papel.
-- [ ] Validar contexto empresarial, estados de convites e campos permitidos;
+- [x] Validar contexto empresarial, estados de convites e campos permitidos;
   exigir motivo para desativar usuários/superadmins. Criação por outro
   superadmin usa convite para definir senha; permitir reativação por outro
   ativo, com poderes iguais. Sem editor de permissões individuais.
-- [ ] Permitir troca admin_empresa/atendente e desativar último admin da
+- [x] Permitir troca admin_empresa/atendente e desativar último admin da
   empresa; exclusão/desativação de atendente finaliza seus atendimentos
   atribuídos quando o domínio existir. Não duplicar módulo de atendimento.
-- [ ] Impedir pela UI desativação da própria conta superadmin e do último
+- [x] Impedir pela UI desativação da própria conta superadmin e do último
   superadmin ativo, tratando também recusa da API sob concorrência. Testar
   motivo vazio e início com somente uma conta. Não editar permissões indefinidas.
   A proteção do último ativo é de superadmin, não de admin empresarial.
-- [ ] Testar empresa A/B, retirada de acesso e informações não secretas;
+- [x] Testar empresa A/B, retirada de acesso e informações não secretas;
   revisar grupos separadamente.
 
 Sugestões: `feat(users): add company-scoped administration` (G6) e
@@ -120,17 +120,17 @@ Sugestões: `feat(users): add company-scoped administration` (G6) e
 
 ## FE-SA-05 — Verificação da entrega
 
-- [ ] Implementar testes de componentes nos diretórios correspondentes e
+- [x] Implementar testes de componentes nos diretórios correspondentes e
   cenários E2E com API/persistência isoladas; runner/local a confirmar em G8.
-- [ ] Executar scripts existentes de testes, TypeScript, lint e build
+- [x] Executar scripts existentes de testes, TypeScript, lint e build
   pertinentes; registrar limites e falhas atuais, sem reutilizar prova antiga.
-- [ ] Atualizar docs/frontend-backend.md e specs da entrega após implementar.
-- [ ] Revisar antes de commit; registrar revisor/evidências no task backend.
+- [x] Atualizar docs/frontend-backend.md e specs da entrega após implementar.
+- [x] Revisar antes de commit; registrar revisor/evidências no task backend.
 
 Sugestão: `test(super-admin): verify platform workflows end to end` (G8).
 
 Backlog segue a spec canônica: billing, configurações sem definição,
-trial e funcionalidades/limites/regras por plano. G5 a G8 autorizados e ainda não concluídos.
+trial e funcionalidades/limites/regras por plano. G5 a G7 implementados; G8 em verificação final.
 
 ## Regra de organização
 
@@ -146,3 +146,7 @@ do plano e a UI trata catálogo vazio sem bloquear navegação administrativa.
 
 Evidências G0 a G4 e limites de build/integração real estão registrados no
 [task backend](../../../../backend/.specs/features/super-admin-dashboard/task.md#evidências-da-implementação--2026-11-02).
+
+Verificação atual: 55 testes direcionados, TypeScript, lint e E2E real do
+dashboard aprovados. A suíte completa mantém 11 falhas herdadas e o build
+para no gate About/dashboard.png. Ver o task backend para números e limites.

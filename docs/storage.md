@@ -44,3 +44,15 @@ Para falha de limpeza com metadados existentes, uma operação interna pode repe
 Na verificação histórica da entrega de storage, passaram 124 testes backend, 35 testes frontend, TypeScript backend/frontend, lint frontend e três testes offline do tooling Prisma. Os testes de upload usam HTTP local, persistência JSON e substituto do provedor R2; não comprovam credenciais, bucket ou constraints em PostgreSQL real.
 
 Permanecem pendentes a aplicação autorizada das migrations e a homologação PostgreSQL/R2. O build completo frontend encontra a verificação preexistente de dashboard.png ausente; TypeScript e bundle Vite passaram. A auditoria npm reporta quatro alertas altos transitivos do tooling Prisma fixado; a atualização não foi aplicada.
+
+## Elegibilidade após gestão administrativa
+
+Empresa inativa ou arquivada não aparece no catálogo, detalhe público ou
+rota de capa, e não aceita upload, inclusive por superadmin. As referências
+e objetos existentes são preservados. A gravação de chave também revalida
+elegibilidade para recusar uma suspensão concorrente ao upload.
+Restaurar mantém a empresa inativa até reativação explícita. Sessões dos
+usuários vinculados são revogadas, sem reativar contas bloqueadas individualmente.
+URLs já assinadas seguem seu prazo de cinco minutos; o backend não promete
+revogar um arquivo já baixado. Consultas de empresa não incluem
+cover_image_url_expires_in.

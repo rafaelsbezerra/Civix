@@ -1,7 +1,7 @@
 # Design do dashboard superadmin
 
 Requisitos visuais confirmados em 2026-11-02. Complementa a [spec](spec.md).
-Somente especificação: tema/alternância não foram implementados nesta tarefa.
+Design implementado; evidências e limites de verificação estão no task backend.
 
 ## Identidade visual e referências
 

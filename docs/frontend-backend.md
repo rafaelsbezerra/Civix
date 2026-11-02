@@ -105,4 +105,27 @@ HTTP existentes. Guard consulta identidade atual; API também valida permissão.
 Cadastro mantém operationId por payload até sucesso para repetir com segurança.
 Perfil atualiza nome no header; mudar e-mail encerra a sessão após salvar.
 Tema claro inicial, preferência guardada neste navegador e CSS restrito à área.
-Menus de gestão empresarial, vendas manuais e usuários aguardam G5 a G7.
+Menus de empresas, vendas e superadmins estão disponíveis na continuação
+G5 a G7. A equipe é acessada pelo detalhe de cada empresa.
+
+## Integração de empresas, vendas e usuários
+
+Companies/CompanyDetail/CompanyEdit consomem a administração paginada e
+transições reais. Troca de plano mantém o aviso de venda manual; abrir a
+nova venda não envia requisição de criação. CompanyForm permite manter
+o plano atual inativo para editar dados, mas novos vínculos exigem plano elegível.
+
+Sales/SaleCreate usam preço do plano vigente ou valor manual com motivo,
+interpretam datas em UTC e preservam operationId ao repetir o mesmo payload.
+A interface oferece exclusão definitiva com confirmação, sem editar venda.
+CompanyPicker pagina e busca pelo nome/CNPJ; PlanFilter apresenta nomes.
+
+Users/UserForm atendem a equipe da empresa e os administradores globais.
+Alterar o contexto reinicia o workspace e ignora respostas antigas. Reenvio,
+estados do convite, motivo de desativação, reativação e exclusão lógica são
+tratados pelas APIs existentes no único lib/api.ts. A autossuspensão e a
+retirada do último superadmin ativo são bloqueadas também no backend.
+
+fetchApi aceita 204 sem tentar ler JSON. Confirmações usam dialog nativo,
+com foco restituído ao fechar e tema herdado do dashboard; tabelas usam
+rolagem interna no celular. Paginação usa query page/limit e meta.pageSize.

@@ -1,6 +1,6 @@
 # Planejamento de entrega do superadmin
 
-Data: 2026-11-02. G0 a G4 e perfil próprio implementados na branch feat/super-admin-dashboard; G5 a G8 foram autorizados para continuação e ainda não estão concluídos.
+Data: 2026-11-02. G0 a G4 e perfil próprio implementados na branch feat/super-admin-dashboard; G5 a G7 implementados e G8 validado localmente; abertura do PR depende de acesso ao GitHub.
 
 - [Spec: escopo, decisões e aceite](../backend/.specs/features/super-admin-dashboard/spec.md).
 - [SDD: fluxos, contratos propostos e localização do código](../backend/.specs/features/super-admin-dashboard/sdd.md).
@@ -22,12 +22,12 @@ Assinaturas, cobrança e pagamentos ficam em backlog. Também ficam em
 backlog a arquitetura de teste gratuito e as capacidades, limites de uso e
 regras específicas por plano. Configurações globais aguardam definição.
 As decisões funcionais SA-P01 a SA-P05 estão resolvidas. Configurações
-globais (SA-P06) continuam em backlog. Os contratos SA-P07 foram adotados para G0 a G4; grupos posteriores continuam sujeitos à implementação e revisão.
+globais (SA-P06) continuam em backlog. Os contratos SA-P07 a SA-P10 foram resolvidos e implementados.
 
 A ordem parte da coerência de autenticação/schema, depois shell, planos,
 cadastro com venda, gestão de empresas/vendas, equipe, superadmins e E2E.
 Os contratos implementados estão detalhados no SDD.
-**Não commitar sem revisão.** Duas migrations incrementais e testes foram criados na implementação, sem aplicação de SQL no banco. Os resultados atuais e limites estão no task backend.
+**Não commitar sem revisão.** Três migrations e testes foram criados na implementação, sem aplicação de SQL no banco. Os resultados atuais e limites estão no task backend.
 
 Organização confirmada: cadastro com plano/venda nos arquivos existentes de
 company; usuários empresariais e superadmins nos arquivos existentes de user,
@@ -52,9 +52,9 @@ desativado. Atendentes podem ser excluídos/desativados, finalizando atendimento
 atribuídos. Superadmins entram por convite para definir senha, podem ser
 reativados por outro ativo e têm poderes iguais, sem editor individual.
 
-## Estado da implementação G0 a G4
+## Estado da implementação G0 a G7
 
-Rotas privadas em `/super-admin`: início, planos, cadastro de empresa e perfil.
+Rotas privadas em `/super-admin`: início, empresas, planos, vendas, equipe, superadmins e perfil.
 Tema claro inicial e preferência claro/escuro persistida neste navegador.
 Alterar nome atualiza o header; alterar e-mail exige novo login.
 
@@ -67,10 +67,27 @@ JSON grava o conjunto sob lock; PostgreSQL usa uma conexão e transação única
 O POST existente `/api/v1/empresas` adota o mesmo contrato, sem permitir contornar a venda.
 
 As migrations `20261102000200_company_administration` e
-`20261102000300_create_sales` ainda precisam ser aplicadas pelo responsável
+`20261102000300_create_sales` e `20261102000400_user_administration`
+ainda precisam ser aplicadas pelo responsável
 no ambiente autorizado antes de usar essas operações com PostgreSQL.
 Companies reutiliza `status`; não existe coluna `administrative_status`.
 A inicialização do cliente R2 ocorre quando uma operação de imagem o exige.
 
-Gestão de empresas existentes, vendas manuais/exclusão, equipe e outros
-superadmins continuam em G5 a G7; não há menus dessas operações nesta rodada.
+Gestão de empresas, vendas manuais/exclusão, equipe e superadmins estão
+disponíveis. Usuários e empresas excluídos logicamente preservam referências.
+Suspensão e arquivamento exigem motivo; restaurar empresa mantém inatividade.
+Reativar usuário exige novo login e, sem senha, novo convite.
+
+Users recebe os três campos aprovados por ALTER incremental. A migration
+original e as demais anteriores a create_images permanecem intactas.
+Tokens anteriores à desativação não voltam a funcionar após reativar: o
+middleware compara o instante de autenticação com tokens_revoked_at.
+Vendas manuais usam operation_id/fingerprint na própria sales. Venda removida
+não entra na deduplicação manual; repetir o cadastro inicial continua sem
+recriar uma venda excluída.
+
+Testes backend: foundation 124/124, platform 67/67 e seed 40/40; Prisma offline
+3/3. Frontend direcionado 55/55, TypeScript/lint e E2E Chrome/API/JSON aprovados.
+Suíte completa frontend: 176 aprovados e 11 falhas herdadas no site público.
+Build gera bundle, mas o gate existente da página Sobre falha por dashboard.png.
+PostgreSQL/R2 reais e aplicação de migrations não foram executados.

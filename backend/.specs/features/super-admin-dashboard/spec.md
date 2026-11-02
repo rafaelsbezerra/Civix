@@ -1,8 +1,8 @@
 # Dashboard superadmin — gestão da plataforma
 
 Data: 2026-11-02. G0 a G4 concluídos na branch feat/super-admin-dashboard.
-G5 a G8 e equivalentes frontend autorizados para continuação, com decisões
-técnicas novas aguardando confirmação no SDD/task antes da parte afetada.
+G5 a G7 e equivalentes frontend implementados; G8 validado localmente; abertura do PR depende de acesso ao GitHub.
+SA-P07 a SA-P10 resolvidas. Configurações globais (SA-P06) ficam em backlog.
 A baseline inicial desta spec era staging, commit 9d995d2.
 
 [Desenho e fluxos](sdd.md) · [Tarefas e commits sugeridos](task.md) ·
@@ -35,7 +35,7 @@ anterior; os demais casos de uso continuam nas specs de origem.
 | SA-D07 | Assinaturas, cobranças e pagamentos ficam em backlog até integração financeira. Venda não é pagamento confirmado. |
 | SA-D08 | Configurações globais não possuem definição; sua implementação permanece bloqueada. |
 | SA-D09 | Arquitetura de teste gratuito, permissões por plano, limites de uso e regras de cada plano fica em backlog. |
-| SA-D10 | Banco informado vazio: não há registros existentes de planos a converter. Não aplicar migrations automaticamente. |
+| SA-D10 | Na definição inicial, o banco foi informado vazio e não havia planos a converter. A informação atual de tabelas já criadas e a política de migrations estão em SA-D40. Não aplicar migrations automaticamente. |
 | SA-D11 | Layout raiz com sidebar/header é exclusivo do dashboard superadmin e compartilhado apenas entre suas telas; perfil permite nome/e-mail e senha fica em backlog. |
 | SA-D12 | Design segue branco/azul/amarelo do site, modo claro padrão e modo escuro com azul principal; detalhes na spec frontend. |
 | SA-D13 | Cadastro com plano/venda fica nos arquivos existentes de company. Gestão empresarial e global de usuários fica nos arquivos existentes de user, com nomes que expressem operação e escopo. |
@@ -55,22 +55,23 @@ anterior; os demais casos de uso continuam nas specs de origem.
 | SA-D28 | Usar somente companies.status para ativar/desativar; não criar administrative_status. Verificação permanece em verificado. |
 | SA-D27 | Criar superadmin por convite para definir senha; superadmin desativado pode ser reativado por outro ativo. Todos possuem os mesmos poderes. |
 | SA-D29 | Excluir atendentes por soft delete em users.deleted_at: impedir acesso, retirar da lista normal e preservar o registro e suas referências. |
-| SA-D30 | Alterar a migration existente de criação de users para incluir deleted_at. A decisão posterior SA-D37 também autoriza deactivation_reason TEXT. A resolução posterior de SA-P09 autoriza tokens_revoked_at; não adicionar session_version ou campos de autor. Não aplicar migrations automaticamente. |
+| SA-D30 | Criar migration incremental ALTER TABLE users para incluir deleted_at, preservando a criação original conforme SA-D40. A decisão posterior SA-D37 também autoriza deactivation_reason TEXT. A resolução posterior de SA-P09 autoriza tokens_revoked_at; não adicionar session_version ou campos de autor. Não aplicar migrations automaticamente. |
 | SA-D31 | Não criar tabela de operações de vendas manuais. Usar a própria sales para distinguir o tipo/origem da venda; origin já permite manual e company_creation. Os campos exatos de controle de repetição ainda precisam de definição. |
 | SA-D32 | Paginação administrativa com page e limit, padrão de 20 registros, máximo de 100, ordenação estável e metadados. |
 | SA-D33 | Superadmin pode reativar usuários empresariais; se ainda não possuem senha, exigir novo convite para defini-la. |
 | SA-D34 | Arquivamento de empresa reutiliza o motivo de desativação; não criar motivo/campo separado de arquivamento. |
 | SA-D35 | Para venda manual ainda existente, repetir a mesma operação/dados retorna a original; mesma operação com dados diferentes retorna 409. Vendas já excluídas não entram na decisão de criação de vendas manuais e não impedem novo lançamento. Não manter recibo de exclusão para esse fluxo. A proteção da venda inicial do cadastro continua distinta. |
 | SA-D36 | Alterações administrativas usam transações e bloqueio para revalidar ator, alvo e quantidade de superadmins ativos dentro da mesma operação. O usuário sugeriu permist_write como possível solução; isso não aprova instalar ORM ou uma biblioteca nova. |
-| SA-D37 | Acrescentar deactivation_reason TEXT em users, na migration existente, para persistir o motivo da desativação. Resolve SA-P08 e complementa SA-D30. |
+| SA-D37 | Acrescentar deactivation_reason TEXT em users, por migration incremental conforme SA-D40, para persistir o motivo da desativação. Resolve SA-P08 e complementa SA-D30. |
 | SA-D38 | Ao desativar usuário, invalidar todas as suas sessões. Após reativar, exigir novo login para gerar token válido; tokens anteriores não voltam a funcionar. Usar tokens_revoked_at conforme resolução de SA-P09. |
 | SA-D39 | Usar fingerprint para comparar os dados de tentativas de venda manual. Fingerprint não foi definido como identificador único de uma venda; combinar com operation_id foi aprovado na resolução de SA-P10. |
+| SA-D40 | Users já existe no banco. Alterações em users e demais tabelas anteriores à create_images usam novas migrations de alteração, preservando as migrations originais. Substitui a orientação anterior de editar create_users. |
 
 Papéis técnicos, vínculo único e cliente sem área logada continuam conforme
 [users-roles](../users-roles/spec.md). Bearer atual é preservado; não acrescentar
 refresh, cookies ou novo mecanismo de sessão para preencher este dashboard.
 
-## Base observada e dependências
+## Baseline histórica anterior à implementação
 
 - [PlanService](../../../src/services/plan.service.ts) lista planos ativos e
   atribui plano ao usuário. [PlanRepository](../../../src/repositories/plan.repository.ts)
@@ -274,3 +275,16 @@ não criar tabela adicional. A proteção da venda inicial permanece separada.
 SA-P08 resolvida por deactivation_reason TEXT; SA-P09 resolvida por data de
 revogação; SA-P10 resolvida por operation_id + fingerprint na própria sales.
 Nenhuma dessas decisões autoriza executar migrations automaticamente.
+
+## Política de migrations atualizada — 2026-11-02
+
+O usuário informou que users já existe no banco. Alterações em users e nas
+demais tabelas criadas antes da migration create_images devem ser versionadas
+como novas migrations de alteração, sem editar as migrations originais de
+criação. Esta decisão substitui a orientação anterior de editar create_users.
+
+Para os campos aprovados de users, usar
+backend/prisma/migrations/20261102000400_user_administration/migration.sql:
+ALTER TABLE para deleted_at TIMESTAMPTZ, deactivation_reason TEXT e
+tokens_revoked_at TIMESTAMPTZ. A criação original de users foi preservada.
+Nenhuma migration é executada automaticamente.

@@ -1,6 +1,6 @@
 # Telas do superadmin
 
-Data: 2026-11-02. Estado: planejadas; nenhuma tela implementada nesta tarefa.
+Data: 2026-11-02. Estado: telas G0 a G7 implementadas; G8 validado localmente; abertura do PR depende de acesso ao GitHub.
 [Spec de negócio](../../../../backend/.specs/features/super-admin-dashboard/spec.md),
 [SDD canônico](../../../../backend/.specs/features/super-admin-dashboard/sdd.md) e
 [tarefas frontend](task.md). Decisões de negócio pendentes são mantidas na
@@ -8,8 +8,8 @@ spec de negócio; detalhes visuais ficam em [design](design.md).
 
 ## Base e objetivo
 
-frontend/src/routes/AppRoute.tsx não monta dashboards. Login retorna à Home;
-ProtectedRoute.tsx já consulta profile. Evoluir para uma área exclusiva de
+frontend/src/routes/AppRoute.tsx monta o dashboard; login super_admin vai
+para /super-admin. ProtectedRoute.tsx consulta profile para a área exclusiva de
 super_admin; a segurança definitiva está no backend, mesmo sem o guard.
 Reutilizar UI e transporte atuais; não mudar design do site institucional.
 
@@ -20,8 +20,8 @@ Terá modo claro e escuro, com **modo claro como padrão**. No escuro, azul
 é a cor principal, com base azul-marinho e amarelo em destaques.
 Paleta, tipografia, aplicação em componentes, acessibilidade e arquivos
 previstos estão na [descrição de design](design.md), parte desta spec.
-Persistência da escolha de tema ainda aguarda definição. Nenhum tema foi
-implementado nesta atualização documental.
+Tema implementado: primeiro acesso claro e preferência guardada neste
+navegador, sem modificar o tema público.
 
 ## Telas propostas e arquivos
 
@@ -65,7 +65,7 @@ Não enviar userId/role/companyId editáveis. Após mudança de e-mail,
 reconciliar sessão conforme política aprovada no SDD, pois o JWT atual inclui
 e-mail. Não tratar edição apenas local como persistência concluída.
 
-Rotas/contratos G0 a G4 foram adotados em SA-P07; demais grupos seguem planejados. Prefixo /super-admin, com layout em
+Rotas/contratos G0 a G7 adotados em SA-P07 e implementados. Prefixo /super-admin, com layout em
 frontend/src/components/dashboard-super-admin/layout/SuperAdminLayout.tsx, protegido por
 frontend/src/components/auth/ProtectedRoute.tsx. Montagem em AppRoute.tsx.
 
@@ -156,6 +156,6 @@ plataforma silenciosamente.
 Configurações globais aguardam definição. Pagamentos, assinaturas, trial e
 arquitetura de capacidades/limites/regras por plano ficam em backlog; não
 renderizar controles falsamente funcionais. Superadmin gerencia funcionários,
-mas não acessa atendimento/conversas. Nenhuma migration/teste foi executado.
+mas não acessa atendimento/conversas. Migrations não aplicadas; resultados de testes e limites estão no task backend.
 
 **Não commitar sem revisão**, conforme regra e registro no task backend.

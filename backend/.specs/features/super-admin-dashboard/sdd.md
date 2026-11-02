@@ -3,11 +3,11 @@
 Data: 2026-11-02. Complementa a [spec](spec.md) e orienta [tarefas](task.md).
 G0 a G4 e equivalentes frontend concluídos; checklists/evidências distinguem
 o que foi verificado. G5 a G8 e equivalentes frontend autorizados em 2026-11-02,
-com novas decisões técnicas pendentes registradas no fim deste documento. Configurações globais continuam fora do escopo.
+com decisões técnicas resolvidas e verificação final registrada no task. Configurações globais continuam fora do escopo.
 Caminhos são relativos à raiz do repositório. Escolhas novas de contrato,
-schema e mecanismo transacional foram aprovados no escopo de G0–G4 pela
+schema e mecanismo transacional foram aprovados em G0–G8 pela
 revisão e autorização de implementação do usuário. Detalhes abaixo registram
-as escolhas concretas desta rodada, sem implementar grupos posteriores. A organização nos módulos existentes e nas pastas frontend foi
+as escolhas concretas das rodadas implementadas. A organização nos módulos existentes e nas pastas frontend foi
 confirmada em SA-D13/14; não está pendente nem autoriza arquivos separados
 para os casos de usuários ou cadastro coordenado.
 Os casos de negócio confirmados estão na tabela SA-D da spec, incluindo as
@@ -57,12 +57,11 @@ campos e tabelas genéricas) seguem frontend/src/components/ui ou a pasta
 compartilhada já adotada; não criar uma nova pasta shared por antecipação.
 Sidebar/header/layout exclusivos ficam em components/dashboard-super-admin/layout.
 
-## 2. Rotas e contratos propostos
+## 2. Rotas e contratos adotados
 
-Prefixo administrativo proposto: /api/v1/platform; todas as operações abaixo
-exigem Bearer e super_admin vigente, inclusive GET. G0 a G4 já estão montados;
-as novas rotas de G5 a G7 aguardam esta implementação.
-SA-P07 precisa aprovar contratos; usar PUT nas propostas para não introduzir
+Prefixo administrativo: /api/v1/platform; todas as operações abaixo
+exigem Bearer e super_admin vigente, inclusive GET. As rotas G0 a G7 estão montadas.
+SA-P07 resolvida; usar PUT para não introduzir
 PATCH silenciosamente, que o CORS atual não permite.
 
 | Método/caminho após o prefixo | Caso e entrada | Saída proposta |
@@ -74,11 +73,12 @@ PATCH silenciosamente, que o CORS atual não permite.
 | POST /companies/:companyId/suspension | Motivo obrigatório, não vazio | 200 estado atualizado; motivo persistido |
 | POST /companies/:companyId/reactivation | Empresa desativada e transição permitida | 200 empresa reativada e novamente elegível a catálogo/acesso |
 | POST /companies/:companyId/restoration | Empresa arquivada por soft delete | 200 empresa restaurada ainda desativada; exige reativação explícita |
-| DELETE /companies/:companyId | UUID | 204 após soft delete; nunca exclusão física |
+| DELETE /companies/:companyId | UUID e reason obrigatório; reutiliza motivo de desativação | 204 após soft delete; nunca exclusão física |
 | GET /companies/:companyId/users | Empresa e filtros de papel/estado | 200 equipe daquela empresa |
 | POST /companies/:companyId/users/invitations | email e role empresarial permitido | 201 estado do convite; nunca senha/token bruto |
 | PUT /companies/:companyId/users/:userId | Somente campos aprovados | 200 projeção pública do funcionário |
 | POST /companies/:companyId/users/:userId/suspension | Usuário do contexto e motivo obrigatório | 200 estado do acesso; motivo persistido |
+| POST /companies/:companyId/users/:userId/reactivation | Body vazio, empresa disponível e usuário desativado | 200 usuário; sem senha fica pending e exige novo convite |
 | GET /plans e GET /plans/:planId | Incluem inativos no administrativo | 200 projeção de plano |
 | POST /plans e PUT /plans/:planId | Campos comerciais validados | 201/200 plano |
 | POST /plans/:planId/activation | active boolean | 200 plano; sem alterar vendas antigas |
@@ -89,7 +89,7 @@ PATCH silenciosamente, que o CORS atual não permite.
 | POST /administrators/invitations e PUT /administrators/:userId | Convite para definir senha e campos permitidos; mesmos poderes | 201 convite preparado / 200 dados atualizados, sem senha/token na resposta |
 | POST /administrators/:userId/suspension | Motivo obrigatório; alvo distinto do ator e proteção do último ativo | 200 após desativação; recusar violações mesmo com motivo |
 | POST /administrators/:userId/reactivation | Outro superadmin ativo como ator | 200 conta reativada; sem elevar permissões além do papel existente |
-| DELETE /companies/:companyId/users/:userId | Atendente do contexto, finalizar atendimentos atribuídos | 204 após exclusão lógica em users.deleted_at, preservando referências |
+| DELETE /companies/:companyId/users/:userId | Atendente do contexto e reason obrigatório; integração com atendimento quando existir | 204 após exclusão lógica em users.deleted_at, preservando referências |
 
 Não criar edição de vendas, DELETE físico de plano, APIs de pagamento, endpoints
 genéricos para configurações ou endpoint universal de dashboard.
@@ -175,7 +175,8 @@ arquivos; não criar arquivos novos para a coordenação.
 1. Buscar empresa persistida pelo UUID em projeção administrativa, incluindo
    estado/vínculo/histórico permitido. Inexistente: 404, sem fallback fictício.
 2. Edição aplica lista explícita de campos. Em mudança de plano, buscar novo
-   plano ativo e positivo; salvar só vínculo e dados aprovados. Vendas antigas
+   plano ativo e positivo apenas se o vínculo mudou; manter o plano atual
+   inativo permite editar os outros dados. Salvar só vínculo e dados aprovados. Vendas antigas
    mantêm snapshot. Mudanças em preço do catálogo não reescrevem o histórico.
 3. Formulário sempre exibe a observação confirmada sobre venda manual; ao
    salvar a troca, oferecer navegação para nova venda com empresa/plano
@@ -451,7 +452,8 @@ pacotes e publicação de endpoints exigem a autorização pertinente.
   ordenação displayOrder/id. Paginação de empresas/vendas pertence a G5.
 - Novo schema incrementa companies com plan_id/estado administrativo e cria
   sales e recibos de operação, sem executar migrations. Perfis/vínculos usam
-  migration existente. Não criar endpoints de G5–G7 ou menus sem funcionalidade.
+  migration existente. Na etapa G0–G4 não foram expostos endpoints de G5–G7; na continuação,
+  esses handlers e menus foram implementados e verificados.
 
 ## Continuação autorizada — G5 a G8
 
@@ -465,8 +467,8 @@ estão consolidadas em SA-D29–36 na [spec](spec.md).
 1. Buscar o atendente no vínculo empresarial correto e validar o ator.
 2. Excluir logicamente usando users.deleted_at. Impedir autenticação e
    retirar o usuário da listagem normal, preservando imagens e referências.
-3. Alterar a migration existente
-   backend/prisma/migrations/20261025000100_create_users/migration.sql
+3. Criar a migration incremental
+   backend/prisma/migrations/20261102000400_user_administration/migration.sql
    para acrescentar deleted_at e deactivation_reason TEXT, conforme SA-D37.
    Acrescentar também tokens_revoked_at TIMESTAMPTZ, aprovado na resolução
    de SA-P09. Não criar session_version ou campo de autor.
@@ -571,3 +573,62 @@ não criar tabela adicional. A proteção da venda inicial permanece separada.
 SA-P08 resolvida por deactivation_reason TEXT; SA-P09 resolvida por data de
 revogação; SA-P10 resolvida por operation_id + fingerprint na própria sales.
 Nenhuma dessas decisões autoriza executar migrations automaticamente.
+
+## Política de migrations atualizada — 2026-11-02
+
+O usuário informou que users já existe no banco. Alterações em users e nas
+demais tabelas criadas antes da migration create_images devem ser versionadas
+como novas migrations de alteração, sem editar as migrations originais de
+criação. Esta decisão substitui a orientação anterior de editar create_users.
+
+Para os campos aprovados de users, usar
+backend/prisma/migrations/20261102000400_user_administration/migration.sql:
+ALTER TABLE para deleted_at TIMESTAMPTZ, deactivation_reason TEXT e
+tokens_revoked_at TIMESTAMPTZ. A criação original de users foi preservada.
+Nenhuma migration é executada automaticamente.
+
+## Detalhes implementados e arquivos de G5 a G8
+
+- company.controller.ts/company.service.ts e CompanyRepository/adapters:
+  listagem paginada, leitura administrativa, edição, suspensão, arquivamento,
+  restauração inativa e reativação. Público e storage aplicam elegibilidade.
+- sale.controller.ts/sale.service.ts e SaleRepository/adapters: consulta,
+  preço do plano atual ou valor manual justificado, snapshot e DELETE físico.
+  operation_id/fingerprint são internos; a resposta não expõe esses campos.
+- user.controller.ts/user.service.ts, user.auth.dto.ts e UserRepository/adapters:
+  equipe por companyId e superadmins com escopo nulo, sem módulos por perfil.
+  Respostas retornam somente id/name/email/role/status/companyId, motivo e
+  estado do convite; nunca hash, tokens ou campos internos de recuperação.
+- admin.service.ts prepara JWT de convite com purpose, escopo, jti novo e
+  validade de 24h. auth.service.ts/AuthRepository validam estado/empresa/
+  revogação e consomem uma única vez. Reenvio público empresarial também
+  revalida o estado na gravação; convite revogado não é recolocado por corrida.
+- Falha de e-mail após persistir retorna 502 com instrução de reenvio. A conta
+  fica pendente, sem duplicar usuário/empresa/venda. A UI atualiza a lista.
+- Middleware auth compara issuedAt com tokens_revoked_at. issuedAt representa
+  o início da validação de credenciais, capturado antes da leitura e bcrypt,
+  e é posterior ao marcador lido quando há revogação anterior. Não usar o
+  instante pós-bcrypt: uma suspensão durante o hash tornaria o snapshot velho
+  válido. Novos convites seguem a mesma proteção temporal.
+- Gravar a revogação dentro do mutex JSON ou após adquirir locks PostgreSQL,
+  usando relógio atual e marcador monotônico em milissegundos. Suspender ou
+  arquivar empresa aplica isso aos usuários vinculados e limpa convites/reset.
+  Reativação preserva o marcador e bloqueios individuais.
+- SQL administrativo usa transação em uma conexão, bloqueio comum e
+  revalidação do ator. A integração inclui mutações de planos de G3.
+  Proteção do último superadmin conta somente contas ativas com senha;
+  desativar convite pendente não remove um ativo. Não desativar a própria conta.
+- Listas administrativas usam query page/limit e meta do helper existente:
+  page, pageSize, total e totalPages. Padrão 20/máximo 100, ordenação estável.
+  Filtros de data incluem os limites informados, interpretados em UTC.
+- Frontend usa api.ts, Companies/CompanyDetail/CompanyEdit, Sales/SaleCreate
+  e Users.tsx; este último é compartilhado pelos dois escopos. Trocar o
+  companyId reinicia o workspace de usuários e ignora respostas antigas.
+  Planos são selecionados pelo nome; não exigir digitação de IDs no filtro.
+  ActionConfirmation usa dialog nativo e devolve o foco; tema permanece
+  restrito ao dashboard.
+
+A equipe de empresa inativa/arquivada pode ser consultada para histórico;
+alterações de acesso exigem empresa disponível. Exclusão lógica de atendente
+também exige motivo, pois retira o acesso. Ainda não há domínio de atendimento:
+nenhuma finalização de atendimento foi implementada ou executada nesta rodada.
