@@ -1,5 +1,14 @@
 # Specs do backend
 
+## Dashboard superadmin — planejamento de 2026-11-02
+
+[Spec](features/super-admin-dashboard/spec.md),
+[SDD com fluxos e arquivos](features/super-admin-dashboard/sdd.md) e
+[tarefas com commits sugeridos](features/super-admin-dashboard/task.md).
+Gestão de empresas/equipe/planos, venda comercial inicial e gestão global.
+Sem implementação nesta tarefa; billing, trial e capacidades por plano em
+backlog. Configurações globais e decisões detalhadas aguardam resposta.
+
 ## Evolução dos papéis de usuários
 
 [Spec](features/users-roles/spec.md) e [tarefas](features/users-roles/task.md).

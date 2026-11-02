@@ -18,6 +18,7 @@ Planos, decisões, revisões de entrega e evidências de execução ficam nas sp
 
 ## Planejamento e acompanhamento
 
+- [Entrega do superadmin: spec, SDD e tarefas](super-admin.md).
 - [Ordem e pares das specs dos dashboards](../backend/.specs/roadmaps/dashboards/README.md).
 - [Índice das specs frontend](../frontend/.specs/README.md).
 

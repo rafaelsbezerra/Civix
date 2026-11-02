@@ -1,5 +1,13 @@
 # Specs do frontend
 
+## Entrega do superadmin — 2026-11-02
+
+[Telas e integração](features/super-admin-dashboard/spec.md) e
+[tarefas/arquivos/commits sugeridos](features/super-admin-dashboard/task.md).
+[SDD backend/frontend](../../backend/.specs/features/super-admin-dashboard/sdd.md)
+detalha esta entrega sem implementar as demais etapas do roadmap abaixo.
+Billing, trial e capacidades/limites/regras de planos ficam em backlog.
+
 Planejamento leve por funcionalidade, com spec backend pareada e contrato
 canônico. Documentação não autoriza código, configuração, instalação ou testes
 executáveis. Novos checkboxes ficam abertos; sem commit nesta etapa.
