@@ -1,4 +1,10 @@
 import type { User, UserRole } from '../entities/user.entity.js';
+import { z } from 'zod';
+
+export const ownProfileSchema = z.object({
+  name: z.string().trim().min(1).max(120),
+  email: z.string().trim().email().transform(value => value.toLowerCase()),
+}).strict();
 
 export interface LoginInput {
   email: string;

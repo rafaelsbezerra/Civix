@@ -7,8 +7,19 @@ import { userRepository } from '../persistence/user.repository.js';
 import * as mailService from './mail.service.js';
 import * as authService from './auth.service.js';
 import type { LoginInput, LoginResult, PasswordResetInput } from '../dtos/user.auth.dto.js';
-import { AuthenticatedUser, isAuthenticatedRole } from '../entities/user.entity.js';
+import { type AuthenticatedUser, type UserId, isAuthenticatedRole } from '../entities/user.entity.js';
 import { companyRepository } from '../persistence/company.repository.js';
+import { ownProfileSchema } from '../dtos/user.auth.dto.js';
+
+export async function updateOwnProfile(id: UserId, input: unknown) {
+  const current = await getAuthenticatedUser(id);
+  const parsed = ownProfileSchema.safeParse(input);
+  if (!parsed.success) throw new AppError({ status: 400, code: ErrorCode.VALIDATION_ERROR, message: 'Nome e e-mail do perfil inválidos.' });
+  const updated = await userRepository.updateOwnProfile(current.id, parsed.data);
+  if (!updated) throw new AppError({ status: 401, code: ErrorCode.UNAUTHORIZED, message: 'Acesso inválido. Faça login novamente.' });
+  return { user: { id: updated.id, name: updated.name, email: updated.email, role: updated.role,
+    companyId: updated.company_id ?? null }, requiresLogin: current.email.toLowerCase() !== updated.email.toLowerCase() };
+}
 
 export async function login({ email, role, password }: LoginInput): Promise<LoginResult> {
   if (role === 'cliente') {
@@ -97,7 +108,7 @@ export async function resetPassword({ token, password }: PasswordResetInput): Pr
 
 }
 
-export async function getAuthenticatedUser(id: string): Promise<AuthenticatedUser> {
+export async function getAuthenticatedUser(id: UserId): Promise<AuthenticatedUser> {
   const user = await userRepository.getById(id);
   if (!user || !isAuthenticatedRole(user.role)
     || (user.status != null && user.status !== 'active') || !user.password_hash) {
@@ -110,7 +121,7 @@ export async function getAuthenticatedUser(id: string): Promise<AuthenticatedUse
     }
   } else {
     const company = companyId ? await companyRepository.getById(companyId) : undefined;
-    if (!company || company.status === 'inativo') {
+    if (!company || company.status === 'inativo' || company.deleted_at) {
       throw new AppError({ status: 401, code: ErrorCode.UNAUTHORIZED, message: 'Empresa indisponível ou vínculo inválido.' });
     }
   }

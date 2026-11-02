@@ -5,6 +5,10 @@ import { ErrorCode } from '../shared/errors/error.code.js';
 import { createSuccessResponse } from '../shared/contracts/response.contract.js';
 import { isUserRole } from '../entities/user.entity.js';
 
+export async function updateOwnProfile(req: Request, res: Response): Promise<Response> {
+  return res.json(createSuccessResponse(await userService.updateOwnProfile(req.authenticatedUser!.id, req.body)));
+}
+
 export async function login(req: Request, res: Response): Promise<Response> {
   const { email, password, role } = req.body ?? {};
 

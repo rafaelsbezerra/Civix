@@ -10,6 +10,7 @@ import { AppError } from '../shared/errors/app.error.js';
 import { ErrorCode } from '../shared/errors/error.code.js';
 import { logger } from '../shared/logging/log.context.js';
 import { getAuthenticatedUser } from './user.service.js';
+import { imageObjectStore } from '../shared/integrations/cloudflare/storage.provider.js';
 
 export const MAX_IMAGE_BYTES = 10000000;
 export const IMAGE_URL_SECONDS = 300;

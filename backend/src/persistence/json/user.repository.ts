@@ -4,6 +4,18 @@ import { AppError } from '../../shared/errors/app.error.js';
 import { ErrorCode } from '../../shared/errors/error.code.js';
 
 export const userJsonRepository: UserRepository = {
+  async updateOwnProfile(id, input) {
+    return updateLocalData(data => {
+      const user = data.users.find(item => String(item.id) === String(id));
+      if (!user) return undefined;
+      if (data.users.some(item => String(item.id) !== String(id) && item.email.toLowerCase() === input.email.toLowerCase())) {
+        throw new AppError({ status: 409, code: ErrorCode.CONFLICT, message: 'E-mail já cadastrado.' });
+      }
+      user.name = input.name;
+      user.email = input.email;
+      return user;
+    });
+  },
   async create(user) {
     return updateLocalData(data => {
       if (data.users.some(item => item.email.toLowerCase() === user.email.toLowerCase())) {

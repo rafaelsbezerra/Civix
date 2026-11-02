@@ -1,8 +1,21 @@
 import type { User } from '../../entities/user.entity.js';
 import type { UserRepository } from '../../repositories/user.repository.js';
 import { db } from '../../shared/config/data.js';
+import { AppError } from '../../shared/errors/app.error.js';
+import { ErrorCode } from '../../shared/errors/error.code.js';
 
 export const userPostgresRepository: UserRepository = {
+  async updateOwnProfile(id, input) {
+    try {
+      return (await db.query<User>('UPDATE users SET name = $1, email = $2 WHERE id = $3 RETURNING *',
+        [input.name, input.email, id])).rows[0];
+    } catch (error) {
+      if ((error as { code?: string }).code === '23505') {
+        throw new AppError({ status: 409, code: ErrorCode.CONFLICT, message: 'E-mail já cadastrado.' });
+      }
+      throw error;
+    }
+  },
   async create(user) {
     return (await db.query<User>(
       'INSERT INTO users (id, email, name, role, company_id, status, password_hash) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *',

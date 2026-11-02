@@ -8,6 +8,7 @@ router.post('/login', userController.login);
 router.post(['/forgot-password', '/esqueci-senha'], userController.forgotPassword);
 router.post(['/reset-password', '/redefinir-senha'], userController.resetPassword);
 router.get('/profile', authMiddleware, userController.profile);
+router.put('/profile', authMiddleware, userController.updateOwnProfile);
 router.post('/home', authMiddleware, userController.home);
 
 export default router;

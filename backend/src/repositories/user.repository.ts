@@ -2,6 +2,7 @@ import type { User, UserId, UserRole } from '../entities/user.entity.js';
 
 /** Contrato compartilhado pelas implementações JSON e PostgreSQL. */
 export interface UserRepository {
+  updateOwnProfile(id: UserId, input: { name: string; email: string }): Promise<User | undefined>;
   create(user: User): Promise<User>;
   getById(id: UserId): Promise<User | undefined>;
   getByEmail(email: string): Promise<Pick<User, 'id' | 'name' | 'email'> | undefined>;
