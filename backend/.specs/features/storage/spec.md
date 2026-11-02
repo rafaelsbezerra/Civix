@@ -12,7 +12,7 @@ Referência: US-54. Homologação R2/PostgreSQL reais ainda não executada.
   data.expiresInSeconds=300 somente para capa vigente de empresa disponível.
   Endpoint adicional preservado da estrutura, com as mesmas verificações.
 - Consultas públicas de empresas (detalhe, busca, filtros e listagem) retornam
-  cover_image_url e cover_image_url_expires_in; sem capa ambos são null.
+  cover_image_url; sem capa o campo é null. A resposta não inclui cover_image_url_expires_in.
   Não retornam cover_key/logo_key. Nenhuma autenticação é exigida para leitura.
 
 Upload retorna 201 com data.imageId e data.target. Campos e nomes existentes

@@ -205,7 +205,8 @@ arquivos; não criar arquivos novos para a coordenação.
    explícita de reutilização; não criar índice parcial silenciosamente.
 
 Proposta de schema: companies.plan_id FK plans + estado administrativo
-separado do status/is_verified existente, deleted_at e dados de alteração
+usando status existente (ativo/inativo, com verificado legado aceito como ativo),
+deleted_at e dados de alteração
 necessários, incluindo motivo da desativação. Nomes/valores finais dependem
 de SA-P07; restauração para estado desativado e reativação explícita estão confirmadas.
 Soft delete não é estado de pagamento nem informação de verificação.
@@ -384,13 +385,12 @@ Fluxo de perfil:
 5. Responder com projeção sanitizada persistida; frontend atualiza header e
    formulário pelo resultado. Não indicar sucesso antes da gravação.
 6. JWT atual carrega e-mail e middleware compara ao registro vigente.
-   **Aguardando resposta — SA-P07:** definir se a edição de e-mail exige novo
-   login após sucesso ou renovação explícita do token; se há confirmação de
-   titularidade do novo endereço. Não emitir refresh/cookies ou afirmar
+   Decisão aprovada: editar e-mail exige novo login após salvar, sem
+   confirmação de titularidade do novo endereço nesta etapa. Não emitir refresh/cookies ou afirmar
    e-mail verificado por inferência. Testar o comportamento aprovado.
 
 Não alterar senha, avatar ou configurações globais nesta extensão. A decisão
-de persistir tema entre visitas permanece pendente no design, sem API/coluna
+de persistir tema entre visitas foi aprovada: localStorage neste navegador, sem API/coluna
 de preferência antecipada. Conferir UI/API do próprio perfil, e-mail duplicado,
 tentativa de alterar outro usuário e integridade da sessão nos dois temas.
 
@@ -424,7 +424,7 @@ tentativa de alterar outro usuário e integridade da sessão nos dois temas.
   em payload/log. Sem afirmar recebimento de pagamento.
 - Executar scripts existentes pertinentes após consultar package.json;
   fixtures de PostgreSQL e R2 somente em ambiente autorizado e isolado.
-  Nesta tarefa documental não executar nem criar testes executáveis.
+  Na implementação G0 a G4, usar testes isolados e registrar limites no task.md.
 
 ## 10. Revisão obrigatória
 

@@ -1,6 +1,6 @@
 # Planejamento de entrega do superadmin
 
-Data: 2026-11-02. Documentação de planejamento, sem implementação nesta tarefa.
+Data: 2026-11-02. G0 a G4 e perfil próprio implementados na branch feat/super-admin-dashboard; G5 a G8 permanecem planejados.
 
 - [Spec: escopo, decisões e aceite](../backend/.specs/features/super-admin-dashboard/spec.md).
 - [SDD: fluxos, contratos propostos e localização do código](../backend/.specs/features/super-admin-dashboard/sdd.md).
@@ -22,13 +22,12 @@ Assinaturas, cobrança e pagamentos ficam em backlog. Também ficam em
 backlog a arquitetura de teste gratuito e as capacidades, limites de uso e
 regras específicas por plano. Configurações globais aguardam definição.
 As decisões funcionais SA-P01 a SA-P05 estão resolvidas. Configurações
-globais (SA-P06) e o desenho técnico final (SA-P07) continuam pendentes.
+globais (SA-P06) continuam em backlog. Os contratos SA-P07 foram adotados para G0 a G4; grupos posteriores continuam sujeitos à implementação e revisão.
 
 A ordem parte da coerência de autenticação/schema, depois shell, planos,
 cadastro com venda, gestão de empresas/vendas, equipe, superadmins e E2E.
-As propostas de URLs/schema/transação exigem revisão antes da implementação.
-**Não commitar sem revisão.** Nenhuma migration ou teste executável foi
-criado/aplicado para produzir esses documentos.
+Os contratos implementados estão detalhados no SDD.
+**Não commitar sem revisão.** Duas migrations incrementais e testes foram criados na implementação, sem aplicação de SQL no banco. Os resultados atuais e limites estão no task backend.
 
 Organização confirmada: cadastro com plano/venda nos arquivos existentes de
 company; usuários empresariais e superadmins nos arquivos existentes de user,
@@ -52,3 +51,26 @@ admin_empresa/atendente pode mudar e último admin empresarial pode ser
 desativado. Atendentes podem ser excluídos/desativados, finalizando atendimentos
 atribuídos. Superadmins entram por convite para definir senha, podem ser
 reativados por outro ativo e têm poderes iguais, sem editor individual.
+
+## Estado da implementação G0 a G4
+
+Rotas privadas em `/super-admin`: início, planos, cadastro de empresa e perfil.
+Tema claro inicial e preferência claro/escuro persistida neste navegador.
+Alterar nome atualiza o header; alterar e-mail exige novo login.
+
+A API `/api/v1/platform` revalida identidade e exige super_admin.
+Planos permitem consulta, criação, edição e ativação com preço positivo.
+POST `/companies` recebe os campos empresariais, `planId` e `operationId` UUID;
+a resposta contém `company`, `sale` e `replayed`. O mesmo ator/operação/payload
+reutiliza o resultado, sem nova venda. Alterar o payload na mesma operação gera 409.
+JSON grava o conjunto sob lock; PostgreSQL usa uma conexão e transação única.
+O POST existente `/api/v1/empresas` adota o mesmo contrato, sem permitir contornar a venda.
+
+As migrations `20261102000200_company_administration` e
+`20261102000300_create_sales` ainda precisam ser aplicadas pelo responsável
+no ambiente autorizado antes de usar essas operações com PostgreSQL.
+Companies reutiliza `status`; não existe coluna `administrative_status`.
+A inicialização do cliente R2 ocorre quando uma operação de imagem o exige.
+
+Gestão de empresas existentes, vendas manuais/exclusão, equipe e outros
+superadmins continuam em G5 a G7; não há menus dessas operações nesta rodada.

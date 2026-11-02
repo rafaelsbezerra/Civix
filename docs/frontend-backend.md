@@ -60,7 +60,7 @@ sem depender de `code`, `details` ou `stack`, ausentes em produção.
 
 Login envia e-mail e senha; o backend determina admin_empresa, super_admin ou atendente e retorna user com companyId. Cliente não autentica. A tela valida a resposta, armazena o token e retorna à Home. ProtectedRoute consulta profile e verifica permissões; será ligado às futuras rotas de dashboard. Tokens antigos exigem novo login.
 
-Consultas públicas de empresa incluem cover_image_url e cover_image_url_expires_in. O formulário de upload não faz parte desta entrega. Ver [guia de storage e usuários](storage.md).
+Consultas públicas de empresa incluem cover_image_url. O formulário de upload não faz parte desta entrega. Ver [guia de storage e usuários](storage.md).
 
 ## Escolha de acesso — 2026-11-02
 
@@ -96,3 +96,13 @@ o fluxo e seus testes; commit limitado liberado com essas ressalvas.
 Evidência histórica da integração anterior: 35 testes direcionados, TypeScript
 e lint aprovados. Naquela rodada o bundle Vite passou e o gate final do build
 acusou dashboard.png ausente. Não é evidência da alteração de rotas de acesso.
+
+## Dashboard superadmin — G0 a G4
+
+O login super_admin redireciona para `/super-admin`. As rotas de planos,
+cadastro e perfil usam o arquivo `frontend/src/lib/api.ts`, Bearer e contratos
+HTTP existentes. Guard consulta identidade atual; API também valida permissão.
+Cadastro mantém operationId por payload até sucesso para repetir com segurança.
+Perfil atualiza nome no header; mudar e-mail encerra a sessão após salvar.
+Tema claro inicial, preferência guardada neste navegador e CSS restrito à área.
+Menus de gestão empresarial, vendas manuais e usuários aguardam G5 a G7.

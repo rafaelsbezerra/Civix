@@ -50,6 +50,7 @@ anterior; os demais casos de uso continuam nas specs de origem.
 | SA-D24 | Permitir troca de papel entre admin_empresa/atendente e desativação do último admin empresarial. Atendentes podem ser desativados ou excluídos; atendimentos atribuídos são finalizados. Isso não elimina a proteção do último superadmin. |
 | SA-D25 | Venda pelo plano atual não exige motivo; registro por valor manual exige descrição/motivo e atende vendas de plano antigo. Permitir data passada, mantendo vendas imutáveis após registro. |
 | SA-D26 | Datas de todo o sistema em UTC: persistência, contratos, entrada de datas, exibição e filtros sem conversão implícita para fuso local. |
+| SA-D28 | Usar somente companies.status para ativar/desativar; não criar administrative_status. Verificação permanece em verificado. |
 | SA-D27 | Criar superadmin por convite para definir senha; superadmin desativado pode ser reativado por outro ativo. Todos possuem os mesmos poderes. |
 
 Papéis técnicos, vínculo único e cliente sem área logada continuam conforme
@@ -92,7 +93,8 @@ Listar e consultar empresas com estado administrativo, plano e equipe; criar
 empresa com plano comercial ativo e gerar exatamente uma venda inicial.
 Validar UUIDs, campos permitidos, e-mail único sem distinção de caixa e CNPJ
 único. Edição não aceita chaves de storage ou papel de usuário no body.
-Não confundir estado de verificação atual com suspensão administrativa.
+Usar somente status para ativação/desativação; verificado permanece booleano
+separado. Status legado verificado continua elegível como ativo.
 
 Suspender aplica bloqueio também a tokens já emitidos nas chamadas seguintes
 e à leitura pública de capas. Arquivar preserva empresa, usuários, vendas e
@@ -198,7 +200,7 @@ sem reabrir estas decisões funcionais nem exigir dados reais para implementar.
 | ID | Decisão pendente | Parte impedida |
 | --- | --- | --- |
 | SA-P06 | Quais configurações globais e regras serão editáveis? | Área de configurações e sua persistência/API. |
-| SA-P07 | Aprovar desenho proposto no SDD: URLs, contratos, transação/idempotência, campos incrementais, paginação e auditoria mínima. | Implementação das escolhas técnicas propostas. |
+| SA-P07 | Aprovar desenho proposto no SDD: URLs, contratos, transação/idempotência, campos incrementais, paginação e auditoria mínima. | G0 a G4 adotados nesta rodada. Escolhas de grupos posteriores seguem sujeitas à implementação/revisão. |
 
 Pendências não bloqueiam a escrita desta spec; bloqueiam a implementação
 do trecho afetado. Não interpretar a aprovação deste planejamento como

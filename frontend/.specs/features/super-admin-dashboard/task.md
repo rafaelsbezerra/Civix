@@ -2,16 +2,16 @@
 
 [Spec](spec.md) · [SDD](../../../../backend/.specs/features/super-admin-dashboard/sdd.md) ·
 [Plano E2E e revisão](../../../../backend/.specs/features/super-admin-dashboard/task.md).
-Somente planejamento. Não commitar sem revisão. Commits abaixo são sugestões;
+G0 a G4 e equivalentes implementados nesta rodada. Não commitar sem revisão. Commits abaixo são sugestões;
 não repetir commits para os mesmos grupos do plano backend.
 
 ## FE-SA-01 — Shell, após G1
 
-- [ ] Montar SuperAdminLayout.tsx e páginas/rotas privadas usando profile e
+- [x] Montar SuperAdminLayout.tsx e páginas/rotas privadas usando profile e
   ProtectedRoute, com loading/401/403/erro e logout local.
-- [ ] Ajustar login.tsx e AppRoute.tsx; preservar acesso público e destinos
+- [x] Ajustar login.tsx e AppRoute.tsx; preservar acesso público e destinos
   existentes de outros perfis. Não oferecer abas de módulos indisponíveis.
-- [ ] Testar acesso direto, reload, rede e teclado; revisar antes de commit.
+- [x] Testar acesso direto, reload, rede e teclado; revisar antes de commit.
 
 Alterar frontend/src/{routes/AppRoute.tsx,pages/login.tsx}; criar
 frontend/src/components/dashboard-super-admin/layout/SuperAdminLayout.tsx,
@@ -20,39 +20,39 @@ Sugestão: `feat(super-admin): add protected administration shell` (G2).
 
 ## FE-SA-01D — Identidade visual e temas, junto de G2
 
-- [ ] Aplicar o [design](design.md): branco/marfim, azul e amarelo do site;
+- [x] Aplicar o [design](design.md): branco/marfim, azul e amarelo do site;
   tema claro padrão e escuro de base azul-marinho.
-- [ ] Mapear tokens em frontend/src/index.css e aplicá-los ao
+- [x] Mapear tokens em frontend/src/index.css e aplicá-los ao
   SuperAdminLayout.tsx e componentes administrativos, incluindo portais.
-- [ ] Implementar alternância acessível em components/dashboard-super-admin/ThemeToggle.tsx
-  se necessário. Definir persistência da preferência antes de implementá-la.
-- [ ] Conferir tipografia, responsividade, estados e contraste nos dois temas;
+- [x] Implementar alternância acessível em components/dashboard-super-admin/ThemeToggle.tsx
+  se necessário. Persistir preferência neste navegador, conforme aprovação.
+- [x] Conferir tipografia, responsividade, estados e contraste nos dois temas;
   verificar que o site público não muda. Revisar antes de commit.
 
 Sugestão após revisão: `feat(super-admin): add brand-aligned light and dark themes`.
-Nenhum CSS ou componente foi alterado nesta tarefa documental.
+CSS e componentes implementados com tema restrito ao dashboard.
 
 ## FE-SA-01L — Layout raiz compartilhado
 
-- [ ] Criar SuperAdminLayout.tsx, SuperAdminSidebar.tsx e SuperAdminHeader.tsx
+- [x] Criar SuperAdminLayout.tsx, SuperAdminSidebar.tsx e SuperAdminHeader.tsx
   em frontend/src/components/dashboard-super-admin/layout, com rotas filhas via Outlet e região main.
-- [ ] Sidebar com marca, itens aprovados/ativos e acesso ao perfil; header
+- [x] Sidebar com marca, itens aprovados/ativos e acesso ao perfil; header
   com título, identidade, alternância de tema, perfil e saída.
-- [ ] Integrar navegação aninhada em frontend/src/routes/AppRoute.tsx;
+- [x] Integrar navegação aninhada em frontend/src/routes/AppRoute.tsx;
   verificar comportamento responsivo, drawer/foco/teclado e os dois temas.
-- [ ] Revisar antes do commit; sem menus/ações sem suporte no backend.
+- [x] Revisar antes do commit; sem menus/ações sem suporte no backend.
 
 Sugestão: `feat(super-admin): add shared sidebar and header layout` (G2).
 
 ## FE-SA-01P — Configurações do perfil
 
-- [ ] Criar frontend/src/pages/dashboard-super-admin/ProfileSettings.tsx e
+- [x] Criar frontend/src/pages/dashboard-super-admin/ProfileSettings.tsx e
   frontend/src/components/dashboard-super-admin/ProfileForm.tsx para nome/e-mail.
-- [ ] Integrar leitura/gravação do próprio usuário em
+- [x] Integrar leitura/gravação do próprio usuário em
   frontend/src/lib/api.ts, reutilizando contrato de sessão aprovado.
-- [ ] Tratar erros, e-mail duplicado e mudança do contexto/header; alinhar
+- [x] Tratar erros, e-mail duplicado e mudança do contexto/header; alinhar
   sessão após mudar e-mail com o backend. Não manter claims divergentes.
-- [ ] Verificar isolamento do próprio perfil, teclado e ambos os temas;
+- [x] Verificar isolamento do próprio perfil, teclado e ambos os temas;
   revisar antes do commit. Senha fica em backlog, sem formulário ativo.
 
 Sugestão: `feat(profile): add personal name and email settings`.
@@ -60,12 +60,12 @@ Dependência: regra e endpoint do perfil no SDD; sem nova área de configuraçõ
 
 ## FE-SA-02 — Planos e cadastro, junto de G3/G4
 
-- [ ] Criar Plans.tsx, CompanyCreate.tsx, PlanForm.tsx e CompanyForm.tsx nos
+- [x] Criar Plans.tsx, CompanyCreate.tsx, PlanForm.tsx e CompanyForm.tsx nos
   diretórios pages/dashboard-super-admin e components/dashboard-super-admin em frontend/src.
-- [ ] Buscar planos ativos/positivos para cadastro; mostrar erros e resultado
+- [x] Buscar planos ativos/positivos para cadastro; mostrar erros e resultado
   empresa/venda. Não hardcodar preços ou capacidade por plano.
-- [ ] Repetir envio com a mesma operação segura, conforme contrato aprovado.
-- [ ] Testar plano inativo, falha parcial e submit repetido; revisar grupo.
+- [x] Repetir envio com a mesma operação segura, conforme contrato aprovado.
+- [x] Testar plano inativo, falha parcial e submit repetido; revisar grupo.
 
 Completar frontend/src/lib/api.ts. Sugestões (G3/G4):
 `feat(plans): add commercial plan administration` e
@@ -129,7 +129,7 @@ Sugestões: `feat(users): add company-scoped administration` (G6) e
 Sugestão: `test(super-admin): verify platform workflows end to end` (G8).
 
 Backlog segue a spec canônica: billing, configurações sem definição,
-trial e funcionalidades/limites/regras por plano. Nenhum código criado aqui.
+trial e funcionalidades/limites/regras por plano. G5 a G8 permanecem planejados.
 
 ## Regra de organização
 
@@ -142,3 +142,6 @@ projeto. Não criar pastas/arquivos novos apenas por papel de usuário.
 Planos demo atuais são referência; dados/planos ativos no banco não bloqueiam
 construção dos módulos. Testes usam fixtures; cadastro real valida existência
 do plano e a UI trata catálogo vazio sem bloquear navegação administrativa.
+
+Evidências G0 a G4 e limites de build/integração real estão registrados no
+[task backend](../../../../backend/.specs/features/super-admin-dashboard/task.md#evidências-da-implementação--2026-11-02).

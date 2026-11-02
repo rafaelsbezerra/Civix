@@ -65,7 +65,7 @@ Não enviar userId/role/companyId editáveis. Após mudança de e-mail,
 reconciliar sessão conforme política aprovada no SDD, pois o JWT atual inclui
 e-mail. Não tratar edição apenas local como persistência concluída.
 
-Rotas/contratos são propostas SA-P07. Prefixo /super-admin, com layout em
+Rotas/contratos G0 a G4 foram adotados em SA-P07; demais grupos seguem planejados. Prefixo /super-admin, com layout em
 frontend/src/components/dashboard-super-admin/layout/SuperAdminLayout.tsx, protegido por
 frontend/src/components/auth/ProtectedRoute.tsx. Montagem em AppRoute.tsx.
 

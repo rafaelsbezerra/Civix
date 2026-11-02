@@ -129,4 +129,24 @@ distintos, sem expor identidade/segredos ao consumidor. Admin continua desmontad
 
 ## Capas de empresas
 
-POST /api/v1/storage/images recebe multipart autenticado; GET /api/v1/storage/images/:imageId/url é público para a capa vigente. Consultas de empresa incluem cover_image_url e cover_image_url_expires_in, sem chaves internas. Contratos, validações, status e preparação estão no [guia de storage](storage.md) e na [spec](../backend/.specs/features/storage/spec.md).
+POST /api/v1/storage/images recebe multipart autenticado; GET /api/v1/storage/images/:imageId/url é público para a capa vigente. Consultas de empresa incluem cover_image_url, sem chaves internas. Contratos, validações, status e preparação estão no [guia de storage](storage.md) e na [spec](../backend/.specs/features/storage/spec.md).
+
+## Plataforma superadmin — G0 a G4
+
+Rotas Bearer com identidade vigente e papel super_admin:
+
+- GET/POST `/api/v1/platform/plans`: listar todos ou criar plano.
+- GET/PUT `/api/v1/platform/plans/:planId`: consultar ou editar plano.
+- POST `/api/v1/platform/plans/:planId/activation`: body `{ "active": true }`. Ativar exige preço positivo.
+- POST `/api/v1/platform/companies`: campos de empresa + `planId` + `operationId` UUID.
+- PUT `/api/v1/users/profile`: somente `{ "name": "Nome", "email": "nome@example.test" }`, para o próprio usuário autenticado.
+
+O cadastro retorna 201 com `data.company`, `data.sale` e `data.replayed`.
+Repetir ator/operação/payload retorna o resultado original; outro payload na
+mesma operação gera 409. Plano ausente/inativo ou inválido impede gravação.
+O POST existente `/api/v1/empresas` exige o mesmo contrato. Perfil retorna
+`data.user` e `data.requiresLogin`; mudar e-mail invalida o token anterior.
+Validação retorna 400, falta de sessão 401 e perfil sem permissão 403.
+As migrations incrementais precisam ser aplicadas no ambiente autorizado.
+Ver [estado e limites da implementação](super-admin.md). O router admin legado
+permanece desmontado; apenas as operações acima foram montadas na plataforma.

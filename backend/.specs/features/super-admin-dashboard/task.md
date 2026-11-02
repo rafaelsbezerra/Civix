@@ -6,7 +6,7 @@ Data: 2026-11-02. [Spec](spec.md) · [SDD](sdd.md) ·
 Implementação autorizada em 2026-11-02 para G0 a G4 e equivalentes frontend,
 incluindo G2P. G5 a G8 continuam fora desta rodada.
 **Não commitar sem revisão de cada grupo.** Os commits abaixo são sugestões
-em inglês, no padrão Conventional Commits, e não foram executados.
+em inglês, no padrão Conventional Commits, e orientam os commits da implementação revisada.
 Paths são relativos à raiz do repositório; SDD detalha a lógica por arquivo.
 
 ## Ordem e bloqueios
@@ -38,13 +38,13 @@ limites/regras de planos e billing separado do compromisso desta entrega.
 
 ## G1 — Corrigir dependências e proteger plataforma
 
-- [ ] SA-04: Resolver import ausente e tipagem sem duplicar regra de identidade;
+- [x] SA-04: Resolver import ausente e tipagem sem duplicar regra de identidade;
   conferir profile/JWT/papéis e bloqueio por estado da empresa.
-- [ ] SA-05: Revalidar a migration users.company_id existente, FK/checks e
+- [x] SA-05: Revalidar a migration users.company_id existente, FK/checks e
   compatibilidade da sequência. Não recriar nem executar essa migration.
-- [ ] SA-06: Implementar guard backend super_admin com identidade vigente;
+- [x] SA-06: Implementar guard backend super_admin com identidade vigente;
   manter admin legado desmontado até substituição segura.
-- [ ] SA-07: Testar 401/403, revogação de papel/vínculo e ausência de dados
+- [x] SA-07: Testar 401/403, revogação de papel/vínculo e ausência de dados
   empresariais privados na plataforma. Registrar revisão do grupo.
 
 Arquivos a alterar: backend/src/middlewares/auth.ts,
@@ -53,7 +53,7 @@ backend/src/interfaces/auth.user.row.ts, repositories/adapters de users e
 backend/src/persistence/json/local.data.ts. Criar, se aprovado,
 backend/src/middlewares/super.admin.ts; conferir a migration de vínculo
 20261102000100_user_company_scope existente, sem criar duplicata.
-Testes previstos: backend/tests/platform.authorization.test.ts e testes de
+Testes previstos: backend/tests/platform.foundation.test.ts e testes de
 users existentes, depois de implementação autorizada.
 Sugestão de commit: `fix(auth): align identity and platform authorization`.
 Aceite: base coerente, migrations revisadas, chamadas administrativas
@@ -61,11 +61,11 @@ negadas no backend para outros papéis. SQL real só em ambiente autorizado.
 
 ## G2 — Shell privado e navegação
 
-- [ ] SA-08: Montar layout/rotas superadmin usando ProtectedRoute e profile;
+- [x] SA-08: Montar layout/rotas superadmin usando ProtectedRoute e profile;
   redirecionar login desse perfil somente após a rota existir.
-- [ ] SA-09: Implementar menu disponível, logout local, loading/erro/403 e
+- [x] SA-09: Implementar menu disponível, logout local, loading/erro/403 e
   limpeza de estado; preservar rotas públicas e outros perfis.
-- [ ] SA-10: Verificar acesso direto/reload, teclado/foco e falha de rede;
+- [x] SA-10: Verificar acesso direto/reload, teclado/foco e falha de rede;
   revisar diff antes de commit. Não criar métricas fictícias.
 
 Arquivos: alterar frontend/src/routes/AppRoute.tsx,
@@ -78,14 +78,14 @@ Sugestão de commit: `feat(super-admin): add protected administration shell`.
 
 ## G2P — Configurações do próprio perfil e design
 
-- [ ] SA-10D: Implementar o [design frontend](../../../../frontend/.specs/features/super-admin-dashboard/design.md)
+- [x] SA-10D: Implementar o [design frontend](../../../../frontend/.specs/features/super-admin-dashboard/design.md)
   e layout raiz com sidebar/header, modo claro padrão e escuro azul principal;
-  respeitar preferência ainda não definida e revisar contraste/teclado/portais.
-- [ ] SA-10P: Especificar contrato de atualização do próprio nome/e-mail e
+  persistir preferência neste navegador e revisar contraste/teclado/portais.
+- [x] SA-10P: Especificar contrato de atualização do próprio nome/e-mail e
   política de sessão/confirmar e-mail conforme SDD (SA-P07).
-- [ ] SA-10Q: Implementar leitura/gravação do perfil próprio com DTO estrito,
+- [x] SA-10Q: Implementar leitura/gravação do perfil próprio com DTO estrito,
   e-mail único sem caixa e proteção contra alteração de outro usuário/role.
-- [ ] SA-10R: Integrar ProfileSettings/header; verificar persistência, 409,
+- [x] SA-10R: Integrar ProfileSettings/header; verificar persistência, 409,
   sessão após edição e temas. Revisar antes do commit. Senha em backlog.
 
 Alterar backend/src/controller/user.controller.ts, services/user.service.ts,
@@ -98,15 +98,15 @@ Sugestões após revisão: `feat(super-admin): add brand-aligned light and dark 
 
 ## G3 — Administração comercial de planos
 
-- [ ] SA-11: Estender PlanRepository para consulta administrativa, criação,
+- [x] SA-11: Estender PlanRepository para consulta administrativa, criação,
   atualização e ativação; manter listagem pública só de ativos.
-- [ ] SA-12: Validar preço positivo, BRL, slug único e período; não implementar
+- [x] SA-12: Validar preço positivo, BRL, slug único e período; não implementar
   trial, medição ou controle de capacidades por plano.
-- [ ] SA-13: Usar planos demo atuais como referência. Não exigir planos
+- [x] SA-13: Usar planos demo atuais como referência. Não exigir planos
   cadastrados/ativos para construir módulos; usar fixtures em testes e validar
   os registros reais na execução do cadastro. Seed é preparação de ambiente,
   não definição de catálogo bloqueante nem alteração obrigatória de migration.
-- [ ] SA-14: Integrar listagem/formulário e inativação; preservar plano usado
+- [x] SA-14: Integrar listagem/formulário e inativação; preservar plano usado
   no histórico. Testar preço zero/inativo e acesso negado; revisar grupo.
 
 Arquivos: alterar backend/src/services/plan.service.ts,
@@ -116,18 +116,18 @@ backend/src/controller/plan.controller.ts e tipos em entities/plan.entity.ts
 existentes; rotas em platform.routes.ts após prontas.
 Frontend: pages/dashboard-super-admin/Plans.tsx, components/dashboard-super-admin/PlanForm.tsx
 e lib/api.ts. Não bloquear implementação por existência de seed/dados no banco.
-Testes: backend/tests/platform.plans.test.ts e frontend de planos.
+Testes: backend/tests/platform.foundation.test.ts e frontend de planos.
 Sugestão de commit: `feat(plans): add commercial plan administration`.
 
 ## G4 — Cadastro de empresa e venda automática
 
-- [ ] SA-15: Aprovar/versionar companies.plan_id, estado administrativo,
+- [x] SA-15: Aprovar/versionar companies.plan_id, estado administrativo,
   soft delete e sales com snapshots/constraints; alinhar interfaces SQL/TS.
-- [ ] SA-16: Implementar regras de venda e persistência JSON/PostgreSQL,
+- [x] SA-16: Implementar regras de venda e persistência JSON/PostgreSQL,
   coordenação transacional empresa/vínculo/venda e repetição segura.
-- [ ] SA-17: Integrar cadastro com plano ativo positivo e venda inicial única;
+- [x] SA-17: Integrar cadastro com plano ativo positivo e venda inicial única;
   separar envio/reenvio de convite da confirmação comercial.
-- [ ] SA-18: Expor POST administrativo e formulário com resultado real;
+- [x] SA-18: Expor POST administrativo e formulário com resultado real;
   testar falha parcial, dois envios e concorrência. Revisar SQL e grupo.
 
 Criar backend/src/entities/sale.entity.ts, interfaces/sale.row.ts,
@@ -258,7 +258,10 @@ Sugestão de commit: `test(super-admin): verify platform workflows end to end`.
 - [ ] SA-B04: Definir configurações globais (SA-P06) antes de desenhar schema/API.
 - [ ] SA-B05: Especificar alteração de senha na área de configurações do perfil.
 
-## Registro de revisão e evidências
+## Histórico da fase documental — anterior à implementação
+
+As linhas abaixo registram o estado de cada revisão documental naquela fase.
+A seção seguinte contém o estado atual de G0 a G4.
 
 | Grupo | Revisor | Resultado / evidências | Commit liberado |
 | --- | --- | --- | --- |
@@ -274,3 +277,27 @@ constitui revisão da futura implementação.
 
 Não executados: testes da aplicação, build, integração externa ou migrations.
 Não há código, configuração ou teste executável alterado nesta entrega.
+
+## Evidências da implementação — 2026-11-02
+
+Revisão secundária: final_review, sem bloqueadores após corrigir privacidade
+das consultas públicas e ativação de plano legado com preço zero.
+Revisões de testes: storage_tests e review_http.
+
+- Backend: foundation 124/124, platform 19/19, seed 40/40, Prisma tooling offline 3/3; TypeScript completo aprovado.
+- Frontend: 26/26 testes direcionados na revisão inicial. Repetição posterior: 25/26, com timeout de 5 segundos no teste existente de recuperação; arquivo repetido com limite de 15 segundos: 13/13.
+- TypeScript frontend e lint aprovados; reset de erro dos efeitos corrigido e verificado novamente nos dois arquivos afetados.
+- Browser real com Chrome headless, backend JSON/Vite isolados: login, tema por teclado/reload, planos criar/editar, cadastro com uma empresa e venda, nome no header, troca de e-mail encerrando sessão e menu mobile/Escape sem overflow.
+- Build: TypeScript e bundle Vite concluídos; gate final existente falha por dashboard.png ausente na página Sobre. Não considerar npm run build aprovado.
+- Não foram executados PostgreSQL/R2 reais nem migrations. Testes PostgreSQL usam conexão simulada, sem provar homologação no provedor.
+- Migrations novas preservam as anteriores e reutilizam companies.status. G5 a G8 continuam planejados.
+
+Documentos atualizados: spec/SDD/tasks pareados para rastrear decisões e entrega;
+docs/api.md e docs/frontend-backend.md para contratos; docs/storage.md e
+docs/dados-locais.md para comandos válidos. A spec de storage foi alinhada
+à remoção confirmada de cover_image_url_expires_in; TTL da URL continua 300s.
+
+Revisão visual final: títulos escuros herdavam regra global com !important.
+Override restrito ao dashboard corrigiu o tema; Chrome confirmou títulos
+#f4f6f7 sobre #102b42 (13,39:1), sem overflow mobile ou erros de página.
+review_http aprovou o delta visual, além dos fluxos reais já registrados.
