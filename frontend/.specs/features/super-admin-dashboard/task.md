@@ -18,6 +18,46 @@ frontend/src/components/layout/SuperAdminLayout.tsx,
 frontend/src/pages/super-admin/Overview.tsx e frontend/src/lib/platform.api.ts.
 Sugestão: `feat(super-admin): add protected administration shell` (G2).
 
+## FE-SA-01D — Identidade visual e temas, junto de G2
+
+- [ ] Aplicar o [design](design.md): branco/marfim, azul e amarelo do site;
+  tema claro padrão e escuro de base azul-marinho.
+- [ ] Mapear tokens em frontend/src/index.css e aplicá-los ao
+  SuperAdminLayout.tsx e componentes administrativos, incluindo portais.
+- [ ] Implementar alternância acessível em components/super-admin/ThemeToggle.tsx
+  se necessário. Definir persistência da preferência antes de implementá-la.
+- [ ] Conferir tipografia, responsividade, estados e contraste nos dois temas;
+  verificar que o site público não muda. Revisar antes de commit.
+
+Sugestão após revisão: `feat(super-admin): add brand-aligned light and dark themes`.
+Nenhum CSS ou componente foi alterado nesta tarefa documental.
+
+## FE-SA-01L — Layout raiz compartilhado
+
+- [ ] Criar SuperAdminLayout.tsx, SuperAdminSidebar.tsx e SuperAdminHeader.tsx
+  em frontend/src/components/layout, com rotas filhas via Outlet e região main.
+- [ ] Sidebar com marca, itens aprovados/ativos e acesso ao perfil; header
+  com título, identidade, alternância de tema, perfil e saída.
+- [ ] Integrar navegação aninhada em frontend/src/routes/AppRoute.tsx;
+  verificar comportamento responsivo, drawer/foco/teclado e os dois temas.
+- [ ] Revisar antes do commit; sem menus/ações sem suporte no backend.
+
+Sugestão: `feat(super-admin): add shared sidebar and header layout` (G2).
+
+## FE-SA-01P — Configurações do perfil
+
+- [ ] Criar frontend/src/pages/super-admin/ProfileSettings.tsx e
+  frontend/src/components/super-admin/ProfileForm.tsx para nome/e-mail.
+- [ ] Integrar leitura/gravação do próprio usuário em
+  frontend/src/lib/platform.api.ts, reutilizando contrato de sessão aprovado.
+- [ ] Tratar erros, e-mail duplicado e mudança do contexto/header; alinhar
+  sessão após mudar e-mail com o backend. Não manter claims divergentes.
+- [ ] Verificar isolamento do próprio perfil, teclado e ambos os temas;
+  revisar antes do commit. Senha fica em backlog, sem formulário ativo.
+
+Sugestão: `feat(profile): add personal name and email settings`.
+Dependência: regra e endpoint do perfil no SDD; sem nova área de configurações globais.
+
 ## FE-SA-02 — Planos e cadastro, junto de G3/G4
 
 - [ ] Criar Plans.tsx, CompanyCreate.tsx, PlanForm.tsx e CompanyForm.tsx nos

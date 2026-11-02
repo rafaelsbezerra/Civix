@@ -34,6 +34,8 @@ anterior; os demais casos de uso continuam nas specs de origem.
 | SA-D08 | Configurações globais não possuem definição; sua implementação permanece bloqueada. |
 | SA-D09 | Arquitetura de teste gratuito, permissões por plano, limites de uso e regras de cada plano fica em backlog. |
 | SA-D10 | Banco informado vazio: não há registros existentes de planos a converter. Não aplicar migrations automaticamente. |
+| SA-D11 | Dashboard terá layout raiz compartilhado com sidebar/header e configurações do próprio perfil para nome/e-mail; alteração de senha fica em backlog. |
+| SA-D12 | Design segue branco/azul/amarelo do site, modo claro padrão e modo escuro com azul principal; detalhes na spec frontend. |
 
 Papéis técnicos, vínculo único e cliente sem área logada continuam conforme
 [users-roles](../users-roles/spec.md). Bearer atual é preservado; não acrescentar
@@ -128,6 +130,11 @@ Permissões globais não definidas não viram um editor arbitrário de papéis.
 
 ### SA-07 — Configurações globais
 
+Configurações do próprio perfil são uma entrega distinta, confirmada em
+SA-D11: editar nome/e-mail do ator autenticado, sem gerenciar terceiros.
+O [SDD](sdd.md) descreve validação, persistência e a decisão pendente de
+sessão após trocar e-mail. Não confundir essa tela com a área global abaixo.
+
 **Aguardando resposta — SA-P06:** não há chaves/regras aprovadas. Registrar
 seção no planejamento; não expor endpoint genérico chave/valor, edição de
 ambiente/credenciais ou formulário aparentemente funcional.
@@ -157,6 +164,7 @@ aprovação automática de schema, bibliotecas ou mecanismos novos.
   regras, exceções e enforcement backend/frontend. Features atuais podem
   continuar descritivas; não representam permissões operacionais.
 - Mudança automática de preço, rateio, cupons e cobrança proporcional.
+- Alteração de senha na tela de configurações do perfil.
 - Dashboards de empresa/atendente, atendimento e acesso do superadmin a
   conversas, prompts, transcrições ou credenciais de empresas.
 - Indicadores de receita recebida, MRR, inadimplência ou custos IA sem fonte.

@@ -71,6 +71,26 @@ frontend/src/pages/super-admin/Overview.tsx e frontend/src/lib/platform.api.ts.
 Detalhes e testes planejados estão no task frontend.
 Sugestão de commit: `feat(super-admin): add protected administration shell`.
 
+## G2P — Configurações do próprio perfil e design
+
+- [ ] SA-10D: Implementar o [design frontend](../../../../frontend/.specs/features/super-admin-dashboard/design.md)
+  e layout raiz com sidebar/header, modo claro padrão e escuro azul principal;
+  respeitar preferência ainda não definida e revisar contraste/teclado/portais.
+- [ ] SA-10P: Especificar contrato de atualização do próprio nome/e-mail e
+  política de sessão/confirmar e-mail conforme SDD (SA-P07).
+- [ ] SA-10Q: Implementar leitura/gravação do perfil próprio com DTO estrito,
+  e-mail único sem caixa e proteção contra alteração de outro usuário/role.
+- [ ] SA-10R: Integrar ProfileSettings/header; verificar persistência, 409,
+  sessão após edição e temas. Revisar antes do commit. Senha em backlog.
+
+Alterar backend/src/controller/user.controller.ts, services/user.service.ts,
+routes/user.routes.ts, repositories/user.repository.ts e adapters JSON/SQL.
+Criar backend/src/dtos/user.profile.dto.ts se o contrato for aprovado;
+sem nova tabela. Frontend: arquivos do FE-SA-01D/01L/01P no task pareado.
+Sugestões após revisão: `feat(super-admin): add brand-aligned light and dark themes`,
+`feat(super-admin): add shared sidebar and header layout` e
+`feat(profile): add personal name and email settings`.
+
 ## G3 — Administração comercial de planos
 
 - [ ] SA-11: Estender PlanRepository para consulta administrativa, criação,
@@ -204,12 +224,14 @@ Sugestão de commit: `test(super-admin): verify platform workflows end to end`.
 - [ ] SA-B03: Especificar capacidades de planos, funcionalidades, limites,
   consumo, regras por plano e enforcement. Sem trial/plano grátis operacional.
 - [ ] SA-B04: Definir configurações globais (SA-P06) antes de desenhar schema/API.
+- [ ] SA-B05: Especificar alteração de senha na área de configurações do perfil.
 
 ## Registro de revisão e evidências
 
 | Grupo | Revisor | Resultado / evidências | Commit liberado |
 | --- | --- | --- | --- |
 | G0 documentação | Subagente final_review, mesmo modelo do agente principal, em 2026-11-02 | Nove Markdown revisados contra código/decisões; sem bloqueadores. Links dos seis documentos novos resolvem e os três índices foram conferidos; git diff --check aprovado. | Sim, somente documentação |
+| Extensão de design/layout/perfil | Subagente final_review, mesmo modelo do agente principal, em 2026-11-02 | Seis Markdown revisados na staging; links, cabeçalhos, tokens de cores, escopo do perfil e decisões pendentes conferidos; git diff --check aprovado. | Sim, somente documentação |
 | G1–G8 implementação | Não executada | Planejamento somente; nenhum teste ou SQL executado. | Não |
 
 A revisão documental não aprova preços, contratos ou schema pendentes e não

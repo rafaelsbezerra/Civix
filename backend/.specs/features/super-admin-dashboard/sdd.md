@@ -236,6 +236,43 @@ estado de sessão ou bibliotecas. Cancelar/ignorar respostas antigas ao trocar
 companyId e limpar dados ao perder acesso. Componentes SuperAdminLayout e
 pages/super-admin usam UI existente; não redesenhar o site institucional.
 
+## 8.1. Layout raiz, temas e configurações do próprio perfil
+
+Confirmação de 2026-11-02: criar sidebar/header compartilhados e configurações
+de perfil com edição de nome/e-mail. Senha fica em backlog. A especificação
+visual está em [design frontend](../../../../frontend/.specs/features/super-admin-dashboard/design.md).
+Layout raiz significa SuperAdminLayout com Outlet em rotas aninhadas, não
+substituição da raiz pública do React. Sidebar/header ficam em
+frontend/src/components/layout/{SuperAdminLayout,SuperAdminSidebar,SuperAdminHeader}.tsx.
+
+Fluxo de perfil:
+
+1. Ler identidade do próprio usuário por profile já autenticado e preencher
+   ProfileSettings.tsx/ProfileForm.tsx. Nunca selecionar o usuário pelo ID
+   fornecido no formulário nem reutilizar administração global irrestrita.
+2. Proposta de gravação: PUT /api/v1/users/profile, protegido por auth e pelo
+   escopo aprovado da área. Handler independente em user.controller.ts chama
+   updateOwnProfile em user.service.ts. Contrato final depende de SA-P07.
+3. Service busca novamente usuário pelo ator autenticado, valida estado,
+   nome/e-mail e aceita somente esses campos. Excluir role/company_id/status
+   e credenciais do DTO; não promover ou transferir vínculo por mass assignment.
+4. Repository de users consulta unicidade de e-mail sem caixa e atualiza os
+   campos atomicamente com constraints do banco; duplicidade retorna 409.
+   Estender contrato/adapters JSON/PostgreSQL e DTO de perfil em
+   backend/src/dtos/user.profile.dto.ts, se aprovado. Não criar tabela de perfil.
+5. Responder com projeção sanitizada persistida; frontend atualiza header e
+   formulário pelo resultado. Não indicar sucesso antes da gravação.
+6. JWT atual carrega e-mail e middleware compara ao registro vigente.
+   **Aguardando resposta — SA-P07:** definir se a edição de e-mail exige novo
+   login após sucesso ou renovação explícita do token; se há confirmação de
+   titularidade do novo endereço. Não emitir refresh/cookies ou afirmar
+   e-mail verificado por inferência. Testar o comportamento aprovado.
+
+Não alterar senha, avatar ou configurações globais nesta extensão. A decisão
+de persistir tema entre visitas permanece pendente no design, sem API/coluna
+de preferência antecipada. Conferir UI/API do próprio perfil, e-mail duplicado,
+tentativa de alterar outro usuário e integridade da sessão nos dois temas.
+
 ## 9. Critérios de verificação
 
 - E2E real isolado: superadmin login → empresa com plano → uma venda → equipe
