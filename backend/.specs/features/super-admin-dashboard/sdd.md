@@ -89,7 +89,7 @@ PATCH silenciosamente, que o CORS atual não permite.
 | POST /administrators/invitations e PUT /administrators/:userId | Convite para definir senha e campos permitidos; mesmos poderes | 201 convite preparado / 200 dados atualizados, sem senha/token na resposta |
 | POST /administrators/:userId/suspension | Motivo obrigatório; alvo distinto do ator e proteção do último ativo | 200 após desativação; recusar violações mesmo com motivo |
 | POST /administrators/:userId/reactivation | Outro superadmin ativo como ator | 200 conta reativada; sem elevar permissões além do papel existente |
-| DELETE /companies/:companyId/users/:userId | Atendente do contexto, finalizar atendimentos atribuídos | 204 após exclusão conforme mecanismo que preserve referências aprovado em SA-P07 |
+| DELETE /companies/:companyId/users/:userId | Atendente do contexto, finalizar atendimentos atribuídos | 204 após exclusão lógica em users.deleted_at, preservando referências |
 
 Não criar edição de vendas, DELETE físico de plano, APIs de pagamento, endpoints
 genéricos para configurações ou endpoint universal de dashboard.
@@ -192,7 +192,8 @@ arquivos; não criar arquivos novos para a coordenação.
    aplicar elegibilidade, assim como a rota de URL da capa e upload.
    URL assinada já emitida pode durar até expirar; não prometer revogação
    instantânea de arquivo já baixado. Não excluir imagens por suspensão.
-6. DELETE arquiva por marcador persistido, sem apagar vendas/equipe/imagens.
+6. DELETE arquiva por marcador persistido, sem apagar vendas/equipe/imagens,
+   reutilizando o motivo de desativação conforme SA-D34.
    Arquivada não é candidata a venda nova, convite ou troca de plano. Proposta
    de repetir arquivamento sem efeito adicional deve ser aprovada em SA-P07.
 7. Reativação e restauração são permitidas. Implementá-las em company.service.ts
@@ -238,7 +239,7 @@ storage.service.ts e consultas públicas; DTOs público/administrativo distintos
    Quando esse domínio existir, integrar ao módulo responsável pela finalização,
    sem manipular tabelas desconhecidas ou criar o módulo completo de atendimento
    por antecipação. Não deixar atendimentos abertos após sucesso dessa operação.
-   Preservação de referências/forma SQL da exclusão pertence ao desenho SA-P07.
+   Preservar referências com soft delete em users.deleted_at, conforme SA-D29/30.
 6. Gestão global busca apenas role super_admin e company_id nulo, em funções
    específicas do user.service.ts existente. Superadmins ativos podem criar
    outros por convite para definir a senha e desativá-los com motivo. Adaptar
@@ -454,18 +455,91 @@ pacotes e publicação de endpoints exigem a autorização pertinente.
 
 ## Continuação autorizada — G5 a G8
 
-Em 2026-11-02 o usuário autorizou G5, G6, G7 e G8, incluindo frontend,
-na continuação da branch feat/super-admin-dashboard. Preservar revisão
-por grupo, commits conforme sugestões e nenhuma execução automática de SQL.
+Em 2026-11-02 o usuário autorizou G5 a G8 e equivalentes frontend na
+branch feat/super-admin-dashboard. Revisar cada grupo antes de commitar;
+não executar migrations automaticamente. As respostas às seis perguntas
+estão consolidadas em SA-D29–36 na [spec](spec.md).
 
-**Aguardando resposta:** política de exclusão lógica de atendentes; migration
-incremental de metadados de desativação/exclusão/versão de sessão de usuários
-e recibos de operações de vendas manuais; paginação e reativação empresarial.
-Esses pontos foram perguntados antes de implementar as partes afetadas.
-Não existe domínio de atendimento no backend atual; não criar esse módulo
-por antecipação nem afirmar finalização de atendimentos inexistentes.
+### Usuários: exclusão e schema autorizado
 
-**Aguardando resposta:** motivo próprio obrigatório no arquivamento;
-replay de venda manual excluída como 409 sem recriação; uso de transação
-com bloqueio comum às alterações administrativas e revalidação concorrente
-do ator, alvo e último superadmin ativo.
+1. Buscar o atendente no vínculo empresarial correto e validar o ator.
+2. Excluir logicamente usando users.deleted_at. Impedir autenticação e
+   retirar o usuário da listagem normal, preservando imagens e referências.
+3. Alterar somente a migration existente
+   backend/prisma/migrations/20261025000100_create_users/migration.sql
+   para acrescentar deleted_at. Não criar migration incremental de users
+   nem acrescentar session_version ou metadados novos de desativação.
+4. Alinhar User, UserRow, schema JSON e filtros dos repositories ao campo,
+   durante a implementação; esta atualização documental não altera SQL/TS.
+5. Reativar usuário empresarial pelo superadmin conforme SA-D33. Se ainda
+   não há senha, preparar novo convite e não conceder sessão antecipada.
+
+A exigência anterior de motivo para desativar usuários continua vigente.
+**Aguardando resposta — SA-P08:** persistência desse motivo sem novo campo
+aprovado em users. A tabela atual não possui esse campo.
+**Aguardando resposta — SA-P09:** revogação permanente de tokens de acesso
+anteriores à reativação, sem session_version ou novo marcador temporal.
+Não substituir essas decisões por campos de recuperação/convite nem limpar
+senhas por inferência.
+
+O domínio de atendimento ainda não existe no backend. Não criar esse módulo
+por antecipação nem afirmar que atendimentos inexistentes foram finalizados.
+Quando disponível, a integração deverá respeitar os casos de G6.
+
+### Empresas: motivo do arquivamento
+
+Arquivar reutiliza o motivo de desativação e o campo existente
+companies.deactivation_reason. Não criar um motivo separado de arquivamento.
+Manter status inativo e deleted_at, preservando histórico, equipe e imagens.
+Restaurar não reativa; a reativação continua uma ação explícita.
+
+### Vendas manuais: usar sales, sem tabela de operações
+
+Não criar manual_sale_operations ou outra tabela de recibos para vendas
+manuais. A tabela sales existente já diferencia origin=manual de
+origin=company_creation; pricing_mode distingue a fonte do preço.
+A sugestão do usuário de usar um tipo na própria tabela não exige criar
+outro discriminador redundante nem aprova campos adicionais por inferência.
+
+Fluxo de repetição aprovado para POST manual:
+
+1. Validar ator, entrada e contexto empresarial conforme o fluxo de vendas.
+2. Consultar somente vendas ainda existentes ao verificar a operação.
+3. Se a mesma operação/dados encontra uma venda existente, retornar essa
+   venda; se a operação existente tem dados diferentes, retornar 409.
+4. Se a venda anterior foi excluída, ela não participa da verificação de
+   criação. Sua exclusão não bloqueia um novo lançamento manual. Não criar
+   recibo de exclusão nem retornar conflito apenas pela venda removida.
+5. Criar o novo registro somente após as demais validações. A ação não
+   altera o plano da empresa nem representa cobrança ou pagamento.
+
+Exemplo: registrar venda manual, excluí-la definitivamente e reenviar a
+operação não é recusado apenas pela venda excluída. Uma venda manual ainda
+existente continua sujeita à verificação de operação/dados descrita acima.
+**Aguardando resposta — SA-P10:** campos de identificação da operação e
+comparação dos dados dentro de sales; origin sozinho não identifica uma
+requisição específica. Não implementar a persistência antes dessa definição.
+
+Essa decisão não altera company_registration_operations nem a proteção
+já implementada da venda inicial: repetir o cadastro da empresa não recria
+uma venda inicial excluída. Os dois fluxos têm regras diferentes confirmadas.
+
+### Paginação administrativa
+
+Adotar page/limit, limite padrão 20, máximo 100, ordenação estável e
+metadados. Aplicar a listas administrativas previstas em G5 a G7; preservar
+os contratos públicos existentes e a consulta de planos adotada em G3.
+Validar entradas antes da consulta e permitir navegação sem carregar toda
+a plataforma para paginar apenas no navegador.
+
+### Concorrência na gestão de superadmins
+
+Usar transação e bloqueio comum aos fluxos de alteração administrativa.
+Revalidar ator ativo, alvo, estado e quantidade de superadmins ativos dentro
+da mesma transação antes da escrita. Manter a proibição de desativar a
+própria conta e o último ativo, inclusive em solicitações simultâneas.
+
+O usuário sugeriu permist_write como possível solução para a proteção de
+escrita. Registrar como sugestão, sem afirmar que essa API existe ou está
+implementada no projeto. A base usa SQL/driver; não há autorização para
+instalar ORM, alterar a persistência ou introduzir dependências por isso.

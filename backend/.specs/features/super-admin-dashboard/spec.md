@@ -54,6 +54,14 @@ anterior; os demais casos de uso continuam nas specs de origem.
 | SA-D26 | Datas de todo o sistema em UTC: persistência, contratos, entrada de datas, exibição e filtros sem conversão implícita para fuso local. |
 | SA-D28 | Usar somente companies.status para ativar/desativar; não criar administrative_status. Verificação permanece em verificado. |
 | SA-D27 | Criar superadmin por convite para definir senha; superadmin desativado pode ser reativado por outro ativo. Todos possuem os mesmos poderes. |
+| SA-D29 | Excluir atendentes por soft delete em users.deleted_at: impedir acesso, retirar da lista normal e preservar o registro e suas referências. |
+| SA-D30 | Na estrutura de users, acrescentar apenas deleted_at e alterar a migration existente de criação de usuários. Não foram aprovados session_version nem novos campos de motivo/data/autor da desativação. Não aplicar migrations automaticamente. |
+| SA-D31 | Não criar tabela de operações de vendas manuais. Usar a própria sales para distinguir o tipo/origem da venda; origin já permite manual e company_creation. Os campos exatos de controle de repetição ainda precisam de definição. |
+| SA-D32 | Paginação administrativa com page e limit, padrão de 20 registros, máximo de 100, ordenação estável e metadados. |
+| SA-D33 | Superadmin pode reativar usuários empresariais; se ainda não possuem senha, exigir novo convite para defini-la. |
+| SA-D34 | Arquivamento de empresa reutiliza o motivo de desativação; não criar motivo/campo separado de arquivamento. |
+| SA-D35 | Para venda manual ainda existente, repetir a mesma operação/dados retorna a original; mesma operação com dados diferentes retorna 409. Vendas já excluídas não entram na decisão de criação de vendas manuais e não impedem novo lançamento. Não manter recibo de exclusão para esse fluxo. A proteção da venda inicial do cadastro continua distinta. |
+| SA-D36 | Alterações administrativas usam transações e bloqueio para revalidar ator, alvo e quantidade de superadmins ativos dentro da mesma operação. O usuário sugeriu permist_write como possível solução; isso não aprova instalar ORM ou uma biblioteca nova. |
 
 Papéis técnicos, vínculo único e cliente sem área logada continuam conforme
 [users-roles](../users-roles/spec.md). Bearer atual é preservado; não acrescentar
@@ -117,7 +125,7 @@ de outra empresa não pode ser alterado pela troca de ID no formulário.
 Não aceitar transferência de vínculo ou promoção para super_admin nesse fluxo.
 Convite reutiliza primeiro acesso/reenvio existentes, sem distribuir senhas.
 É permitido alterar papel entre admin_empresa/atendente e desativar o último
-admin empresarial. Atendentes podem ser desativados ou excluídos; seus
+admin empresarial. Atendentes podem ser desativados ou excluídos logicamente com deleted_at; seus
 atendimentos atribuídos são finalizados. A proteção do último superadmin
 continua obrigatória e não se estende por inferência ao admin da empresa.
 Desativação de usuário exige motivo não vazio e persistido; não remover a
@@ -177,8 +185,8 @@ os mesmos poderes; não criar níveis, matriz individual ou editor de permissõe
 
 Configurações do próprio perfil são uma entrega distinta, confirmada em
 SA-D11: editar nome/e-mail do ator autenticado, sem gerenciar terceiros.
-O [SDD](sdd.md) descreve validação, persistência e a decisão pendente de
-sessão após trocar e-mail. Não confundir essa tela com a área global abaixo.
+O [SDD](sdd.md) descreve validação, persistência e novo login obrigatório
+após trocar e-mail, conforme decisão já aprovada. Não confundir essa tela com a área global abaixo.
 
 **Aguardando resposta — SA-P06:** não há chaves/regras aprovadas. Registrar
 seção no planejamento; não expor endpoint genérico chave/valor, edição de
@@ -202,7 +210,10 @@ sem reabrir estas decisões funcionais nem exigir dados reais para implementar.
 | ID | Decisão pendente | Parte impedida |
 | --- | --- | --- |
 | SA-P06 | Quais configurações globais e regras serão editáveis? | Área de configurações e sua persistência/API. |
-| SA-P07 | Aprovar desenho proposto no SDD: URLs, contratos, transação/idempotência, campos incrementais, paginação e auditoria mínima. | G0 a G4 adotados nesta rodada. Escolhas de grupos posteriores seguem sujeitas à implementação/revisão. |
+| SA-P07 | Contratos técnicos dos grupos restantes. Paginação e proteção transacional aprovadas em SA-D32/36; restrições de schema e vendas em SA-D29–35. | Não reabrir decisões resolvidas; pendências concretas em SA-P08–10. |
+| SA-P08 | Como persistir o motivo obrigatório de desativação dos usuários com a autorização de acrescentar somente deleted_at? A tabela users atual não possui campo para esse motivo. | Persistência da desativação individual em G6/G7. A exigência funcional de motivo não foi removida. |
+| SA-P09 | Qual mecanismo invalidará tokens de acesso antigos após reativação sem session_version ou novo campo de data/versão? | Garantia de revogação persistente nesse ciclo. Não reutilizar outros campos para essa finalidade sem decisão. |
+| SA-P10 | Quais campos da própria sales identificarão a operação e os dados para repetição segura, sem tabela adicional? origin distingue a origem, mas não identifica uma tentativa específica. | Persistência da idempotência de vendas manuais em G5. |
 
 Pendências não bloqueiam a escrita desta spec; bloqueiam a implementação
 do trecho afetado. Não interpretar a aprovação deste planejamento como

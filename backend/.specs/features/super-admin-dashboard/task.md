@@ -183,6 +183,8 @@ Sugestões de commits, cada qual revisado:
 Exclusão definitiva fica no sale.controller.ts/sale.service.ts e
 SaleRepository/adapters propostos, com método deleteSaleById; sem updateSale,
 sem soft delete de venda e sem exclusão automática na troca de plano.
+Vendas manuais removidas não entram na decisão de novo lançamento (SA-D35);
+a proteção contra recriar venda inicial pelo cadastro permanece distinta.
 
 ## G6 — Equipe de cada empresa
 
@@ -190,7 +192,7 @@ sem soft delete de venda e sem exclusão automática na troca de plano.
   papéis empresariais aprovados usando primeiro acesso/reenvio existentes.
 - [ ] SA-25: Permitir troca admin_empresa/atendente e desativar o último admin
   empresarial. Validar empresa da URL/vínculo e motivo obrigatório. Atendentes
-  podem ser desativados/excluídos, finalizando atendimentos atribuídos; integrar
+  podem ser desativados/excluídos logicamente por deleted_at, finalizando atendimentos atribuídos; integrar
   ao domínio de atendimento quando disponível, sem criá-lo por antecipação.
   Não promover superadmin nem transferir empresa implicitamente.
 - [ ] SA-26: Integrar lista/formulário e estados do convite; tratar falha de
@@ -305,18 +307,56 @@ review_http aprovou o delta visual, além dos fluxos reais já registrados.
 
 ## Continuação autorizada — G5 a G8
 
-Em 2026-11-02 o usuário autorizou G5, G6, G7 e G8, incluindo frontend,
-na continuação da branch feat/super-admin-dashboard. Preservar revisão
-por grupo, commits conforme sugestões e nenhuma execução automática de SQL.
+G5 a G8 e equivalentes frontend foram autorizados em 2026-11-02, na branch
+feat/super-admin-dashboard. Respostas às seis perguntas registradas como
+SA-D29–36 na [spec](spec.md); lógica e arquivos no [SDD](sdd.md).
+As tarefas G5 a G8 continuam abertas: documentar uma decisão não comprova
+sua implementação. Revisar cada grupo antes do commit e não aplicar SQL.
 
-**Aguardando resposta:** política de exclusão lógica de atendentes; migration
-incremental de metadados de desativação/exclusão/versão de sessão de usuários
-e recibos de operações de vendas manuais; paginação e reativação empresarial.
-Esses pontos foram perguntados antes de implementar as partes afetadas.
-Não existe domínio de atendimento no backend atual; não criar esse módulo
-por antecipação nem afirmar finalização de atendimentos inexistentes.
+### Ajustes de tasks pelas decisões respondidas
 
-**Aguardando resposta:** motivo próprio obrigatório no arquivamento;
-replay de venda manual excluída como 409 sem recriação; uso de transação
-com bloqueio comum às alterações administrativas e revalidação concorrente
-do ator, alvo e último superadmin ativo.
+- [ ] SA-20D: Arquivar empresa reutilizando o motivo/campo de desativação,
+  sem criar campo próprio de arquivamento (SA-D34).
+- [ ] SA-21D: Diferenciar venda manual na própria sales, sem tabela de
+  operações manuais. Validar operação/dados somente entre vendas existentes;
+  venda excluída não impede novo lançamento. Manter distinta a proteção da
+  venda inicial em company_registration_operations (SA-D31/35).
+- [ ] SA-23D: Cobrir replay de venda manual existente, dados divergentes,
+  exclusão seguida de novo lançamento e repetição do cadastro inicial.
+- [ ] SA-24D: Aplicar page/limit, padrão 20, máximo 100, ordenação estável
+  e metadados às listas administrativas previstas (SA-D32).
+- [ ] SA-25D: Acrescentar somente deleted_at à migration existente
+  backend/prisma/migrations/20261025000100_create_users/migration.sql;
+  alinhar User, UserRow, JSON e repositories. Excluir atendente logicamente,
+  retirar da lista normal e impedir acesso sem destruir referências
+  (SA-D29/30). Não executar migration nem criar campos não aprovados.
+- [ ] SA-25R: Permitir reativar usuário empresarial pelo superadmin; quando
+  ainda não possuir senha, exigir novo convite (SA-D33).
+- [ ] SA-29D: Proteger alterações administrativas por transação/bloqueio,
+  revalidando ator, alvo e último ativo dentro da operação. Testar solicitações
+  concorrentes. permist_write foi uma sugestão, sem autorizar ORM/pacote
+  (SA-D36).
+- [ ] SA-31D: Incluir os casos acima na validação G8 e registrar separadamente
+  evidências simuladas/reais. Não afirmar entrega dos grupos antes dos checks.
+
+### Impedimentos técnicos remanescentes
+
+- **Aguardando resposta — SA-P08:** persistência do motivo de desativação
+  individual com somente deleted_at autorizado em users. Afeta G6/G7.
+- **Aguardando resposta — SA-P09:** revogação permanente de tokens antigos
+  após reativação, sem session_version ou novo marcador. Afeta o ciclo de
+  acesso e os testes correspondentes.
+- **Aguardando resposta — SA-P10:** campos de operação/comparação dentro de
+  sales para repetição segura manual, sem nova tabela. Afeta G5.
+
+Não existe módulo de atendimento no backend atual. Preservar essa limitação;
+quando o domínio existir, integrar a finalização dos atendimentos atribuídos.
+Não criar esse módulo por antecipação nem marcar essa integração como feita.
+
+### Revisão documental das respostas — 2026-11-02
+
+Subagente scope_review (gpt-6-luna, raciocínio max), revisão somente leitura:
+SA-D29–36 e SA-P08–10 sem bloqueadores documentais; commit liberado.
+22 links relativos válidos e git diff --check aprovado. Nenhum SQL ou teste
+foi executado para esta atualização documental. Alterações de código/teste
+já em andamento antes dela foram preservadas e não integram este commit.
