@@ -11,6 +11,12 @@ import { type AuthenticatedUser, type UserId, isAuthenticatedRole } from '../ent
 import { companyRepository } from '../persistence/company.repository.js';
 import { ownProfileSchema } from '../dtos/user.auth.dto.js';
 
+export async function requireSuperAdminActor(id: UserId) {
+  const user = await getAuthenticatedUser(id);
+  if (user.role !== 'super_admin') throw new AppError({ status: 403, code: ErrorCode.FORBIDDEN, message: 'Acesso exclusivo da administração da Civix.' });
+  return user;
+}
+
 export async function updateOwnProfile(id: UserId, input: unknown) {
   const current = await getAuthenticatedUser(id);
   const parsed = ownProfileSchema.safeParse(input);
@@ -35,6 +41,7 @@ export async function login({ email, role, password }: LoginInput): Promise<Logi
   if (user.role === 'cliente') {
     throw new AppError({ status: 403, code: ErrorCode.FORBIDDEN, message: 'Cliente não possui acesso à área logada.' });
   }
+  const authenticationStartedAt = Date.now();
   const current = await getAuthenticatedUser(user.id);
   if (!await authService.comparePassword(password, current.password_hash!)) {
     throw new AppError({ status: 401, code: ErrorCode.UNAUTHORIZED, message: 'Credenciais inválidas.' });
@@ -42,6 +49,7 @@ export async function login({ email, role, password }: LoginInput): Promise<Logi
   const token = authService.signToken({
     id: current.id, email: current.email, role: current.role,
     companyId: current.company_id, tokenVersion: 2,
+    issuedAt: new Date(Math.max(authenticationStartedAt, current.tokens_revoked_at ? new Date(current.tokens_revoked_at).getTime() + 1 : 0)).toISOString(),
   }, '1h');
   logger().info({ event: 'user.authenticated', module: 'users', message: 'Autenticação concluída',
     context: { userId: current.id, role: current.role, companyId: current.company_id ?? undefined, persistenceMode: USE_MOCK_DATA ? 'json' : 'postgres' } });
@@ -111,7 +119,7 @@ export async function resetPassword({ token, password }: PasswordResetInput): Pr
 export async function getAuthenticatedUser(id: UserId): Promise<AuthenticatedUser> {
   const user = await userRepository.getById(id);
   if (!user || !isAuthenticatedRole(user.role)
-    || (user.status != null && user.status !== 'active') || !user.password_hash) {
+    || !!user.deleted_at || (user.status != null && user.status !== 'active') || !user.password_hash) {
     throw new AppError({ status: 401, code: ErrorCode.UNAUTHORIZED, message: 'Acesso inválido. Faça login novamente.' });
   }
   const companyId = user.company_id ?? null;

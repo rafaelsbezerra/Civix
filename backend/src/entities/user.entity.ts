@@ -20,6 +20,9 @@ export interface User {
   name?: string;
   password_hash?: string;
   status?: string;
+  deleted_at?: string | null;
+  deactivation_reason?: string | null;
+  tokens_revoked_at?: string | Date | null;
   invite_token?: string | null;
   company_id?: string | null;
 }

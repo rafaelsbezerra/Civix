@@ -27,7 +27,7 @@ export function SuperAdminLayout() {
     return error instanceof Error ? error.message : 'Não foi possível concluir a operação.';
   }, [logout]);
   const title = pathname.endsWith('/plans') ? 'Planos comerciais' : pathname.endsWith('/companies/new') ? 'Cadastrar empresa'
-    : pathname.endsWith('/settings/profile') ? 'Meu perfil' : 'Visão geral';
+    : pathname.includes('/companies') ? 'Empresas' : pathname.endsWith('/settings/profile') ? 'Meu perfil' : 'Visão geral';
   return <div className={`super-admin-root${theme === 'dark' ? ' dark' : ''}`} data-theme={theme}>
     <a className="sa-skip-link" href="#admin-content">Pular para o conteúdo</a>
     <aside className="sa-sidebar"><SuperAdminSidebar /></aside>
@@ -37,7 +37,7 @@ export function SuperAdminLayout() {
     </dialog>
     <div className="sa-workspace"><SuperAdminHeader title={title} name={session.user.name || 'Superadmin'} dark={theme === 'dark'}
       onToggleTheme={() => setTheme(theme === 'dark' ? 'light' : 'dark')} onOpenMenu={() => dialog.current?.showModal()} onLogout={logout} />
-      <main id="admin-content" className="sa-content"><Outlet context={{ session, setProfile: user => setSession({ ...session, user }), handleError } satisfies SuperAdminContext} /></main>
+      <main id="admin-content" tabIndex={-1} className="sa-content"><Outlet context={{ session, setProfile: user => setSession({ ...session, user }), handleError } satisfies SuperAdminContext} /></main>
       <footer className="sa-footer">Civix · Administração da plataforma<span>Valores em BRL · Datas em UTC</span></footer>
     </div>
   </div>;

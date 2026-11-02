@@ -18,3 +18,19 @@ export const companyCreateSchema = companyDataSchema.omit({
 }).strict();
 
 export type CompanyCreateDTO = z.infer<typeof companyCreateSchema>;
+
+export interface CompanyListFilters {
+  q?: string;
+  status?: 'ativo' | 'inativo' | 'archived';
+  planId?: string;
+  offset: number;
+  pageSize: number;
+}
+export interface CompanyAdministrationChange {
+  actorId: string | number;
+  companyId: string;
+  action: 'update' | 'suspend' | 'archive' | 'reactivate' | 'restore';
+  fields?: CompanyCreateDTO & { planId: string };
+  reason?: string;
+  changedAt: string;
+}

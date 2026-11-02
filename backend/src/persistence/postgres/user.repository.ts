@@ -7,8 +7,13 @@ import { ErrorCode } from '../../shared/errors/error.code.js';
 export const userPostgresRepository: UserRepository = {
   async updateOwnProfile(id, input) {
     try {
-      return (await db.query<User>('UPDATE users SET name = $1, email = $2 WHERE id = $3 RETURNING *',
-        [input.name, input.email, id])).rows[0];
+      return (await db.query<User>(`UPDATE users SET name=$1,email=$2,
+        tokens_revoked_at=CASE WHEN LOWER(email)<>LOWER($2) THEN GREATEST($4::timestamptz,date_trunc('milliseconds',clock_timestamp()),COALESCE(tokens_revoked_at,'epoch'::timestamptz)+INTERVAL '2 milliseconds') ELSE tokens_revoked_at END,
+        invite_token=CASE WHEN LOWER(email)<>LOWER($2) THEN NULL ELSE invite_token END,
+        reset_password_token=CASE WHEN LOWER(email)<>LOWER($2) THEN NULL ELSE reset_password_token END,
+        reset_password_expires=CASE WHEN LOWER(email)<>LOWER($2) THEN NULL ELSE reset_password_expires END
+        WHERE id=$3 AND deleted_at IS NULL AND COALESCE(status,'active')='active' RETURNING *`,
+        [input.name,input.email,id,new Date().toISOString()])).rows[0];
     } catch (error) {
       if ((error as { code?: string }).code === '23505') {
         throw new AppError({ status: 409, code: ErrorCode.CONFLICT, message: 'E-mail já cadastrado.' });

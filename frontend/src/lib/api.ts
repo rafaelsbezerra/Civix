@@ -137,6 +137,8 @@ async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<Api
 
   let payload: unknown;
 
+  if (response.status === 204 && response.ok) return { data: undefined as T };
+
   try {
     payload = await response.json();
   } catch {
@@ -291,4 +293,37 @@ export async function getSessionProfile(): Promise<SessionProfile> {
     throw new ApiError('Sessão inválida.', 401);
   }
   return profile;
+}
+
+export interface PaginationMeta { page: number; pageSize: number; total: number; totalPages: number }
+export interface PageResult<T> { data: T[]; meta: PaginationMeta }
+export interface PlatformCompany extends Empresa {
+  plan_id?: string | null; deleted_at?: string | null;
+  deactivation_reason?: string | null; deactivated_at?: string | null;
+}
+function requirePlatformCompany(value: PlatformCompany): PlatformCompany {
+  if (!value || typeof value.id !== 'string' || typeof value.nome !== 'string'
+    || !['ativo','inativo','verificado'].includes(value.status)) throw new ApiError('Empresa inválida na resposta.');
+  return value;
+}
+function requirePage<T>(result: ApiResponse<T[]>, validate: (value: T) => T): PageResult<T> {
+  const meta = result.meta as unknown as PaginationMeta;
+  if (!Array.isArray(result.data) || !meta || !Number.isInteger(meta.page) || meta.page < 1
+    || !Number.isInteger(meta.pageSize) || meta.pageSize < 1 || !Number.isInteger(meta.total)
+    || meta.total < 0 || !Number.isInteger(meta.totalPages) || meta.totalPages < 0) throw new ApiError('Paginação inválida na resposta.');
+  return { data: result.data.map(validate), meta };
+}
+export async function getPlatformCompanies(query: { page?: number; limit?: number; q?: string; status?: string; planId?: string } = {}): Promise<PageResult<PlatformCompany>> {
+  const params = new URLSearchParams(Object.entries(query).filter(([,value]) => value !== undefined && value !== '').map(([key,value]) => [key,String(value)]));
+  return requirePage(await fetchApi<PlatformCompany[]>('/api/v1/platform/companies?' + params, authenticatedOptions()), requirePlatformCompany);
+}
+export async function getPlatformCompany(id: string): Promise<PlatformCompany> {
+  return requirePlatformCompany((await fetchApi<PlatformCompany>('/api/v1/platform/companies/' + encodeURIComponent(id), authenticatedOptions())).data);
+}
+export async function updatePlatformCompany(id: string, input: Omit<CompanyRegistrationInput,'operationId'>): Promise<PlatformCompany> {
+  return requirePlatformCompany((await fetchApi<PlatformCompany>('/api/v1/platform/companies/' + encodeURIComponent(id), authenticatedOptions('PUT', input))).data);
+}
+export async function changePlatformCompanyState(id: string, action: 'suspension'|'reactivation'|'restoration'|'archive', reason?: string): Promise<void> {
+  await fetchApi('/api/v1/platform/companies/' + encodeURIComponent(id) + (action === 'archive' ? '' : '/' + action),
+    authenticatedOptions(action === 'archive' ? 'DELETE' : 'POST', reason === undefined ? {} : { reason }));
 }

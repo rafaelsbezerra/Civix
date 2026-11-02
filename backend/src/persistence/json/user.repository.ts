@@ -7,9 +7,13 @@ export const userJsonRepository: UserRepository = {
   async updateOwnProfile(id, input) {
     return updateLocalData(data => {
       const user = data.users.find(item => String(item.id) === String(id));
-      if (!user) return undefined;
+      if (!user || user.deleted_at || user.status != null && user.status !== 'active') return undefined;
       if (data.users.some(item => String(item.id) !== String(id) && item.email.toLowerCase() === input.email.toLowerCase())) {
         throw new AppError({ status: 409, code: ErrorCode.CONFLICT, message: 'E-mail já cadastrado.' });
+      }
+      if (user.email.toLowerCase() !== input.email.toLowerCase()) {
+        user.tokens_revoked_at = new Date(Math.max(Date.now(),Date.parse(user.tokens_revoked_at || '1970-01-01') + 2)).toISOString();
+        user.invite_token = null;user.reset_password_token = null;user.reset_password_expires = null;
       }
       user.name = input.name;
       user.email = input.email;
@@ -21,7 +25,8 @@ export const userJsonRepository: UserRepository = {
       if (data.users.some(item => item.email.toLowerCase() === user.email.toLowerCase())) {
         throw new AppError({ status: 409, code: ErrorCode.CONFLICT, message: 'E-mail já cadastrado.' });
       }
-      data.users.push({ ...user, company_id: user.company_id ?? null });
+      data.users.push({ ...user, company_id: user.company_id ?? null,
+        tokens_revoked_at: user.tokens_revoked_at ? new Date(user.tokens_revoked_at).toISOString() : user.tokens_revoked_at });
       return user;
     });
   },

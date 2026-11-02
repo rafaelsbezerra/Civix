@@ -11,6 +11,9 @@ import { SuperAdminLayout } from '@/components/dashboard-super-admin/layout/Supe
 import Overview from '@/pages/dashboard-super-admin/Overview';
 import Plans from '@/pages/dashboard-super-admin/Plans';
 import CompanyCreate from '@/pages/dashboard-super-admin/CompanyCreate';
+import Companies from '@/pages/dashboard-super-admin/Companies';
+import CompanyDetail from '@/pages/dashboard-super-admin/CompanyDetail';
+import CompanyEdit from '@/pages/dashboard-super-admin/CompanyEdit';
 import ProfileSettings from '@/pages/dashboard-super-admin/ProfileSettings';
 import CatalogoEmpresas from '@/pages/CatalogoEmpresas';
 import PerfilEmpresa from '@/pages/PerfilEmpresa';
@@ -33,6 +36,9 @@ export const AppRoutes: React.FC = () => (
                     <Route index element={<Overview />} />
                     <Route path="plans" element={<Plans />} />
                     <Route path="companies/new" element={<CompanyCreate />} />
+                    <Route path="companies" element={<Companies />} />
+                    <Route path="companies/:companyId" element={<CompanyDetail />} />
+                    <Route path="companies/:companyId/edit" element={<CompanyEdit />} />
                     <Route path="settings/profile" element={<ProfileSettings />} />
                 </Route>
             </Route>
