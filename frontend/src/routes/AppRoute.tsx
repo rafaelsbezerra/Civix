@@ -6,6 +6,12 @@ import HomePage from '@/pages/Home';
 import Login from '@/pages/login';
 import AccessChoice from '@/pages/AccessChoice';
 import ClientAccess from '@/pages/ClientAccess';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { SuperAdminLayout } from '@/components/dashboard-super-admin/layout/SuperAdminLayout';
+import Overview from '@/pages/dashboard-super-admin/Overview';
+import Plans from '@/pages/dashboard-super-admin/Plans';
+import CompanyCreate from '@/pages/dashboard-super-admin/CompanyCreate';
+import ProfileSettings from '@/pages/dashboard-super-admin/ProfileSettings';
 import CatalogoEmpresas from '@/pages/CatalogoEmpresas';
 import PerfilEmpresa from '@/pages/PerfilEmpresa';
 import NotFound from '@/pages/PageError';
@@ -22,6 +28,14 @@ export const AppRoutes: React.FC = () => (
         <PublicSmoothScroll />
         <CompanyPageTransition />
         <Routes>
+            <Route element={<ProtectedRoute allowedRoles={['super_admin']} />}>
+                <Route path="/super-admin" element={<SuperAdminLayout />}>
+                    <Route index element={<Overview />} />
+                    <Route path="plans" element={<Plans />} />
+                    <Route path="companies/new" element={<CompanyCreate />} />
+                    <Route path="settings/profile" element={<ProfileSettings />} />
+                </Route>
+            </Route>
             <Route path='/' element={<HomePage />} />
             <Route path="/login" element={<AccessChoice />} />
             <Route path="/login/empresa" element={<Login />} />

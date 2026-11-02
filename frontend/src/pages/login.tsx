@@ -9,7 +9,7 @@ import {
 
 import { useState } from "react";
 import type { FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { ApiError, login } from "../lib/api";
 
 import civixLogo from "../assets/civix/logoCivix.png";
@@ -132,6 +132,7 @@ export default function Login({ access = "empresa" }: { access?: "empresa" | "cl
   const [error, setError] = useState<string | null>(null);
 
   const navigate = useNavigate();
+  const { state } = useLocation();
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -159,7 +160,7 @@ export default function Login({ access = "empresa" }: { access?: "empresa" | "cl
 
       localStorage.setItem("token", result.token);
 
-      navigate("/");
+      navigate(result.user.role === 'super_admin' ? '/super-admin' : '/');
     } catch (err: unknown) {
       setError(err instanceof ApiError
         ? err.message
@@ -269,6 +270,7 @@ export default function Login({ access = "empresa" }: { access?: "empresa" | "cl
                 </button>
               </div>}
 
+              {state?.profileChanged && access === 'empresa' && <p role="status" className="mb-4 text-sm text-[#07192a]">Perfil atualizado. Entre novamente com seu novo e-mail.</p>}
               {error && (
                 <div role="alert" className="mb-4 p-3 rounded bg-red-100 border border-red-300 text-red-700 text-xs">
                   {error}

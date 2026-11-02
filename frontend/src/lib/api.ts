@@ -45,6 +45,52 @@ export interface Plan {
   isActive: boolean;
   displayOrder: number;
 }
+export type PlanInput = Omit<Plan, 'id'>;
+export interface InitialSale {
+  id: string; companyId: string; planId: string; planName: string;
+  amount: string; currency: 'BRL'; soldAt: string; createdAt: string;
+}
+export interface CompanyRegistrationResult {
+  company: Empresa & { plan_id: string }; sale: InitialSale; replayed: boolean;
+}
+export type CompanyRegistrationInput = Pick<Empresa, 'nome' | 'cnpj' | 'descricao' | 'descricao_detalhada' | 'categoria' | 'cidade' | 'estado' | 'tamanho'>
+  & Partial<Pick<Empresa, 'email' | 'telefone' | 'endereco' | 'website' | 'whatsapp'>> & { planId: string; operationId: string };
+
+function authenticatedOptions(method = 'GET', body?: unknown): RequestInit {
+  const token = localStorage.getItem('token');
+  if (!token) throw new ApiError('Faça login para continuar.', 401);
+  return { method, headers: { Authorization: `Bearer ${token}` }, ...(body === undefined ? {} : { body: JSON.stringify(body) }) };
+}
+function requirePlanResponse(value: Plan): Plan {
+  if (!value || typeof value.id !== 'string' || typeof value.price !== 'string'
+    || typeof value.name !== 'string' || typeof value.slug !== 'string' || typeof value.isActive !== 'boolean'
+    || !Array.isArray(value.features) || !value.limits) throw new ApiError('A API retornou um plano inválido.');
+  return value;
+}
+export async function getPlatformPlans(): Promise<Plan[]> {
+  const result = (await fetchApi<Plan[]>('/api/v1/platform/plans', authenticatedOptions())).data;
+  if (!Array.isArray(result)) throw new ApiError('A API retornou uma lista de planos inválida.');
+  return result.map(requirePlanResponse);
+}
+export async function savePlatformPlan(input: PlanInput, id?: string): Promise<Plan> {
+  return requirePlanResponse((await fetchApi<Plan>(`/api/v1/platform/plans${id ? '/' + encodeURIComponent(id) : ''}`,
+    authenticatedOptions(id ? 'PUT' : 'POST', input))).data);
+}
+export async function setPlatformPlanActive(id: string, active: boolean): Promise<Plan> {
+  return requirePlanResponse((await fetchApi<Plan>(`/api/v1/platform/plans/${encodeURIComponent(id)}/activation`,
+    authenticatedOptions('POST', { active }))).data);
+}
+export async function registerCompany(input: CompanyRegistrationInput): Promise<CompanyRegistrationResult> {
+  const result = (await fetchApi<CompanyRegistrationResult>('/api/v1/platform/companies', authenticatedOptions('POST', input))).data;
+  if (!result?.company?.id || !result.sale?.id || typeof result.sale.amount !== 'string'
+    || result.sale.companyId !== result.company.id) throw new ApiError('A API retornou um cadastro inválido.');
+  return result;
+}
+export async function updateOwnProfile(input: { name: string; email: string }): Promise<{ user: LoginResult['user']; requiresLogin: boolean }> {
+  const result = (await fetchApi<{ user: LoginResult['user']; requiresLogin: boolean }>('/api/v1/users/profile', authenticatedOptions('PUT', input))).data;
+  if (!result?.user?.id || typeof result.user.email !== 'string' || typeof result.requiresLogin !== 'boolean') throw new ApiError('A API retornou um perfil inválido.');
+  return result;
+}
 
 export class ApiError extends Error {
   status?: number;

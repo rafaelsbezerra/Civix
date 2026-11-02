@@ -152,7 +152,7 @@ describe('Formulários existentes integrados ao backend', () => {
     fireEvent.change(screen.getByPlaceholderText('••••••••'), { target: { value: 'senha-teste' } })
     fireEvent.click(screen.getByRole('button', { name: 'Login' }))
     await waitFor(() => expect(setItem).toHaveBeenCalledWith('token', 'token-sintetico'))
-    expect(navigate).toHaveBeenCalledWith('/')
+    expect(navigate).toHaveBeenCalledWith(role === 'super_admin' ? '/super-admin' : '/')
   })
 
   it('Login com falha mostra mensagem pública sem gravar token ou navegar', async () => {
