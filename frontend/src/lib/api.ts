@@ -226,6 +226,15 @@ export async function login(input: LoginInput): Promise<LoginResult> {
 
 export type AuthenticatedRole = 'admin_empresa' | 'super_admin' | 'atendente';
 
+export async function requestClientAccess(email: string): Promise<void> {
+  await fetchApi<unknown>('/api/v1/users/login', {
+    method: 'POST',
+    body: JSON.stringify({ email, role: 'cliente' }),
+  });
+  // Cliente não deve receber nem armazenar sessão, mesmo em resposta inesperada.
+  throw new ApiError('A API retornou uma resposta inesperada para o acesso de cliente.');
+}
+
 export interface SessionProfile {
   user: LoginResult['user'];
   permissions: { uploadCompanyCover: boolean };

@@ -62,4 +62,34 @@ Login envia e-mail e senha; o backend determina admin_empresa, super_admin ou at
 
 Consultas públicas de empresa incluem cover_image_url e cover_image_url_expires_in. O formulário de upload não faz parte desta entrega. Ver [guia de storage e usuários](storage.md).
 
-Verificação atual: 35 testes direcionados, TypeScript e lint aprovados. O bundle Vite passou; o gate final do build ainda acusa dashboard.png ausente.
+## Escolha de acesso — 2026-11-02
+
+Os links de login do site continuam apontando para /login, que agora mostra
+somente as opções Empresa e Cliente. Empresa abre /login/empresa, com e-mail
+e senha; Cliente abre /login/cliente, com apenas e-mail. O popup da Home já
+abre a rota específica escolhida, sem repetir a seleção. As três telas
+reutilizam o visual de login existente.
+
+Login empresarial envia e-mail/senha, sem papel imposto pelo frontend, e
+continua retornando à Home enquanto os dashboards não existem. No acesso de
+cliente, o helper requestClientAccess envia e-mail e role cliente ao endpoint
+de login atual. O backend nega com 403, sem emitir sessão; a tela apresenta
+“A área logada do cliente está sendo construída.” Outros erros continuam
+visíveis, sem simular sucesso, salvar token ou liberar área privada.
+
+Arquivos: pages/AccessChoice.tsx, pages/ClientAccess.tsx e pages/login.tsx,
+rotas em routes/AppRoute.tsx, helpers em lib/api.ts e navegação direta em
+components/pop-up/SignSelect.tsx, todos sob frontend/src.
+
+Verificação desta alteração: 25 testes direcionados aprovados em AccessChoice,
+SignSelect e BackendConsumers; TypeScript, lint e git diff --check aprovados.
+Suíte completa: 141 testes passaram e 11 falharam, em Home, Sobre, Planos,
+ActionButton e identidade de assets. Essas falhas não foram corrigidas nesta
+entrega; não considerar a suíte completa aprovada. Não houve verificação
+visual no navegador nem execução do build completo nesta rodada.
+Revisão independente por final_review, em 2026-11-02, sem bloqueadores para
+o fluxo e seus testes; commit limitado liberado com essas ressalvas.
+
+Evidência histórica da integração anterior: 35 testes direcionados, TypeScript
+e lint aprovados. Naquela rodada o bundle Vite passou e o gate final do build
+acusou dashboard.png ausente. Não é evidência da alteração de rotas de acesso.

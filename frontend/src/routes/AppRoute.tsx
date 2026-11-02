@@ -4,6 +4,8 @@ import { MotionRoot } from '@/components/motion/MotionRoot';
 import { Routes, Route } from 'react-router-dom';
 import HomePage from '@/pages/Home';
 import Login from '@/pages/login';
+import AccessChoice from '@/pages/AccessChoice';
+import ClientAccess from '@/pages/ClientAccess';
 import CatalogoEmpresas from '@/pages/CatalogoEmpresas';
 import PerfilEmpresa from '@/pages/PerfilEmpresa';
 import NotFound from '@/pages/PageError';
@@ -21,7 +23,9 @@ export const AppRoutes: React.FC = () => (
         <CompanyPageTransition />
         <Routes>
             <Route path='/' element={<HomePage />} />
-            <Route path="/login" element={<Login />} />
+            <Route path="/login" element={<AccessChoice />} />
+            <Route path="/login/empresa" element={<Login />} />
+            <Route path="/login/cliente" element={<ClientAccess />} />
             <Route path="/catalogo" element={<CatalogoEmpresas />} />
             <Route path="/empresa/:id" element={<PerfilEmpresa />} />
             <Route path="/primeiro-acesso" element={<FirstAccess />} />

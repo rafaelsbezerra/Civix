@@ -74,7 +74,16 @@ describe('Diálogo de escolha de perfil', () => {
     expect(values.get('@civix:user_role')).toBe('empresa')
     expect(values.has('@civix:modal_dismissed_until')).toBe(false)
     expect(onSelectRole).toHaveBeenCalledWith('empresa')
-    expect(navigate).toHaveBeenCalledWith('/login')
+    expect(navigate).toHaveBeenCalledWith('/login/empresa')
+  })
+
+  it('escolha de cliente abre diretamente o acesso de cliente', () => {
+    const onSelectRole = vi.fn()
+    render(<MemoryRouter><RoleSelectionModal onSelectRole={onSelectRole} /></MemoryRouter>)
+    fireEvent.click(screen.getByRole('button', { name: /Sou cliente/ }))
+    expect(values.get('@civix:user_role')).toBe('cliente')
+    expect(onSelectRole).toHaveBeenCalledWith('cliente')
+    expect(navigate).toHaveBeenCalledWith('/login/cliente')
   })
 
   it('unmount com modal aberto devolve rolagem, inert e foco', () => {

@@ -5,7 +5,7 @@ import { useLocation, useNavigationType } from 'react-router-dom'
 export function PublicSmoothScroll() {
   const { pathname } = useLocation()
   const navigationType = useNavigationType()
-  const isPublicPage = pathname !== '/login'
+  const isPublicPage = pathname !== '/login' && !pathname.startsWith('/login/')
   const lenisRef = useRef<Lenis | null>(null)
   const hasNavigated = useRef(false)
 

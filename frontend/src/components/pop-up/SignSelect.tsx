@@ -33,7 +33,7 @@ export default function RoleSelectionModal({ onSelectRole }: RoleModalProps) {
     if (onSelectRole) onSelectRole(role);
     setIsOpen(false);
     
-    navigate("/login");
+    navigate(role === "empresa" ? "/login/empresa" : "/login/cliente");
   };
 
   const handleCloseWithTimer = useCallback(() => {
