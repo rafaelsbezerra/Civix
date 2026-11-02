@@ -1,11 +1,17 @@
 # Specs do backend
 
+## Evolução dos papéis de usuários
+
+[Spec](features/users-roles/spec.md) e [tarefas](features/users-roles/task.md).
+Quatro papéis confirmados, três dashboards previstos e cliente sem área logada.
+Autorização de upload e conversão explícita do legado implementadas localmente.
+Homologação externa permanece pendente. Leitura pública da capa não depende de autenticação.
+
 ## Storage de imagens
 
 [Estrutura e contratos](features/storage/spec.md) e
-[tarefas](features/storage/task.md). Scaffold sem handlers implementados;
-router não montado e migrations não executadas. Integração de empresas,
-persistência e autorização continuam pendentes.
+[tarefas](features/storage/task.md). Fluxo de capa implementado com multipart, autorização, persistência e R2;
+router montado. Migrations e homologação PostgreSQL/R2 reais não executadas.
 
 ## Planejamento dos dashboards — 2026-10-12
 
