@@ -1,9 +1,9 @@
 # SDD — telas e backend do superadmin
 
 Data: 2026-11-02. Complementa a [spec](spec.md) e orienta [tarefas](task.md).
-G0 a G4 e equivalentes frontend autorizados para implementação em 2026-11-02;
-checklists/evidências distinguem o que foi concluído. G5–G8 não estão autorizados
-nesta rodada. Configurações globais continuam fora do escopo.
+G0 a G4 e equivalentes frontend concluídos; checklists/evidências distinguem
+o que foi verificado. G5 a G8 e equivalentes frontend autorizados em 2026-11-02,
+com novas decisões técnicas pendentes registradas no fim deste documento. Configurações globais continuam fora do escopo.
 Caminhos são relativos à raiz do repositório. Escolhas novas de contrato,
 schema e mecanismo transacional foram aprovados no escopo de G0–G4 pela
 revisão e autorização de implementação do usuário. Detalhes abaixo registram
@@ -60,7 +60,8 @@ Sidebar/header/layout exclusivos ficam em components/dashboard-super-admin/layou
 ## 2. Rotas e contratos propostos
 
 Prefixo administrativo proposto: /api/v1/platform; todas as operações abaixo
-exigem Bearer e super_admin vigente, inclusive GET. URLs não estão montadas.
+exigem Bearer e super_admin vigente, inclusive GET. G0 a G4 já estão montados;
+as novas rotas de G5 a G7 aguardam esta implementação.
 SA-P07 precisa aprovar contratos; usar PUT nas propostas para não introduzir
 PATCH silenciosamente, que o CORS atual não permite.
 
@@ -450,3 +451,21 @@ pacotes e publicação de endpoints exigem a autorização pertinente.
 - Novo schema incrementa companies com plan_id/estado administrativo e cria
   sales e recibos de operação, sem executar migrations. Perfis/vínculos usam
   migration existente. Não criar endpoints de G5–G7 ou menus sem funcionalidade.
+
+## Continuação autorizada — G5 a G8
+
+Em 2026-11-02 o usuário autorizou G5, G6, G7 e G8, incluindo frontend,
+na continuação da branch feat/super-admin-dashboard. Preservar revisão
+por grupo, commits conforme sugestões e nenhuma execução automática de SQL.
+
+**Aguardando resposta:** política de exclusão lógica de atendentes; migration
+incremental de metadados de desativação/exclusão/versão de sessão de usuários
+e recibos de operações de vendas manuais; paginação e reativação empresarial.
+Esses pontos foram perguntados antes de implementar as partes afetadas.
+Não existe domínio de atendimento no backend atual; não criar esse módulo
+por antecipação nem afirmar finalização de atendimentos inexistentes.
+
+**Aguardando resposta:** motivo próprio obrigatório no arquivamento;
+replay de venda manual excluída como 409 sem recriação; uso de transação
+com bloqueio comum às alterações administrativas e revalidação concorrente
+do ator, alvo e último superadmin ativo.

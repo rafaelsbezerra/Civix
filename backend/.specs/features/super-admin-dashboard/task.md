@@ -3,8 +3,9 @@
 Data: 2026-11-02. [Spec](spec.md) · [SDD](sdd.md) ·
 [Tarefas frontend](../../../../frontend/.specs/features/super-admin-dashboard/task.md).
 
-Implementação autorizada em 2026-11-02 para G0 a G4 e equivalentes frontend,
-incluindo G2P. G5 a G8 continuam fora desta rodada.
+G0 a G4 e equivalentes frontend, incluindo G2P, foram concluídos.
+Em 2026-11-02 o usuário autorizou a continuação G5 a G8 e equivalentes frontend;
+as decisões técnicas novas abaixo aguardam confirmação antes da parte afetada.
 **Não commitar sem revisão de cada grupo.** Os commits abaixo são sugestões
 em inglês, no padrão Conventional Commits, e orientam os commits da implementação revisada.
 Paths são relativos à raiz do repositório; SDD detalha a lógica por arquivo.
@@ -301,3 +302,21 @@ Revisão visual final: títulos escuros herdavam regra global com !important.
 Override restrito ao dashboard corrigiu o tema; Chrome confirmou títulos
 #f4f6f7 sobre #102b42 (13,39:1), sem overflow mobile ou erros de página.
 review_http aprovou o delta visual, além dos fluxos reais já registrados.
+
+## Continuação autorizada — G5 a G8
+
+Em 2026-11-02 o usuário autorizou G5, G6, G7 e G8, incluindo frontend,
+na continuação da branch feat/super-admin-dashboard. Preservar revisão
+por grupo, commits conforme sugestões e nenhuma execução automática de SQL.
+
+**Aguardando resposta:** política de exclusão lógica de atendentes; migration
+incremental de metadados de desativação/exclusão/versão de sessão de usuários
+e recibos de operações de vendas manuais; paginação e reativação empresarial.
+Esses pontos foram perguntados antes de implementar as partes afetadas.
+Não existe domínio de atendimento no backend atual; não criar esse módulo
+por antecipação nem afirmar finalização de atendimentos inexistentes.
+
+**Aguardando resposta:** motivo próprio obrigatório no arquivamento;
+replay de venda manual excluída como 409 sem recriação; uso de transação
+com bloqueio comum às alterações administrativas e revalidação concorrente
+do ator, alvo e último superadmin ativo.

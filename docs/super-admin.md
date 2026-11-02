@@ -1,6 +1,6 @@
 # Planejamento de entrega do superadmin
 
-Data: 2026-11-02. G0 a G4 e perfil próprio implementados na branch feat/super-admin-dashboard; G5 a G8 permanecem planejados.
+Data: 2026-11-02. G0 a G4 e perfil próprio implementados na branch feat/super-admin-dashboard; G5 a G8 foram autorizados para continuação e ainda não estão concluídos.
 
 - [Spec: escopo, decisões e aceite](../backend/.specs/features/super-admin-dashboard/spec.md).
 - [SDD: fluxos, contratos propostos e localização do código](../backend/.specs/features/super-admin-dashboard/sdd.md).

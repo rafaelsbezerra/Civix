@@ -1,7 +1,9 @@
 # Dashboard superadmin — gestão da plataforma
 
-Data: 2026-11-02. Estado: especificação; nenhuma implementação autorizada
-nesta entrega documental. Base observada: staging, commit 9d995d2.
+Data: 2026-11-02. G0 a G4 concluídos na branch feat/super-admin-dashboard.
+G5 a G8 e equivalentes frontend autorizados para continuação, com decisões
+técnicas novas aguardando confirmação no SDD/task antes da parte afetada.
+A baseline inicial desta spec era staging, commit 9d995d2.
 
 [Desenho e fluxos](sdd.md) · [Tarefas e commits sugeridos](task.md) ·
 [Par frontend](../../../../frontend/.specs/features/super-admin-dashboard/spec.md).

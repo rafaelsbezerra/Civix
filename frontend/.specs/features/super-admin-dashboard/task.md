@@ -2,7 +2,8 @@
 
 [Spec](spec.md) · [SDD](../../../../backend/.specs/features/super-admin-dashboard/sdd.md) ·
 [Plano E2E e revisão](../../../../backend/.specs/features/super-admin-dashboard/task.md).
-G0 a G4 e equivalentes implementados nesta rodada. Não commitar sem revisão. Commits abaixo são sugestões;
+G0 a G4 e equivalentes concluídos. G5 a G8 autorizados para continuação,
+com decisões pendentes no SDD/task backend. Não commitar sem revisão. Commits abaixo são sugestões;
 não repetir commits para os mesmos grupos do plano backend.
 
 ## FE-SA-01 — Shell, após G1
@@ -129,7 +130,7 @@ Sugestões: `feat(users): add company-scoped administration` (G6) e
 Sugestão: `test(super-admin): verify platform workflows end to end` (G8).
 
 Backlog segue a spec canônica: billing, configurações sem definição,
-trial e funcionalidades/limites/regras por plano. G5 a G8 permanecem planejados.
+trial e funcionalidades/limites/regras por plano. G5 a G8 autorizados e ainda não concluídos.
 
 ## Regra de organização
 
