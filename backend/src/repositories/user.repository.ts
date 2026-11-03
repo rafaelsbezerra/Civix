@@ -1,7 +1,11 @@
 import type { User, UserId, UserRole } from '../entities/user.entity.js';
+import type { UserAdministrationChange, UserAdministrationFilters } from '../dtos/user.auth.dto.js';
 
 /** Contrato compartilhado pelas implementações JSON e PostgreSQL. */
 export interface UserRepository {
+  getUsersForAdministration(companyId: string | null, filters: UserAdministrationFilters): Promise<{ items: User[]; total: number }>;
+  changeUserAdministration(input: UserAdministrationChange): Promise<User>;
+  updateOwnProfile(id: UserId, input: { name: string; email: string }): Promise<User | undefined>;
   create(user: User): Promise<User>;
   getById(id: UserId): Promise<User | undefined>;
   getByEmail(email: string): Promise<Pick<User, 'id' | 'name' | 'email'> | undefined>;

@@ -4,6 +4,29 @@ import { AppError } from '../shared/errors/app.error.js';
 import { ErrorCode } from '../shared/errors/error.code.js';
 import { createSuccessResponse } from '../shared/contracts/response.contract.js';
 
+export async function listPlatformCompanies(req: Request, res: Response) {
+  return res.json(await companyService.listPlatformCompanies(req.authenticatedUser!.id, req.query));
+}
+export async function getPlatformCompany(req: Request, res: Response) {
+  return res.json(createSuccessResponse(await companyService.getPlatformCompany(req.authenticatedUser!.id, String(req.params.companyId))));
+}
+export async function updatePlatformCompany(req: Request, res: Response) {
+  return res.json(createSuccessResponse(await companyService.changeCompanyAdministration(req.authenticatedUser!.id, String(req.params.companyId), 'update', req.body)));
+}
+export async function suspendPlatformCompany(req: Request, res: Response) {
+  return res.json(createSuccessResponse(await companyService.changeCompanyAdministration(req.authenticatedUser!.id, String(req.params.companyId), 'suspend', req.body)));
+}
+export async function archivePlatformCompany(req: Request, res: Response) {
+  await companyService.changeCompanyAdministration(req.authenticatedUser!.id, String(req.params.companyId), 'archive', req.body);
+  return res.status(204).end();
+}
+export async function reactivatePlatformCompany(req: Request, res: Response) {
+  return res.json(createSuccessResponse(await companyService.changeCompanyAdministration(req.authenticatedUser!.id, String(req.params.companyId), 'reactivate', req.body)));
+}
+export async function restorePlatformCompany(req: Request, res: Response) {
+  return res.json(createSuccessResponse(await companyService.changeCompanyAdministration(req.authenticatedUser!.id, String(req.params.companyId), 'restore', req.body)));
+}
+
 export async function createCompany(req: Request, res: Response): Promise<Response> {
   if (req.userId === undefined) {
     throw new AppError({
@@ -21,9 +44,8 @@ export async function createCompany(req: Request, res: Response): Promise<Respon
     });
   }
 
-  const company = await companyService.createCompany(req.body);
-
-  return res.status(201).json(createSuccessResponse(await companyService.presentCompany(company)));
+  const result = await companyService.createCompanyWithInitialSale(req.body, req.userId);
+  return res.status(201).json(createSuccessResponse(result));
 }
 
 export async function listCompanies(req: Request, res: Response): Promise<Response> {

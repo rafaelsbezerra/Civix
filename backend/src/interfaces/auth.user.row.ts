@@ -6,6 +6,9 @@ export interface UserRow {
   email: string;
   role: UserRole;
   status?: string;
+  deleted_at?: string | null;
+  deactivation_reason?: string | null;
+  tokens_revoked_at?: string | Date | null;
   company_id?: string | null;
   invite_token?: string | null;
 }

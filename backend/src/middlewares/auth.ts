@@ -47,11 +47,24 @@ export default async function authMiddleware(req: Request, res: Response, next: 
         throw new Error('Claims de acesso inválidos ou legados.');
       }
     } catch (cause) {
+
+      // console.log('AUTH DEBUG', {
+      //   cookie: req.cookies?.[SESSION_COOKIE]?.slice(0, 25),
+      //   header: req.headers.authorization?.slice(0, 40),
+      //   usado: token.slice(0, 25),
+      //   partes: token.split('.').length,
+      // });
+
       const { maxAge: _maxAge, ...clearOptions } = sessionCookieOptions;
       res.clearCookie(SESSION_COOKIE, clearOptions);
       throw new AppError({ status: 401, code: ErrorCode.UNAUTHORIZED, message: 'Token inválido ou expirado. Faça login novamente.', cause });
     }
-    const user = await getAuthenticatedUser(String(decoded.id));
+    const user = await getAuthenticatedUser(decoded.id);
+    if (user.tokens_revoked_at && (typeof decoded.issuedAt !== 'string'
+      || !Number.isFinite(Date.parse(decoded.issuedAt))
+      || Date.parse(decoded.issuedAt) <= new Date(user.tokens_revoked_at).getTime())) {
+      throw new AppError({ status: 401, code: ErrorCode.UNAUTHORIZED, message: 'Sessão revogada. Faça login novamente.' });
+    }
     if (user.role !== decoded.role || user.company_id !== decoded.companyId
       || user.email.toLowerCase() !== decoded.email.toLowerCase()) {
       throw new AppError({ status: 401, code: ErrorCode.UNAUTHORIZED, message: 'Acesso alterado. Faça login novamente.' });

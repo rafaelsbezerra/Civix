@@ -22,15 +22,21 @@ export const authPostgresRepository: AuthRepository = {
   },
 
   async activateUser(id, passwordHash, token) {
-    const result = await db.query(
+    return db.transaction(async client => {
+      await client.query("SELECT pg_advisory_xact_lock(hashtextextended('civix:platform-administration',0))");
+      const result = await client.query(
       `UPDATE users
        SET password_hash = $1, status = $2, invite_token = $3
-       WHERE id = $4 AND invite_token = $5 AND status = 'pending'
+       WHERE id = $4 AND invite_token = $5 AND status = 'pending' AND deleted_at IS NULL
+       AND ((role = 'super_admin' AND company_id IS NULL) OR
+         (role IN ('admin_empresa','atendente') AND EXISTS
+           (SELECT 1 FROM companies WHERE companies.id = users.company_id AND companies.status <> 'inativo' AND companies.deleted_at IS NULL)))
        RETURNING id`,
       [passwordHash, 'active', null, id, token],
     );
 
-    return result.rowCount === 1;
+      return result.rowCount === 1;
+    });
   },
 
   async getResetUserByEmail(email) {
@@ -41,14 +47,19 @@ export const authPostgresRepository: AuthRepository = {
     await db.query('UPDATE users SET reset_password_token = $1 WHERE id = $2', [token, id]);
   },
 
-  async saveInvite(email, role, token, existingId, companyId) {
+  async saveInvite(email, role, token, existingId, companyId, issuedAt) {
+    await db.transaction(async client => {
+      await client.query("SELECT pg_advisory_xact_lock(hashtextextended('civix:platform-administration',0))");
+      const company = (await client.query<{ status:string;deleted_at:string|null }>('SELECT status,deleted_at FROM companies WHERE id=$1 FOR SHARE',[companyId])).rows[0];
+      if (!company || company.deleted_at || company.status === 'inativo') throw new AppError({ status:409,code:ErrorCode.CONFLICT,message:'Empresa indisponível para convite.' });
     if (existingId !== undefined) {
-      const result = await db.query(
+      const result = await client.query(
         `UPDATE users
          SET role = $1, status = $2, invite_token = $3
-         WHERE id = $4 AND status = 'pending' AND company_id = $5 AND role = $1
+         WHERE id = $4 AND status = 'pending' AND company_id = $5 AND role = $1 AND deleted_at IS NULL
+         AND (tokens_revoked_at IS NULL OR tokens_revoked_at < $6::timestamptz)
          RETURNING id`,
-        [role, 'pending', token, existingId, companyId],
+        [role, 'pending', token, existingId, companyId,issuedAt ?? null],
       );
 
       if (result.rowCount !== 1) {
@@ -62,10 +73,11 @@ export const authPostgresRepository: AuthRepository = {
       return;
     }
 
-    await db.query(
+    await client.query(
       `INSERT INTO users (email, role, status, invite_token, company_id)
        VALUES ($1, $2, $3, $4, $5)`,
       [email, role, 'pending', token, companyId],
     );
+    });
   },
 };

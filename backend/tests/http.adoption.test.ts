@@ -46,6 +46,8 @@ async function withRoutes(t: TestContext, query: Query, run: (url: string) => Pr
   const previous = Object.fromEntries(Object.keys(environment).map(key => [key, process.env[key]]));
   Object.assign(process.env, environment);
   t.mock.method(db, 'query', query);
+  // A fronteira transacional usa o mesmo substituto SQL, sem conexão externa.
+  t.mock.method(db, 'transaction', async (run: Parameters<typeof db.transaction>[0]) => run({ query: db.query } as never));
   t.mock.method(Resend.prototype, 'post', mail ?? (async () => { throw new Error('Envio externo não esperado'); }));
   t.mock.method(console, 'error', () => {});
   const app = express();
@@ -91,8 +93,8 @@ test('Convite valida propósito, empresa, estado e token antes da ativação bcr
   await withRoutes(t, async (text, values) => {
     calls.push({ text, values });
     if (scenario === 'database') throw new Error('Falha SQL confidencial');
-    if (text.includes('FROM companies')) return { rows: [{ id: companyId, status: 'ativo' }] };
     if (text.includes('UPDATE')) return { rows: [], rowCount: scenario === 'race' ? 0 : 1 };
+    if (text.includes('FROM companies')) return { rows: [{ id: companyId, status: 'ativo' }] };
     return { rows: scenario === 'missing' ? [] : [{ ...account, status: scenario === 'active' ? 'active' : 'pending', invite_token: scenario === 'used' ? 'outro' : token }] };
   }, async url => {
     assert.equal((await request(url, '/api/v1/auth/validate-token')).status, 400);

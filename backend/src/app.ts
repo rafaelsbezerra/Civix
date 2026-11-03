@@ -9,6 +9,7 @@ import firstAccessRoutes from './routes/auth.routes.js';
 import companyRoutes from './routes/company.routes.js';
 import planRoutes from './routes/plan.routes.js';
 import storageRoutes from './routes/storage.routes.js';
+import platformRoutes from './routes/platform.routes.js';
 import { createSuccessResponse } from './shared/contracts/response.contract.js';
 import { createLogMiddleware } from './middlewares/log.middleware.js';
 import { createErrorHandler, createNotFoundHandler, terminateErroredResponse } from './middlewares/error.handler.js';
@@ -56,6 +57,7 @@ app.use(`${apiVersion}/auth`, firstAccessRoutes);
 app.use(`${apiVersion}/empresas`, companyRoutes);
 app.use(`${apiVersion}/plans`, planRoutes);
 app.use(`${apiVersion}/storage`, storageRoutes);
+app.use(`${apiVersion}/platform`, platformRoutes);
 
 app.use(createNotFoundHandler());
 app.use(createErrorHandler());

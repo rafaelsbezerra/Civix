@@ -19,11 +19,15 @@ export const authJsonRepository: AuthRepository = {
   async activateUser(id, passwordHash, token) {
     return updateLocalData(data => {
       const user = data.users.find(user => String(user.id) === String(id)
-        && user.invite_token === token && user.status === 'pending');
+        && !user.deleted_at && user.invite_token === token && user.status === 'pending');
 
       if (!user) {
         return false;
       }
+      if (user.role !== 'super_admin') {
+        const company = data.companies.find(item => item.id === user.company_id);
+        if (!company || company.deleted_at || company.status === 'inativo' || !['admin_empresa','atendente'].includes(user.role)) return false;
+      } else if (user.company_id !== null) return false;
 
       user.password_hash = passwordHash;
       user.status = 'active';
@@ -47,8 +51,10 @@ export const authJsonRepository: AuthRepository = {
     });
   },
 
-  async saveInvite(email, role, token, existingId, companyId) {
+  async saveInvite(email, role, token, existingId, companyId, issuedAt) {
     await updateLocalData(data => {
+      const company = data.companies.find(item => item.id === companyId);
+      if (!company || company.deleted_at || company.status === 'inativo') throw new AppError({ status:409,code:ErrorCode.CONFLICT,message:'Empresa indisponível para convite.' });
       if (existingId !== undefined) {
         const user = data.users.find(user => String(user.id) === String(existingId));
 
@@ -60,7 +66,8 @@ export const authJsonRepository: AuthRepository = {
           });
         }
 
-        if (user.status !== 'pending' || user.role !== role || user.company_id !== companyId) {
+        if (user.deleted_at || user.status !== 'pending' || user.role !== role || user.company_id !== companyId
+          || user.tokens_revoked_at && (!issuedAt || !Number.isFinite(Date.parse(issuedAt)) || Date.parse(issuedAt) <= Date.parse(user.tokens_revoked_at))) {
           throw new AppError({
             status: 409,
             code: ErrorCode.CONFLICT,

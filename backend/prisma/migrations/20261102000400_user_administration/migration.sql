@@ -1,0 +1,7 @@
+BEGIN;
+
+ALTER TABLE users ADD COLUMN deleted_at TIMESTAMPTZ;
+ALTER TABLE users ADD COLUMN deactivation_reason TEXT;
+ALTER TABLE users ADD COLUMN tokens_revoked_at TIMESTAMPTZ;
+
+COMMIT;

@@ -1,6 +1,6 @@
 # Telas do superadmin
 
-Data: 2026-11-02. Estado: planejadas; nenhuma tela implementada nesta tarefa.
+Data: 2026-11-02. Estado: telas G0 a G7 implementadas; G8 validado localmente; abertura do PR depende de acesso ao GitHub.
 [Spec de negócio](../../../../backend/.specs/features/super-admin-dashboard/spec.md),
 [SDD canônico](../../../../backend/.specs/features/super-admin-dashboard/sdd.md) e
 [tarefas frontend](task.md). Decisões de negócio pendentes são mantidas na
@@ -8,8 +8,8 @@ spec de negócio; detalhes visuais ficam em [design](design.md).
 
 ## Base e objetivo
 
-frontend/src/routes/AppRoute.tsx não monta dashboards. Login retorna à Home;
-ProtectedRoute.tsx já consulta profile. Evoluir para uma área exclusiva de
+frontend/src/routes/AppRoute.tsx monta o dashboard; login super_admin vai
+para /super-admin. ProtectedRoute.tsx consulta profile para a área exclusiva de
 super_admin; a segurança definitiva está no backend, mesmo sem o guard.
 Reutilizar UI e transporte atuais; não mudar design do site institucional.
 
@@ -20,14 +20,15 @@ Terá modo claro e escuro, com **modo claro como padrão**. No escuro, azul
 é a cor principal, com base azul-marinho e amarelo em destaques.
 Paleta, tipografia, aplicação em componentes, acessibilidade e arquivos
 previstos estão na [descrição de design](design.md), parte desta spec.
-Persistência da escolha de tema ainda aguarda definição. Nenhum tema foi
-implementado nesta atualização documental.
+Tema implementado: primeiro acesso claro e preferência guardada neste
+navegador, sem modificar o tema público.
 
 ## Telas propostas e arquivos
 
 ### Layout raiz: sidebar e header
 
-Criar um layout raiz compartilhado da área autenticada, sem substituir o
+Criar um layout raiz exclusivo do dashboard superadmin, compartilhado somente
+entre suas telas, sem substituir o
 App.tsx do site. SuperAdminLayout.tsx envolve as rotas filhas com sidebar,
 header e região principal renderizada por Outlet. Navegar entre telas
 preserva essa estrutura; nenhuma página recria seu próprio menu/header.
@@ -64,7 +65,7 @@ Não enviar userId/role/companyId editáveis. Após mudança de e-mail,
 reconciliar sessão conforme política aprovada no SDD, pois o JWT atual inclui
 e-mail. Não tratar edição apenas local como persistência concluída.
 
-Rotas/contratos são propostas SA-P07. Prefixo /super-admin, com layout em
+Rotas/contratos G0 a G7 adotados em SA-P07 e implementados. Prefixo /super-admin, com layout em
 frontend/src/components/dashboard-super-admin/layout/SuperAdminLayout.tsx, protegido por
 frontend/src/components/auth/ProtectedRoute.tsx. Montagem em AppRoute.tsx.
 
@@ -78,8 +79,8 @@ frontend/src/components/auth/ProtectedRoute.tsx. Montagem em AppRoute.tsx.
 | Funcionários | Users.tsx | Admins/atendentes somente da empresa da rota, convite/estados e ações aprovadas. |
 | Planos | Plans.tsx | Consulta/administração de dados comerciais, inclusive inativos. Sem trial/limites operacionais. |
 | Vendas | Sales.tsx | Registros imutáveis, valores BRL e exclusão definitiva com confirmação; sem edição ou apresentação como pagamento. |
-| Nova venda | SaleCreate.tsx | Registro manual conforme SA-P04, empresa/plano pré-preenchíveis após edição. |
-| Administradores | Users.tsx | Mesma tela de usuários com contexto global; superadmins separados por filtro/permissões, mutações dependem de SA-P05. |
+| Nova venda | SaleCreate.tsx | Modo pelo plano atual ou valor manual justificado, com data comercial UTC retroativa permitida. |
+| Administradores | Users.tsx | Mesma tela com contexto global: convite para senha, desativação com motivo e reativação por outro ativo; todos com poderes iguais. |
 | Configurações do perfil | ProfileSettings.tsx | Nome/e-mail do próprio usuário; sem senha ou configurações globais. |
 
 Formulários em frontend/src/components/dashboard-super-admin/CompanyForm.tsx,
@@ -109,8 +110,10 @@ compartilhada atual (por exemplo components/ui), sem duplicação nessa pasta.
    plano não gera uma venda automática. Registre a venda manualmente na área
    de vendas.” Após sucesso, oferecer a ação; navegar não envia venda sozinho.
 4. Suspender/arquivar exige confirmação com empresa e consequência visíveis.
-   Arquivar informa preservação do histórico. Reativar/restaurar não é
-   oferecido antes de SA-P02.
+   Desativar exige formulário de motivo obrigatório; não enviar motivo vazio
+   ou só espaços. Arquivar informa preservação do histórico. Restaurar mantém
+   empresa desativada; somente reativação explícita devolve catálogo/acesso.
+   Convites anteriores à desativação não voltam a funcionar.
 5. Ao abrir equipe, usar ID da empresa da rota; limpar respostas antigas ao
    trocar contexto. Erro de vínculo não permite editar outro funcionário.
 6. Formulários mostram mensagens públicas, erros por campo quando disponíveis,
@@ -122,6 +125,25 @@ compartilhada atual (por exemplo components/ui), sem duplicação nessa pasta.
    errado, orientar corrigir o plano da empresa, excluir a venda automática
    e cadastrar nova venda. Nenhuma dessas ações ocorre por simples navegação.
    A troca de plano posterior continua somente com aviso de venda manual.
+9. Formulário de venda oferece modo pelo plano atual e modo por valor manual.
+   Pelo plano, preço somente leitura vindo do backend e motivo não obrigatório.
+   Por valor manual, exigir montante e descrição/motivo; usar esse modo para
+   plano antigo. Permitir data comercial passada. Entradas, filtros e exibição
+   de todas as datas usam UTC identificado, sem conversão local silenciosa.
+10. Gestão de usuários exige motivo ao desativar, inclusive superadmins.
+    Superadmins podem criar outros; o ambiente deve suportar esse caso mesmo
+    se começar com uma conta só. Não permitir desativar a própria conta nem
+    o último superadmin ativo. Mostrar o bloqueio na UI e tratar a recusa da
+    API; esconder botão não substitui validação no backend.
+11. Superadmin é criado por convite para definir senha e pode ser reativado
+    por outro ativo; todos têm os mesmos poderes. Não criar editor de permissões.
+    Na equipe, permitir trocar admin_empresa/atendente e desativar o último
+    admin empresarial; essa permissão não se aplica ao último superadmin.
+    Atendentes podem ser excluídos/desativados, finalizando atendimentos atribuídos.
+
+Os três planos demo com preços atuais são referência, não pré-requisito de
+implementação. Sem planos cadastrados na API, mostrar estado vazio/ação de
+cadastro apropriada; não impedir acesso aos demais módulos nem inventar dados.
 
 ## Aceite e limites
 
@@ -134,6 +156,6 @@ plataforma silenciosamente.
 Configurações globais aguardam definição. Pagamentos, assinaturas, trial e
 arquitetura de capacidades/limites/regras por plano ficam em backlog; não
 renderizar controles falsamente funcionais. Superadmin gerencia funcionários,
-mas não acessa atendimento/conversas. Nenhuma migration/teste foi executado.
+mas não acessa atendimento/conversas. Migrations não aplicadas; resultados de testes e limites estão no task backend.
 
 **Não commitar sem revisão**, conforme regra e registro no task backend.
