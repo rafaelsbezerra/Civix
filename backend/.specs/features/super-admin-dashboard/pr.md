@@ -22,8 +22,26 @@ imagem. O formulário de edição permite enviar somente capa, em operação
 separada da edição dos dados comerciais, com prévia e feedback. Ambos validam
 tipo/tamanho no navegador; o backend mantém a validação real do conteúdo.
 
-Implementação e verificação deste complemento: pendentes neste commit de
-planejamento. Não declarar homologação de R2/PostgreSQL reais.
+Implementação concluída em codex/company-images, derivada de
+feat/super-admin-dashboard. Ambos os PRs têm staging como destino; integrar
+primeiro o dashboard. Até essa integração, o diff cumulativo do PR de imagens
+também contém os commits necessários do dashboard. Esta ampliação não cria
+migrations, tabelas, dependências ou rotas.
+
+Verificação do complemento: backend foundation 131/131, storage 47/47 e
+plataforma 67/67. TypeScript backend/frontend e lint completo frontend
+aprovados. Frontend: 84 testes direcionados aprovados (dashboard/guard/imagens
+53; API e consumidores existentes 31), incluindo 11 casos novos de imagens.
+E2E em Chrome com Vite, Express e JSON reais de teste, substituindo somente o
+provedor R2 por armazenamento em memória. Inclui falha sintética de logo,
+reenvio sem repetir cadastro/venda e envio de capa mantendo logo, além dos
+fluxos anteriores. A primeira execução encontrou timeout no fluxo herdado de
+venda manual; a repetição com diagnóstico passou integralmente. Evidências de
+imagem inspecionadas. Revisão estática independente aprovada, sem bloqueadores.
+R2/PostgreSQL reais continuam sem homologação; nenhuma migration executada.
+
+Os tópicos e números seguintes também registram a validação histórica do
+dashboard, anterior ao complemento de imagens.
 
 - Rotas `/api/v1/platform` exigem identidade vigente e super_admin; controllers independentes chamam os módulos existentes. Frontend concentra transporte em `lib/api.ts` e componentes exclusivos em `dashboard-super-admin`.
 - Cadastro de empresa e venda inicial usam uma transação/operação repetível. Edição e troca de plano não geram venda; a interface orienta o lançamento manual. Empresas podem ser desativadas, arquivadas, restauradas ainda inativas e reativadas.

@@ -55,7 +55,7 @@ interface StoredImage {
 }
 
 interface StoredData {
-  companies: Array<{ id: string; cover_key?: string | null }>;
+  companies: Array<{ id: string; cover_key?: string | null; logo_key?: string | null }>;
   images: StoredImage[];
 }
 
@@ -207,11 +207,124 @@ test('Storage integra HTTP, autorização e metadados com R2 simulado', async t 
       assert.equal((await upload(multipart({ buffer: atLimit }))).status, 201);
     });
 
-    await t.test('Logo não é liberada pelo contrato estrutural e empresa ausente retorna 404', async () => {
+    await t.test('Finalidade desconhecida é rejeitada e empresa ausente retorna 404', async () => {
       await reset();
-      assert.equal((await upload(multipart({ purpose: 'logo' }))).status, 400);
+      assert.equal((await upload(multipart({ purpose: 'avatar' }))).status, 400);
       assert.equal((await upload(multipart({ companyId: randomUUID() }), token(superAdminId))).status, 404);
       assert.equal(uploaded.length, 0);
+    });
+
+    await t.test('Logo exige as mesmas permissões de capa e superadmin pode alterar outra empresa', async () => {
+      await reset();
+      assert.equal((await upload(multipart({ purpose: 'logo', companyId: companyBId }))).status, 403);
+      assert.equal((await upload(multipart({ purpose: 'logo' }), token(attendantId))).status, 403);
+      assert.equal((await upload(multipart({ purpose: 'logo' }), token(customerId))).status, 401);
+      assert.equal((await upload(multipart({ purpose: 'logo' }), null)).status, 401);
+      assert.equal((await upload(multipart({ purpose: 'logo' }), token(adminId, true))).status, 401);
+      assert.equal(uploaded.length, 0);
+      assert.equal((await upload(multipart({ purpose: 'logo', companyId: companyBId }), token(superAdminId))).status, 201);
+      const data = await readData();
+      assert.equal(data.companies[1].logo_key, data.images[0].object_key);
+      assert.match(data.images[0].object_key, /\/logo\//);
+      assert.equal(data.images[0].purpose, 'logo');
+    });
+
+    await t.test('Logo e capa têm referências independentes e URLs públicas de cinco minutos', async () => {
+      await reset();
+      const cover = await (await upload()).json();
+      const logo = await (await upload(multipart({ purpose: 'logo' }))).json();
+      assert.equal(logo.data.target.purpose, 'logo');
+      const data = await readData();
+      const coverKey = data.companies[0].cover_key!;
+      const logoKey = data.companies[0].logo_key!;
+      assert.notEqual(coverKey, logoKey); assert.equal(data.images.length, 2);
+      assert.equal(deleted.length, 0);
+      const detail = await (await fetch(`${baseUrl}/api/v1/empresas/${companyAId}`)).json();
+      assert.match(detail.data.cover_image_url, new RegExp(encodeURIComponent(coverKey)));
+      assert.match(detail.data.logo, new RegExp(encodeURIComponent(logoKey)));
+      assert.equal('logo_image_url' in detail.data, false);
+      assert.equal(detail.data.cover_key, undefined); assert.equal(detail.data.logo_key, undefined);
+      for (const id of [cover.data.imageId, logo.data.imageId]) {
+        const response = await fetch(`${baseUrl}/api/v1/storage/images/${id}/url`);
+        assert.equal(response.status, 200); assert.equal((await response.json()).data.expiresInSeconds, 300);
+      }
+      assert.ok(signed.every(entry => entry.seconds === 300));
+      assert.equal((await upload(multipart({ purpose: 'logo' }))).status, 201);
+      const current = await readData();
+      assert.equal(current.companies[0].cover_key, coverKey);
+      assert.notEqual(current.companies[0].logo_key, logoKey);
+      assert.ok(deleted.includes(logoKey)); assert.ok(!deleted.includes(coverKey));
+      assert.equal((await fetch(`${baseUrl}/api/v1/storage/images/${logo.data.imageId}/url`)).status, 404);
+      assert.equal((await fetch(`${baseUrl}/api/v1/storage/images/${cover.data.imageId}/url`)).status, 200);
+    });
+
+    await t.test('Logo legada permanece como fallback sem chave e conteúdo inválido não a substitui', async () => {
+      await reset();
+      const data = fixture();
+      Object.assign(data.companies[0], { logo: 'https://legacy.example.test/logo.png' });
+      await writeFile(dataFile, JSON.stringify(data));
+      const detail = await (await fetch(`${baseUrl}/api/v1/empresas/${companyAId}`)).json();
+      assert.equal(detail.data.logo, 'https://legacy.example.test/logo.png');
+      assert.equal('logo_image_url' in detail.data, false);
+      for (const options of [{ includeFile: false }, { buffer: Buffer.from('inválido') }, { mime: 'image/jpeg' }]) {
+        assert.equal((await upload(multipart({ ...options, purpose: 'logo' }))).status, 400);
+      }
+      assert.equal(uploaded.length, 0); assert.equal((await readData()).companies[0].logo_key, null);
+    });
+
+    await t.test('Chave de logo sem metadado compatível não expõe fallback legado nem assina imagem de capa', async () => {
+      await reset();
+      await upload();
+      const stored = JSON.parse(await readFile(dataFile, 'utf8'));
+      stored.companies[0].logo = 'https://legacy.example.test/logo.png';
+      stored.companies[0].logo_key = stored.companies[0].cover_key;
+      await writeFile(dataFile, JSON.stringify(stored));
+      signed.length = 0;
+      const detail = await (await fetch(`${baseUrl}/api/v1/empresas/${companyAId}`)).json();
+      assert.equal(detail.data.logo, null);
+      assert.equal(signed.length, 1);
+      assert.match(detail.data.cover_image_url, /^https:\/\/images\.example\.test\//);
+    });
+
+    await t.test('Falha ao atualizar logo compensa somente imagem nova e preserva capa e logo vigentes', async context => {
+      await reset(); await upload(); await upload(multipart({ purpose: 'logo' }));
+      const before = await readData();
+      context.mock.method(companyRepository, 'updateLogoKey', async () => { throw new Error('Falha simulada na logo'); });
+      assert.equal((await upload(multipart({ purpose: 'logo' }))).status, 500);
+      const after = await readData();
+      assert.deepEqual(after.companies, before.companies); assert.equal(after.images.length, 2);
+      assert.ok(deleted.includes(uploaded.at(-1)!));
+      assert.ok(!deleted.includes(before.companies[0].logo_key!));
+      assert.ok(!deleted.includes(before.companies[0].cover_key!));
+    });
+
+    await t.test('Substituições concorrentes de logo preservam vencedora e capa', { timeout: 8000 }, async context => {
+      await reset(); await upload(); await upload(multipart({ purpose: 'logo' }));
+      const coverKey = (await readData()).companies[0].cover_key!;
+      let arrivals = 0; let release!: () => void;
+      const barrier = new Promise<void>(resolveBarrier => { release = resolveBarrier; });
+      context.mock.method(imageObjectStore, 'upload', async (key: string) => {
+        uploaded.push(key); if (++arrivals === 2) release(); await barrier;
+      });
+      const responses = await Promise.all([upload(multipart({ purpose: 'logo' })), upload(multipart({ purpose: 'logo' }))]);
+      assert.deepEqual(responses.map(response => response.status).sort(), [201, 409]);
+      const after = await readData(); const winner = after.companies[0].logo_key!;
+      assert.equal(after.companies[0].cover_key, coverKey);
+      assert.ok(after.images.some(image => image.object_key === winner));
+      assert.ok(!deleted.includes(winner)); assert.ok(!deleted.includes(coverKey));
+    });
+
+    await t.test('Uploads simultâneos de capa e logo não conflitam entre si', { timeout: 8000 }, async context => {
+      await reset();
+      let arrivals = 0; let release!: () => void;
+      const barrier = new Promise<void>(resolveBarrier => { release = resolveBarrier; });
+      context.mock.method(imageObjectStore, 'upload', async (key: string) => {
+        uploaded.push(key); if (++arrivals === 2) release(); await barrier;
+      });
+      const responses = await Promise.all([upload(), upload(multipart({ purpose: 'logo' }))]);
+      assert.deepEqual(responses.map(response => response.status), [201, 201]);
+      const after = await readData(); assert.equal(after.images.length, 2);
+      assert.ok(after.companies[0].cover_key); assert.ok(after.companies[0].logo_key); assert.deepEqual(deleted, []);
     });
 
     await t.test('Substituição confirma nova referência antes de excluir anterior e nega URL histórica', async () => {

@@ -277,7 +277,19 @@ async function main() {
 
   backendProcess = spawn(process.execPath, [
     '--import', 'tsx', '--input-type=module', '-e',
-    "import { app } from './src/app.ts'; const server = app.listen(0, '127.0.0.1', () => console.log('CIVIX_E2E_API_PORT=' + server.address().port));",
+    `import { app } from './src/app.ts';
+     import { imageObjectStore } from './src/shared/integrations/cloudflare/storage.provider.ts';
+     const objects = new Map(); let failLogoOnce = true;
+     imageObjectStore.upload = async (key, body) => {
+       if (key.includes('/logo/') && failLogoOnce) { failLogoOnce = false; throw new Error('Falha sintética de upload para testar recuperação.'); }
+       objects.set(key, body);
+     };
+     imageObjectStore.delete = async key => { objects.delete(key); };
+     imageObjectStore.getPresignedUrl = async (key, seconds) => {
+       if (seconds !== 300 || !objects.has(key)) throw new Error('Imagem sintética inválida.');
+       return 'data:image/png;base64,' + objects.get(key).toString('base64');
+     };
+     const server = app.listen(0, '127.0.0.1', () => console.log('CIVIX_E2E_API_PORT=' + server.address().port));`,
   ], {
     cwd: backendRoot,
     env: {
@@ -392,6 +404,9 @@ async function main() {
   await companyForm.getByLabel('Estado').fill('CE')
   await companyForm.getByLabel('E-mail da empresa').fill('contato.browser.e2e@example.test')
   await companyForm.getByLabel('Plano comercial').selectOption(planTwoId)
+  const syntheticImage = { name: 'imagem-sintetica.png', mimeType: 'image/png', buffer: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a2ioAAAAASUVORK5CYII=', 'base64') }
+  await companyForm.getByLabel('Logo da empresa', { exact: true }).setInputFiles(syntheticImage)
+  await expect(companyForm.getByLabel('Capa da empresa', { exact: true })).toHaveCount(0)
   await requestJson('/api/v1/platform/plans/' + planTwoId + '/activation', { method: 'POST', token: superAdminToken, body: { active: false } }).then(response => expectStatus(response, 200, 'Desativar plano para falha recuperável'))
   const companyPostPath = '/api/v1/platform/companies'
   await companyForm.getByRole('button', { name: 'Cadastrar empresa e registrar venda' }).click()
@@ -409,21 +424,41 @@ async function main() {
   const replayedCompany = responseData(companyRegistrationResponse)
   assert.equal(replayedCompany.replayed, true, 'A API não reconheceu a repetição idempotente do cadastro.')
   const createdCompanyId = replayedCompany.company.id
+  await expect(page.getByRole('alert')).toContainText('Empresa e venda já cadastradas.')
+  const companyRequestsBeforeLogoRetry = capturedRequests.filter(item => item.path === companyPostPath && item.method === 'POST').length
+  await page.getByRole('button', { name: 'Tentar enviar logo novamente' }).click()
+  await expect(page.getByRole('status')).toHaveText('Logo enviada com sucesso.')
+  assert.equal(capturedRequests.filter(item => item.path === companyPostPath && item.method === 'POST').length, companyRequestsBeforeLogoRetry, 'O reenvio da logo repetiu cadastro comercial.')
   assert.equal(replayedCompany.sale.companyId, createdCompanyId, 'A venda inicial não ficou vinculada à empresa criada.')
   let dataAfterCreation = await readFixture()
   assert.equal(dataAfterCreation.companies.filter(item => item.id === createdCompanyId).length, 1, 'O replay duplicou a empresa no JSON.')
   assert.equal(dataAfterCreation.sales.filter(item => item.companyId === createdCompanyId).length, 1, 'O replay duplicou a venda inicial no JSON.')
   assert.equal(dataAfterCreation.companyRegistrationOperations.filter(item => item.operationId === companyPayload.operationId).length, 1, 'O JSON deveria preservar uma operação de cadastro.')
+  const logoKey = dataAfterCreation.companies.find(item => item.id === createdCompanyId).logo_key
+  assert.ok(logoKey.includes('/logo/'))
+  assert.equal(dataAfterCreation.images.filter(item => item.resource_id === createdCompanyId && item.purpose === 'logo').length, 1)
 
   logStep('edição de empresa sem venda automática e limpeza de contatos')
   const saleCountBeforeEdit = dataAfterCreation.sales.length
   await page.goto(appBase + '/super-admin/companies/' + createdCompanyId + '/edit', { waitUntil: 'domcontentloaded' })
   await expect(page.getByText(/A alteração do plano não gera uma venda automática/).first()).toBeVisible()
   const companyEditForm = page.getByRole('form', { name: 'Editar empresa' })
+  await expect(page.getByLabel('Logo da empresa', { exact: true })).toHaveCount(0)
   await companyEditForm.getByLabel('Plano comercial').selectOption(planOneId)
   await companyEditForm.getByLabel('E-mail da empresa').fill('')
   await companyEditForm.getByRole('button', { name: 'Salvar empresa' }).click()
   await expect(page.getByRole('status')).toContainText('Nenhuma venda foi lançada automaticamente.')
+  const coverForm = page.getByRole('form', { name: 'Atualizar capa' })
+  await coverForm.getByLabel('Capa da empresa', { exact: true }).setInputFiles(syntheticImage)
+  await coverForm.getByRole('button', { name: 'Enviar capa' }).click()
+  await expect(coverForm.getByRole('status')).toHaveText('Capa enviada com sucesso.')
+  await expect(coverForm.getByRole('img')).toBeVisible()
+  await captureScreenshot(page, 'company-image-upload.png')
+  const imagesAfterUpload = await readFixture()
+  const withImages = imagesAfterUpload.companies.find(item => item.id === createdCompanyId)
+  assert.equal(withImages.logo_key, logoKey, 'Enviar capa alterou a logo.')
+  assert.ok(withImages.cover_key.includes('/cover/'))
+  assert.equal(imagesAfterUpload.sales.length, saleCountBeforeEdit, 'Upload gerou venda.')
   const updatePayload = latestRequest('/api/v1/platform/companies/' + createdCompanyId, 'PUT')
   assert.equal(updatePayload.planId, planOneId)
   assert.equal(updatePayload.email, null, 'Limpar o e-mail não enviou null ao backend.')
@@ -712,6 +747,14 @@ async function main() {
 
 try {
   await main()
+} catch (error) {
+  if (browser) {
+    for (const [index, page] of browser.contexts().flatMap(context => context.pages()).entries()) {
+      await captureScreenshot(page, 'failure-' + index + '.png').catch(() => undefined)
+      console.error('[E2E] Alertas da fixture:', await page.getByRole('alert').allTextContents().catch(() => []))
+    }
+  }
+  throw error
 } finally {
   if (browser) await browser.close().catch(() => undefined)
   if (viteServer) await viteServer.close().catch(() => undefined)

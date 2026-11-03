@@ -14,26 +14,27 @@ import { imageObjectStore } from '../shared/integrations/cloudflare/storage.prov
 
 export const MAX_IMAGE_BYTES = 10000000;
 export const IMAGE_URL_SECONDS = 300;
-const targetSchema = z.object({ module: z.literal('companies'), resourceId: z.string().uuid(), purpose: z.literal('cover') }).strict();
+const targetSchema = z.object({ module: z.literal('companies'), resourceId: z.string().uuid(), purpose: z.enum(['cover', 'logo']) }).strict();
 const allowedMime = ['image/png', 'image/jpeg', 'image/webp'];
 
 export async function validateImageTargetAccess(target: ImageTarget, actor: StorageActor): Promise<void> {
   if (!targetSchema.safeParse(target).success) {
-    throw new AppError({ status: 400, code: ErrorCode.VALIDATION_ERROR, message: 'Destino de imagem inválido. Apenas capa de empresa é permitida.' });
+    throw new AppError({ status: 400, code: ErrorCode.VALIDATION_ERROR, message: 'Destino de imagem inválido. Envie capa ou logo de empresa.' });
   }
   const user = await getAuthenticatedUser(actor.userId);
   if (user.role !== actor.role || (user.role !== 'super_admin' && (user.role !== 'admin_empresa' || user.company_id !== target.resourceId))) {
-    throw new AppError({ status: 403, code: ErrorCode.FORBIDDEN, message: 'Sem permissão para alterar a capa desta empresa.' });
+    throw new AppError({ status: 403, code: ErrorCode.FORBIDDEN, message: 'Sem permissão para alterar a imagem desta empresa.' });
   }
   const company = await companyRepository.getById(target.resourceId);
   if (!company || company.status === 'inativo' || company.deleted_at) throw new AppError({ status: 404, code: ErrorCode.NOT_FOUND, message: 'Empresa não encontrada.' });
 }
 
 export async function updateTargetImageKey(target: ImageTarget, key: string, expectedKey: string | null): Promise<void> {
-  if (target.module !== 'companies' || target.purpose !== 'cover') {
+  if (target.module !== 'companies' || !['cover', 'logo'].includes(target.purpose)) {
     throw new AppError({ status: 400, code: ErrorCode.VALIDATION_ERROR, message: 'Destino não suportado.' });
   }
-  await companyService.updateCompanyCoverKey(target.resourceId, key, expectedKey);
+  if (target.purpose === 'logo') await companyService.updateCompanyLogoKey(target.resourceId, key, expectedKey);
+  else await companyService.updateCompanyCoverKey(target.resourceId, key, expectedKey);
 }
 
 // A API nunca reutiliza uma chave antiga: toda substituição recebe UUID novo.
@@ -68,8 +69,8 @@ export async function uploadImage(input: UploadImageInput, actor: StorageActor):
   }
   // Releitura após validação: a referência anterior participa do compare-and-swap.
   const company = await companyService.getCompanyById(target.resourceId);
-  const previousKey = company.cover_key ?? null;
-  const key = 'companies/' + company.id + '/cover/' + randomUUID() + '.' + detected.ext;
+  const previousKey = (target.purpose === 'logo' ? company.logo_key : company.cover_key) ?? null;
+  const key = 'companies/' + company.id + '/' + target.purpose + '/' + randomUUID() + '.' + detected.ext;
   let image: Image | undefined;
   try {
     await imageObjectStore.upload(key, file.buffer, detected.mime);
@@ -96,7 +97,7 @@ export async function uploadImage(input: UploadImageInput, actor: StorageActor):
     } catch (error) { recordCleanupFailure(error); }
   }
   try {
-    logger().info({ event: 'storage.cover.updated', module: 'storage', message: 'Capa da empresa atualizada.',
+    logger().info({ event: target.purpose === 'logo' ? 'storage.logo.updated' : 'storage.cover.updated', module: 'storage', message: 'Imagem da empresa atualizada.',
       context: { userId: actor.userId, companyId: company.id } });
   } catch {
     // A atualização persistida já foi confirmada.
@@ -109,10 +110,11 @@ export async function getPresignedImageUrl(imageId: string): Promise<PresignedIm
     throw new AppError({ status: 400, code: ErrorCode.VALIDATION_ERROR, message: 'ID de imagem inválido.' });
   }
   const image = await storageRepository.getById(imageId);
-  const company = image?.module === 'companies' && image.purpose === 'cover'
+  const company = image?.module === 'companies' && ['cover', 'logo'].includes(image.purpose)
     ? await companyRepository.getById(image.resource_id) : undefined;
-  if (!image || !company || company.cover_key !== image.object_key || company.status === 'inativo' || company.deleted_at) {
-    throw new AppError({ status: 404, code: ErrorCode.NOT_FOUND, message: 'Capa não encontrada.' });
+  const currentKey = image?.purpose === 'logo' ? company?.logo_key : company?.cover_key;
+  if (!image || !company || currentKey !== image.object_key || company.status === 'inativo' || company.deleted_at) {
+    throw new AppError({ status: 404, code: ErrorCode.NOT_FOUND, message: 'Imagem não encontrada.' });
   }
   return { url: await imageObjectStore.getPresignedUrl(image.object_key, IMAGE_URL_SECONDS), expiresInSeconds: IMAGE_URL_SECONDS };
 }

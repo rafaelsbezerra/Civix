@@ -1,4 +1,4 @@
-# Usuários e capas de empresas
+# Usuários e imagens de empresas
 
 Implementação local de usuários e storage. Consulte as [specs de usuários](../backend/.specs/features/users-roles/spec.md) e [storage](../backend/.specs/features/storage/spec.md) para contratos e decisões completos.
 
@@ -19,15 +19,38 @@ POST /api/v1/storage/images recebe multipart/form-data com quatro partes:
 | file | Um arquivo PNG, JPEG ou WEBP |
 | module | companies |
 | resourceId | UUID da empresa |
-| purpose | cover |
+| purpose | cover ou logo |
 
 O limite é 10.000.000 bytes. O servidor verifica a assinatura binária e o MIME declarado. Admin altera apenas a própria empresa; superadmin pode alterar qualquer empresa existente. Atendente e cliente não enviam imagens. Identidade e papel vêm da sessão validada, nunca de campos do formulário.
 
-A operação armazena o arquivo no R2, cria os metadados images e troca companies.cover_key pelo service de empresas. Atualizações concorrentes usam comparação com a chave anterior: uma operação perde com 409 e desfaz seus recursos. A imagem anterior só é removida depois da nova referência confirmada. Falhas de limpeza são registradas; uma capa confirmada é preservada.
+A operação armazena o arquivo no R2, cria os metadados images e troca
+companies.cover_key ou companies.logo_key pelo service de empresas, conforme
+purpose. Atualizações concorrentes usam comparação com a chave anterior:
+uma operação perde com 409 e desfaz seus recursos. A imagem anterior só é
+removida depois da nova referência confirmada. Falhas de limpeza são
+registradas; uma imagem confirmada é preservada.
 
-As consultas públicas de empresas retornam cover_image_url, com URL assinada de 300 segundos. Sem capa vigente o campo é nulo. A resposta de empresa não inclui cover_image_url_expires_in. A rota pública GET /api/v1/storage/images/:imageId/url também retorna a URL da capa atual. Não permite consultar uma chave arbitrária ou uma capa substituída. URLs já emitidas podem continuar utilizáveis até expirar, se o objeto ainda existir.
+As consultas públicas de empresas retornam cover_image_url, com URL assinada
+de 300 segundos. Sem capa vigente o campo é nulo. A resposta de empresa não
+inclui cover_image_url_expires_in. A rota pública GET
+/api/v1/storage/images/:imageId/url retorna a URL da logo ou capa vigente.
+Não permite consultar chave arbitrária ou imagem substituída. URLs já
+emitidas podem continuar utilizáveis até expirar, se o objeto ainda existir.
 
-cover_key e logo_key não são expostos na resposta pública. Logo tem somente estrutura reservada, sem upload funcional. O formulário de upload no frontend está fora desta entrega.
+cover_key e logo_key não são expostos na resposta pública. O upload aceita
+logo ou capa e atualiza somente a chave correspondente, preservando a outra.
+O GET de URL também aceita a logo vigente. Nas consultas de empresa, logo
+contém a URL assinada de 300 segundos quando há logo_key; sem chave usa o
+valor legado. A capa continua em cover_image_url.
+
+No dashboard superadmin, o cadastro permite selecionar logo. O frontend
+primeiro cria empresa/venda e depois envia a imagem usando o ID retornado.
+Se o upload falhar, a empresa permanece cadastrada e a tela permite reenviar
+somente a logo. Na edição, a capa possui formulário de envio independente;
+não gera venda nem salva alterações pendentes dos dados comerciais.
+Tipos permitidos: PNG/JPG/WEBP, de 1 a 10.000.000 bytes. Validação no navegador
+antecipa erros; o servidor verifica o conteúdo real. Rotas, bucket e tabelas
+existentes são reutilizados, sem novas migrations ou dependências.
 
 ## Preparação e operação
 

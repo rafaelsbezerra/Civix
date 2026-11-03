@@ -330,6 +330,10 @@ html:has([data-site-header]) {
 .sa-checkboxes input { accent-color: var(--sa-accent-ink); }
 .sa-section-legend { padding: 0 9px; font: 600 18px var(--font-display); }
 .sa-form-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 28px; }
+.sa-image-field { display: grid; gap: 12px; margin-top: 16px; }
+.sa-image-preview { display: block; width: 100%; max-width: 640px; max-height: 280px; object-fit: contain; border: 1px solid var(--sa-line); border-radius: 8px; background: var(--sa-bg); }
+.sa-image-preview-logo { width: 160px; height: 160px; }
+.sa-image-preview[hidden] { display: none; }
 .super-admin-root .sa-button { min-height: 44px; padding: 11px 20px; border-radius: 7px; background: var(--sa-ink); color: var(--sa-surface); font: 600 12px var(--font-body); cursor: pointer; }
 .super-admin-root[data-theme="dark"] .sa-button { background: var(--sa-gold); color: #07192a; }
 .super-admin-root .sa-button.sa-button-secondary { background: transparent; color: var(--sa-ink); border: 1px solid var(--sa-line); }
