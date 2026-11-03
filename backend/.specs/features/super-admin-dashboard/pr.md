@@ -138,4 +138,12 @@ COMMIT;
 
 ## Próximos passos
 
+As duas branches estão publicadas, mas as tentativas de criar seus PRs para
+staging pelo conector GitHub retornaram 404 (a busca retornou 422 por falta de
+visibilidade/permissão). Nenhum PR foi criado nesta execução. Liberar o acesso
+ao repositório na conexão ou usar os links de abertura preparados:
+
+- [Dashboard → staging](https://github.com/rafaelsbe/Civix/compare/staging...feat/super-admin-dashboard?expand=1)
+- [Imagens → staging](https://github.com/rafaelsbe/Civix/compare/staging...codex/company-images?expand=1)
+
 Revisar o PR para staging, aplicar as migrations pendentes pelo responsável no ambiente autorizado e homologar PostgreSQL/R2 reais. Tratar separadamente as falhas herdadas do site público/build antes de considerar todos os gates aprovados. Não fazer merge ou implantação automaticamente.

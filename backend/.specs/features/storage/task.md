@@ -60,8 +60,11 @@ Os itens ST-01 a ST-10 registram a entrega estrutural anterior; funções antes 
 - [x] IMG-B03: manter rotas, SDK, bucket e esquema; nenhuma migration nova.
 - [x] IMG-B04: registrar revisão, regressão e evidência do frontend no
   [arquivo de PR](../super-admin-dashboard/pr.md).
-- [ ] IMG-B05: publicar e abrir PR staging. A criação do PR do dashboard
-  retornou 404 no conector GitHub; repetir para imagens depois do push.
+- [x] IMG-B05: publicar codex/company-images com documentação e código revisados.
+- [ ] IMG-B06: abrir PR para staging. As tentativas de criação dos PRs de
+  feat/super-admin-dashboard e codex/company-images retornaram 404 no conector
+  GitHub. Branches publicadas; descrições preparadas. Necessário liberar acesso
+  ao repositório na conexão GitHub para concluir a abertura.
 
 Fonte alterada em services/storage.service.ts e services/company.service.ts.
 Teste de R2/PostgreSQL reais (ST-18) continua pendente.
