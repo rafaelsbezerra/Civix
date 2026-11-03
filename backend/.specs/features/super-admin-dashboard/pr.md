@@ -2,6 +2,29 @@ O superadmin precisava de uma área administrativa para operar a plataforma. Est
 
 ## O que mudou, como e por quê
 
+### Complemento autorizado: logo no cadastro e capa na edição
+
+Reutilizar POST /api/v1/storage/images com multipart (file, module=companies,
+resourceId e purpose=logo|cover) e GET /api/v1/storage/images/:imageId/url.
+Sem novos buckets, dependências, tabelas ou migrations. Preservar os limites
+de 10 MB, PNG/JPG/WEBP e assinatura pública por 300 segundos.
+
+No backend, validar os dois destinos, selecionar logo_key/cover_key e caminho
+R2 por purpose, manter compare-and-swap e limpeza independente por imagem.
+Consultas de empresa devem apresentar a logo assinada no campo logo já
+consumido pelo site, preservando a URL legada quando não há logo_key; a capa
+continua em cover_image_url. Chaves internas não são retornadas.
+
+No frontend, o formulário de cadastro permite selecionar somente logo.
+Primeiro cadastrar empresa/venda; depois enviar a logo usando o ID retornado.
+Na falha do upload, preservar cadastro e venda e permitir reenviar apenas a
+imagem. O formulário de edição permite enviar somente capa, em operação
+separada da edição dos dados comerciais, com prévia e feedback. Ambos validam
+tipo/tamanho no navegador; o backend mantém a validação real do conteúdo.
+
+Implementação e verificação deste complemento: pendentes neste commit de
+planejamento. Não declarar homologação de R2/PostgreSQL reais.
+
 - Rotas `/api/v1/platform` exigem identidade vigente e super_admin; controllers independentes chamam os módulos existentes. Frontend concentra transporte em `lib/api.ts` e componentes exclusivos em `dashboard-super-admin`.
 - Cadastro de empresa e venda inicial usam uma transação/operação repetível. Edição e troca de plano não geram venda; a interface orienta o lançamento manual. Empresas podem ser desativadas, arquivadas, restauradas ainda inativas e reativadas.
 - Vendas são imutáveis: lançamento pelo plano atual ou valor manual justificado, snapshots em BRL/UTC e exclusão definitiva. `operation_id` identifica a tentativa por ator e `fingerprint` compara dados normalizados dentro de sales. Vendas manuais removidas não bloqueiam novo lançamento. A tabela de recibos existe somente para o cadastro inicial, para não recriar sua venda ao repetir a operação original.

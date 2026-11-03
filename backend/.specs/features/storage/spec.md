@@ -1,5 +1,19 @@
 # Storage — upload e leitura pública da capa
 
+## Ampliação autorizada em 2026-11-02
+
+O usuário autorizou logo e capa nas mesmas rotas existentes. Esta seção
+substitui as restrições históricas a somente capa descritas abaixo.
+purpose aceita cover ou logo; cada destino usa sua própria chave, caminho
+no R2 e substituição concorrente. GET de URL aceita somente a referência
+vigente do destino e empresa disponível, com validade de 300 segundos.
+A apresentação pública usa logo para a URL assinada da logo (fallback legado
+somente sem logo_key) e cover_image_url para a capa. Não expor chaves.
+Reutilizar o schema e infraestrutura existentes, sem migrations.
+O frontend superadmin envia logo após cadastrar a empresa e capa na edição.
+Falha da logo permite tentar novamente sem cadastrar outra empresa/venda.
+Detalhamento e evidências: [PR do dashboard](../super-admin-dashboard/pr.md).
+
 Atualização: 2026-11-01. Backend implementado e testado com R2 simulado.
 Referência: US-54. Homologação R2/PostgreSQL reais ainda não executada.
 
