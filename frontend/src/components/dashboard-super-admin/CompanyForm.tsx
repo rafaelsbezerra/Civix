@@ -1,8 +1,10 @@
 import { useState, type FormEvent } from 'react';
 import { Button } from '../ui/button';
 import type { CompanyRegistrationInput, Plan, PlatformCompany } from '../../lib/api';
+import { CompanyImageInput } from './CompanyImageInput';
 
-export function CompanyForm({ plans, busy, onSave, company }: { plans: Plan[]; busy: boolean; company?: PlatformCompany; onSave: (input: Omit<CompanyRegistrationInput, 'operationId'>) => void }) {
+export function CompanyForm({ plans, busy, onSave, company }: { plans: Plan[]; busy: boolean; company?: PlatformCompany; onSave: (input: Omit<CompanyRegistrationInput, 'operationId'>, logo?: File | null) => void }) {
+  const [logo, setLogo] = useState<File | null>(null);
   const [form, setForm] = useState(() => { const initial = { nome: '', cnpj: '', descricao: '', descricao_detalhada: '', categoria: '', cidade: '', estado: '', tamanho: 'pequena', email: '', telefone: '', endereco: '', website: '', whatsapp: '', planId: company?.plan_id || '' };
     for (const key of Object.keys(initial) as (keyof typeof initial)[]) { if (key !== 'planId' && company?.[key] != null) initial[key] = String(company[key]); }
     return initial; });
@@ -13,7 +15,7 @@ export function CompanyForm({ plans, busy, onSave, company }: { plans: Plan[]; b
     onSave({ nome: form.nome, cnpj: form.cnpj, descricao: form.descricao, descricao_detalhada: form.descricao_detalhada,
       categoria: form.categoria, cidade: form.cidade, estado: form.estado, tamanho: form.tamanho as CompanyRegistrationInput['tamanho'], planId: form.planId,
       ...(form.email || company ? { email: form.email || null } : {}), ...(form.telefone || company ? { telefone: form.telefone || null } : {}),
-      ...(form.endereco || company ? { endereco: form.endereco || null } : {}), ...(form.website || company ? { website: form.website || null } : {}), ...(form.whatsapp || company ? { whatsapp: form.whatsapp || null } : {}) });
+      ...(form.endereco || company ? { endereco: form.endereco || null } : {}), ...(form.website || company ? { website: form.website || null } : {}), ...(form.whatsapp || company ? { whatsapp: form.whatsapp || null } : {}) }, logo);
   };
   return <form onSubmit={submit} className="sa-form" aria-label={company ? 'Editar empresa' : 'Cadastrar empresa com plano'}>
     <fieldset className="sa-panel" disabled={busy}><legend className="sa-section-legend">01 · Identificação</legend><div className="sa-form-grid">
@@ -38,6 +40,7 @@ export function CompanyForm({ plans, busy, onSave, company }: { plans: Plan[]; b
       {selected && <div className="sa-plan-preview"><strong>{selected.name}</strong><span>{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(selected.price))}</span><p>{company ? 'A alteração do plano não gera uma venda automática. Registre a venda manualmente na área de vendas.' : 'O valor vigente do plano será registrado pelo servidor no momento da confirmação.'}</p></div>}
       <p className="sa-footnote">{company ? 'A alteração do plano não gera uma venda automática. Registre a venda manualmente na área de vendas.' : <>Este cadastro registra uma venda comercial inicial. Não realiza cobrança nem cria assinatura. O convite da equipe é uma etapa separada.</>}</p>
     </fieldset>
+    {!company && <fieldset className="sa-panel" disabled={busy}><legend className="sa-section-legend">04 · Logo</legend><CompanyImageInput purpose="logo" file={logo} onChange={setLogo} /></fieldset>}
     <div className="sa-form-actions"><Button className="sa-button" type="submit" disabled={busy || !plans.length}>{busy ? 'Salvando…' : company ? 'Salvar empresa' : 'Cadastrar empresa e registrar venda'}</Button></div>
   </form>;
 }

@@ -119,7 +119,7 @@ async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<Api
   const headers = new Headers(options?.headers);
   headers.set('Accept', 'application/json');
 
-  if (!headers.has('Content-Type')) {
+  if (!(options?.body instanceof FormData) && !headers.has('Content-Type')) {
     headers.set('Content-Type', 'application/json');
   }
 
@@ -157,6 +157,29 @@ async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<Api
   }
 
   return payload as ApiResponse<T>;
+}
+
+export type CompanyImagePurpose = 'logo' | 'cover';
+export interface CompanyImageUpload {
+  imageId: string;
+  target: { module: 'companies'; resourceId: string; purpose: CompanyImagePurpose };
+}
+export async function uploadCompanyImage(companyId: string, purpose: CompanyImagePurpose, file: File): Promise<CompanyImageUpload> {
+  const body = new FormData();
+  body.append('file', file);
+  body.append('module', 'companies');
+  body.append('resourceId', companyId);
+  body.append('purpose', purpose);
+  const result = (await fetchApi<CompanyImageUpload>('/api/v1/storage/images', { ...authenticatedOptions('POST'), body })).data;
+  if (!result?.imageId || result.target?.module !== 'companies' || result.target.resourceId !== companyId || result.target.purpose !== purpose) {
+    throw new ApiError('A API retornou um upload inválido.');
+  }
+  return result;
+}
+export async function getCompanyImageUrl(imageId: string): Promise<string> {
+  const result = (await fetchApi<{ url: string; expiresInSeconds: number }>('/api/v1/storage/images/' + encodeURIComponent(imageId) + '/url')).data;
+  if (typeof result?.url !== 'string' || result.expiresInSeconds !== 300) throw new ApiError('A API retornou uma URL de imagem inválida.');
+  return result.url;
 }
 
 export const fetchEmpresas = async (): Promise<Empresa[]> => {

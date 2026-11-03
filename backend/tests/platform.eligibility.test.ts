@@ -15,6 +15,7 @@ const inactiveCompanyId = randomUUID();
 const archivedCompanyId = randomUUID();
 const companyIds = [activeCompanyId, legacyCompanyId, inactiveCompanyId, archivedCompanyId];
 const imageIds = new Map<string, string>(companyIds.map(id => [id, randomUUID()] as const));
+const logoIds = new Map<string, string>(companyIds.map(id => [id, randomUUID()] as const));
 const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/b9sAAAAASUVORK5CYII=', 'base64');
 
 Object.assign(process.env, {
@@ -38,7 +39,7 @@ function makeCompany(id: string, status: 'ativo' | 'inativo' | 'verificado', del
     verificado: status === 'verificado' || status === 'inativo' || deletedAt !== null,
     tamanho: 'pequena',
     cover_key: `companies/${id}/cover.png`,
-    logo_key: null,
+    logo_key: `companies/${id}/logo.png`,
     deleted_at: deletedAt,
   };
 }
@@ -56,18 +57,18 @@ function fixture() {
     companies,
     users: [{ id: superAdminId, email: 'super-admin@example.test', role: 'super_admin', name: 'Superadmin sintético',
       password_hash: 'hash-sintetico-nao-usado', status: 'active', company_id: null }],
-    images: companies.map(company => ({
-      id: imageIds.get(company.id)!,
-      object_key: company.cover_key,
+    images: companies.flatMap(company => (['cover', 'logo'] as const).map(purpose => ({
+      id: (purpose === 'cover' ? imageIds : logoIds).get(company.id)!,
+      object_key: purpose === 'cover' ? company.cover_key : company.logo_key,
       original_name: 'capa.png',
       mime_type: 'image/png',
       size_bytes: png.length,
       module: 'companies',
       resource_id: company.id,
-      purpose: 'cover',
+      purpose,
       uploaded_by: superAdminId,
       created_at: '2026-11-02T12:00:00.000Z',
-    })),
+    }))),
     plans: [],
     sales: [],
     companyRegistrationOperations: [],
@@ -130,24 +131,27 @@ test('elegibilidade pública exclui empresas suspensas/arquivadas sem apagar his
     signedKeys.length = 0;
     const publicArchive = await companyService.presentCompany(archive);
     assert.equal(publicArchive.cover_image_url, null);
+    assert.equal(publicArchive.logo, null);
     assert.deepEqual(signedKeys, []);
 
     for (const companyId of [inactiveCompanyId, archivedCompanyId]) {
-      const imageId = imageIds.get(companyId)!;
-      const urlResponse = await fetch(`${baseUrl}/api/v1/storage/images/${imageId}/url`);
-      assert.equal(urlResponse.status, 404);
+      for (const purpose of ['cover', 'logo'] as const) {
+        const imageId = (purpose === 'cover' ? imageIds : logoIds).get(companyId)!;
+        const urlResponse = await fetch(`${baseUrl}/api/v1/storage/images/${imageId}/url`);
+        assert.equal(urlResponse.status, 404);
 
-      const form = new FormData();
-      form.set('module', 'companies');
-      form.set('resourceId', companyId);
-      form.set('purpose', 'cover');
-      form.set('file', new Blob([new Uint8Array(png)], { type: 'image/png' }), 'capa.png');
-      const uploadResponse = await fetch(`${baseUrl}/api/v1/storage/images`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${bearer}` },
-        body: form,
-      });
-      assert.equal(uploadResponse.status, 404);
+        const form = new FormData();
+        form.set('module', 'companies');
+        form.set('resourceId', companyId);
+        form.set('purpose', purpose);
+        form.set('file', new Blob([new Uint8Array(png)], { type: 'image/png' }), 'capa.png');
+        const uploadResponse = await fetch(`${baseUrl}/api/v1/storage/images`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${bearer}` },
+          body: form,
+        });
+        assert.equal(uploadResponse.status, 404);
+      }
     }
 
     assert.deepEqual(uploadedKeys, []);

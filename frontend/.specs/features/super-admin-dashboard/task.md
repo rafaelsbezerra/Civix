@@ -1,5 +1,20 @@
 # Tarefas frontend — superadmin
 
+## Complemento de imagens — 2026-11-02
+
+- [x] IMG-F01: uploadCompanyImage e getCompanyImageUrl em lib/api.ts, Bearer
+  somente no upload, FormData com boundary gerado pelo navegador.
+- [x] IMG-F02: seletor e prévia de logo somente no cadastro; upload depois
+  de empresa/venda confirmadas, com reenvio isolado em falha.
+- [x] IMG-F03: envio separado da capa na edição, sem alterar vendas/plano;
+  validar arquivo e apresentar prévia e feedback, bloquear empresa inativa.
+- [x] IMG-F04: revisar, verificar testes de recuperação/multipart e navegador;
+  registrar resultados no PR da spec antes do commit funcional.
+
+Arquivos: lib/api.ts; components/dashboard-super-admin/CompanyImageInput.tsx,
+CompanyForm.tsx; pages/dashboard-super-admin/CompanyCreate.tsx e CompanyEdit.tsx;
+index.css. Sugestão de commit: feat(storage): support company image uploads.
+
 [Spec](spec.md) · [SDD](../../../../backend/.specs/features/super-admin-dashboard/sdd.md) ·
 [Plano E2E e revisão](../../../../backend/.specs/features/super-admin-dashboard/task.md).
 G0 a G4 e equivalentes concluídos. G5 a G8 autorizados para continuação,
