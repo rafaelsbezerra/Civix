@@ -53,7 +53,7 @@ export async function sendInviteEmail({ email, role, token }: SendInviteParams) 
     return result;
   }
 
-  const roleText = role === 'admin_empresa' ? 'Organização/Empresa' : 'Cliente/Usuário';
+  const roleText = role === 'super_admin' ? 'Administrador da plataforma' : role === 'atendente' ? 'Atendente' : 'Administrador da empresa';
 
   try {
     const result = await getResendClient().emails.send({

@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import { Pool } from '@neondatabase/serverless';
-import type { QueryResultRow } from 'pg';
+import type { QueryResultRow, PoolClient } from 'pg';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -27,6 +27,18 @@ function getPool(): Pool {
 }
 
 export const db = {
+  async transaction<T>(run: (client: Pick<PoolClient, 'query'>) => Promise<T>): Promise<T> {
+    const client = await getPool().connect();
+    try {
+      await client.query('BEGIN');
+      const result = await run(client);
+      await client.query('COMMIT');
+      return result;
+    } catch (error) {
+      await client.query('ROLLBACK').catch(() => undefined);
+      throw error;
+    } finally { client.release(); }
+  },
   query<T extends QueryResultRow = QueryResultRow>(text: string, values?: unknown[]) {
     return getPool().query<T>(text, values);
   },

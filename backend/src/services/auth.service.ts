@@ -20,8 +20,8 @@ async function getInviteUser(token: string): Promise<UserRow> {
     decoded = jwt.verify(token, jwtSecret) as JwtInvitePayload;
 
     if (!decoded || typeof decoded !== 'object' || typeof decoded.email !== 'string'
-      || !decoded.email || (!isAuthenticatedRole(decoded.role) || decoded.role === 'super_admin')
-      || decoded.purpose !== 'invite' || typeof decoded.companyId !== 'string') {
+      || !decoded.email || !isAuthenticatedRole(decoded.role)
+      || decoded.purpose !== 'invite' || (decoded.role === 'super_admin' ? decoded.companyId !== null : typeof decoded.companyId !== 'string')) {
       throw new Error('O token de convite não contém uma identidade válida.');
     }
   } catch (cause) {
@@ -43,13 +43,19 @@ async function getInviteUser(token: string): Promise<UserRow> {
     });
   }
 
-  if (user.status !== 'pending' || user.company_id !== decoded.companyId
-    || !await companyRepository.getById(decoded.companyId)) {
+  const company = decoded.companyId ? await companyRepository.getById(decoded.companyId) : undefined;
+  if (user.deleted_at || user.status !== 'pending' || user.company_id !== decoded.companyId
+    || (decoded.role !== 'super_admin' && (!company || company.status === 'inativo' || company.deleted_at))) {
     throw new AppError({
       status: 400,
       code: ErrorCode.VALIDATION_ERROR,
       message: 'Esta conta já foi ativada anteriormente.',
     });
+  }
+
+  if (user.tokens_revoked_at && (typeof decoded.issuedAt !== 'string' || !Number.isFinite(Date.parse(decoded.issuedAt))
+    || Date.parse(decoded.issuedAt) <= new Date(user.tokens_revoked_at).getTime())) {
+    throw new AppError({ status:401,code:ErrorCode.UNAUTHORIZED,message:'Convite revogado. Solicite um novo link.' });
   }
 
   if (user.invite_token !== token) {

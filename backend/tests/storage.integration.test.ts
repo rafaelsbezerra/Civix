@@ -150,7 +150,7 @@ test('Storage integra HTTP, autorização e metadados com R2 simulado', async t 
       assert.equal(detail.status, 200);
       const companyBody = await detail.json();
       assert.match(companyBody.data.cover_image_url, /^https:\/\/images\.example\.test\//);
-      assert.equal(companyBody.data.cover_image_url_expires_in, 300);
+      assert.equal('cover_image_url_expires_in' in companyBody.data, false);
       assert.equal(companyBody.data.cover_key, undefined);
       assert.equal(companyBody.data.logo_key, undefined);
       assert.deepEqual(signed, [{ key: data.images[0].object_key, seconds: 300 }]);

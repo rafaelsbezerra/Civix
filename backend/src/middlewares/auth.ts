@@ -39,6 +39,11 @@ export default async function authMiddleware(req: Request, _res: Response, next:
       throw new AppError({ status: 401, code: ErrorCode.UNAUTHORIZED, message: 'Token inválido ou expirado. Faça login novamente.', cause });
     }
     const user = await getAuthenticatedUser(decoded.id);
+    if (user.tokens_revoked_at && (typeof decoded.issuedAt !== 'string'
+      || !Number.isFinite(Date.parse(decoded.issuedAt))
+      || Date.parse(decoded.issuedAt) <= new Date(user.tokens_revoked_at).getTime())) {
+      throw new AppError({ status: 401, code: ErrorCode.UNAUTHORIZED, message: 'Sessão revogada. Faça login novamente.' });
+    }
     if (user.role !== decoded.role || user.company_id !== decoded.companyId
       || user.email.toLowerCase() !== decoded.email.toLowerCase()) {
       throw new AppError({ status: 401, code: ErrorCode.UNAUTHORIZED, message: 'Acesso alterado. Faça login novamente.' });

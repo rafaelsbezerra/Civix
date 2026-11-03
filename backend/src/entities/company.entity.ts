@@ -23,9 +23,17 @@ export interface Company {
   tamanho: 'pequena' | 'media' | 'grande';
   descritivo?: string | null;
   tone?: 'blue' | 'green' | 'orange' | 'purple' | 'gray' | null;
+  plan_id?: string | null;
+  deleted_at?: string | null;
+  deactivation_reason?: string | null;
+  deactivated_at?: string | null;
+  deactivated_by?: string | null;
 }
 
 export const companyDataSchema = z.object({
+  plan_id: z.string().nullable().optional(),
+  deleted_at: z.string().nullable().optional(), deactivation_reason: z.string().nullable().optional(),
+  deactivated_at: z.string().nullable().optional(), deactivated_by: z.string().nullable().optional(),
   id: z.string().min(1),
   nome: z.string().min(1),
   cnpj: z.string().min(1),

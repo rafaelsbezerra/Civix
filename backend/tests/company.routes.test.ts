@@ -46,7 +46,7 @@ test('Endpoints do catálogo preservam respostas, ordem das rotas e consultas pa
     for (const [path, query, values] of cases) {
       const response = await fetch(url + path);
       assert.equal(response.status, 200);
-      const presented = { ...company, cover_image_url: null, cover_image_url_expires_in: null };
+      const presented = { ...company, cover_image_url: null };
       assert.deepEqual(await response.json(), { data: path === '/catalog-id' ? presented : [presented] });
       const lastCall = calls.at(-1)!;
       assert.ok(lastCall.query.startsWith('SELECT '));

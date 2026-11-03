@@ -22,9 +22,8 @@
     "test:seed": "node --import tsx --test tests/staging.seed.test.ts",
     "test:local": "node --import tsx --test tests/local.persistence.test.ts",
     "test:logging": "node scripts/test.runner.mjs tests/logging.test.ts tests/logging.http.test.ts tests/logging.services.test.ts",
-    "user:bootstrap-super-admin": "tsx scripts/bootstrap.super.admin.ts",
-    "mock:roles:migrate": "tsx scripts/migrate.local.roles.ts",
-    "test:storage": "node scripts/test.runner.mjs tests/storage.r2.test.ts tests/storage.integration.test.ts tests/users.roles.test.ts tests/users.provisioning.test.ts"
+    "test:storage": "node scripts/test.runner.mjs tests/storage.r2.test.ts tests/storage.integration.test.ts tests/users.roles.test.ts tests/users.provisioning.test.ts",
+    "test:platform": "node scripts/test.runner.mjs tests/platform.foundation.test.ts tests/platform.postgres.test.ts tests/platform.eligibility.test.ts tests/platform.companies.test.ts tests/platform.sales.test.ts tests/platform.sales.postgres.test.ts tests/platform.users.test.ts tests/platform.users.postgres.test.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1156.0",

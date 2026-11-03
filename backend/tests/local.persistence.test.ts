@@ -156,15 +156,29 @@ test('Persistência local preserva acesso, convites, recuperação e integridade
 
     await t.test('Cadastro HTTP permite superadmin e nega perfil empresarial sem expor admin router', async () => {
       const company = await prepareCompany();
+      await store.updateLocalData(data => {
+        data.plans.push({ id: 'plano-cadastro', name: 'Plano sintético', slug: 'plano-cadastro',
+          description: 'Plano de teste', price: '39.90', billing_period: 'monthly', features: [],
+          limits: {}, is_featured: false, is_active: true, display_order: 1 });
+      });
       await createMockUser({ email: 'super@example.test', role: 'super_admin', password: 'senha-local-123' });
       await createMockUser({ email: 'admin@example.test', role: 'admin_empresa', companyId: company.id, password: 'senha-local-123' });
       const superLogin = await userService.login({ email: 'super@example.test', password: 'senha-local-123' });
       const adminLogin = await userService.login({ email: 'admin@example.test', password: 'senha-local-123' });
       await withServer(async url => {
         const send = (token: string, input: unknown) => fetch(url + '/api/v1/empresas', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify(input) });
-        assert.equal((await send(adminLogin.token, companyInput)).status, 403);
-        assert.equal((await send(superLogin.token, { ...companyInput, cnpj: 'segunda-empresa' })).status, 201);
-        assert.equal((await send(superLogin.token, { ...companyInput, id: 'arbitrario' })).status, 400);
+        const registration = { ...companyInput, cnpj: 'segunda-empresa', planId: 'plano-cadastro',
+          operationId: '40000000-0000-4000-8000-000000000001' };
+        assert.equal((await send(adminLogin.token, registration)).status, 403);
+        const created = await send(superLogin.token, registration);
+        assert.equal(created.status, 201);
+        const result = (await created.json()).data;
+        assert.equal(result.company.cnpj, registration.cnpj);
+        assert.equal(result.company.plan_id, registration.planId);
+        assert.equal(result.sale.companyId, result.company.id);
+        assert.equal(result.sale.amount, '39.90');
+        assert.equal(result.replayed, false);
+        assert.equal((await send(superLogin.token, { ...registration, id: 'arbitrario' })).status, 400);
         assert.equal((await fetch(url + '/api/v1/admin/invite', { method: 'POST' })).status, 404);
         const list = await fetch(url + '/api/v1/empresas');
         assert.equal((await list.json()).data.length, 2);

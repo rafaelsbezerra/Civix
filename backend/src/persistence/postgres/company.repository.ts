@@ -1,25 +1,131 @@
 import type { Company } from '../../entities/company.entity.js';
 import type { CompanyRepository } from '../../repositories/company.repository.js';
 import { db } from '../../shared/config/data.js';
+import type { PlanRow } from '../../interfaces/plan.row.js';
+import type { SaleRow } from '../../interfaces/sale.row.js';
+import { createInitialSale } from '../../services/sale.service.js';
+import { toSale } from '../sale.mapper.js';
+import { AppError } from '../../shared/errors/app.error.js';
+import { ErrorCode } from '../../shared/errors/error.code.js';
+import { normalizePlanPrice } from '../../services/plan.service.js';
 
 // A API mantém o DTO português; o banco usa identificadores em inglês.
 const columns = `id, name AS nome, tax_id AS cnpj, description AS descricao,
   detailed_description AS descricao_detalhada, category AS categoria, city AS cidade,
   state AS estado, status, is_verified AS verificado, size AS tamanho,
   created_at AS data_cadastro, logo, address AS endereco, phone AS telefone,
-  email, website, whatsapp, additional_description AS descritivo, tone, cover_key, logo_key`;
+  email, website, whatsapp, additional_description AS descritivo, tone, cover_key, logo_key,
+  plan_id, deleted_at, deactivation_reason, deactivated_at, deactivated_by`;
 
 export const companyPostgresRepository: CompanyRepository = {
+  async listPlatformCompanies(filters) {
+    const values: unknown[] = [];
+    const where: string[] = [];
+    if (filters.q) { values.push('%' + filters.q.replace(/[\\%_]/g, '\\$&') + '%'); where.push('(name ILIKE $' + values.length + ' OR tax_id ILIKE $' + values.length + ')'); }
+    if (filters.planId) { values.push(filters.planId); where.push('plan_id=$' + values.length); }
+    if (filters.status === 'archived') where.push('deleted_at IS NOT NULL');
+    else if (filters.status) where.push("deleted_at IS NULL AND status " + (filters.status === 'ativo' ? "<> 'inativo'" : "= 'inativo'"));
+    values.push(filters.pageSize, filters.offset);
+    const query = 'WITH filtered AS (SELECT ' + columns.replace('plan_id,', 'plan_id::text AS plan_id,') + ' FROM companies'
+      + (where.length ? ' WHERE ' + where.join(' AND ') : '')
+      + ') SELECT (SELECT COUNT(*)::int FROM filtered) AS total, COALESCE((SELECT json_agg(page_rows) FROM '
+      + '(SELECT * FROM filtered ORDER BY nome, id LIMIT $' + (values.length - 1) + ' OFFSET $' + values.length + ") page_rows), '[]'::json) AS items";
+    return (await db.query<{ total: number; items: Company[] }>(query, values)).rows[0];
+  },
+  async changeCompanyAdministration(input) {
+    try {
+      return await db.transaction(async client => {
+        await client.query("SELECT pg_advisory_xact_lock(hashtextextended('civix:platform-administration', 0))");
+        const actor = (await client.query<{ role: string; status: string | null; deleted_at: string | null }>('SELECT role,status,deleted_at FROM users WHERE id=$1 FOR UPDATE', [input.actorId])).rows[0];
+        if (!actor || actor.role !== 'super_admin' || actor.deleted_at || actor.status != null && actor.status !== 'active') throw new AppError({ status: 403, code: ErrorCode.FORBIDDEN, message: 'Acesso administrativo alterado.' });
+        const company = (await client.query<Company>('SELECT ' + columns + ' FROM companies WHERE id=$1 FOR UPDATE', [input.companyId])).rows[0];
+        if (!company) throw new AppError({ status: 404, code: ErrorCode.NOT_FOUND, message: 'Empresa não encontrada.' });
+        if (input.action === 'restore') {
+          if (!company.deleted_at) throw new AppError({ status: 409, code: ErrorCode.CONFLICT, message: 'A empresa não está arquivada.' });
+          return (await client.query<Company>("UPDATE companies SET deleted_at=NULL,status='inativo' WHERE id=$1 RETURNING " + columns, [company.id])).rows[0];
+        }
+        if (company.deleted_at) throw new AppError({ status: 409, code: ErrorCode.CONFLICT, message: 'Restaure a empresa antes de alterá-la.' });
+        if (input.action === 'update') {
+          const { planId, ...fields } = input.fields!;
+          const plan = (await client.query<PlanRow>('SELECT * FROM plans WHERE id=$1 FOR SHARE', [planId])).rows[0];
+          if (!plan) throw new AppError({ status: 404, code: ErrorCode.NOT_FOUND, message: 'Plano não encontrado.' });
+          if (String(company.plan_id) !== String(plan.id)) {
+            if (!plan.is_active) throw new AppError({ status: 400, code: ErrorCode.VALIDATION_ERROR, message: 'Plano inativo.' });
+            normalizePlanPrice(String(plan.price));
+          }
+          const names: Record<string, string> = { nome:'name',cnpj:'tax_id',descricao:'description',descricao_detalhada:'detailed_description',categoria:'category',cidade:'city',estado:'state',tamanho:'size',logo:'logo',endereco:'address',telefone:'phone',email:'email',website:'website',whatsapp:'whatsapp',descritivo:'additional_description',tone:'tone' };
+          const entries = Object.entries(fields);
+          const values: unknown[] = entries.map(([, value]) => value);
+          const updates = entries.map(([key], index) => {
+            if (!names[key]) throw new Error('Campo de empresa não permitido.');
+            return names[key] + '=$' + (index + 1);
+          });
+          values.push(planId, company.id);
+          return (await client.query<Company>('UPDATE companies SET ' + updates.join(',') + ',plan_id=$' + (values.length - 1) + ' WHERE id=$' + values.length + ' RETURNING ' + columns, values)).rows[0];
+        }
+        if (input.action === 'reactivate') {
+          if (company.status !== 'inativo') throw new AppError({ status: 409, code: ErrorCode.CONFLICT, message: 'A empresa já está ativa.' });
+          return (await client.query<Company>("UPDATE companies SET status='ativo' WHERE id=$1 RETURNING " + columns, [company.id])).rows[0];
+        }
+        await client.query("UPDATE users SET invite_token=NULL,reset_password_token=NULL,reset_password_expires=NULL,tokens_revoked_at=GREATEST($1::timestamptz,date_trunc('milliseconds',clock_timestamp()),COALESCE(tokens_revoked_at,'epoch'::timestamptz)+INTERVAL '2 milliseconds') WHERE company_id=$2", [input.changedAt, company.id]);
+        return (await client.query<Company>("UPDATE companies SET status='inativo',deactivation_reason=$1,deactivated_at=GREATEST($2::timestamptz,date_trunc('milliseconds',clock_timestamp())),deactivated_by=$3"
+          + (input.action === 'archive' ? ",deleted_at=GREATEST($2::timestamptz,date_trunc('milliseconds',clock_timestamp()))" : '') + ' WHERE id=$4 RETURNING ' + columns,
+          [input.reason, input.changedAt, input.actorId, company.id])).rows[0];
+      });
+    } catch (error) {
+      if ((error as { code?: string }).code === '23505') throw new AppError({ status: 409, code: ErrorCode.CONFLICT, message: 'CNPJ ou e-mail de empresa já cadastrado.' });
+      throw error;
+    }
+  },
+  async createCompanyWithInitialSale(input) {
+    try {
+      return await db.transaction(async client => {
+        await client.query('SELECT pg_advisory_xact_lock(hashtextextended($1, 0))', [String(input.actorId) + ':' + input.operationId]);
+        const previous = (await client.query<{ fingerprint: string; company_id: string; sale_id: string | null }>(
+          'SELECT fingerprint, company_id, sale_id FROM company_registration_operations WHERE actor_id=$1 AND operation_id=$2',
+          [input.actorId, input.operationId])).rows[0];
+        if (previous) {
+          if (previous.fingerprint !== input.fingerprint) throw new AppError({ status: 409, code: ErrorCode.CONFLICT, message: 'A operação já foi usada com outros dados.' });
+          const company = (await client.query<Company>('SELECT ' + columns + ' FROM companies WHERE id=$1', [previous.company_id])).rows[0];
+          const sale = previous.sale_id ? (await client.query<SaleRow>('SELECT * FROM sales WHERE id=$1', [previous.sale_id])).rows[0] : undefined;
+          if (!company || !sale) throw new AppError({ status: 409, code: ErrorCode.CONFLICT, message: 'A operação original não pode ser recriada. Consulte o cadastro existente.' });
+          return { company, sale: toSale(sale), replayed: true };
+        }
+        const actor = (await client.query<{ role: string; status: string | null }>('SELECT role, status FROM users WHERE id=$1 FOR SHARE', [input.actorId])).rows[0];
+        if (!actor || actor.role !== 'super_admin' || (actor.status != null && actor.status !== 'active')) throw new AppError({ status: 403, code: ErrorCode.FORBIDDEN, message: 'Acesso administrativo alterado.' });
+        const plan = (await client.query<PlanRow>('SELECT * FROM plans WHERE id=$1 FOR SHARE', [input.planId])).rows[0];
+        if (!plan) throw new AppError({ status: 404, code: ErrorCode.NOT_FOUND, message: 'Plano não encontrado.' });
+        if (!plan.is_active) throw new AppError({ status: 400, code: ErrorCode.VALIDATION_ERROR, message: 'O plano está inativo.' });
+        const company = { ...input.company, plan_id: String(plan.id) };
+        const sale = createInitialSale(company.id, plan, input.actorId);
+        await client.query(`INSERT INTO companies (id,name,tax_id,description,detailed_description,category,city,state,status,is_verified,size,
+          created_at,logo,address,phone,email,website,whatsapp,additional_description,tone,plan_id)
+          VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21)`,
+          [company.id,company.nome,company.cnpj,company.descricao,company.descricao_detalhada,company.categoria,company.cidade,company.estado,
+            company.status,company.verificado,company.tamanho,company.data_cadastro,company.logo??null,company.endereco??null,
+            company.telefone??null,company.email??null,company.website??null,company.whatsapp??null,company.descritivo??null,company.tone??null,plan.id]);
+        await client.query(`INSERT INTO sales (id,company_id,plan_id,origin,pricing_mode,plan_name,plan_price,plan_billing_period,amount,currency,description,sold_at,created_at,created_by)
+          VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)`,
+          [sale.id,sale.companyId,sale.planId,sale.origin,sale.pricingMode,sale.planName,sale.planPrice,sale.planBillingPeriod,sale.amount,sale.currency,sale.description,sale.soldAt,sale.createdAt,sale.createdBy]);
+        await client.query('INSERT INTO company_registration_operations (actor_id,operation_id,fingerprint,company_id,sale_id) VALUES ($1,$2,$3,$4,$5)',
+          [input.actorId,input.operationId,input.fingerprint,company.id,sale.id]);
+        return { company, sale, replayed: false };
+      });
+    } catch (error) {
+      if ((error as { code?: string }).code === '23505') throw new AppError({ status: 409, code: ErrorCode.CONFLICT, message: 'CNPJ, e-mail ou operação já cadastrado.' });
+      throw error;
+    }
+  },
   async updateCoverKey(id, key, expectedKey) {
     const result = await db.query(
-      'UPDATE companies SET cover_key = $1 WHERE id = $2 AND cover_key IS NOT DISTINCT FROM $3 RETURNING id',
+      "UPDATE companies SET cover_key = $1 WHERE id = $2 AND cover_key IS NOT DISTINCT FROM $3 AND deleted_at IS NULL AND status <> 'inativo' RETURNING id",
       [key, id, expectedKey],
     );
     return result.rowCount === 1;
   },
   async updateLogoKey(id, key, expectedKey) {
     const result = await db.query(
-      'UPDATE companies SET logo_key = $1 WHERE id = $2 AND logo_key IS NOT DISTINCT FROM $3 RETURNING id',
+      "UPDATE companies SET logo_key = $1 WHERE id = $2 AND logo_key IS NOT DISTINCT FROM $3 AND deleted_at IS NULL AND status <> 'inativo' RETURNING id",
       [key, id, expectedKey],
     );
     return result.rowCount === 1;
