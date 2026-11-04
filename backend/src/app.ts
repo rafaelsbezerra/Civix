@@ -16,10 +16,22 @@ import { createErrorHandler, createNotFoundHandler, terminateErroredResponse } f
 
 export const app = express();
 
+const isProd = process.env.NODE_ENV === 'production';
+
+if (isProd) app.set('trust proxy', 1);
+
+const allowedOrigins = (process.env.ALLOWED_ORIGINS ?? process.env.FRONTEND_URL ?? 'http://localhost:5173')
+  .split(',')
+  .map((o) => o.trim().replace(/\/$/, ''))
+  .filter(Boolean);
+
 app.use(createLogMiddleware());
 
 app.use(cors({
-  origin: true,
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(null, false);
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
@@ -41,7 +53,7 @@ app.get('/', (_req, res) => {
 const apiVersion = '/api/v1';
 
 app.use(`${apiVersion}/users`, userRoutes);
-app.use('/api', firstAccessRoutes);
+app.use(`${apiVersion}/auth`, firstAccessRoutes);
 app.use(`${apiVersion}/empresas`, companyRoutes);
 app.use(`${apiVersion}/plans`, planRoutes);
 app.use(`${apiVersion}/storage`, storageRoutes);

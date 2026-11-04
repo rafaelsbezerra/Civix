@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect, useCallback } from 'react';
 import { Outlet, useLocation, useNavigate, useOutletContext } from 'react-router-dom';
 import { X } from 'lucide-react';
-import { ApiError, type SessionProfile } from '../../../lib/api';
+import { ApiError, logout as apiLogout, type SessionProfile } from '../../../lib/api';
 import { SuperAdminSidebar } from './SuperAdminSidebar';
 import { SuperAdminHeader } from './SuperAdminHeader';
 
@@ -11,24 +11,38 @@ export interface SuperAdminContext {
   handleError: (error: unknown) => string;
 }
 const THEME_KEY = 'civix:super-admin:theme';
+
 export function SuperAdminLayout() {
   const initialSession = useOutletContext<SessionProfile>();
   const [session, setSession] = useState(initialSession);
   const [theme, setTheme] = useState(() => {
     try { return localStorage.getItem(THEME_KEY) === 'dark' ? 'dark' : 'light'; } catch { return 'light'; }
   });
+
   const dialog = useRef<HTMLDialogElement>(null);
   const navigate = useNavigate();
   const { pathname } = useLocation();
   useEffect(() => { try { localStorage.setItem(THEME_KEY, theme); } catch { /* Preferência indisponível não bloqueia acesso. */ } }, [theme]);
-  const logout = useCallback(() => { localStorage.removeItem('token'); navigate('/login/empresa', { replace: true }); }, [navigate]);
+
+  const logout = useCallback(async () => {
+    try {
+      await apiLogout();
+    } catch {
+      // se a chamada falhar, ainda saímos da área protegida
+    } finally {
+      navigate('/super-admin/login', { replace: true });
+    }
+  }, [navigate]);
+
   const handleError = useCallback((error: unknown) => {
-    if (error instanceof ApiError && error.status === 401) logout();
+    if (error instanceof ApiError && error.status === 401) void logout();
     return error instanceof Error ? error.message : 'Não foi possível concluir a operação.';
   }, [logout]);
+
   const title = pathname.endsWith('/plans') ? 'Planos comerciais' : pathname.endsWith('/companies/new') ? 'Cadastrar empresa'
     : pathname.includes('/companies') ? 'Empresas' : pathname.includes('/sales') ? 'Vendas comerciais' : pathname.includes('/administrators') ? 'Superadmins' : pathname.endsWith('/settings/profile') ? 'Meu perfil' : 'Visão geral';
   return <div className={`super-admin-root${theme === 'dark' ? ' dark' : ''}`} data-theme={theme}>
+
     <a className="sa-skip-link" href="#admin-content">Pular para o conteúdo</a>
     <aside className="sa-sidebar"><SuperAdminSidebar /></aside>
     <dialog ref={dialog} className="sa-mobile-menu" aria-label="Menu de navegação">

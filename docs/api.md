@@ -129,12 +129,7 @@ distintos, sem expor identidade/segredos ao consumidor. Admin continua desmontad
 
 ## Capas de empresas
 
-POST /api/v1/storage/images recebe multipart autenticado com purpose=cover|logo;
-GET /api/v1/storage/images/:imageId/url é público para a logo ou capa vigente.
-Consultas públicas de empresa incluem cover_image_url e logo assinada quando
-há logo_key, sem chaves internas. O detalhe administrativo também inclui as
-URLs para prévia. Contratos, validações, status e preparação estão no
-[guia de storage](storage.md) e na [spec](../backend/.specs/features/storage/spec.md).
+POST /api/v1/storage/images recebe multipart autenticado; GET /api/v1/storage/images/:imageId/url é público para a capa vigente. Consultas de empresa incluem cover_image_url, sem chaves internas. Contratos, validações, status e preparação estão no [guia de storage](storage.md) e na [spec](../backend/.specs/features/storage/spec.md).
 
 ## Plataforma superadmin — G0 a G4
 

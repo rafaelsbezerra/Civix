@@ -37,8 +37,7 @@ export async function getPlatformCompany(actorId: UserId, companyId: string) {
   if (!z.string().uuid().safeParse(companyId).success) throw new AppError({ status: 400, code: ErrorCode.VALIDATION_ERROR, message: 'ID da empresa inválido.' });
   const company = await companyRepository.getById(companyId);
   if (!company) throw new AppError({ status: 404, code: ErrorCode.NOT_FOUND, message: 'Empresa não encontrada.' });
-  const images = await presentCompany(company);
-  return { ...presentPlatformCompany(company), logo: images.logo, cover_image_url: images.cover_image_url };
+  return presentPlatformCompany(company);
 }
 export async function changeCompanyAdministration(actorId: UserId, companyId: string, action: CompanyAdministrationChange['action'], input: unknown) {
   await requireSuperAdminActor(actorId);
@@ -214,21 +213,24 @@ export async function getCompanyById(id: string): Promise<Company> {
 }
 
 export async function presentCompany(company: Company) {
-  const { cover_key, logo_key, plan_id: _planId,
+  const { cover_key, logo_key: _logoKey, plan_id: _planId,
     deleted_at: _deletedAt, deactivation_reason: _reason, deactivated_at: _deactivatedAt,
     deactivated_by: _actor, ...publicCompany } = company;
-  async function signCurrentImage(key: string | null | undefined, purpose: 'cover' | 'logo'): Promise<string | null> {
-    if (!key || company.status === 'inativo' || company.deleted_at) return null;
-    const image = await storageRepository.getByObjectKey(key);
-    if (!image || image.resource_id !== company.id || image.module !== 'companies' || image.purpose !== purpose) return null;
-    try {
-      return (await getPresignedImageUrl(image.id)).url;
-    } catch (error) {
-      // Uma troca concorrente pode invalidar a imagem, mas não a empresa consultada.
-      if (error instanceof AppError && error.status === 404) return null;
-      throw error;
-    }
+  if (!cover_key || company.status === 'inativo' || company.deleted_at) {
+    return { ...publicCompany, cover_image_url: null };
   }
-  const [coverUrl, logoUrl] = await Promise.all([signCurrentImage(cover_key, 'cover'), signCurrentImage(logo_key, 'logo')]);
-  return { ...publicCompany, logo: logo_key ? logoUrl : publicCompany.logo ?? null, cover_image_url: coverUrl };
+  const image = await storageRepository.getByObjectKey(cover_key);
+  if (!image || image.resource_id !== company.id || image.module !== 'companies' || image.purpose !== 'cover') {
+    return { ...publicCompany, cover_image_url: null };
+  }
+  try {
+    const signed = await getPresignedImageUrl(image.id);
+    return { ...publicCompany, cover_image_url: signed.url };
+  } catch (error) {
+    // Uma troca concorrente pode invalidar a imagem, mas não a empresa consultada.
+    if (error instanceof AppError && error.status === 404) {
+      return { ...publicCompany, cover_image_url: null };
+    }
+    throw error;
+  }
 }

@@ -1,33 +1,18 @@
-# Storage — upload e leitura pública de logo e capa
+# Storage — upload e leitura pública da capa
 
-## Ampliação autorizada em 2026-11-02
-
-O usuário autorizou logo e capa nas mesmas rotas existentes. Esta seção
-substitui as restrições históricas a somente capa descritas abaixo.
-purpose aceita cover ou logo; cada destino usa sua própria chave, caminho
-no R2 e substituição concorrente. GET de URL aceita somente a referência
-vigente do destino e empresa disponível, com validade de 300 segundos.
-A apresentação pública usa logo para a URL assinada da logo (fallback legado
-somente sem logo_key) e cover_image_url para a capa. Não expor chaves.
-Reutilizar o schema e infraestrutura existentes, sem migrations.
-O frontend superadmin envia logo após cadastrar a empresa e capa na edição.
-Falha da logo permite tentar novamente sem cadastrar outra empresa/venda.
-Detalhamento e evidências: [PR do dashboard](../super-admin-dashboard/pr.md).
-
-Atualização: 2026-11-02. Backend implementado e testado com R2 simulado.
+Atualização: 2026-11-01. Backend implementado e testado com R2 simulado.
 Referência: US-54. Homologação R2/PostgreSQL reais ainda não executada.
 
 ## API
 
 - POST /api/v1/storage/images: Bearer autenticado, multipart/form-data.
   Um arquivo no campo file; campos module=companies, resourceId=UUID da
-  empresa e purpose=cover ou purpose=logo. Outros metadados são rejeitados.
+  empresa e purpose=cover. Outros metadados são rejeitados.
 - GET /api/v1/storage/images/:imageId/url: público, retorna data.url e
-  data.expiresInSeconds=300 somente para logo/capa vigente de empresa disponível.
+  data.expiresInSeconds=300 somente para capa vigente de empresa disponível.
   Endpoint adicional preservado da estrutura, com as mesmas verificações.
 - Consultas públicas de empresas (detalhe, busca, filtros e listagem) retornam
-  cover_image_url e logo (URL assinada quando há logo_key). Sem capa o campo
-  é null; sem logo_key, preservar logo legado. A resposta não inclui cover_image_url_expires_in.
+  cover_image_url; sem capa o campo é null. A resposta não inclui cover_image_url_expires_in.
   Não retornam cover_key/logo_key. Nenhuma autenticação é exigida para leitura.
 
 Upload retorna 201 com data.imageId e data.target. Campos e nomes existentes
@@ -46,18 +31,16 @@ O destino identifica recurso, não autorização. Papel/autor/bucket/chave não
 são escolhas do frontend; o servidor gera chave nova com UUID e consulta a
 identidade/vínculo vigente. Veja [papéis](../users-roles/spec.md).
 
-Logo e capa são independentes. Não existe galeria, upload direto no navegador
-ou destino arbitrário.
+Logo tem campo e contrato estrutural reservados, mas upload de logo não está
+liberado. Não existe galeria, upload direto no navegador ou destino arbitrário.
 
 ## Fluxo de escrita e consistência
 
 1. Autenticar, validar destino e permissão.
 2. Conferir arquivo, assinatura, MIME e tamanho.
-3. Ler a chave anterior do destino e gerar nova chave em companies/{id}/{purpose},
-   nunca reutilizando chave histórica.
+3. Ler capa anterior e gerar nova chave, nunca reutilizando chave histórica.
 4. Enviar objeto ao R2 e persistir metadados images.
-5. Revalidar permissão/vínculo e chamar companyService.updateCompanyCoverKey
-   ou updateCompanyLogoKey, conforme o destino.
+5. Revalidar permissão/vínculo e chamar companyService.updateCompanyCoverKey.
 6. Atualizar companies por compare-and-swap contra a chave anterior; mudança
    concorrente retorna 409. Não confiar somente em bloqueio no processo Node.
 7. Após confirmação, limpar imagem anterior apenas se não mais referenciada.
@@ -105,7 +88,7 @@ e [URLs assinadas](https://developers.cloudflare.com/r2/api/s3/presigned-urls/).
 
 ## Fora do escopo
 
-Outros dashboards além do superadmin, armazenamento de outros módulos,
+Frontend de upload/exibição, dashboards, armazenamento de outros módulos,
 transformações de imagem, bucket público, histórico de versões e execução
 automática de migrations. O cliente não escolhe credenciais ou caminhos livres.
 

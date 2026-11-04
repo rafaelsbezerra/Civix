@@ -28,13 +28,16 @@ import ResetPassword from '@/pages/ResetPassword';
 import { TermsOfService } from '@/pages/TermsOfServices';
 import { PrivacyPolicy } from '@/pages/PrivacityPolicy';
 import HelperCenter from '@/pages/HelperCenter';
+import CookieBanner from '@/components/Cookie/CookieBanner';
+import SuperAdminLogin from '@/pages/SuperAdminLogin';
 
 export const AppRoutes: React.FC = () => (
     <MotionRoot>
         <PublicSmoothScroll />
         <CompanyPageTransition />
+        <CookieBanner />
         <Routes>
-            <Route element={<ProtectedRoute allowedRoles={['super_admin']} />}>
+            <Route element={<ProtectedRoute allowedRoles={['super_admin']} redirectTo="/super-admin/login" />}>
                 <Route path="/super-admin" element={<SuperAdminLayout />}>
                     <Route index element={<Overview />} />
                     <Route path="plans" element={<Plans />} />
@@ -62,6 +65,8 @@ export const AppRoutes: React.FC = () => (
             <Route path="/termos-de-uso" element={<TermsOfService />} />
             <Route path="/politica-de-privacidade" element={<PrivacyPolicy />} />
             <Route path="/central-de-ajuda" element={<HelperCenter />} />
+            <Route path="/super-admin/login" element={<SuperAdminLogin />} />
+            <Route path="/super-admin" element={<SuperAdminLogin />} />   
 
             <Route path='*' element={<NotFound />} />
         </Routes>
