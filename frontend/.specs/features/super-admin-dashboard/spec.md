@@ -1,5 +1,21 @@
 # Telas do superadmin
 
+## Imagens de empresa — complemento autorizado em 2026-11-02
+
+No cadastro, permitir selecionar somente a logo (opcional), com prévia.
+Enviar empresa/plano/operação no JSON existente e, após obter o ID, fazer
+upload multipart da logo. Uma falha no upload não desfaz cadastro/venda:
+mostrar mensagem e permitir repetir apenas o envio da mesma imagem.
+Na edição, disponibilizar formulário separado para a capa, com prévia atual
+e do arquivo selecionado, estado de envio, confirmação e erro recuperável.
+Não enviar logo pela edição nem capa pelo cadastro. Empresas inativas não
+podem receber imagens; orientar reativação. Validar PNG/JPG/WEBP e 10 MB no
+navegador e manter a validação do conteúdo no backend. Revogar object URLs
+das prévias locais ao substituir/desmontar. O browser define o boundary do
+multipart; não forçar Content-Type JSON ou multipart sem boundary.
+Reutilizar lib/api.ts, os componentes do dashboard e as duas rotas de storage.
+URLs persistidas não são públicas permanentes: o backend assina por 300s.
+
 Data: 2026-11-02. Estado: telas G0 a G7 implementadas; G8 validado localmente; abertura do PR depende de acesso ao GitHub.
 [Spec de negócio](../../../../backend/.specs/features/super-admin-dashboard/spec.md),
 [SDD canônico](../../../../backend/.specs/features/super-admin-dashboard/sdd.md) e
