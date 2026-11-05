@@ -1,11 +1,13 @@
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Outlet, Route, Routes } from 'react-router-dom';
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { PageResult, PlatformCompany, Plan, SessionProfile } from '../../lib/api';
+import type { CompanyMetrics, PageResult, PlatformCompany, Plan, SessionProfile } from '../../lib/api';
 import {
   changePlatformCompanyState,
   getPlatformCompanies,
   getPlatformCompany,
+  getPlatformCompanyMetrics,
   getPlatformPlans,
   registerCompany,
   updatePlatformCompany,
@@ -20,6 +22,7 @@ vi.mock('../../lib/api', async original => ({
   changePlatformCompanyState: vi.fn(),
   getPlatformCompanies: vi.fn(),
   getPlatformCompany: vi.fn(),
+  getPlatformCompanyMetrics: vi.fn(),
   getPlatformPlans: vi.fn(),
   registerCompany: vi.fn(),
   updatePlatformCompany: vi.fn(),
@@ -76,6 +79,20 @@ const plan: Plan = {
 const nextPlan: Plan = { ...plan, id: 'plan-2', name: 'Avançado', slug: 'avancado', price: '99.00' };
 const inactivePlan: Plan = { ...plan, id: 'plan-inactive', name: 'Plano inativo', isActive: false };
 const freePlan: Plan = { ...plan, id: 'plan-free', name: 'Plano gratuito', price: '0.00' };
+const companyMetrics: CompanyMetrics = {
+  total: 42,
+  active: 37,
+  inactive: 3,
+  archived: 2,
+  byPlan: [
+    { planId: 'plan-1', planName: 'Profissional', count: 23 },
+    { planId: 'initial', planName: 'Inicial', count: 0 },
+    { planId: 'pro', planName: 'Pro', count: 0 },
+    { planId: 'plan-old', planName: 'Plano inativo', count: 18 },
+    { planId: 'plan-demo', planName: 'PLANO gratuito', count: 0 },
+    { planId: null, planName: 'Sem plano', count: 1 },
+  ],
+};
 
 function pageResult(data: PlatformCompany[], page = 1, pageSize = 20, total = data.length, totalPages = 1): PageResult<PlatformCompany> {
   return { data, meta: { page, pageSize, total, totalPages } };
@@ -115,6 +132,7 @@ beforeEach(() => {
   handleError.mockClear();
   vi.mocked(getPlatformCompanies).mockReset().mockResolvedValue(pageResult([company]));
   vi.mocked(getPlatformCompany).mockReset().mockResolvedValue(company);
+  vi.mocked(getPlatformCompanyMetrics).mockReset().mockResolvedValue(companyMetrics);
   vi.mocked(getPlatformPlans).mockReset().mockResolvedValue([plan]);
   vi.mocked(changePlatformCompanyState).mockReset().mockResolvedValue(undefined);
   vi.mocked(updatePlatformCompany).mockReset().mockResolvedValue(company);
@@ -122,7 +140,94 @@ beforeEach(() => {
 });
 
 describe('Empresas do superadmin', () => {
+  it('mantém as métricas agregadas independentes dos filtros e da paginação da lista', async () => {
+    const user = userEvent.setup();
+    const filteredCompany = { ...company, id: 'company-filtered', nome: 'Empresa arquivada filtrada' };
+    const nextPageCompany = { ...company, id: 'company-page-2', nome: 'Empresa da página 2' };
+    vi.mocked(getPlatformCompanies)
+      .mockResolvedValueOnce(pageResult([company], 1, 20, 42, 3))
+      .mockResolvedValueOnce(pageResult([filteredCompany], 1, 20, 25, 2))
+      .mockResolvedValueOnce(pageResult([nextPageCompany], 2, 20, 25, 2));
+
+    renderCompanyRoutes('/super-admin/companies');
+
+    const metrics = await screen.findByRole('region', { name: 'Métricas de empresas' });
+    expect(metrics).toHaveTextContent('Total de empresas');
+    expect(metrics).toHaveTextContent('42');
+    expect(metrics.children).toHaveLength(3);
+    const planMetrics = within(metrics).getByRole('region', { name: 'Empresas por plano' });
+    const planMeters = within(planMetrics).getAllByRole('meter');
+    expect(planMeters).toHaveLength(3);
+    expect(within(planMetrics).getByRole('meter', { name: 'Empresas em Profissional' })).toHaveAttribute('aria-valuenow', '23');
+    expect(within(planMetrics).getByRole('meter', { name: 'Empresas em Inicial' })).toHaveAttribute('aria-valuenow', '0');
+    expect(within(planMetrics).getByRole('meter', { name: 'Empresas em Pro' })).toHaveAttribute('aria-valuenow', '0');
+    expect(planMetrics).not.toHaveTextContent('Plano inativo');
+    expect(planMetrics).not.toHaveTextContent('PLANO gratuito');
+    expect(planMetrics).not.toHaveTextContent('Sem plano');
+    const statusMetrics = within(metrics).getByRole('region', { name: 'Situação das empresas' });
+    expect(statusMetrics).toHaveTextContent('Empresas ativas');
+    expect(statusMetrics).toHaveTextContent('37');
+    expect(statusMetrics).toHaveTextContent('88% da base');
+    expect(statusMetrics).toHaveTextContent('3 inativas · 2 arquivadas');
+    expect(within(statusMetrics).getByRole('meter', { name: 'Percentual de empresas ativas' })).toHaveAttribute('aria-valuenow', '88');
+    expect(getPlatformCompanyMetrics).toHaveBeenCalledTimes(1);
+    expect(getPlatformCompanyMetrics).toHaveBeenCalledWith();
+
+    fireEvent.change(screen.getByLabelText('Nome ou CNPJ'), { target: { value: 'arquivada' } });
+    await user.click(screen.getByLabelText('Estado do cadastro'));
+    await user.click(await screen.findByRole('option', { name: 'Arquivadas' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Filtrar' }));
+
+    expect(await screen.findByText('Empresa arquivada filtrada')).toBeInTheDocument();
+    expect(getPlatformCompanies).toHaveBeenLastCalledWith({ q: 'arquivada', status: 'archived', planId: '', page: 1 });
+    expect(metrics).toHaveTextContent('42');
+    expect(getPlatformCompanyMetrics).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Próxima' }));
+
+    expect(await screen.findByText('Empresa da página 2')).toBeInTheDocument();
+    expect(getPlatformCompanies).toHaveBeenLastCalledWith({ q: 'arquivada', status: 'archived', planId: '', page: 2 });
+    expect(metrics).toHaveTextContent('42');
+    expect(getPlatformCompanyMetrics).toHaveBeenCalledTimes(1);
+  });
+
+  it('exibe valores zero no total e na barra sem dividir por zero', async () => {
+    vi.mocked(getPlatformCompanyMetrics).mockResolvedValue({
+      total: 0,
+      active: 0,
+      inactive: 0,
+      archived: 0,
+      byPlan: [{ planId: plan.id, planName: plan.name, count: 0 }],
+    });
+    vi.mocked(getPlatformCompanies).mockResolvedValue(pageResult([], 1, 100, 0, 0));
+
+    renderCompanyRoutes('/super-admin/companies');
+
+    const metrics = await screen.findByRole('region', { name: 'Métricas de empresas' });
+    expect(metrics.children).toHaveLength(3);
+    expect(metrics.children[0]).toHaveTextContent('Total de empresas');
+    expect(metrics.children[0]).toHaveTextContent('0');
+    const zeroMeter = within(metrics).getByRole('meter', { name: 'Empresas em Profissional' });
+    expect(zeroMeter).toHaveAttribute('aria-valuemax', '1');
+    expect(zeroMeter).toHaveAttribute('aria-valuenow', '0');
+    expect(zeroMeter).toHaveAttribute('aria-valuetext', '0 empresas');
+    expect(zeroMeter.firstElementChild).toHaveStyle({ width: '0%' });
+    const activeMeter = within(metrics).getByRole('meter', { name: 'Percentual de empresas ativas' });
+    expect(activeMeter).toHaveAttribute('aria-valuenow', '0');
+    expect(activeMeter.firstElementChild).toHaveStyle({ width: '0%' });
+  });
+
+  it('mantém o botão de consulta navegável e com nome acessível', async () => {
+    renderCompanyRoutes('/super-admin/companies');
+
+    const consultationButton = await screen.findByRole('button', { name: 'Consultar Empresa de Exemplo' });
+    expect(consultationButton).toHaveAttribute('href', '/super-admin/companies/company-1');
+    expect(consultationButton).toHaveAttribute('title', 'Consultar Empresa de Exemplo');
+    expect(consultationButton.querySelector('svg')).toHaveAttribute('aria-hidden', 'true');
+  });
+
   it('página os resultados, preserva os filtros e reinicia na primeira página ao filtrar', async () => {
+    const user = userEvent.setup();
     vi.mocked(getPlatformCompanies)
       .mockResolvedValueOnce(pageResult([company], 1, 20, 45, 3))
       .mockResolvedValueOnce(pageResult([{ ...company, id: 'company-filtered', nome: 'Empresa filtrada' }], 1, 20, 25, 2))
@@ -135,8 +240,10 @@ describe('Empresas do superadmin', () => {
     expect(getPlatformCompanies).toHaveBeenCalledWith({ q: '', status: '', planId: '', page: 1 });
 
     fireEvent.change(screen.getByLabelText('Nome ou CNPJ'), { target: { value: 'Fortaleza Tech' } });
-    fireEvent.change(screen.getByLabelText('Estado do cadastro'), { target: { value: 'archived' } });
-    fireEvent.change(screen.getByLabelText('Plano'), { target: { value: 'plan-1' } });
+    await user.click(screen.getByLabelText('Estado do cadastro'));
+    await user.click(await screen.findByRole('option', { name: 'Arquivadas' }));
+    await user.click(screen.getByLabelText('Plano'));
+    await user.click(await screen.findByRole('option', { name: 'Profissional' }));
     fireEvent.click(screen.getByRole('button', { name: 'Filtrar' }));
 
     expect(await screen.findByText('Empresa filtrada')).toBeInTheDocument();

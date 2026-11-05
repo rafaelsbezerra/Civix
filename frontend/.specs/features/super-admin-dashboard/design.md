@@ -1,5 +1,76 @@
 # Design do dashboard superadmin
 
+## Marca e header — shadcn, 2026-11-04
+
+Substituir a marca textual da sidebar pela imagem transparente `logo-civix.png`,
+também utilizada no header da landing page. No tema escuro, utilizar a variante
+existente `logo-civix-white.png`, preservando o contraste sem adicionar fundo.
+
+O header utiliza Button e Avatar shadcn, com menu de usuário adaptado do bloco
+`@shadcn-space/dropdown-menu-01`. Manter nome, papel, acesso a Meu perfil,
+saída e troca de tema existentes. O portal do dropdown permanece dentro do
+header para herdar os tokens do dashboard nos dois temas. Componentes adicionados
+usam Base UI e o utilitário `cn` já instalado; sem novas dependências.
+
+Verificação: três testes de interação (perfil/saída, teclado/Escape/foco e
+callbacks de tema/menu mobile), revisão secundária e Chrome em 1440/390/320px
+nos dois temas. Menu sem transbordamento horizontal. Sem commit, na staging.
+
+## Empresas — shadcn e Tailwind, 2026-11-04
+
+Migrar somente a listagem de empresas para componentes shadcn e utilitários
+Tailwind. Remover rótulo/título/subtítulo do conteúdo; o título fica no header.
+Exibir total de empresas e quantidades por plano, com dados agregados de toda
+a base (inclusive inativas/arquivadas), independentes dos filtros/paginação.
+Manter três cards: total, “Empresas por plano” com barras horizontais, rótulos
+e quantidades, e “Empresas ativas” com quantidade, percentual da base e resumo
+de inativas e arquivadas. Larguras proporcionais à maior quantidade do grupo;
+zero não preenche as barras. Todos os cálculos permanecem no frontend. Empresa
+ativa não possui `deleted_at` e tem status `ativo` ou o legado `verificado`;
+inativa tem status `inativo` sem `deleted_at`; arquivada possui `deleted_at`.
+Cards compactos: espaçamento interno reduzido e cada plano apresentado em uma
+linha com nome, barra horizontal e quantidade, preservando as informações.
+No card de barras, exibir somente nomes sem a palavra “Plano”, ignorando caixa;
+os nomes demonstrativos com “Plano” e o grupo “Sem plano” ficam ocultos. Aplicar
+essa regra de apresentação no frontend, sem excluir cadastros nem alterar o
+total geral. Nos dados atuais são três planos visíveis. Os três cards usam a
+mesma largura e altura, com a largura compacta dos cards originais. Manter
+`16px` entre cada card e também entre o último card e o botão de cadastro, sem
+coluna vazia intermediária.
+Planos visíveis sem empresas podem apresentar zero. Não confundir erro com zero.
+Cadastro e ações passam a usar Button; ação de consulta usa ícone com nome
+acessível. Paginação própria da tela reutiliza Button shadcn e mantém page/meta,
+sem alterar os consumidores atuais da paginação compartilhada.
+“Cadastrar empresa” fica no topo do conteúdo, antes dos cards, em linha flex
+com justify-between e botão alinhado à direita.
+Preservar filtros, rotas, carregamento, erros, navegação e temas claro/escuro.
+O frontend utiliza somente as rotas existentes de listagem de empresas e planos.
+Reúne as páginas da listagem administrativa (até 100 registros por requisição),
+calcula total com array.length e quantidades por plano com filter().length.
+Não utiliza /companies/metrics nem cria agregação no backend. As contagens não
+se limitam à página visível. Falha em qualquer página mantém erro, sem exibir
+um total parcial. Esta escolha carrega os registros para contagem no navegador.
+
+Implementação na staging, sem commit por orientação do usuário. Componentes
+Card/Table/Input/Badge/Select do registry shadcn (base-nova), adaptando
+somente cn para @/lib/utils existente. Button já estava instalado; sem alteração
+de manifest/lockfile. CompanyFilters, CompanyMetricsCards, CompanyTable e
+CompanyPagination usam Tailwind e preservam a paginação das outras telas.
+Filtros de estado e plano utilizam Select shadcn com nomes acessíveis e
+mantêm os mesmos valores enviados no formulário. O portal permanece dentro
+do escopo visual do dashboard para respeitar o tema claro/escuro.
+A consulta agregada inicialmente adicionada foi removida por orientação do
+usuário; backend e guia de API restaurados ao estado anterior desta tarefa.
+Correção verificada: 14 testes direcionados (11 da tela e 3 do cálculo) e lint
+aprovados; cobertura de 101 empresas em duas páginas, base vazia e falha durante
+a paginação. Revisão secundária sem bloqueadores, sem chamada à rota removida.
+Selects e cards compactos verificados em Chrome com API simulada em
+1440/390/320px, nos dois temas, incluindo envio dos filtros, Escape e menus
+dentro da viewport; capturas inspecionadas. Select oficial adicionado sem novas
+dependências, mantendo o utilitário cn existente e portal no tema do dashboard.
+O typecheck completo possui o impedimento anterior TS1484 em
+CookieOptions, no backend incluído pelo tsconfig frontend.
+
 Requisitos visuais confirmados em 2026-11-02. Complementa a [spec](spec.md).
 Design implementado; evidências e limites de verificação estão no task backend.
 

@@ -57,6 +57,13 @@
 
 ## Never do
 
+- Não acrescentar propostas ou implementações além do que o usuário solicitou.
+  Não sugerir novamente decisões ou requisitos que ele já informou.
+- Não criar nem consumir rotas que o usuário não tenha indicado ou autorizado,
+  ou cuja existência e contrato não tenham sido confirmados no código atual.
+  Não presumir endpoints pelo nome do recurso ou pela aparência da interface.
+  Se o pedido parecer exigir uma rota nova, explicar a necessidade e aguardar
+  autorização explícita antes de implementá-la ou integrá-la ao frontend.
 - Do not make technical decisions on your own; present options and request confirmation.
 - Record unresolved decisions in the relevant spec as **Aguardando resposta**.
 - Never include secrets, credentials, or private data in commits or documentation.
