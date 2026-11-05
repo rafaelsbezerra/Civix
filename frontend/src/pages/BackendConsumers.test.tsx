@@ -143,16 +143,27 @@ describe('Formulários existentes integrados ao backend', () => {
     expect(signal?.aborted).toBe(true)
     await act(async () => { finish?.(new Response(JSON.stringify({ data: { email: 'pessoa@example.test' } }))) })
   })
-  it.each(['admin_empresa', 'super_admin', 'atendente'] as const)('Login %s armazena token do envelope e mantém destino', async role => {
+  it.each(['admin_empresa', 'atendente'] as const)('Login %s usa a sessão HTTP e mantém o destino público', async role => {
     const setItem = vi.fn()
     vi.stubGlobal('localStorage', { setItem })
-    respond({ data: { token: 'token-sintetico', user: { id: 'user-1', name: 'Teste', email: 'pessoa@example.test', role, companyId: role === 'super_admin' ? null : 'company-1' } } })
+    respond({ data: { user: { id: 'user-1', name: 'Teste', email: 'pessoa@example.test', role, companyId: 'company-1' } } })
     renderPage(<Login />, '/login')
     fireEvent.change(screen.getByPlaceholderText('seu_email@email.com'), { target: { value: 'pessoa@example.test' } })
     fireEvent.change(screen.getByPlaceholderText('••••••••'), { target: { value: 'senha-teste' } })
     fireEvent.click(screen.getByRole('button', { name: 'Login' }))
-    await waitFor(() => expect(setItem).toHaveBeenCalledWith('token', 'token-sintetico'))
-    expect(navigate).toHaveBeenCalledWith(role === 'super_admin' ? '/super-admin' : '/')
+    await waitFor(() => expect(navigate).toHaveBeenCalledWith('/'))
+    expect(setItem).not.toHaveBeenCalled()
+  })
+
+  it('Login empresarial rejeita superadmin e não navega para o dashboard', async () => {
+    respond({ data: { user: { id: 'user-1', name: 'Teste', email: 'pessoa@example.test', role: 'super_admin', companyId: null } } })
+    respond({ data: {} })
+    renderPage(<Login />, '/login/empresa')
+    fireEvent.change(screen.getByPlaceholderText('seu_email@email.com'), { target: { value: 'pessoa@example.test' } })
+    fireEvent.change(screen.getByPlaceholderText('••••••••'), { target: { value: 'senha-teste' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Login' }))
+    expect(await screen.findByText('Credenciais inválidas.')).toBeInTheDocument()
+    expect(navigate).not.toHaveBeenCalled()
   })
 
   it('Login com falha mostra mensagem pública sem gravar token ou navegar', async () => {

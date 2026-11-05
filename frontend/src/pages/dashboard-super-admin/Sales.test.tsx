@@ -84,22 +84,22 @@ function pageResult<T>(data: T[], page = 1, pageSize = 20, total = data.length, 
   return { data, meta: { page, pageSize, total, totalPages } };
 }
 
-function renderSalesRoutes(path = '/super-admin/sales') {
+function renderSalesRoutes(path = '/dashboard/super-admin/sales') {
   return render(
     <MemoryRouter initialEntries={[path]}>
       <Routes>
-        <Route path="/super-admin/sales" element={<Outlet context={context} />}>
+        <Route path="/dashboard/super-admin/sales" element={<Outlet context={context} />}>
           <Route index element={<Sales />} />
           <Route path="new" element={<SaleCreate />} />
         </Route>
-        <Route path="/super-admin/companies/:companyId" element={<p>Empresa consultada</p>} />
+        <Route path="/dashboard/super-admin/companies/:companyId" element={<p>Empresa consultada</p>} />
       </Routes>
     </MemoryRouter>,
   );
 }
 
 async function chooseCompanyForNewSale() {
-  renderSalesRoutes('/super-admin/sales/new');
+  renderSalesRoutes('/dashboard/super-admin/sales/new');
   fireEvent.click(await screen.findByRole('button', { name: /Empresa de Exemplo/ }));
   await screen.findByLabelText('Origem do valor');
 }
@@ -330,7 +330,7 @@ describe('Vendas do superadmin', () => {
     expect(await screen.findByText('Nenhuma venda encontrada.')).toBeInTheDocument();
     expect(deletePlatformSale).toHaveBeenCalledWith(sale.id);
     expect(screen.getByRole('status')).toHaveTextContent('Venda excluída definitivamente.');
-    expect(screen.getByRole('link', { name: 'Fazer novo lançamento' })).toHaveAttribute('href', '/super-admin/sales/new');
+    expect(screen.getByRole('link', { name: 'Fazer novo lançamento' })).toHaveAttribute('href', '/dashboard/super-admin/sales/new');
     expect(createManualSale).not.toHaveBeenCalled();
     expect(updatePlatformCompany).not.toHaveBeenCalled();
   });

@@ -17,7 +17,7 @@ describe('Header do superadmin', () => {
   it('abre o menu com perfil e preserva a saída', async () => {
     const { user, onLogout } = setup();
     await user.click(screen.getByRole('button', { name: 'Abrir menu de Admin Teste' }));
-    expect(await screen.findByRole('menuitem', { name: 'Meu perfil' })).toHaveAttribute('href', '/super-admin/settings/profile');
+    expect(await screen.findByRole('menuitem', { name: 'Meu perfil' })).toHaveAttribute('href', '/dashboard/super-admin/settings/profile');
     expect(screen.getAllByRole('menuitem')).toHaveLength(2);
     const portal = screen.getByRole('menu').closest('[data-slot="super-admin-user-menu-portal"]');
     expect(portal).not.toBeNull();

@@ -32,7 +32,7 @@ function renderArea(path: string, guarded = false) {
     <Route path="/login" element={<p>Login necessário</p>} />
     <Route path="/login/empresa" element={<p>Entre com seu novo e-mail</p>} />
     <Route element={guarded ? <ProtectedRoute allowedRoles={['super_admin']} /> : <Outlet context={session} />}>
-      <Route path="/super-admin" element={<SuperAdminLayout />}>
+      <Route path="/dashboard/super-admin" element={<SuperAdminLayout />}>
         <Route index element={<p>Visão inicial autorizada</p>} />
         <Route path="plans" element={<Plans />} />
         <Route path="companies/new" element={<CompanyCreate />} />
@@ -59,7 +59,7 @@ describe('Fluxos do dashboard de superadmin', () => {
 
   it('Não libera dashboard para admin empresarial nem quando possui permissão de upload', async () => {
     vi.mocked(getSessionProfile).mockResolvedValue({ ...session, user: { ...session.user, role: 'admin_empresa', companyId: 'empresa-1' } })
-    renderArea('/super-admin', true)
+    renderArea('/dashboard/super-admin', true)
     expect(await screen.findByRole('alert')).toHaveTextContent('Acesso não permitido')
     expect(screen.queryByText('Visão inicial autorizada')).not.toBeInTheDocument()
     expect(getPlatformPlans).not.toHaveBeenCalled()
@@ -68,7 +68,7 @@ describe('Fluxos do dashboard de superadmin', () => {
   it('Tema inicia claro, responde ao teclado, persiste e não modifica o tema público', async () => {
     const user = userEvent.setup()
     const originalClass = document.documentElement.className
-    const first = renderArea('/super-admin')
+    const first = renderArea('/dashboard/super-admin')
     const toggle = screen.getByRole('button', { name: 'Ativar modo escuro' })
     expect(first.container.querySelector('.super-admin-root')).toHaveAttribute('data-theme', 'light')
     toggle.focus()
@@ -77,14 +77,14 @@ describe('Fluxos do dashboard de superadmin', () => {
     expect(memory.get('civix:super-admin:theme')).toBe('dark')
     expect(document.documentElement.className).toBe(originalClass)
     first.unmount()
-    const second = renderArea('/super-admin')
+    const second = renderArea('/dashboard/super-admin')
     expect(second.container.querySelector('.super-admin-root')).toHaveAttribute('data-theme', 'dark')
     expect(screen.getByRole('button', { name: 'Ativar modo claro' })).toBeInTheDocument()
   })
 
   it('Planos distingue lista vazia de falha e permite repetir consulta', async () => {
     vi.mocked(getPlatformPlans).mockRejectedValueOnce(new ApiError('Consulta indisponível')).mockResolvedValueOnce([])
-    renderArea('/super-admin/plans')
+    renderArea('/dashboard/super-admin/plans')
     expect(await screen.findByRole('alert')).toHaveTextContent('Consulta indisponível')
     fireEvent.click(screen.getByRole('button', { name: 'Tentar novamente' }))
     expect(await screen.findByText('Nenhum plano cadastrado.')).toBeInTheDocument()
@@ -93,7 +93,7 @@ describe('Fluxos do dashboard de superadmin', () => {
 
   it('Criar e editar plano envia campos comerciais sem transportar ID no corpo', async () => {
     vi.mocked(savePlatformPlan).mockResolvedValue(plan)
-    renderArea('/super-admin/plans')
+    renderArea('/dashboard/super-admin/plans')
     await screen.findByRole('button', { name: 'Editar Profissional' })
     fireEvent.click(screen.getByRole('button', { name: 'Novo plano' }))
     fireEvent.change(screen.getByLabelText('Nome do plano'), { target: { value: 'Profissional' } })
@@ -113,7 +113,7 @@ describe('Fluxos do dashboard de superadmin', () => {
 
   it('Falha ao desativar plano mantém disponibilidade e mensagem pública', async () => {
     vi.mocked(setPlatformPlanActive).mockRejectedValue(new ApiError('Plano não pode ser alterado', 409))
-    renderArea('/super-admin/plans')
+    renderArea('/dashboard/super-admin/plans')
     fireEvent.click(await screen.findByRole('button', { name: 'Desativar Profissional' }))
     expect(await screen.findByRole('alert')).toHaveTextContent('Plano não pode ser alterado')
     expect(screen.getByRole('button', { name: 'Desativar Profissional' })).toBeEnabled()
@@ -122,7 +122,7 @@ describe('Fluxos do dashboard de superadmin', () => {
 
   it('Cadastro sem plano comercial elegível não permite confirmar empresa', async () => {
     vi.mocked(getPlatformPlans).mockResolvedValue([{ ...plan, isActive: false }, { ...plan, id: 'free', price: '0.00' }])
-    renderArea('/super-admin/companies/new')
+    renderArea('/dashboard/super-admin/companies/new')
     expect(await screen.findByRole('heading', { name: 'Nenhum plano disponível para cadastro.' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Cadastrar empresa e registrar venda' })).not.toBeInTheDocument()
     expect(registerCompany).not.toHaveBeenCalled()
@@ -131,7 +131,7 @@ describe('Fluxos do dashboard de superadmin', () => {
   it('Repetição do cadastro preserva operationId e mostra resultado real da venda', async () => {
     const result = { company: { id: 'empresa-1', nome: 'Empresa Nova', plan_id: plan.id }, sale: { id: 'sale-1', companyId: 'empresa-1', planId: plan.id, planName: plan.name, amount: '59.90', currency: 'BRL', soldAt: '2026-11-01T12:00:00Z', createdAt: '2026-11-01T12:00:00Z' }, replayed: true } as CompanyRegistrationResult
     vi.mocked(registerCompany).mockRejectedValueOnce(new ApiError('Conexão interrompida')).mockResolvedValueOnce(result)
-    renderArea('/super-admin/companies/new')
+    renderArea('/dashboard/super-admin/companies/new')
     await screen.findByLabelText('Nome da empresa')
     for (const [label, value] of [['Nome da empresa', 'Empresa Nova'], ['CNPJ', '12345678000190'], ['Categoria', 'Tecnologia'], ['Resumo', 'Resumo'], ['Descrição detalhada', 'Descrição'], ['Cidade', 'Fortaleza'], ['Estado', 'CE']]) {
       fireEvent.change(screen.getByLabelText(label), { target: { value } })
@@ -152,7 +152,7 @@ describe('Fluxos do dashboard de superadmin', () => {
 
   it('Alterar nome atualiza cabeçalho sem encerrar sessão', async () => {
     vi.mocked(updateOwnProfile).mockResolvedValue({ user: { ...session.user, name: 'Nome Atualizado' }, requiresLogin: false })
-    renderArea('/super-admin/settings/profile')
+    renderArea('/dashboard/super-admin/settings/profile')
     fireEvent.change(screen.getByLabelText('Nome'), { target: { value: 'Nome Atualizado' } })
     fireEvent.click(screen.getByRole('button', { name: 'Salvar perfil' }))
     expect(await screen.findByText('Perfil atualizado com sucesso.')).toBeInTheDocument()
@@ -162,7 +162,7 @@ describe('Fluxos do dashboard de superadmin', () => {
 
   it('Alterar e-mail encerra sessão e solicita novo login', async () => {
     vi.mocked(updateOwnProfile).mockResolvedValue({ user: { ...session.user, email: 'novo@example.test' }, requiresLogin: true })
-    renderArea('/super-admin/settings/profile')
+    renderArea('/dashboard/super-admin/settings/profile')
     fireEvent.change(screen.getByLabelText('E-mail'), { target: { value: 'novo@example.test' } })
     fireEvent.click(screen.getByRole('button', { name: 'Salvar perfil' }))
     expect(await screen.findByText('Entre com seu novo e-mail')).toBeInTheDocument()

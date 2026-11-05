@@ -17,15 +17,15 @@ export default function CompanyDetail() {
   const query = useAsyncQuery(companyId + ':' + retry, load);
   const company = query.data;
   return <>
-    <div className="sa-page-heading"><Link className="sa-text-link" to="/super-admin/companies">Empresas</Link><h1>{company?.nome || 'Dados da empresa'}</h1><p>Cadastro e disponibilidade na plataforma.</p></div>
+    <div className="sa-page-heading"><Link className="sa-text-link" to="/dashboard/super-admin/companies">Empresas</Link><h1>{company?.nome || 'Dados da empresa'}</h1><p>Cadastro e disponibilidade na plataforma.</p></div>
     {notice && <p className="sa-feedback" role="status">{notice}</p>}
     {query.loading ? <p role="status">Carregando empresa…</p> : query.error ? <p role="alert" className="sa-feedback sa-error">{(query.error as Error).message}<button onClick={() => setRetry(value => value + 1)}>Tentar novamente</button></p> : company && <>
       <section className="sa-panel"><h2>{company.deleted_at ? 'Empresa arquivada' : company.status === 'inativo' ? 'Empresa inativa' : 'Empresa ativa'}</h2><dl className="sa-detail-grid"><div><dt>CNPJ</dt><dd>{company.cnpj}</dd></div><div><dt>Plano</dt><dd>{company.planName}</dd></div><div><dt>Localização</dt><dd>{company.cidade} · {company.estado}</dd></div><div><dt>E-mail</dt><dd>{company.email || 'Não informado'}</dd></div></dl><p>{company.descricao_detalhada}</p>
         {company.deactivation_reason && <p><strong>Motivo da desativação/arquivamento:</strong> {company.deactivation_reason}</p>}
         {company.deleted_at && <p>Restauração preserva a empresa inativa. Reative explicitamente para liberar catálogo e acesso.</p>}
         <div className="sa-inline-actions">{company.deleted_at ? <button onClick={() => setAction('restoration')}>Restaurar empresa</button> : <>
-          <Link to={'/super-admin/companies/' + company.id + '/edit'}>Editar empresa</Link>
-          <Link to={'/super-admin/companies/' + company.id + '/users'}>Gerenciar equipe</Link>
+          <Link to={'/dashboard/super-admin/companies/' + company.id + '/edit'}>Editar empresa</Link>
+          <Link to={'/dashboard/super-admin/companies/' + company.id + '/users'}>Gerenciar equipe</Link>
           <button onClick={() => setAction(company.status === 'inativo' ? 'reactivation' : 'suspension')}>{company.status === 'inativo' ? 'Reativar empresa' : 'Desativar empresa'}</button>
           <button onClick={() => setAction('archive')}>Arquivar empresa</button>
         </>}</div>

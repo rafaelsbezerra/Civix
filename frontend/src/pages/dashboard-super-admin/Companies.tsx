@@ -26,7 +26,7 @@ export default function Companies() {
         {metrics.loading ? <p role="status" className="text-sm text-muted-foreground">Carregando métricas…</p> : metrics.error ? <div role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-xl border p-4 text-sm"><p>Não foi possível carregar as métricas. {(metrics.error as Error).message}</p><Button variant="outline" onClick={() => setMetricsRetry(value => value + 1)}>Tentar novamente métricas</Button></div> : metrics.data && <CompanyMetricsCards metrics={metrics.data} />}
       </div>
       <div className="order-1 flex shrink-0 justify-end xl:order-2">
-        <Button className="min-h-11 rounded-xl px-4" render={<Link to="/super-admin/companies/new" />} nativeButton={false}><Plus aria-hidden="true" />Cadastrar empresa</Button>
+        <Button className="min-h-11 rounded-xl px-4" render={<Link to="/dashboard/super-admin/companies/new" />} nativeButton={false}><Plus aria-hidden="true" />Cadastrar empresa</Button>
       </div>
     </div>
     <CompanyFilters onError={handleError} onApply={value => { setPage(1); setFilters(value); }} />

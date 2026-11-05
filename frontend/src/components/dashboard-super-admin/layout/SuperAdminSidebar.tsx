@@ -9,13 +9,13 @@ import {
 } from '@/components/ui/sidebar';
 
 const items = [
-  { to: '/super-admin', label: 'Visão geral', Icon: LayoutDashboard, end: true },
-  { to: '/super-admin/companies', label: 'Empresas', Icon: Building2, end: true },
-  { to: '/super-admin/companies/new', label: 'Cadastrar empresa', Icon: Building2 },
-  { to: '/super-admin/plans', label: 'Planos', Icon: Layers3 },
-  { to: '/super-admin/sales', label: 'Vendas', Icon: Receipt },
-  { to: '/super-admin/administrators', label: 'Superadmins', Icon: UserRound },
-  { to: '/super-admin/settings/profile', label: 'Meu perfil', Icon: UserRound },
+  { to: '/dashboard/super-admin', label: 'Visão geral', Icon: LayoutDashboard, end: true },
+  { to: '/dashboard/super-admin/companies', label: 'Empresas', Icon: Building2, end: true },
+  { to: '/dashboard/super-admin/companies/new', label: 'Cadastrar empresa', Icon: Building2 },
+  { to: '/dashboard/super-admin/plans', label: 'Planos', Icon: Layers3 },
+  { to: '/dashboard/super-admin/sales', label: 'Vendas', Icon: Receipt },
+  { to: '/dashboard/super-admin/administrators', label: 'Superadmins', Icon: UserRound },
+  { to: '/dashboard/super-admin/settings/profile', label: 'Meu perfil', Icon: UserRound },
 ];
 
 export function SuperAdminSidebar() {
@@ -25,7 +25,7 @@ export function SuperAdminSidebar() {
     <SidebarHeader className="p-3">
       <SidebarMenu><SidebarMenuItem>
         <SidebarMenuButton size="lg" className="h-12 rounded-xl p-2" tooltip="Início da administração"
-          render={<NavLink to="/super-admin" aria-label="Civix — início da administração" onClick={() => setOpenMobile(false)} />}>
+          render={<NavLink to="/dashboard/super-admin" aria-label="Civix — início da administração" onClick={() => setOpenMobile(false)} />}>
           {state === 'collapsed' && !isMobile ? <img src="/icon.svg" alt="" className="size-8 shrink-0 object-contain" /> : <>
             <img src={logoCivix} alt="Civix" className="sa-brand-logo sa-brand-logo-light" />
             <img src={logoCivixWhite} alt="Civix" className="sa-brand-logo sa-brand-logo-dark" />

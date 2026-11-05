@@ -24,8 +24,8 @@ export function CompanyTable({ result, onPage }: { result: PageResult<PlatformCo
       <TableBody>{result.data.map(company => <TableRow key={company.id}>
         <TableCell className="px-6 py-5 font-medium">{company.nome}</TableCell><TableCell className="text-muted-foreground">{company.cnpj}</TableCell>
         <TableCell><CompanyStatusBadge company={company} /></TableCell>
-        <TableCell>{company.plan_id ? <Button variant="ghost" className="min-h-10" render={<Link to="/super-admin/plans" />} nativeButton={false}><Layers3 aria-hidden="true" />Consultar plano</Button> : 'Sem plano'}</TableCell>
-        <TableCell className="px-6 text-right"><Button variant="outline" size="icon" className="size-10" aria-label={'Consultar ' + company.nome} title={'Consultar ' + company.nome} render={<Link to={'/super-admin/companies/' + company.id} />} nativeButton={false}><Eye aria-hidden="true" /></Button></TableCell>
+        <TableCell>{company.plan_id ? <Button variant="ghost" className="min-h-10" render={<Link to="/dashboard/super-admin/plans" />} nativeButton={false}><Layers3 aria-hidden="true" />Consultar plano</Button> : 'Sem plano'}</TableCell>
+        <TableCell className="px-6 text-right"><Button variant="outline" size="icon" className="size-10" aria-label={'Consultar ' + company.nome} title={'Consultar ' + company.nome} render={<Link to={'/dashboard/super-admin/companies/' + company.id} />} nativeButton={false}><Eye aria-hidden="true" /></Button></TableCell>
       </TableRow>)}</TableBody>
     </Table>}
     <CompanyPagination meta={result.meta} onPage={onPage} />

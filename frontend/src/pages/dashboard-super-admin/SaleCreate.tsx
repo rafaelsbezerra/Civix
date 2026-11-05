@@ -26,9 +26,9 @@ export default function SaleCreate() {
     try { setResult((await createManualSale({ ...input, operationId: operation.current.id })).sale); }
     catch (failure) { setError(handleError(failure)); } finally { setBusy(false); }
   };
-  return <><div className="sa-page-heading"><Link className="sa-text-link" to="/super-admin/sales">Vendas</Link><h1>Lançar venda manual</h1><p>Um registro comercial, sem cobrança e sem alterar o plano da empresa.</p></div>
+  return <><div className="sa-page-heading"><Link className="sa-text-link" to="/dashboard/super-admin/sales">Vendas</Link><h1>Lançar venda manual</h1><p>Um registro comercial, sem cobrança e sem alterar o plano da empresa.</p></div>
     {error && <p role="alert" className="sa-feedback sa-error">{error}</p>}
-    {result ? <section className="sa-panel sa-success" aria-label="Venda registrada"><h2>Venda registrada.</h2><p>{new Intl.NumberFormat('pt-BR',{ style:'currency',currency:'BRL' }).format(Number(result.amount))}</p><p>Data comercial: {new Date(result.soldAt).toISOString()} UTC</p><Link className="sa-text-link" to="/super-admin/sales">Consultar vendas</Link><button className="sa-text-link" onClick={() => { setResult(null); operation.current = null; }}>Novo lançamento</button></section> : <>
+    {result ? <section className="sa-panel sa-success" aria-label="Venda registrada"><h2>Venda registrada.</h2><p>{new Intl.NumberFormat('pt-BR',{ style:'currency',currency:'BRL' }).format(Number(result.amount))}</p><p>Data comercial: {new Date(result.soldAt).toISOString()} UTC</p><Link className="sa-text-link" to="/dashboard/super-admin/sales">Consultar vendas</Link><button className="sa-text-link" onClick={() => { setResult(null); operation.current = null; }}>Novo lançamento</button></section> : <>
       <CompanyPicker selectedId={companyId} onError={handleError} onSelect={company => { setCompanyId(company.id); operation.current = null; setError(''); }} />
       {companyId && (query.loading ? <p role="status">Carregando plano da empresa…</p> : query.error ? <p role="alert">{(query.error as Error).message}<button onClick={() => setRetry(value => value + 1)}>Tentar novamente</button></p>
         : query.data && (query.data.company.deleted_at || query.data.company.status === 'inativo' ? <p>Empresa indisponível para novo lançamento.</p>

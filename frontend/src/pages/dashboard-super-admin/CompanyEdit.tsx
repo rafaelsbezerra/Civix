@@ -31,9 +31,9 @@ function CompanyEditPage() {
     try { await updatePlatformCompany(companyId, input); setNotice('Empresa atualizada. Nenhuma venda foi lançada automaticamente.'); }
     catch (failure) { setError(handleError(failure)); } finally { setBusy(false); }
   };
-  return <><div className="sa-page-heading"><Link className="sa-text-link" to={'/super-admin/companies/' + companyId}>Voltar à empresa</Link><h1>Editar empresa</h1><p>A alteração do plano não gera uma venda automática. Registre a venda manualmente na área de vendas.</p></div>
+  return <><div className="sa-page-heading"><Link className="sa-text-link" to={'/dashboard/super-admin/companies/' + companyId}>Voltar à empresa</Link><h1>Editar empresa</h1><p>A alteração do plano não gera uma venda automática. Registre a venda manualmente na área de vendas.</p></div>
     {error && <p className="sa-feedback sa-error" role="alert">{error}</p>}
-    {notice && <div className="sa-feedback" role="status">{notice} <Link to={'/super-admin/sales/new?companyId=' + companyId}>Registrar venda manual</Link></div>}
+    {notice && <div className="sa-feedback" role="status">{notice} <Link to={'/dashboard/super-admin/sales/new?companyId=' + companyId}>Registrar venda manual</Link></div>}
     {query.loading ? <p role="status">Carregando cadastro…</p> : query.error ? <p role="alert">{(query.error as Error).message}<button onClick={() => setRetry(value => value + 1)}>Tentar novamente</button></p> : query.data?.company.deleted_at ? <p>Restaure a empresa antes de editar.</p>
       : query.data && <>
         <CompanyForm key={companyId} company={query.data.company} plans={query.data.plans.filter(plan => plan.id === query.data!.company.plan_id || plan.isActive && Number(plan.price) > 0)} busy={busy} onSave={save} />

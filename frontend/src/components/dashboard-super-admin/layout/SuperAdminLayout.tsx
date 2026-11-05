@@ -30,7 +30,7 @@ export function SuperAdminLayout() {
     } catch {
       // Se a chamada falhar, a saída local ainda será concluída.
     } finally {
-      navigate('/super-admin/login', { replace: true });
+      navigate('/dashboard/super-admin/login', { replace: true });
     }
   }, [navigate]);
 

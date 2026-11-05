@@ -21,7 +21,7 @@ export function SuperAdminUserMenu({ name, trigger, container, onLogout }: {
           <span className="min-w-0"><span className="block truncate text-sm font-medium text-popover-foreground">{name}</span><span className="block text-xs text-muted-foreground">Superadmin</span></span>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem render={<Link to="/super-admin/settings/profile" />} className="min-h-11 cursor-pointer gap-2 rounded-xl p-2">
+        <DropdownMenuItem render={<Link to="/dashboard/super-admin/settings/profile" />} className="min-h-11 cursor-pointer gap-2 rounded-xl p-2">
           <CircleUserRound aria-hidden="true" />Meu perfil
         </DropdownMenuItem>
       </DropdownMenuGroup>

@@ -126,7 +126,7 @@ export default function SuperAdminLogin() {
     getSessionProfile()
       .then((profile) => {
         if (active && profile.user.role === "super_admin") {
-          navigate("/super-admin", { replace: true });
+          navigate("/dashboard/super-admin", { replace: true });
         }
       })
       .catch(() => undefined);
@@ -154,7 +154,7 @@ export default function SuperAdminLogin() {
         return;
       }
 
-      navigate("/super-admin", { replace: true });
+      navigate("/dashboard/super-admin", { replace: true });
     } catch (err: unknown) {
       setError(
         err instanceof ApiError

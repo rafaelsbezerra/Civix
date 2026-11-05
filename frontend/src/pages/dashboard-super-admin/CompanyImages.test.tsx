@@ -58,7 +58,7 @@ function renderCompanyRoutes(path: string) {
   return render(
     <MemoryRouter initialEntries={[path]}>
       <Routes>
-        <Route path="/super-admin/companies" element={<Outlet context={context} />}>
+        <Route path="/dashboard/super-admin/companies" element={<Outlet context={context} />}>
           <Route path="new" element={<CompanyCreate />} />
           <Route path=":companyId/edit" element={<CompanyEdit />} />
         </Route>
@@ -111,7 +111,7 @@ describe('Logo no cadastro e capa na edição de empresa', () => {
     vi.mocked(uploadCompanyImage)
       .mockRejectedValueOnce(new Error('Upload indisponível.'))
       .mockResolvedValueOnce({ imageId: 'image-logo-1', target: { module: 'companies', resourceId: registration.company.id, purpose: 'logo' } })
-    renderCompanyRoutes('/super-admin/companies/new')
+    renderCompanyRoutes('/dashboard/super-admin/companies/new')
 
     await screen.findByLabelText('Nome da empresa')
     await fillCreateCompanyForm()
@@ -142,7 +142,7 @@ describe('Logo no cadastro e capa na edição de empresa', () => {
     const logo = new File(['logo sintética'], 'logo.webp', { type: 'image/webp' })
     vi.mocked(registerCompany).mockRejectedValueOnce(new Error('Falha temporária no cadastro.')).mockResolvedValueOnce(registration)
     vi.mocked(uploadCompanyImage).mockResolvedValue({ imageId: 'image-logo-2', target: { module: 'companies', resourceId: registration.company.id, purpose: 'logo' } })
-    renderCompanyRoutes('/super-admin/companies/new')
+    renderCompanyRoutes('/dashboard/super-admin/companies/new')
 
     await screen.findByLabelText('Nome da empresa')
     await fillCreateCompanyForm()
@@ -169,7 +169,7 @@ describe('Logo no cadastro e capa na edição de empresa', () => {
     vi.mocked(updatePlatformCompany).mockResolvedValue(company)
     vi.mocked(uploadCompanyImage).mockResolvedValue({ imageId: 'image-cover-1', target: { module: 'companies', resourceId: company.id, purpose: 'cover' } })
     vi.mocked(getCompanyImageUrl).mockResolvedValue('https://images.example.test/signed-cover.webp')
-    renderCompanyRoutes('/super-admin/companies/' + company.id + '/edit')
+    renderCompanyRoutes('/dashboard/super-admin/companies/' + company.id + '/edit')
 
     const coverInput = await screen.findByLabelText('Capa da empresa')
     expect(screen.queryByLabelText('Logo da empresa')).not.toBeInTheDocument()
@@ -200,7 +200,7 @@ describe('Logo no cadastro e capa na edição de empresa', () => {
       .mockRejectedValueOnce(new Error('Storage indisponível.'))
       .mockResolvedValueOnce({ imageId: 'image-cover-2', target: { module: 'companies', resourceId: company.id, purpose: 'cover' } })
     vi.mocked(getCompanyImageUrl).mockRejectedValue(new Error('Prévia indisponível.'))
-    renderCompanyRoutes('/super-admin/companies/' + company.id + '/edit')
+    renderCompanyRoutes('/dashboard/super-admin/companies/' + company.id + '/edit')
 
     await user.upload(await screen.findByLabelText('Capa da empresa'), cover)
     fireEvent.click(screen.getByRole('button', { name: 'Enviar capa' }))
@@ -219,7 +219,7 @@ describe('Logo no cadastro e capa na edição de empresa', () => {
   it('valida MIME e tamanho no formulário sem iniciar cadastro ou upload', async () => {
     const user = userEvent.setup({ applyAccept: false })
     vi.mocked(registerCompany).mockResolvedValue(registration)
-    const createView = renderCompanyRoutes('/super-admin/companies/new')
+    const createView = renderCompanyRoutes('/dashboard/super-admin/companies/new')
     await screen.findByLabelText('Nome da empresa')
     const invalidLogo = new File(['não é imagem'], 'documento.pdf', { type: 'application/pdf' })
     const logoInput = screen.getByLabelText('Logo da empresa') as HTMLInputElement
@@ -230,7 +230,7 @@ describe('Logo no cadastro e capa na edição de empresa', () => {
     expect(uploadCompanyImage).not.toHaveBeenCalled()
     createView.unmount()
 
-    const editView = renderCompanyRoutes('/super-admin/companies/' + company.id + '/edit')
+    const editView = renderCompanyRoutes('/dashboard/super-admin/companies/' + company.id + '/edit')
     const coverInput = await screen.findByLabelText('Capa da empresa') as HTMLInputElement
     const oversizedCover = new File([new Uint8Array(10_000_001)], 'cover.png', { type: 'image/png' })
     await user.upload(coverInput, oversizedCover)

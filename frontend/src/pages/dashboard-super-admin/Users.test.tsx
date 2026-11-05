@@ -122,18 +122,18 @@ function pageResult<T>(data: T[], page = 1, pageSize = 20, total = data.length, 
   return { data, meta: { page, pageSize, total, totalPages } };
 }
 
-function renderUsersRoutes(path = '/super-admin/administrators') {
+function renderUsersRoutes(path = '/dashboard/super-admin/administrators') {
   return render(
     <MemoryRouter initialEntries={[path]}>
       <nav aria-label="Trocar empresa">
-        <Link to="/super-admin/companies/company-a/users">Abrir empresa A</Link>
-        <Link to="/super-admin/companies/company-b/users">Abrir empresa B</Link>
-        <Link to="/super-admin/administrators">Abrir superadmins</Link>
+        <Link to="/dashboard/super-admin/companies/company-a/users">Abrir empresa A</Link>
+        <Link to="/dashboard/super-admin/companies/company-b/users">Abrir empresa B</Link>
+        <Link to="/dashboard/super-admin/administrators">Abrir superadmins</Link>
       </nav>
       <Routes>
         <Route path="/login/empresa" element={<p>Entre com seu novo e-mail</p>} />
         <Route element={<Outlet context={session} />}>
-          <Route path="/super-admin" element={<SuperAdminLayout />}>
+          <Route path="/dashboard/super-admin" element={<SuperAdminLayout />}>
             <Route path="companies/:companyId/users" element={<Users />} />
             <Route path="administrators" element={<Users />} />
           </Route>
@@ -181,7 +181,7 @@ afterEach(() => {
 
 describe('Gestão de usuários do superadmin', () => {
   it('troca o contexto entre empresas sem manter lista ou formulário da empresa anterior', async () => {
-    renderUsersRoutes('/super-admin/companies/company-a/users');
+    renderUsersRoutes('/dashboard/super-admin/companies/company-a/users');
 
     expect(await screen.findByText(companyA.nome)).toBeInTheDocument();
     expect(await screen.findByText(companyAdminA.name)).toBeInTheDocument();
@@ -210,7 +210,7 @@ describe('Gestão de usuários do superadmin', () => {
       .mockResolvedValueOnce(pageResult([filteredUser], 1, 20, 25, 2))
       .mockResolvedValueOnce(pageResult([secondPageUser], 2, 20, 25, 2));
 
-    renderUsersRoutes('/super-admin/companies/company-a/users');
+    renderUsersRoutes('/dashboard/super-admin/companies/company-a/users');
 
     expect(await screen.findByText(companyAdminA.name)).toBeInTheDocument();
     expect(screen.getByRole('navigation', { name: 'Paginação' })).toHaveTextContent('Página 1 de 3');
@@ -249,7 +249,7 @@ describe('Gestão de usuários do superadmin', () => {
     };
     vi.mocked(inviteManagedUser).mockResolvedValue(invitee);
 
-    renderUsersRoutes('/super-admin/administrators');
+    renderUsersRoutes('/dashboard/super-admin/administrators');
 
     expect(await screen.findByRole('heading', { name: 'Superadmins' })).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Convidar usuário' }));
@@ -271,7 +271,7 @@ describe('Gestão de usuários do superadmin', () => {
   it('envia convite empresarial com perfil permitido e sem credenciais', async () => {
     vi.mocked(inviteManagedUser).mockResolvedValue(companyAttendant);
 
-    renderUsersRoutes('/super-admin/companies/company-a/users');
+    renderUsersRoutes('/dashboard/super-admin/companies/company-a/users');
 
     fireEvent.click(await screen.findByRole('button', { name: 'Convidar usuário' }));
     const form = screen.getByRole('form', { name: 'Convidar usuário' });
@@ -297,7 +297,7 @@ describe('Gestão de usuários do superadmin', () => {
     vi.mocked(getManagedUsers).mockResolvedValue(pageResult([pendingAttendant]));
     vi.mocked(inviteManagedUser).mockResolvedValue(pendingAttendant);
 
-    renderUsersRoutes('/super-admin/companies/company-a/users');
+    renderUsersRoutes('/dashboard/super-admin/companies/company-a/users');
 
     expect(await screen.findByText('Convite enviado')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Reenviar convite' }));
@@ -314,7 +314,7 @@ describe('Gestão de usuários do superadmin', () => {
     vi.mocked(getManagedUsers).mockResolvedValue(pageResult([pendingAttendant]));
     vi.mocked(inviteManagedUser).mockRejectedValue(new ApiError('Serviço de e-mail indisponível.', 502));
 
-    renderUsersRoutes('/super-admin/companies/company-a/users');
+    renderUsersRoutes('/dashboard/super-admin/companies/company-a/users');
 
     expect(await screen.findByText('Convite enviado')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Reenviar convite' }));
@@ -332,7 +332,7 @@ describe('Gestão de usuários do superadmin', () => {
   ])('$action exige justificativa e envia motivo sem espaços externos', async ({ action, button, title }) => {
     vi.mocked(getManagedUsers).mockResolvedValue(pageResult([companyAttendant]));
 
-    renderUsersRoutes('/super-admin/companies/company-a/users');
+    renderUsersRoutes('/dashboard/super-admin/companies/company-a/users');
 
     fireEvent.click(await screen.findByRole('button', { name: button }));
     const dialog = screen.getByRole('dialog', { name: title });
@@ -364,7 +364,7 @@ describe('Gestão de usuários do superadmin', () => {
       .mockResolvedValueOnce(pageResult([reactivatedPending]));
     vi.mocked(changeManagedUserState).mockResolvedValue(reactivatedPending);
 
-    renderUsersRoutes('/super-admin/companies/company-a/users');
+    renderUsersRoutes('/dashboard/super-admin/companies/company-a/users');
 
     fireEvent.click(await screen.findByRole('button', { name: 'Reativar' }));
     const dialog = screen.getByRole('dialog', { name: 'Reativar usuário' });
@@ -385,7 +385,7 @@ describe('Gestão de usuários do superadmin', () => {
     });
     vi.mocked(changeManagedUserState).mockRejectedValue(new ApiError('Não é possível desativar o último superadmin ativo.', 409));
 
-    renderUsersRoutes('/super-admin/administrators');
+    renderUsersRoutes('/dashboard/super-admin/administrators');
 
     const disableButtons = await screen.findAllByRole('button', { name: 'Desativar' });
     expect(disableButtons[0]).toBeDisabled();
@@ -409,7 +409,7 @@ describe('Gestão de usuários do superadmin', () => {
       return pageResult([otherAdmin], 1, 20, 1, 1);
     });
 
-    renderUsersRoutes('/super-admin/administrators');
+    renderUsersRoutes('/dashboard/super-admin/administrators');
 
     const disable = await screen.findByRole('button', { name: 'Desativar' });
     expect(disable).toBeDisabled();
@@ -430,7 +430,7 @@ describe('Gestão de usuários do superadmin', () => {
       return updatedSelf;
     });
 
-    renderUsersRoutes('/super-admin/administrators');
+    renderUsersRoutes('/dashboard/super-admin/administrators');
 
     fireEvent.click(await screen.findByRole('button', { name: 'Editar Admin Inicial' }));
     fireEvent.change(screen.getByLabelText('Nome'), { target: { value: 'Nome Atualizado' } });
@@ -449,7 +449,7 @@ describe('Gestão de usuários do superadmin', () => {
     localStorage.setItem('token', 'token-sintetico');
     vi.mocked(updateManagedUser).mockResolvedValue(updatedSelf);
 
-    renderUsersRoutes('/super-admin/administrators');
+    renderUsersRoutes('/dashboard/super-admin/administrators');
 
     fireEvent.click(await screen.findByRole('button', { name: 'Editar Admin Inicial' }));
     fireEvent.change(screen.getByLabelText('E-mail'), { target: { value: updatedSelf.email } });
@@ -468,7 +468,7 @@ describe('Gestão de usuários do superadmin', () => {
       .mockRejectedValueOnce(new ApiError('Consulta de usuários indisponível.', 502))
       .mockResolvedValueOnce(pageResult([], 1, 20, 0, 0));
 
-    renderUsersRoutes('/super-admin/companies/company-a/users');
+    renderUsersRoutes('/dashboard/super-admin/companies/company-a/users');
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Consulta de usuários indisponível.');
     expect(screen.queryByText('Nenhum usuário encontrado.')).not.toBeInTheDocument();

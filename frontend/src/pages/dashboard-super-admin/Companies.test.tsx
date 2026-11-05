@@ -102,7 +102,7 @@ function renderCompanyRoutes(path: string) {
   return render(
     <MemoryRouter initialEntries={[path]}>
       <Routes>
-        <Route path="/super-admin/companies" element={<Outlet context={context} />}>
+        <Route path="/dashboard/super-admin/companies" element={<Outlet context={context} />}>
           <Route index element={<Companies />} />
           <Route path=":companyId" element={<CompanyDetail />} />
           <Route path=":companyId/edit" element={<CompanyEdit />} />
@@ -149,7 +149,7 @@ describe('Empresas do superadmin', () => {
       .mockResolvedValueOnce(pageResult([filteredCompany], 1, 20, 25, 2))
       .mockResolvedValueOnce(pageResult([nextPageCompany], 2, 20, 25, 2));
 
-    renderCompanyRoutes('/super-admin/companies');
+    renderCompanyRoutes('/dashboard/super-admin/companies');
 
     const metrics = await screen.findByRole('region', { name: 'Métricas de empresas' });
     expect(metrics).toHaveTextContent('Total de empresas');
@@ -201,7 +201,7 @@ describe('Empresas do superadmin', () => {
     });
     vi.mocked(getPlatformCompanies).mockResolvedValue(pageResult([], 1, 100, 0, 0));
 
-    renderCompanyRoutes('/super-admin/companies');
+    renderCompanyRoutes('/dashboard/super-admin/companies');
 
     const metrics = await screen.findByRole('region', { name: 'Métricas de empresas' });
     expect(metrics.children).toHaveLength(3);
@@ -218,10 +218,10 @@ describe('Empresas do superadmin', () => {
   });
 
   it('mantém o botão de consulta navegável e com nome acessível', async () => {
-    renderCompanyRoutes('/super-admin/companies');
+    renderCompanyRoutes('/dashboard/super-admin/companies');
 
     const consultationButton = await screen.findByRole('button', { name: 'Consultar Empresa de Exemplo' });
-    expect(consultationButton).toHaveAttribute('href', '/super-admin/companies/company-1');
+    expect(consultationButton).toHaveAttribute('href', '/dashboard/super-admin/companies/company-1');
     expect(consultationButton).toHaveAttribute('title', 'Consultar Empresa de Exemplo');
     expect(consultationButton.querySelector('svg')).toHaveAttribute('aria-hidden', 'true');
   });
@@ -233,7 +233,7 @@ describe('Empresas do superadmin', () => {
       .mockResolvedValueOnce(pageResult([{ ...company, id: 'company-filtered', nome: 'Empresa filtrada' }], 1, 20, 25, 2))
       .mockResolvedValueOnce(pageResult([{ ...company, id: 'company-page-2', nome: 'Empresa da página 2' }], 2, 20, 25, 2));
 
-    renderCompanyRoutes('/super-admin/companies');
+    renderCompanyRoutes('/dashboard/super-admin/companies');
 
     expect(await screen.findByText('Empresa de Exemplo')).toBeInTheDocument();
     expect(screen.getByRole('navigation', { name: 'Paginação' })).toHaveTextContent('Página 1 de 3');
@@ -271,7 +271,7 @@ describe('Empresas do superadmin', () => {
       .mockRejectedValueOnce(new Error('Consulta de empresas indisponível.'))
       .mockResolvedValueOnce(pageResult([], 1, 20, 0, 0));
 
-    renderCompanyRoutes('/super-admin/companies');
+    renderCompanyRoutes('/dashboard/super-admin/companies');
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Consulta de empresas indisponível.');
     expect(screen.queryByText('Nenhuma empresa encontrada.')).not.toBeInTheDocument();
@@ -316,7 +316,7 @@ describe('Empresas do superadmin', () => {
   it('restaura empresa arquivada e informa que ela continuará inativa', async () => {
     vi.mocked(getPlatformCompany).mockResolvedValue(archivedCompany);
 
-    renderCompanyRoutes('/super-admin/companies/company-1');
+    renderCompanyRoutes('/dashboard/super-admin/companies/company-1');
 
     expect(await screen.findByText('Restauração preserva a empresa inativa. Reative explicitamente para liberar catálogo e acesso.')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Empresa arquivada' })).toBeInTheDocument();
@@ -334,7 +334,7 @@ describe('Empresas do superadmin', () => {
     ['suspension', 'Desativar empresa'],
     ['archive', 'Arquivar empresa'],
   ] as const)('%s exige motivo e envia texto com espaços removidos', async (action, actionLabel) => {
-    renderCompanyRoutes('/super-admin/companies/company-1');
+    renderCompanyRoutes('/dashboard/super-admin/companies/company-1');
 
     fireEvent.click(await screen.findByRole('button', { name: actionLabel }));
     const dialog = screen.getByRole('dialog', { name: actionLabel });
@@ -360,7 +360,7 @@ describe('Empresas do superadmin', () => {
 
   it('preserva o plano atual inativo ao editar somente dados da empresa', async () => {
     vi.mocked(getPlatformPlans).mockResolvedValue([{ ...plan, isActive:false }]);
-    renderCompanyRoutes('/super-admin/companies/company-1/edit');
+    renderCompanyRoutes('/dashboard/super-admin/companies/company-1/edit');
     const name = await screen.findByLabelText('Nome da empresa');
     expect(screen.getByLabelText('Plano comercial')).toHaveValue(plan.id);
     expect(screen.getByRole('option', { name:/inativo — vínculo atual/ })).toBeInTheDocument();
@@ -373,7 +373,7 @@ describe('Empresas do superadmin', () => {
   it('edita somente campos permitidos, limpa contatos com null e não lança venda automaticamente', async () => {
     vi.mocked(getPlatformPlans).mockResolvedValue([plan, nextPlan, inactivePlan, freePlan]);
 
-    renderCompanyRoutes('/super-admin/companies/company-1/edit');
+    renderCompanyRoutes('/dashboard/super-admin/companies/company-1/edit');
 
     const nameField = await screen.findByLabelText('Nome da empresa');
     const planField = screen.getByLabelText('Plano comercial');
@@ -393,7 +393,7 @@ describe('Empresas do superadmin', () => {
     expect(await screen.findByRole('status')).toHaveTextContent('Empresa atualizada. Nenhuma venda foi lançada automaticamente.');
     expect(screen.getByRole('link', { name: 'Registrar venda manual' })).toHaveAttribute(
       'href',
-      '/super-admin/sales/new?companyId=company-1',
+      '/dashboard/super-admin/sales/new?companyId=company-1',
     );
 
     const input = vi.mocked(updatePlatformCompany).mock.calls[0][1];
