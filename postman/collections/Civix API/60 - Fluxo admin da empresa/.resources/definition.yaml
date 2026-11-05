@@ -1,0 +1,3 @@
+$kind: collection
+description: Troca controlada de sessão e seleção de plano como admin_empresa.
+order: 8000

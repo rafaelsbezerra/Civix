@@ -1,0 +1,38 @@
+$kind: http-request
+description: Realiza exclusão lógica e preserva o histórico.
+url: "{{baseUrl}}/api/v1/platform/companies/{{companyId}}"
+method: DELETE
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "reason": "{{deactivationReason}}"
+    }
+scripts:
+  - type: beforeRequest
+    code: |-
+      const requiredFlags = ["allowWrites","allowDestructive","allowAdministrativeWrites"];
+      const requiredVariables = ["companyId"];
+      const missingFlags = requiredFlags.filter((flag) => pm.environment.get(flag) !== 'true');
+      const missingVariables = requiredVariables.filter((variable) => !String(pm.environment.get(variable) || '').trim());
+      const baseUrl = (pm.environment.get('baseUrl') || '').replace(/[/]$/, '');
+      const confirmedWriteBaseUrl = (pm.environment.get('confirmedWriteBaseUrl') || '').replace(/[/]$/, '');
+      const environmentNotConfirmed = !baseUrl || confirmedWriteBaseUrl !== baseUrl;
+      if (missingFlags.length || missingVariables.length || environmentNotConfirmed) {
+        const reasons = [];
+        if (missingFlags.length) reasons.push(`flags ausentes: ${missingFlags.join(', ')}`);
+        if (missingVariables.length) reasons.push(`variáveis ausentes: ${missingVariables.join(', ')}`);
+        if (environmentNotConfirmed) reasons.push('confirmedWriteBaseUrl deve ser igual a baseUrl');
+        console.warn(`Request ignorada: ${reasons.join('; ')}.`);
+        pm.execution.skipRequest();
+      }
+    language: text/javascript
+  - type: afterResponse
+    code: |-
+      pm.test('Status 204', () => pm.response.to.have.status(204));
+      pm.test('Resposta sem corpo', () => pm.expect(pm.response.text()).to.equal(''));
+    language: text/javascript
+settings: {}
+order: 3000

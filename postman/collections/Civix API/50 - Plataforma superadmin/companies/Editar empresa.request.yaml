@@ -1,0 +1,55 @@
+$kind: http-request
+description: A troca de plano não cria venda automática.
+url: "{{baseUrl}}/api/v1/platform/companies/{{companyId}}"
+method: PUT
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "nome": "{{companyName}}",
+      "cnpj": "{{companyCnpj}}",
+      "descricao": "Empresa criada pelo fluxo do Postman.",
+      "descricao_detalhada": "Cadastro de validação compartilhado pela equipe Civix.",
+      "categoria": "{{category}}",
+      "cidade": "Fortaleza",
+      "estado": "{{state}}",
+      "tamanho": "{{companySize}}",
+      "email": "{{companyEmail}}",
+      "endereco": null,
+      "telefone": null,
+      "website": null,
+      "whatsapp": null,
+      "logo": null,
+      "descritivo": null,
+      "tone": "blue",
+      "planId": "{{planId}}"
+    }
+scripts:
+  - type: beforeRequest
+    code: |-
+      const requiredFlags = ["allowWrites","allowAdministrativeWrites"];
+      const requiredVariables = ["companyId"];
+      const missingFlags = requiredFlags.filter((flag) => pm.environment.get(flag) !== 'true');
+      const missingVariables = requiredVariables.filter((variable) => !String(pm.environment.get(variable) || '').trim());
+      const baseUrl = (pm.environment.get('baseUrl') || '').replace(/[/]$/, '');
+      const confirmedWriteBaseUrl = (pm.environment.get('confirmedWriteBaseUrl') || '').replace(/[/]$/, '');
+      const environmentNotConfirmed = !baseUrl || confirmedWriteBaseUrl !== baseUrl;
+      if (missingFlags.length || missingVariables.length || environmentNotConfirmed) {
+        const reasons = [];
+        if (missingFlags.length) reasons.push(`flags ausentes: ${missingFlags.join(', ')}`);
+        if (missingVariables.length) reasons.push(`variáveis ausentes: ${missingVariables.join(', ')}`);
+        if (environmentNotConfirmed) reasons.push('confirmedWriteBaseUrl deve ser igual a baseUrl');
+        console.warn(`Request ignorada: ${reasons.join('; ')}.`);
+        pm.execution.skipRequest();
+      }
+    language: text/javascript
+  - type: afterResponse
+    code: |-
+      pm.test('Status 200', () => pm.response.to.have.status(200));
+      let body;
+      pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });
+      pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));
+    language: text/javascript
+order: 4000

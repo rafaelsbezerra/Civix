@@ -1,0 +1,7 @@
+$kind: collection
+description: Consultas públicas de planos e empresas.
+auth:
+  - id: ""
+    type: noauth
+    name: No Auth
+order: 3000

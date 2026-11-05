@@ -1,0 +1,7 @@
+$kind: collection
+description: Erros representativos sem mutação persistente.
+auth:
+  - id: ""
+    type: noauth
+    name: No Auth
+order: 11000

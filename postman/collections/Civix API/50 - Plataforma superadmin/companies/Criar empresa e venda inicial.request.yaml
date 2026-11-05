@@ -1,0 +1,65 @@
+$kind: http-request
+description: Cria a empresa e registra a venda automática do plano.
+url: "{{baseUrl}}/api/v1/platform/companies"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "nome": "{{companyName}}",
+      "cnpj": "{{companyCnpj}}",
+      "descricao": "Empresa criada pelo fluxo do Postman.",
+      "descricao_detalhada": "Cadastro de validação compartilhado pela equipe Civix.",
+      "categoria": "{{category}}",
+      "cidade": "Fortaleza",
+      "estado": "{{state}}",
+      "tamanho": "{{companySize}}",
+      "email": "{{companyEmail}}",
+      "endereco": null,
+      "telefone": null,
+      "website": null,
+      "whatsapp": null,
+      "logo": null,
+      "descritivo": null,
+      "tone": "blue",
+      "planId": "{{planId}}",
+      "operationId": "{{companyOperationId}}"
+    }
+scripts:
+  - type: beforeRequest
+    code: |-
+      const requiredFlags = ["allowWrites","allowAdministrativeWrites"];
+      const requiredVariables = ["planId"];
+      const missingFlags = requiredFlags.filter((flag) => pm.environment.get(flag) !== 'true');
+      const missingVariables = requiredVariables.filter((variable) => !String(pm.environment.get(variable) || '').trim());
+      const baseUrl = (pm.environment.get('baseUrl') || '').replace(/[/]$/, '');
+      const confirmedWriteBaseUrl = (pm.environment.get('confirmedWriteBaseUrl') || '').replace(/[/]$/, '');
+      const environmentNotConfirmed = !baseUrl || confirmedWriteBaseUrl !== baseUrl;
+      if (missingFlags.length || missingVariables.length || environmentNotConfirmed) {
+        const reasons = [];
+        if (missingFlags.length) reasons.push(`flags ausentes: ${missingFlags.join(', ')}`);
+        if (missingVariables.length) reasons.push(`variáveis ausentes: ${missingVariables.join(', ')}`);
+        if (environmentNotConfirmed) reasons.push('confirmedWriteBaseUrl deve ser igual a baseUrl');
+        console.warn(`Request ignorada: ${reasons.join('; ')}.`);
+        pm.execution.skipRequest();
+      }
+      const suffix = Date.now().toString();
+      if (!pm.environment.get('companyOperationId')) pm.environment.set('companyOperationId', pm.variables.replaceIn('{{$guid}}'));
+      if (!pm.environment.get('companyName')) pm.environment.set('companyName', `Empresa Postman ${suffix}`);
+      if (!pm.environment.get('companyCnpj')) pm.environment.set('companyCnpj', `postman-${suffix}`);
+      if (!pm.environment.get('companyEmail')) pm.environment.set('companyEmail', `empresa-${suffix}@example.test`);
+    language: text/javascript
+  - type: afterResponse
+    code: |-
+      pm.test('Status 201', () => pm.response.to.have.status(201));
+      let body;
+      pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });
+      pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));
+      const companyIdValue = "data.company.id".split('.').reduce((value, key) => value?.[key], body);
+      if (companyIdValue !== undefined && companyIdValue !== null && companyIdValue !== '') pm.environment.set("companyId", String(companyIdValue));
+      const initialSaleIdValue = "data.sale.id".split('.').reduce((value, key) => value?.[key], body);
+      if (initialSaleIdValue !== undefined && initialSaleIdValue !== null && initialSaleIdValue !== '') pm.environment.set("initialSaleId", String(initialSaleIdValue));
+    language: text/javascript
+order: 3000

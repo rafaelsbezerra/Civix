@@ -1,0 +1,3 @@
+$kind: collection
+description: Operações que podem invalidar a sessão e devem ocorrer no fim.
+order: 10000

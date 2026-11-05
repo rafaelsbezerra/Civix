@@ -1,0 +1,16 @@
+$kind: http-request
+description: "Filtros opcionais: q, status e planId. Retorna paginação em meta."
+url: "{{baseUrl}}/api/v1/platform/companies?page={{page}}&limit={{limit}}"
+method: GET
+queryParams:
+  page: "{{page}}"
+  limit: "{{limit}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Status 200', () => pm.response.to.have.status(200));
+      let body;
+      pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });
+      pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));
+    language: text/javascript
+order: 1000

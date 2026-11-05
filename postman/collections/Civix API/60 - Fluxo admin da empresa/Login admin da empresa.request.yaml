@@ -1,0 +1,46 @@
+$kind: http-request
+description: Cria uma sessão de admin_empresa para testar seleção de plano e upload da própria empresa.
+url: "{{baseUrl}}/api/v1/users/login"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "email": "{{companyAdminEmail}}",
+      "password": "{{companyAdminPassword}}",
+      "role": "admin_empresa"
+    }
+auth:
+  type: noauth
+scripts:
+  - type: beforeRequest
+    code: |-
+      const requiredFlags = ["allowRoleSwitch"];
+      const requiredVariables = ["companyAdminEmail","companyAdminPassword"];
+      const missingFlags = requiredFlags.filter((flag) => pm.environment.get(flag) !== 'true');
+      const missingVariables = requiredVariables.filter((variable) => !String(pm.environment.get(variable) || '').trim());
+      const environmentNotConfirmed = false;
+      if (missingFlags.length || missingVariables.length || environmentNotConfirmed) {
+        const reasons = [];
+        if (missingFlags.length) reasons.push(`flags ausentes: ${missingFlags.join(', ')}`);
+        if (missingVariables.length) reasons.push(`variáveis ausentes: ${missingVariables.join(', ')}`);
+        if (environmentNotConfirmed) reasons.push('confirmedWriteBaseUrl deve ser igual a baseUrl');
+        console.warn(`Request ignorada: ${reasons.join('; ')}.`);
+        pm.execution.skipRequest();
+      }
+      pm.environment.unset('accessToken');
+    language: text/javascript
+  - type: afterResponse
+    code: |-
+      pm.test('Status 200', () => pm.response.to.have.status(200));
+      let body;
+      pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });
+      pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));
+      const sessionHeader = pm.response.headers.get('Set-Cookie') || '';
+      pm.test('Cookie de sessão emitido', () => pm.expect(sessionHeader).to.include('sessao='));
+      const token = body?.data?.token;
+      if (typeof token === 'string' && token) pm.environment.set('accessToken', token);
+    language: text/javascript
+order: 1000
