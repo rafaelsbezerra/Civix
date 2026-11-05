@@ -4,6 +4,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { SuperAdminHeader } from './SuperAdminHeader';
+import { SuperAdminSidebar } from './SuperAdminSidebar';
 
 function setup(dark = false) {
   const callbacks = { onLogout: vi.fn(), onToggleTheme: vi.fn() };
@@ -44,5 +45,20 @@ describe('Header do superadmin', () => {
     await user.click(sidebarTrigger);
     expect(onToggleTheme).toHaveBeenCalledTimes(1);
     expect(sidebarTrigger).toHaveAttribute('data-sidebar', 'trigger');
+  });
+
+  it('mantém Empresas ativo nas sub-rotas e não exibe Cadastrar empresa na sidebar', () => {
+    render(
+      <MemoryRouter initialEntries={['/dashboard/super-admin/companies/new']}>
+        <SidebarProvider>
+          <SuperAdminSidebar />
+        </SidebarProvider>
+      </MemoryRouter>,
+    );
+    const nav = screen.getByRole('navigation', { name: 'Navegação administrativa' });
+    expect(screen.queryByRole('link', { name: 'Cadastrar empresa' })).not.toBeInTheDocument();
+    const companiesLink = screen.getByRole('link', { name: 'Empresas' });
+    expect(nav).toContainElement(companiesLink);
+    expect(companiesLink).toHaveAttribute('data-active');
   });
 });

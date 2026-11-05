@@ -5,6 +5,11 @@
 Substituir a marca textual da sidebar pela imagem transparente `logo-civix.png`,
 também utilizada no header da landing page. No tema escuro, utilizar a variante
 existente `logo-civix-white.png`, preservando o contraste sem adicionar fundo.
+Na sidebar, manter apenas o item `Empresas` para o módulo empresarial (ativo em
+`/dashboard/super-admin/companies` e sub-rotas como `/companies/new` e
+`/companies/:companyId`), removendo o atalho separado `Cadastrar empresa` do
+menu lateral e mantendo a rota `/dashboard/super-admin/companies/new` acessível
+pelo botão `Cadastrar empresa` na página de empresas.
 
 O header utiliza Button e Avatar shadcn, com menu de usuário adaptado do bloco
 `@shadcn-space/dropdown-menu-01`. Manter nome, papel, acesso a Meu perfil,

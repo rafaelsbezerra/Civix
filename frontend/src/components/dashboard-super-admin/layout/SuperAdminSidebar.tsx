@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Building2, Layers3, UserRound, Receipt, MessageCircle } from 'lucide-react';
+import { LayoutDashboard, Building2, Layers3, UserRound, Receipt, MessageCircle, UserShield } from 'lucide-react';
 import logoCivix from '@/assets/civix/logo-civix.png';
 import logoCivixWhite from '@/assets/civix/logo-civix-white.png';
 import {
@@ -10,11 +10,10 @@ import {
 
 const items = [
   { to: '/dashboard/super-admin', label: 'Visão geral', Icon: LayoutDashboard, end: true },
-  { to: '/dashboard/super-admin/companies', label: 'Empresas', Icon: Building2, end: true },
-  { to: '/dashboard/super-admin/companies/new', label: 'Cadastrar empresa', Icon: Building2 },
+  { to: '/dashboard/super-admin/companies', label: 'Empresas', Icon: Building2 },
   { to: '/dashboard/super-admin/plans', label: 'Planos', Icon: Layers3 },
   { to: '/dashboard/super-admin/sales', label: 'Vendas', Icon: Receipt },
-  { to: '/dashboard/super-admin/administrators', label: 'Superadmins', Icon: UserRound },
+  { to: '/dashboard/super-admin/administrators', label: 'Superadmins', Icon: UserShield },
   { to: '/dashboard/super-admin/settings/profile', label: 'Meu perfil', Icon: UserRound },
 ];
 
