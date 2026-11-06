@@ -7,7 +7,7 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../ui/select';
 
-const selectClass = 'w-full min-h-11 border-input! bg-background text-foreground';
+const selectClass = 'w-full min-h-11 border-input! bg-muted/40 text-foreground hover:bg-muted/60 dark:bg-input/30 dark:hover:bg-input/50';
 export function CompanyFilters({ onError, onApply }: {
   onError: (error: unknown) => string; onApply: (filters: { q: string; status: string; planId: string }) => void;
 }) {

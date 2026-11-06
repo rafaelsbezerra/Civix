@@ -76,6 +76,21 @@ dependências, mantendo o utilitário cn existente e portal no tema do dashboard
 O typecheck completo possui o impedimento anterior TS1484 em
 CookieOptions, no backend incluído pelo tsconfig frontend.
 
+## Cadastro de empresa — React Hook Form, Zod e shadcn, 2026-11-05
+
+Refatorar `CompanyCreate.tsx`, `CompanyForm.tsx` e `CompanyImageInput.tsx` para
+utilizar `react-hook-form`, `zod` com `@hookform/resolvers/zod` e componentes
+`shadcn/ui` (`Card`, `Field`, `FieldSet`, `FieldGroup`, `FieldLabel`,
+`FieldDescription`, `FieldError`, `Input`, `Textarea`, `Select`, `Button`,
+`Badge`) com utilitários Tailwind. Remover o bloco de cabeçalho interno da
+página de cadastro, mantendo o título “Cadastrar empresa” no header superior e
+adicionando o botão “Voltar para empresas” no topo do conteúdo. Aplicar fundo
+com opacidade baixa (`bg-muted/40 hover:bg-muted/60` no claro e `dark:bg-input/30
+dark:hover:bg-input/50` no escuro) ao gatilho dos componentes `Select`
+(`SelectTrigger`) para destacá-los dentro dos cards. Preservar a
+idempotência por `operationId`, o envio separado da logo após confirmação da
+empresa/venda inicial e a reutilização de `CompanyForm` na edição de empresa.
+
 Requisitos visuais confirmados em 2026-11-02. Complementa a [spec](spec.md).
 Design implementado; evidências e limites de verificação estão no task backend.
 

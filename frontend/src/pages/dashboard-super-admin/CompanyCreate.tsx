@@ -1,10 +1,21 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { Link, useOutletContext } from 'react-router-dom';
-import { CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, CheckCircle2 } from 'lucide-react';
 import { getPlatformPlans, registerCompany, uploadCompanyImage, type CompanyRegistrationInput, type CompanyRegistrationResult, type Plan } from '../../lib/api';
 import { Button } from '../../components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader } from '../../components/ui/card';
 import { CompanyForm } from '../../components/dashboard-super-admin/CompanyForm';
 import type { SuperAdminContext } from '../../components/dashboard-super-admin/layout/SuperAdminLayout';
+
+const theme = {
+  '--card': 'var(--sa-surface)',
+  '--card-foreground': 'var(--sa-ink)',
+  '--popover': 'var(--sa-surface)',
+  '--popover-foreground': 'var(--sa-ink)',
+  '--input': 'var(--sa-line)',
+  '--accent': 'var(--sa-soft)',
+  '--accent-foreground': 'var(--sa-ink)',
+} as CSSProperties;
 
 export default function CompanyCreate() {
   const { handleError } = useOutletContext<SuperAdminContext>();
@@ -46,22 +57,99 @@ export default function CompanyCreate() {
     }
     catch (failure) { setError(handleError(failure)); } finally { setBusy(false); }
   };
-  return <>
-    <div className="sa-page-heading"><span className="sa-eyebrow">CADASTRO COMERCIAL</span><h1>Uma nova empresa na Civix.</h1><p>Dados organizados. Plano definido. Venda inicial registrada em uma só confirmação.</p></div>
-    {error && <p className="sa-feedback sa-error" role="alert">{error}</p>}
-    {loading ? <p role="status" className="sa-empty">Carregando planos disponíveis…</p> : result ? <section className="sa-panel sa-success" aria-labelledby="company-created-title">
-      <CheckCircle2 size={32} aria-hidden="true" /><h2 id="company-created-title">Empresa cadastrada.</h2><p>{result.company.nome} está vinculada ao plano {result.sale.planName}.</p>
-      {busy && pendingLogo && <p role="status">Enviando logo…</p>}
-      {logoUploaded && <p role="status">Logo enviada com sucesso.</p>}
-      {logoError && <div className="sa-feedback sa-error" role="alert"><p>{logoError}</p><Button className="sa-button" disabled={busy} onClick={async () => {
-        if (!pendingLogo || busy) return;
-        setBusy(true);
-        try { await sendLogo(result.company.id, pendingLogo); } finally { setBusy(false); }
-      }}>Tentar enviar logo novamente</Button></div>}
-      <dl><div><dt>Venda comercial inicial</dt><dd>{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(result.sale.amount))}</dd></div>
-        <div><dt>Registro em UTC</dt><dd>{new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short', timeZone: 'UTC' }).format(new Date(result.sale.createdAt))} UTC</dd></div></dl>
-      <Link className="sa-text-link" to={'/dashboard/super-admin/companies/' + result.company.id}>Ver empresa</Link>
-      <Button className="sa-button" disabled={busy} onClick={() => { setResult(null); setPendingLogo(null); setLogoError(''); setLogoUploaded(false); operation.current = null; }}>Cadastrar outra empresa</Button>
-    </section> : loadFailed ? <section className="sa-panel sa-empty"><p>Não foi possível carregar os planos.</p><button className="sa-text-link" onClick={() => { setLoading(true); setRetry(value => value + 1); }}>Tentar novamente</button></section> : !plans.length ? <section className="sa-panel sa-empty"><h2>Nenhum plano disponível para cadastro.</h2><p>Cadastre ou ative um plano com preço positivo para continuar.</p><Link className="sa-text-link" to="/dashboard/super-admin/plans">Ir para planos</Link><button className="sa-text-link" onClick={() => { setLoading(true); setRetry(value => value + 1); }}>Atualizar planos</button></section> : <CompanyForm plans={plans} busy={busy} onSave={save} />}
-  </>;
+  return (
+    <div className="space-y-6 text-foreground" style={theme}>
+      <div className="flex items-center justify-between gap-4">
+        <Button variant="outline" className="min-h-10 rounded-xl" render={<Link to="/dashboard/super-admin/companies" />} nativeButton={false}>
+          <ArrowLeft aria-hidden="true" />Voltar para empresas
+        </Button>
+      </div>
+      {error && (
+        <div role="alert" className="rounded-xl border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive">
+          {error}
+        </div>
+      )}
+      {loading ? (
+        <Card className="rounded-2xl py-10">
+          <CardContent className="text-center text-sm text-muted-foreground" role="status">
+            Carregando planos disponíveis…
+          </CardContent>
+        </Card>
+      ) : result ? (
+        <Card className="max-w-3xl rounded-2xl py-6" role="region" aria-labelledby="company-created-title">
+          <CardHeader className="px-6">
+            <div className="flex items-center gap-3">
+              <CheckCircle2 className="size-7 text-[var(--sa-accent-ink)]" aria-hidden="true" />
+              <h2 id="company-created-title" className="text-xl font-semibold">Empresa cadastrada.</h2>
+            </div>
+            <CardDescription className="text-sm">
+              {result.company.nome} está vinculada ao plano {result.sale.planName}.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4 px-6">
+            {busy && pendingLogo && <p role="status" className="text-sm text-muted-foreground">Enviando logo…</p>}
+            {logoUploaded && <p role="status" className="text-sm font-medium text-green-700 dark:text-green-300">Logo enviada com sucesso.</p>}
+            {logoError && (
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive" role="alert">
+                <p>{logoError}</p>
+                <Button variant="outline" className="min-h-10 rounded-xl" disabled={busy} onClick={async () => {
+                  if (!pendingLogo || busy) return;
+                  setBusy(true);
+                  try { await sendLogo(result.company.id, pendingLogo); } finally { setBusy(false); }
+                }}>Tentar enviar logo novamente</Button>
+              </div>
+            )}
+            <dl className="grid gap-4 rounded-xl border bg-muted/40 p-4 sm:grid-cols-2">
+              <div>
+                <dt className="text-xs text-muted-foreground">Venda comercial inicial</dt>
+                <dd className="mt-1 text-base font-semibold tabular-nums">
+                  {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(result.sale.amount))}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-xs text-muted-foreground">Registro em UTC</dt>
+                <dd className="mt-1 text-base font-semibold tabular-nums">
+                  {new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short', timeZone: 'UTC' }).format(new Date(result.sale.createdAt))} UTC
+                </dd>
+              </div>
+            </dl>
+          </CardContent>
+          <CardFooter className="flex flex-wrap justify-end gap-3 px-6 py-4">
+            <Button variant="outline" className="min-h-11 rounded-xl" render={<Link to={'/dashboard/super-admin/companies/' + result.company.id} />} nativeButton={false}>
+              Ver empresa
+            </Button>
+            <Button className="min-h-11 rounded-xl" disabled={busy} onClick={() => { setResult(null); setPendingLogo(null); setLogoError(''); setLogoUploaded(false); operation.current = null; }}>
+              Cadastrar outra empresa
+            </Button>
+          </CardFooter>
+        </Card>
+      ) : loadFailed ? (
+        <Card className="rounded-2xl py-8">
+          <CardContent className="flex flex-col items-center gap-4 px-6 text-center">
+            <p className="text-sm text-muted-foreground">Não foi possível carregar os planos.</p>
+            <Button variant="outline" className="min-h-10 rounded-xl" onClick={() => { setLoading(true); setRetry(value => value + 1); }}>
+              Tentar novamente
+            </Button>
+          </CardContent>
+        </Card>
+      ) : !plans.length ? (
+        <Card className="rounded-2xl py-8">
+          <CardContent className="flex flex-col items-center gap-3 px-6 text-center">
+            <h2 className="text-lg font-semibold">Nenhum plano disponível para cadastro.</h2>
+            <p className="text-sm text-muted-foreground">Cadastre ou ative um plano com preço positivo para continuar.</p>
+            <div className="mt-2 flex flex-wrap justify-center gap-3">
+              <Button variant="outline" className="min-h-10 rounded-xl" render={<Link to="/dashboard/super-admin/plans" />} nativeButton={false}>
+                Ir para planos
+              </Button>
+              <Button className="min-h-10 rounded-xl" onClick={() => { setLoading(true); setRetry(value => value + 1); }}>
+                Atualizar planos
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <CompanyForm plans={plans} busy={busy} onSave={save} />
+      )}
+    </div>
+  );
 }

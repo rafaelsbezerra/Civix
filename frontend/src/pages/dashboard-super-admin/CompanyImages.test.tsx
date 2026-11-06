@@ -67,7 +67,7 @@ function renderCompanyRoutes(path: string) {
   )
 }
 
-async function fillCreateCompanyForm() {
+async function fillCreateCompanyForm(user = userEvent.setup()) {
   for (const [label, value] of [
     ['Nome da empresa', 'Empresa Nova'],
     ['CNPJ', '12345678000190'],
@@ -79,7 +79,8 @@ async function fillCreateCompanyForm() {
   ]) {
     fireEvent.change(screen.getByLabelText(label), { target: { value } })
   }
-  fireEvent.change(screen.getByLabelText('Plano comercial'), { target: { value: plan.id } })
+  await user.click(screen.getByLabelText('Plano comercial'))
+  await user.click(await screen.findByRole('option', { name: /Profissional/ }))
 }
 
 beforeEach(() => {

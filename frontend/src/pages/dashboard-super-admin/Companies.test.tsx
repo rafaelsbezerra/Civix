@@ -359,11 +359,15 @@ describe('Empresas do superadmin', () => {
   });
 
   it('preserva o plano atual inativo ao editar somente dados da empresa', async () => {
+    const user = userEvent.setup();
     vi.mocked(getPlatformPlans).mockResolvedValue([{ ...plan, isActive:false }]);
     renderCompanyRoutes('/dashboard/super-admin/companies/company-1/edit');
     const name = await screen.findByLabelText('Nome da empresa');
-    expect(screen.getByLabelText('Plano comercial')).toHaveValue(plan.id);
-    expect(screen.getByRole('option', { name:/inativo — vínculo atual/ })).toBeInTheDocument();
+    const planTrigger = screen.getByLabelText('Plano comercial');
+    expect(planTrigger).toHaveTextContent(/inativo — vínculo atual/);
+    await user.click(planTrigger);
+    expect(await screen.findByRole('option', { name:/inativo — vínculo atual/ })).toBeInTheDocument();
+    await user.keyboard('{Escape}');
     fireEvent.change(name,{ target:{ value:'Empresa com plano preservado' } });
     fireEvent.click(screen.getByRole('button',{name:'Salvar empresa'}));
     await waitFor(()=>expect(updatePlatformCompany).toHaveBeenCalledWith(company.id,expect.objectContaining({ planId:plan.id,nome:'Empresa com plano preservado' })));
@@ -371,20 +375,22 @@ describe('Empresas do superadmin', () => {
   });
 
   it('edita somente campos permitidos, limpa contatos com null e não lança venda automaticamente', async () => {
+    const user = userEvent.setup();
     vi.mocked(getPlatformPlans).mockResolvedValue([plan, nextPlan, inactivePlan, freePlan]);
 
     renderCompanyRoutes('/dashboard/super-admin/companies/company-1/edit');
 
     const nameField = await screen.findByLabelText('Nome da empresa');
     const planField = screen.getByLabelText('Plano comercial');
-    expect(within(planField).getByRole('option', { name: /Profissional/ })).toBeInTheDocument();
-    expect(within(planField).getByRole('option', { name: /Avançado/ })).toBeInTheDocument();
-    expect(within(planField).queryByRole('option', { name: /Plano inativo/ })).not.toBeInTheDocument();
-    expect(within(planField).queryByRole('option', { name: /Plano gratuito/ })).not.toBeInTheDocument();
+    await user.click(planField);
+    expect(await screen.findByRole('option', { name: /Profissional/ })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: /Avançado/ })).toBeInTheDocument();
+    expect(screen.queryByRole('option', { name: /Plano inativo/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('option', { name: /Plano gratuito/ })).not.toBeInTheDocument();
     expect(screen.getAllByText(/A alteração do plano não gera uma venda automática/).length).toBeGreaterThan(0);
 
+    await user.click(screen.getByRole('option', { name: /Avançado/ }));
     fireEvent.change(nameField, { target: { value: 'Empresa Atualizada' } });
-    fireEvent.change(planField, { target: { value: 'plan-2' } });
     for (const label of ['E-mail da empresa', 'Telefone', 'Endereço', 'Site', 'WhatsApp']) {
       fireEvent.change(screen.getByLabelText(label), { target: { value: '' } });
     }

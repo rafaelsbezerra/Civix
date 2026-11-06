@@ -129,6 +129,7 @@ describe('Fluxos do dashboard de superadmin', () => {
   })
 
   it('Repetição do cadastro preserva operationId e mostra resultado real da venda', async () => {
+    const user = userEvent.setup()
     const result = { company: { id: 'empresa-1', nome: 'Empresa Nova', plan_id: plan.id }, sale: { id: 'sale-1', companyId: 'empresa-1', planId: plan.id, planName: plan.name, amount: '59.90', currency: 'BRL', soldAt: '2026-11-01T12:00:00Z', createdAt: '2026-11-01T12:00:00Z' }, replayed: true } as CompanyRegistrationResult
     vi.mocked(registerCompany).mockRejectedValueOnce(new ApiError('Conexão interrompida')).mockResolvedValueOnce(result)
     renderArea('/dashboard/super-admin/companies/new')
@@ -136,7 +137,8 @@ describe('Fluxos do dashboard de superadmin', () => {
     for (const [label, value] of [['Nome da empresa', 'Empresa Nova'], ['CNPJ', '12345678000190'], ['Categoria', 'Tecnologia'], ['Resumo', 'Resumo'], ['Descrição detalhada', 'Descrição'], ['Cidade', 'Fortaleza'], ['Estado', 'CE']]) {
       fireEvent.change(screen.getByLabelText(label), { target: { value } })
     }
-    fireEvent.change(screen.getByLabelText('Plano comercial'), { target: { value: plan.id } })
+    await user.click(screen.getByLabelText('Plano comercial'))
+    await user.click(await screen.findByRole('option', { name: /Profissional/ }))
     fireEvent.click(screen.getByRole('button', { name: 'Cadastrar empresa e registrar venda' }))
     expect(await screen.findByRole('alert')).toHaveTextContent('Conexão interrompida')
     fireEvent.click(screen.getByRole('button', { name: 'Cadastrar empresa e registrar venda' }))
