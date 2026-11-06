@@ -239,7 +239,7 @@ svg {
 
 /* Reservar espaço para a navbar e respeitar a preferência de movimento. */
 html:has([data-site-header]) {
-  scroll-padding-top: 130px;
+  scroll-padding-top: 96px;
 }
 
 @media (prefers-reduced-motion: reduce) {
