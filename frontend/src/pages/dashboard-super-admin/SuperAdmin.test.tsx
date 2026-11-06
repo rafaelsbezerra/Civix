@@ -158,7 +158,7 @@ describe('Fluxos do dashboard de superadmin', () => {
     fireEvent.change(screen.getByLabelText('Nome'), { target: { value: 'Nome Atualizado' } })
     fireEvent.click(screen.getByRole('button', { name: 'Salvar perfil' }))
     expect(await screen.findByText('Perfil atualizado com sucesso.')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /Nome Atualizado/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Nome Atualizado/ })).toBeInTheDocument()
     expect(storage.removeItem).not.toHaveBeenCalledWith('token')
   })
 

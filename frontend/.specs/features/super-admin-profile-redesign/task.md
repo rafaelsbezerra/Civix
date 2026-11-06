@@ -24,13 +24,13 @@ Refatorar a página de configurações de perfil (`frontend/src/pages/dashboard-
 
 Passos:
 
-- [ ] Definir o schema `profileFormSchema` com `zod`:
+- [x] Definir o schema `profileFormSchema` com `zod`:
   - `name`: `z.string().trim().min(1, 'Informe seu nome e um e-mail válido.').max(120)`
   - `email`: `z.string().trim().regex(/^\S+@\S+\.\S+$/, 'Informe seu nome e um e-mail válido.').max(254)`
-- [ ] Inicializar `useForm` com `zodResolver(profileFormSchema)` e sincronizar `defaultValues` (`name: session.user.name || ''`, `email: session.user.email`) via `useEffect` quando `session.user` atualizar.
-- [ ] Substituir `<form className="sa-form sa-panel sa-profile-form">` por um `Card` (`rounded-2xl`) contendo `CardHeader` (`CardTitle` `"Dados da conta"` e `CardDescription` `"Alterar o e-mail encerrará a sessão atual e exigirá novo login."`) e `CardContent` com `<form noValidate aria-label="Configurações de perfil">`.
-- [ ] Substituir os campos nativos por `FieldSet`, `FieldGroup`, `Field`, `FieldLabel`, `Input` e `FieldError` para `"Nome"` e `"E-mail"`.
-- [ ] Substituir o botão `.sa-button` por `Button type="submit"` (`"Salvar perfil"` / `"Salvando…"`).
+- [x] Inicializar `useForm` com `zodResolver(profileFormSchema)` e sincronizar `defaultValues` (`name: session.user.name || ''`, `email: session.user.email`) via `useEffect` quando `session.user` atualizar.
+- [x] Substituir `<form className="sa-form sa-panel sa-profile-form">` por um `Card` (`rounded-2xl`) contendo `CardHeader` (`CardTitle` `"Dados da conta"` e `CardDescription` `"Alterar o e-mail encerrará a sessão atual e exigirá novo login."`) e `CardContent` com `<form noValidate aria-label="Configurações de perfil">`.
+- [x] Substituir os campos nativos por `FieldSet`, `FieldGroup`, `Field`, `FieldLabel`, `Input` e `FieldError` para `"Nome"` e `"E-mail"`.
+- [x] Substituir o botão `.sa-button` por `Button type="submit"` (`"Salvar perfil"` / `"Salvando…"`).
 
 Pronto quando:
 - O componente `ProfileForm.tsx` utiliza `react-hook-form`, `zod` e componentes `shadcn/ui` (`Card`, `Field`, `Input`, `Button`), exibindo erros de validação acessíveis e enviando `{ name: values.name.trim(), email: values.email.trim() }`.
@@ -46,11 +46,11 @@ Commit sugerido:
 
 Passos:
 
-- [ ] Remover `<header className="sa-page-heading">` de `ProfileSettings.tsx`, pois `"Meu perfil"` já consta no `SuperAdminHeader.tsx`.
-- [ ] Envolver o conteúdo de `ProfileSettings.tsx` em um container `div.mx-auto.max-w-2xl.space-y-6` com as variáveis CSS de `theme` (`--card`, `--card-foreground`, `--popover`, `--popover-foreground`, `--input`, `--accent`, `--accent-foreground`).
-- [ ] Estilizar os avisos de sucesso (`role="status"`) e erro (`role="alert"`) com utilitários Tailwind compatíveis com os temas claro e escuro, removendo `.sa-feedback` e `.sa-error`.
-- [ ] Atualizar a linha 161 de `frontend/src/pages/dashboard-super-admin/SuperAdmin.test.tsx` de `screen.getByRole('link', { name: /Nome Atualizado/ })` para `screen.getByRole('button', { name: /Nome Atualizado/ })`, refletindo o trigger atual do `SuperAdminHeader.tsx`.
-- [ ] Executar `npx vitest run src/pages/dashboard-super-admin/SuperAdmin.test.tsx` e `npx eslint src/pages/dashboard-super-admin/ProfileSettings.tsx src/components/dashboard-super-admin/ProfileForm.tsx src/pages/dashboard-super-admin/SuperAdmin.test.tsx`.
+- [x] Remover `<header className="sa-page-heading">` de `ProfileSettings.tsx`, pois `"Meu perfil"` já consta no `SuperAdminHeader.tsx`.
+- [x] Envolver o conteúdo de `ProfileSettings.tsx` em um container `div.mx-auto.max-w-2xl.space-y-6` com as variáveis CSS de `theme` (`--card`, `--card-foreground`, `--popover`, `--popover-foreground`, `--input`, `--accent`, `--accent-foreground`).
+- [x] Estilizar os avisos de sucesso (`role="status"`) e erro (`role="alert"`) com utilitários Tailwind compatíveis com os temas claro e escuro, removendo `.sa-feedback` e `.sa-error`.
+- [x] Atualizar a linha 161 de `frontend/src/pages/dashboard-super-admin/SuperAdmin.test.tsx` de `screen.getByRole('link', { name: /Nome Atualizado/ })` para `screen.getByRole('button', { name: /Nome Atualizado/ })`, refletindo o trigger atual do `SuperAdminHeader.tsx`.
+- [x] Executar `npx vitest run src/pages/dashboard-super-admin/SuperAdmin.test.tsx` e `npx eslint src/pages/dashboard-super-admin/ProfileSettings.tsx src/components/dashboard-super-admin/ProfileForm.tsx src/pages/dashboard-super-admin/SuperAdmin.test.tsx`.
 
 Pronto quando:
 - `ProfileSettings.tsx` e `ProfileForm.tsx` seguem integralmente o novo design system e toda a suíte `SuperAdmin.test.tsx` passa (incluindo os testes `"Alterar nome atualiza cabeçalho sem encerrar sessão"` e `"Alterar e-mail encerra sessão e solicita novo login"`).
