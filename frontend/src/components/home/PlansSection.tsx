@@ -14,16 +14,17 @@ export function PlansSection() {
     >
       <div className="mx-auto max-w-[1200px]">
         <div data-motion="section" className="mb-10 max-w-2xl">
-          <p className="font-[family-name:var(--font-display)] text-base font-medium text-[var(--color-civix-gold-accessible)]">
-            // Planos Civix
+          <p className="font-[family-name:var(--font-display)] text-base font-medium leading-[normal] text-[var(--color-civix-navy)]">
+            <span className="text-[var(--color-civix-gold-accessible)]">//</span>{' '}
+            <span>Planos Civix</span>
           </p>
           <h2
-            className="mt-3 font-[family-name:var(--font-display)] text-3xl font-semibold leading-tight text-[var(--color-civix-navy)] sm:text-4xl"
+            className="mt-6 font-[family-name:var(--font-display)] text-[clamp(2.25rem,7vw,3rem)] font-normal leading-[1.1] tracking-normal text-[var(--color-civix-navy)] 2xl:text-[48px]"
             id="plans-section-title"
           >
             O plano certo para cada etapa do seu crescimento
           </h2>
-          <p className="mt-4 max-w-xl text-base leading-7 text-[var(--color-civix-ink)]/70">
+          <p className="mt-4 max-w-[557px] font-[family-name:var(--font-body)] text-base font-normal leading-[normal] text-[rgba(7,25,42,0.8)]">
             Compare os recursos e escolha como sua empresa quer crescer com a Civix.
           </p>
         </div>

@@ -72,7 +72,7 @@ export default function FAQSection() {
             <span>Perguntas frequentes</span>
           </p>
 
-          <h2 className="font-[family-name:var(--font-display)] text-3xl md:text-5xl font-medium text-[#071b2b] mt-3 leading-tight">
+          <h2 className="mt-6 font-[family-name:var(--font-display)] text-[clamp(2.25rem,7vw,3rem)] font-normal leading-[1.1] tracking-normal text-[var(--color-civix-navy)] 2xl:text-[48px]">
             Possui perguntas? <br />
             Nós temos as respostas
           </h2>

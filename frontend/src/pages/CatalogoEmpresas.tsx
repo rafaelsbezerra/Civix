@@ -145,19 +145,26 @@ export default function CatalogoEmpresas() {
               />
 
               <div className="relative z-10 px-6 pb-36 pt-16 text-[var(--color-civix-ivory)] sm:px-10 sm:pt-20 lg:absolute lg:left-[63px] lg:top-[124px] lg:p-0">
+                <p className="mb-4 text-sm font-bold tracking-widest text-[var(--color-civix-gold)]">
+                  REDE CIVIX / EMPRESAS
+                </p>
                 <h1
                   id="hero-title"
                   data-motion="page"
                   data-motion-trigger="mount"
-                  className="max-w-[643px] font-[family-name:var(--font-display)] text-[clamp(2.5rem,5vw,4rem)] font-semibold uppercase leading-[1.1] tracking-[-0.02em] lg:w-[643px] lg:text-[64px] lg:leading-[80px] lg:tracking-[-0.034em]"
+                  className="max-w-[643px] font-[family-name:var(--font-display)] text-[clamp(2.25rem,5vw,4rem)] font-bold uppercase leading-[1.1] tracking-normal lg:w-[643px] lg:text-[64px] lg:leading-[72px]"
                 >
-                  <p className="text-[var(--color-civix-gold)] font-bold tracking-widest text-sm mb-4">REDE CIVIX / EMPRESAS</p>
                   <span className="lg:block lg:whitespace-nowrap">EMPRESAS PARCEIRAS DA</span>{' '}
-                  <span className="lg:block lg:whitespace-nowrap lg:tracking-[-0.045em] text-[var(--color-civix-gold)]">
+                  <span className="lg:block lg:whitespace-nowrap text-[var(--color-civix-gold)]">
                     CONSTRUÇÃO CIVIL
                   </span>
                 </h1>
-                <p data-motion="page" data-motion-trigger="mount" data-motion-delay="60" className="mt-10 max-w-[511px] font-[family-name:var(--font-body)] text-base font-normal leading-[normal] text-[var(--color-civix-ivory)]/90 sm:text-lg lg:absolute lg:left-0 lg:top-[164px] lg:mt-0 lg:w-[511px] lg:leading-[20.6667px]">
+                <p
+                  data-motion="page"
+                  data-motion-trigger="mount"
+                  data-motion-delay="60"
+                  className="mt-6 max-w-[511px] font-[family-name:var(--font-body)] text-base font-medium leading-[normal] text-[var(--color-civix-ivory)]/90 sm:text-lg lg:mt-6 lg:w-[511px]"
+                >
                   Encontre profissionais e fornecedores verificados, prontos para o seu próximo projeto.
                 </p>
               </div>

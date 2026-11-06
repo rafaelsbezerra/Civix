@@ -60,11 +60,11 @@ export default function CatalogoEmpresas() {
       {/* Cabeçalho da Seção */}
       <div data-motion="section" className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 border-b border-gray-200 pb-6 gap-4">
         <div>
-          <p className="font-[family-name:var(--font-display)] text-base font-medium leading-normal text-[var(--color-civix-navy)]">
+          <p className="font-[family-name:var(--font-display)] text-base font-medium leading-[normal] text-[var(--color-civix-navy)]">
             <span className="text-[var(--color-civix-gold-accessible)]">//</span>{' '}
             <span>Empresas</span>
           </p>
-          <h2 className="mt-3 max-w-[760px] font-[family-name:var(--font-display)] text-[clamp(2rem,4vw,3rem)] font-semibold leading-[1.1] text-[var(--color-civix-navy)]">
+          <h2 className="mt-6 max-w-[760px] font-[family-name:var(--font-display)] text-[clamp(2.25rem,7vw,3rem)] font-normal leading-[1.1] tracking-normal text-[var(--color-civix-navy)] 2xl:text-[48px]">
             Empresas que constroem o futuro com a gente.
           </h2>
         </div>

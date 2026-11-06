@@ -13,6 +13,7 @@ describe('HeroSection', () => {
     })
     expect(heading).toBeInTheDocument()
     expect(heading.className).toContain('font-[family-name:var(--font-display)]')
+    expect(heading.className).toContain('font-bold')
   })
 
   it('renders the supporting platform copy', () => {
@@ -22,7 +23,7 @@ describe('HeroSection', () => {
       /A plataforma que conecta pessoas, serviços e soluções/i,
     )
 
-    expect(subtitle).toHaveClass('mt-10', 'lg:top-[184px]')
+    expect(subtitle).toHaveClass('mt-6', 'lg:mt-6')
   })
 
   it('renders local anchors for the two hero actions', () => {
@@ -37,7 +38,7 @@ describe('HeroSection', () => {
       '#contato',
     )
     expect(screen.getByRole('link', { name: 'Sobre nós' }).parentElement).toHaveClass(
-      'lg:top-[284px]',
+      'lg:mt-8',
     )
   })
 
