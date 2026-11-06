@@ -27,7 +27,7 @@ Refatorar a página de listagem e gestão de planos comerciais (`frontend/src/pa
 
 Passos:
 
-- [ ] Definir o schema `planFormSchema` com `zod` validando:
+- [x] Definir o schema `planFormSchema` com `zod` validando:
   - `name`: `z.string().trim().min(1, 'Informe o nome, slug válido e preço em reais.')`
   - `slug`: `z.string().trim().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Informe o nome, slug válido e preço em reais.')`
   - `price`: `z.string().trim().regex(/^\d+(?:[.,]\d{1,2})?$/, 'Informe o nome, slug válido e preço em reais.')`
@@ -37,11 +37,11 @@ Passos:
   - `featuresText`: `z.string()`
   - `isActive`: `z.boolean()`
   - `isFeatured`: `z.boolean()`
-- [ ] Configurar `useForm` com `zodResolver(planFormSchema)` e `useEffect` para sincronizar os valores quando a prop `initial` (`Plan | null`) mudar (alternando entre `"Novo plano"` e `"Editar plano"`).
-- [ ] Estruturar o formulário dentro de `Card` (`rounded-2xl`), `CardHeader` (`CardTitle`, `CardDescription`) e `CardContent`, mantendo `aria-label={initial ? 'Editar plano' : 'Novo plano'}` e `noValidate` na tag `<form>`.
-- [ ] Substituir os campos HTML legados por `FieldSet`, `FieldGroup`, `Field`, `FieldLabel`, `FieldDescription`, `FieldError`, `Input`, `Textarea`, `Select` (`SelectTrigger` com `bg-muted/40 hover:bg-muted/60 dark:bg-input/30 dark:hover:bg-input/50` e `SelectContent` com `container={portalRef.current} alignItemWithTrigger={false}`) e `Checkbox` (via `Controller` para `"Disponível para novos cadastros"` e `"Destacar no catálogo"`).
-- [ ] Garantir que o submit normalize `price` (`Number(values.price.replace(',', '.')).toFixed(2)`), converta `featuresText` em array `features` e invoque `onSubmit(input)` sem incluir a chave `id` no objeto enviado.
-- [ ] Substituir os botões de ação por `Button variant="outline"` (`"Cancelar"`) e `Button type="submit"` (`"Salvar plano"` / `"Salvando…"`).
+- [x] Configurar `useForm` com `zodResolver(planFormSchema)` e `useEffect` para sincronizar os valores quando a prop `initial` (`Plan | null`) mudar (alternando entre `"Novo plano"` e `"Editar plano"`).
+- [x] Estruturar o formulário dentro de `Card` (`rounded-2xl`), `CardHeader` (`CardTitle`, `CardDescription`) e `CardContent`, mantendo `aria-label={initial ? 'Editar plano' : 'Novo plano'}` e `noValidate` na tag `<form>`.
+- [x] Substituir os campos HTML legados por `FieldSet`, `FieldGroup`, `Field`, `FieldLabel`, `FieldDescription`, `FieldError`, `Input`, `Textarea`, `Select` (`SelectTrigger` com `bg-muted/40 hover:bg-muted/60 dark:bg-input/30 dark:hover:bg-input/50` e `SelectContent` com `container={portalRef.current} alignItemWithTrigger={false}`) e `Checkbox` (via `Controller` para `"Disponível para novos cadastros"` e `"Destacar no catálogo"`).
+- [x] Garantir que o submit normalize `price` (`Number(values.price.replace(',', '.')).toFixed(2)`), converta `featuresText` em array `features` e invoque `onSubmit(input)` sem incluir a chave `id` no objeto enviado.
+- [x] Substituir os botões de ação por `Button variant="outline"` (`"Cancelar"`) e `Button type="submit"` (`"Salvar plano"` / `"Salvando…"`).
 
 Pronto quando:
 - O formulário `PlanForm` renderiza com `Card`, `Field`, `Input`, `Select`, `Textarea`, `Checkbox` e `Button` do `shadcn/ui`, valida entradas com `zod` + `react-hook-form` e envia o payload exato esperado por `savePlatformPlan` sem `id` no corpo.
@@ -57,13 +57,13 @@ Commit sugerido:
 
 Passos:
 
-- [ ] Remover o bloco `.sa-page-heading` (`<header className="sa-page-heading">`), pois o título `"Planos comerciais"` já é exibido no `SuperAdminHeader.tsx`, mantendo uma barra superior enxuta com o botão `"Novo plano"` (`Button` com ícone `Plus`).
-- [ ] Adicionar o objeto `theme` (`CSSProperties`) no container raiz `div.space-y-6` da página para mapear `--card`, `--card-foreground`, `--popover`, `--popover-foreground`, `--input`, `--accent` e `--accent-foreground`.
-- [ ] Substituir os alertas `.sa-feedback` e `.sa-error` por blocos estilizados com Tailwind (`rounded-xl border ...`) ou `Card`, preservando `role="status"`, `role="alert"` e o botão `"Tentar novamente"`.
-- [ ] Estruturar a seção da listagem em um `Card` (` gap-0 rounded-2xl py-0`), com cabeçalho de busca contendo o input acessível (`id="plan-search"`, label `"Buscar plano por nome ou identificador"`, placeholder `"Nome ou slug"`) e `Badge variant="outline"` exibindo `${filtered.length} planos`.
-- [ ] Substituir `<table className="sa-table">` pelos componentes `Table`, `TableHeader`, `TableBody`, `TableRow`, `TableHead` e `TableCell` de `frontend/src/components/ui/table.tsx`.
-- [ ] Renderizar a coluna `"Situação"` com `Badge` estilizada (`Ativo` em verde esmeralda e `Inativo` em âmbar/neutro) e a coluna `"Ações"` com `Button variant="outline" size="sm"` mantendo os `aria-label` `"Editar ${plan.name}"` e `"Desativar ${plan.name}"` / `"Ativar ${plan.name}"`.
-- [ ] Executar `npx vitest run src/pages/dashboard-super-admin/SuperAdmin.test.tsx -t "Planos|plano"` e `npx eslint src/pages/dashboard-super-admin/Plans.tsx src/components/dashboard-super-admin/PlanForm.tsx`.
+- [x] Remover o bloco `.sa-page-heading` (`<header className="sa-page-heading">`), pois o título `"Planos comerciais"` já é exibido no `SuperAdminHeader.tsx`, mantendo uma barra superior enxuta com o botão `"Novo plano"` (`Button` com ícone `Plus`).
+- [x] Adicionar o objeto `theme` (`CSSProperties`) no container raiz `div.space-y-6` da página para mapear `--card`, `--card-foreground`, `--popover`, `--popover-foreground`, `--input`, `--accent` e `--accent-foreground`.
+- [x] Substituir os alertas `.sa-feedback` e `.sa-error` por blocos estilizados com Tailwind (`rounded-xl border ...`) ou `Card`, preservando `role="status"`, `role="alert"` e o botão `"Tentar novamente"`.
+- [x] Estruturar a seção da listagem em um `Card` (` gap-0 rounded-2xl py-0`), com cabeçalho de busca contendo o input acessível (`id="plan-search"`, label `"Buscar plano por nome ou identificador"`, placeholder `"Nome ou slug"`) e `Badge variant="outline"` exibindo `${filtered.length} planos`.
+- [x] Substituir `<table className="sa-table">` pelos componentes `Table`, `TableHeader`, `TableBody`, `TableRow`, `TableHead` e `TableCell` de `frontend/src/components/ui/table.tsx`.
+- [x] Renderizar a coluna `"Situação"` com `Badge` estilizada (`Ativo` em verde esmeralda e `Inativo` em âmbar/neutro) e a coluna `"Ações"` com `Button variant="outline" size="sm"` mantendo os `aria-label` `"Editar ${plan.name}"` e `"Desativar ${plan.name}"` / `"Ativar ${plan.name}"`.
+- [x] Executar `npx vitest run src/pages/dashboard-super-admin/SuperAdmin.test.tsx -t "Planos|plano"` e `npx eslint src/pages/dashboard-super-admin/Plans.tsx src/components/dashboard-super-admin/PlanForm.tsx`.
 
 Pronto quando:
 - A página `Plans.tsx` não utiliza mais classes legadas `.sa-*`, exibe a tabela, busca, badges e ações no padrão `shadcn/ui` nos temas claro e escuro, e todos os testes de planos em `SuperAdmin.test.tsx` passam sem erros de lint ou TypeScript.
