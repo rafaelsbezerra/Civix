@@ -1,5 +1,109 @@
 # Design do dashboard superadmin
 
+## Marca e header — shadcn, 2026-11-04
+
+Substituir a marca textual da sidebar pela imagem transparente `logo-civix.png`,
+também utilizada no header da landing page. No tema escuro, utilizar a variante
+existente `logo-civix-white.png`, preservando o contraste sem adicionar fundo.
+Na sidebar, manter apenas o item `Empresas` para o módulo empresarial (ativo em
+`/dashboard/super-admin/companies` e sub-rotas como `/companies/new` e
+`/companies/:companyId`), removendo o atalho separado `Cadastrar empresa` do
+menu lateral e mantendo a rota `/dashboard/super-admin/companies/new` acessível
+pelo botão `Cadastrar empresa` na página de empresas.
+
+O header utiliza Button e Avatar shadcn, com menu de usuário adaptado do bloco
+`@shadcn-space/dropdown-menu-01`. Manter nome, papel, acesso a Meu perfil,
+saída e troca de tema existentes. O portal do dropdown permanece dentro do
+header para herdar os tokens do dashboard nos dois temas. Componentes adicionados
+usam Base UI e o utilitário `cn` já instalado; sem novas dependências.
+
+Verificação: três testes de interação (perfil/saída, teclado/Escape/foco e
+callbacks de tema/menu mobile), revisão secundária e Chrome em 1440/390/320px
+nos dois temas. Menu sem transbordamento horizontal. Sem commit, na staging.
+
+## Empresas — shadcn e Tailwind, 2026-11-04
+
+Migrar somente a listagem de empresas para componentes shadcn e utilitários
+Tailwind. Remover rótulo/título/subtítulo do conteúdo; o título fica no header.
+Exibir total de empresas e quantidades por plano, com dados agregados de toda
+a base (inclusive inativas/arquivadas), independentes dos filtros/paginação.
+Manter três cards: total, “Empresas por plano” com barras horizontais, rótulos
+e quantidades, e “Empresas ativas” com quantidade, percentual da base e resumo
+de inativas e arquivadas. Larguras proporcionais à maior quantidade do grupo;
+zero não preenche as barras. Todos os cálculos permanecem no frontend. Empresa
+ativa não possui `deleted_at` e tem status `ativo` ou o legado `verificado`;
+inativa tem status `inativo` sem `deleted_at`; arquivada possui `deleted_at`.
+Cards compactos: espaçamento interno reduzido e cada plano apresentado em uma
+linha com nome, barra horizontal e quantidade, preservando as informações.
+No card de barras, exibir somente nomes sem a palavra “Plano”, ignorando caixa;
+os nomes demonstrativos com “Plano” e o grupo “Sem plano” ficam ocultos. Aplicar
+essa regra de apresentação no frontend, sem excluir cadastros nem alterar o
+total geral. Nos dados atuais são três planos visíveis. Os três cards usam a
+mesma largura e altura, com a largura compacta dos cards originais. Manter
+`16px` entre cada card e também entre o último card e o botão de cadastro, sem
+coluna vazia intermediária.
+Planos visíveis sem empresas podem apresentar zero. Não confundir erro com zero.
+Cadastro e ações passam a usar Button; ação de consulta usa ícone com nome
+acessível. Paginação própria da tela reutiliza Button shadcn e mantém page/meta,
+sem alterar os consumidores atuais da paginação compartilhada.
+“Cadastrar empresa” fica no topo do conteúdo, antes dos cards, em linha flex
+com justify-between e botão alinhado à direita.
+Preservar filtros, rotas, carregamento, erros, navegação e temas claro/escuro.
+O frontend utiliza somente as rotas existentes de listagem de empresas e planos.
+Reúne as páginas da listagem administrativa (até 100 registros por requisição),
+calcula total com array.length e quantidades por plano com filter().length.
+Não utiliza /companies/metrics nem cria agregação no backend. As contagens não
+se limitam à página visível. Falha em qualquer página mantém erro, sem exibir
+um total parcial. Esta escolha carrega os registros para contagem no navegador.
+
+Implementação na staging, sem commit por orientação do usuário. Componentes
+Card/Table/Input/Badge/Select do registry shadcn (base-nova), adaptando
+somente cn para @/lib/utils existente. Button já estava instalado; sem alteração
+de manifest/lockfile. CompanyFilters, CompanyMetricsCards, CompanyTable e
+CompanyPagination usam Tailwind e preservam a paginação das outras telas.
+Filtros de estado e plano utilizam Select shadcn com nomes acessíveis e
+mantêm os mesmos valores enviados no formulário. O portal permanece dentro
+do escopo visual do dashboard para respeitar o tema claro/escuro.
+A consulta agregada inicialmente adicionada foi removida por orientação do
+usuário; backend e guia de API restaurados ao estado anterior desta tarefa.
+Correção verificada: 14 testes direcionados (11 da tela e 3 do cálculo) e lint
+aprovados; cobertura de 101 empresas em duas páginas, base vazia e falha durante
+a paginação. Revisão secundária sem bloqueadores, sem chamada à rota removida.
+Selects e cards compactos verificados em Chrome com API simulada em
+1440/390/320px, nos dois temas, incluindo envio dos filtros, Escape e menus
+dentro da viewport; capturas inspecionadas. Select oficial adicionado sem novas
+dependências, mantendo o utilitário cn existente e portal no tema do dashboard.
+O typecheck completo possui o impedimento anterior TS1484 em
+CookieOptions, no backend incluído pelo tsconfig frontend.
+
+## Cadastro de empresa — React Hook Form, Zod e shadcn, 2026-11-05
+
+Refatorar `CompanyCreate.tsx`, `CompanyForm.tsx` e `CompanyImageInput.tsx` para
+utilizar `react-hook-form`, `zod` com `@hookform/resolvers/zod` e componentes
+`shadcn/ui` (`Card`, `Field`, `FieldSet`, `FieldGroup`, `FieldLabel`,
+`FieldDescription`, `FieldError`, `Input`, `Textarea`, `Select`, `Button`,
+`Badge`) com utilitários Tailwind. Remover o bloco de cabeçalho interno da
+página de cadastro, mantendo o título “Cadastrar empresa” no header superior e
+adicionando o botão “Voltar para empresas” no topo do conteúdo. Aplicar fundo
+com opacidade baixa (`bg-muted/40 hover:bg-muted/60` no claro e `dark:bg-input/30
+dark:hover:bg-input/50` no escuro) ao gatilho dos componentes `Select`
+(`SelectTrigger`) para destacá-los dentro dos cards. Preservar a
+idempotência por `operationId`, o envio separado da logo após confirmação da
+empresa/venda inicial e a reutilização de `CompanyForm` na edição de empresa.
+
+## Perfil da empresa e confirmação de ações — shadcn e Tailwind, 2026-11-05
+
+Migrar `CompanyDetail.tsx` e `ActionConfirmation.tsx` para componentes
+`shadcn/ui` (`Card`, `CardHeader`, `CardContent`, `CardFooter`, `Badge`,
+`Button`, `Field`, `FieldLabel`, `FieldError`, `Textarea`) e utilitários
+Tailwind, removendo os botões e blocos em CSS puro (`.sa-panel`,
+`.sa-inline-actions`, `.sa-button`). Manter o botão “Voltar para empresas” no
+topo, um card dedicado de `Situação` com `Badge` de estado (`Ativa`, `Inativa`,
+`Arquivada`) junto aos demais cards de dados da empresa (sem badge ao lado do
+título nem texto redundante `Empresa ativa`), os alertas de motivo/restauração
+e o diálogo acessível de confirmação com justificativa obrigatória para
+desativação e arquivamento.
+
 Requisitos visuais confirmados em 2026-11-02. Complementa a [spec](spec.md).
 Design implementado; evidências e limites de verificação estão no task backend.
 

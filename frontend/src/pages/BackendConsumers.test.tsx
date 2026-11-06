@@ -146,21 +146,32 @@ describe('Formulários existentes integrados ao backend', () => {
   it.each([
     ['admin_empresa', 'empresa', '/dashboard-empresa'],
     ['atendente', 'atendente', '/dashboard-atendente'],
-  ] as const)('Login %s armazena token e abre sua área', async (role, access, destination) => {
+  ] as const)('Login %s usa a sessão HTTP e abre sua área', async (role, access, destination) => {
     const setItem = vi.fn()
     vi.stubGlobal('localStorage', { setItem })
-    respond({ data: { token: 'token-sintetico', user: { id: 'user-1', name: 'Teste', email: 'pessoa@example.test', role, companyId: 'company-1' } } })
+    respond({ data: { user: { id: 'user-1', name: 'Teste', email: 'pessoa@example.test', role, companyId: 'company-1' } } })
     renderPage(<Login access={access} />, `/login/${access}`)
     fireEvent.change(screen.getByPlaceholderText('seu_email@email.com'), { target: { value: 'pessoa@example.test' } })
     fireEvent.change(screen.getByPlaceholderText('••••••••'), { target: { value: 'senha-teste' } })
     fireEvent.click(screen.getByRole('button', { name: 'Login' }))
-    await waitFor(() => expect(setItem).toHaveBeenCalledWith('token', 'token-sintetico'))
+    await waitFor(() => expect(navigate).toHaveBeenCalledWith(destination))
     expect(JSON.parse(String(fetchMock.mock.calls[0][1]?.body))).toEqual({
       email: 'pessoa@example.test',
       password: 'senha-teste',
       role,
     })
-    expect(navigate).toHaveBeenCalledWith(destination)
+    expect(setItem).not.toHaveBeenCalled()
+  })
+
+  it('Login empresarial rejeita superadmin e não navega para o dashboard', async () => {
+    respond({ data: { user: { id: 'user-1', name: 'Teste', email: 'pessoa@example.test', role: 'super_admin', companyId: null } } })
+    respond({ data: {} })
+    renderPage(<Login />, '/login/empresa')
+    fireEvent.change(screen.getByPlaceholderText('seu_email@email.com'), { target: { value: 'pessoa@example.test' } })
+    fireEvent.change(screen.getByPlaceholderText('••••••••'), { target: { value: 'senha-teste' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Login' }))
+    expect(await screen.findByText('Credenciais inválidas.')).toBeInTheDocument()
+    expect(navigate).not.toHaveBeenCalled()
   })
 
   it('Login com falha mostra mensagem pública sem gravar token ou navegar', async () => {

@@ -144,7 +144,7 @@ describe('SiteHeader', () => {
     expect(within(nav).getByRole('link', { name: 'Empresas' })).toHaveAttribute('href', '/#empresas')
     expect(within(nav).getByRole('link', { name: 'FAQ' })).toHaveAttribute('href', '/#faq')
     expect(screen.getByRole('banner')).toHaveClass('fixed', 'z-40')
-    expect(container.querySelector('[aria-hidden="true"].h-\\[106px\\]')).toBeInTheDocument()
+    expect(container.querySelector('[aria-hidden="true"].h-\\[111px\\]')).toBeInTheDocument()
     expect(container.querySelector('#contato')).not.toBeInTheDocument()
   })
 

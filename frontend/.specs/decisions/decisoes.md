@@ -8,6 +8,13 @@ provedores ou arquitetura novos.
 | ID | Tema | Questão a resolver |
 | --- | --- | --- |
 | DEC-17 | Dashboards | Funcionalidades/rotas por perfil e definição das métricas |
+| DEC-18 | Métricas de empresas e vendas | Cálculo temporário no frontend a partir dos dados listados pela API; rotas dedicadas de métricas no backend ficam em backlog |
+
+## Cálculo de métricas no frontend (Empresas e Vendas) — 2026-11-05
+
+Os cards de métricas das páginas de **Empresas** (`Total de empresas`, `Empresas ativas`, `Empresas por plano` em `CompanyMetricsCards.tsx`) e de **Vendas** (`Faturamento total`, `Faturamento no mês`, `Faturamento por plano` em `SalesMetricsCards.tsx`) são calculados diretamente no frontend a partir das informações retornadas pelas rotas existentes de listagem (`getPlatformCompanies`, `getPlatformSales` e `getPlatformPlans`).
+
+A criação de endpoints dedicados de agregação/métricas no backend permanece em **backlog** para evolução futura.
 
 ## Integração autorizada — 2026-10-12
 

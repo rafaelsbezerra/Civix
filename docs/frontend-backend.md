@@ -99,7 +99,7 @@ acusou dashboard.png ausente. Não é evidência da alteração de rotas de aces
 
 ## Dashboard superadmin — G0 a G4
 
-O login super_admin redireciona para `/super-admin`. As rotas de planos,
+O login super_admin redireciona para `/dashboard/super-admin`. As rotas de planos,
 cadastro e perfil usam o arquivo `frontend/src/lib/api.ts`, Bearer e contratos
 HTTP existentes. Guard consulta identidade atual; API também valida permissão.
 Cadastro mantém operationId por payload até sucesso para repetir com segurança.

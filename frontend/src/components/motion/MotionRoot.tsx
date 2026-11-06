@@ -22,7 +22,7 @@ const presets = {
 export function MotionRoot({ children }: PropsWithChildren) {
   const scope = useRef<HTMLDivElement>(null)
   const { pathname } = useLocation()
-  const enabled = !['/login', '/primeiro-acesso', '/esqueci-senha', '/redefinir-senha', '/super-admin']
+  const enabled = !['/login', '/primeiro-acesso', '/esqueci-senha', '/redefinir-senha', '/dashboard/super-admin']
     .some(path => pathname === path || pathname.startsWith(path + '/'))
 
   useEffect(() => {

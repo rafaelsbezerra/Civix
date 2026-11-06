@@ -43,8 +43,8 @@ export const AppRoutes: React.FC = () => (
         <CompanyPageTransition />
         <CookieBanner />
         <Routes>
-            <Route element={<ProtectedRoute allowedRoles={['super_admin']} redirectTo="/super-admin/login" />}>
-                <Route path="/super-admin" element={<SuperAdminLayout />}>
+            <Route element={<ProtectedRoute allowedRoles={['super_admin']} redirectTo="/dashboard/super-admin/login" />}>
+                <Route path="/dashboard/super-admin" element={<SuperAdminLayout />}>
                     <Route index element={<Overview />} />
                     <Route path="plans" element={<Plans />} />
                     <Route path="companies/new" element={<CompanyCreate />} />
@@ -72,7 +72,7 @@ export const AppRoutes: React.FC = () => (
             <Route path="/termos-de-uso" element={<TermsOfService />} />
             <Route path="/politica-de-privacidade" element={<PrivacyPolicy />} />
             <Route path="/central-de-ajuda" element={<HelperCenter />} />
-            <Route path="/super-admin/login" element={<SuperAdminLogin />} />
+            <Route path="/dashboard/super-admin/login" element={<SuperAdminLogin />} />
 
             <Route element={<ProtectedRoute allowedRoles={['admin_empresa']} />}>
                 <Route path="/dashboard-empresa" element={<CompanyDashboardLayout />}>

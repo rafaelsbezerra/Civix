@@ -55,7 +55,7 @@ export function SiteHeader({
       setIsScrolled(window.scrollY > 8)
       if (pathname !== '/') return
 
-      const line = (headerRef.current?.getBoundingClientRect().height || 106) + 24
+      const line = (headerRef.current?.getBoundingClientRect().height || 76) + 24
       let current: string | null = null
       for (const element of sections) {
         const bounds = element.getBoundingClientRect()
@@ -96,33 +96,33 @@ export function SiteHeader({
 
   return (
     <>
-      <div aria-hidden="true" className="h-[106px] shrink-0" />
-      <header data-site-header="" data-scrolled={isScrolled} className={`fixed inset-x-0 top-0 z-40 w-full transition-colors duration-200 motion-reduce:transition-none ${isScrolled || isMenuOpen ? 'bg-[var(--color-civix-ivory)]/95 shadow-[0_1px_12px_rgba(7,25,42,0.08)]' : 'bg-transparent'}`}>
-        <div ref={headerRef} className="relative mx-auto flex h-[106px] w-full max-w-[1728px] items-center justify-between px-6 sm:px-10 lg:px-16 xl:px-32">
+      <div aria-hidden="true" className="h-[111px] shrink-0" />
+      <header data-site-header="" data-scrolled={isScrolled} className={`fixed inset-x-0 top-0 z-40 w-full rounded-b-2xl transition-all duration-300 motion-reduce:transition-none ${isScrolled || isMenuOpen ? 'border-b border-[var(--color-civix-navy)]/8 bg-[var(--color-civix-ivory)]/88 shadow-[0_8px_28px_rgba(7,25,42,0.06)] backdrop-blur-md' : 'bg-transparent'}`}>
+        <div ref={headerRef} className="relative mx-auto flex h-[85px] w-full max-w-[1728px] items-center justify-between px-6 pb-[20px] pt-2 sm:px-10 lg:px-16 xl:px-32">
           <a
             data-motion="item"
             data-motion-trigger="mount"
             aria-label="Civix — início"
-            className="inline-flex min-h-11 min-w-11 shrink-0 items-center rounded-sm lg:-translate-y-[5px]"
+            className="inline-flex min-h-11 min-w-11 shrink-0 items-center rounded-sm"
             href="/"
           >
             <img
               alt="Civix"
-              className="h-8 w-[99px] object-contain"
-              height="32"
+              className="h-7 w-[88px] object-contain"
+              height="28"
               src={logoCivix}
-              width="99"
+              width="88"
             />
           </a>
 
-          <div data-motion="item" data-motion-trigger="mount" data-motion-delay="60" className="hidden items-center gap-[18px] lg:flex lg:-translate-y-1">
+          <div data-motion="item" data-motion-trigger="mount" data-motion-delay="60" className="hidden items-center gap-4 lg:flex">
             <nav aria-label="Navegação principal" className="h-[19px]">
-              <ul className="flex h-[19px] items-center gap-[30.48px]">
+              <ul className="flex h-[19px] items-center gap-7">
                 {navigationItems.map((item) => (
                   <li key={item.href}>
                     <a
                       aria-current={currentLocation(item)}
-                      className={`font-[family-name:var(--font-body)] text-base leading-[19px] transition-colors hover:text-[#000e1b] ${currentLocation(item) ? 'font-semibold text-[var(--color-civix-gold-accessible)]' : 'font-normal text-[var(--color-civix-navy)]'}`}
+                      className={`font-[family-name:var(--font-body)] text-[15px] leading-[19px] transition-colors hover:text-[#000e1b] ${currentLocation(item) ? 'font-semibold text-[var(--color-civix-gold-accessible)]' : 'font-normal text-[var(--color-civix-navy)]'}`}
                       href={item.href}
                     >
                       {item.label}
@@ -132,7 +132,7 @@ export function SiteHeader({
               </ul>
             </nav>
             <ActionButton
-              className="w-[138px] min-w-0 gap-2 px-3"
+              className="min-h-10 w-[124px] min-w-0 gap-1.5 px-3 text-base lg:min-h-[38px]"
               href="/#contato"
               showArrow
               variant="primary"
@@ -141,7 +141,7 @@ export function SiteHeader({
             </ActionButton>
 
             <ActionButton
-              className="w-[138px] min-w-0 gap-2 px-3"
+              className="min-h-10 w-[116px] min-w-0 gap-1.5 px-3 text-base lg:min-h-[38px]"
               href="/login"
               variant="login"
             >
@@ -176,7 +176,7 @@ export function SiteHeader({
               aria-label="Navegação móvel"
               data-motion="panel"
               data-motion-trigger="mount"
-              className="absolute left-6 right-6 top-[94px] max-h-[calc(100dvh-110px)] overflow-y-auto rounded-2xl bg-[var(--color-civix-ivory)] p-4 shadow-[0_18px_50px_rgba(7,25,42,0.16)] sm:left-10 sm:right-10 lg:hidden"
+              className="absolute left-6 right-6 top-[72px] max-h-[calc(100dvh-88px)] overflow-y-auto rounded-2xl bg-[var(--color-civix-ivory)] p-4 shadow-[0_18px_50px_rgba(7,25,42,0.16)] sm:left-10 sm:right-10 lg:hidden"
               id="mobile-navigation"
             >
               <ul className="flex flex-col">

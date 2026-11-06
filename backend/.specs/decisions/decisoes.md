@@ -23,6 +23,7 @@ provedores ou arquitetura novos.
 | DEC-14 | Operação | Hospedagem, ambientes, CI/CD, migrations, backups/restore, observabilidade e segredos |
 | DEC-15 | Convenções | Confirmadas: inglês, arquivos domínio.papel.ts, erros/comentários em português, pastas por função e handlers independentes; auth/admin separados em services na implementação local de 2026-10-12 |
 | DEC-16 | Escala | Cache, volume por empresa, latência, disponibilidade, RPO/RTO e retenção |
+| DEC-18 | Métricas (Backlog) | Rotas dedicadas de métricas de empresas e vendas no backend ficam em backlog; no momento o cálculo dos cards é realizado no frontend com os dados retornados pelas rotas de listagem |
 
 Notion apresenta simultaneamente vendas “imutáveis” e rotas POST/DELETE;
 empresa como tenant e usuário com role empresa; planos associados à empresa

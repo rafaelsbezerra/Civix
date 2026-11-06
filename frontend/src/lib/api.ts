@@ -360,6 +360,40 @@ export async function changePlatformCompanyState(id: string, action: 'suspension
     authenticatedOptions(action === 'archive' ? 'DELETE' : 'POST', reason === undefined ? {} : { reason }));
 }
 
+export interface CompanyMetrics {
+  total: number;
+  active: number;
+  inactive: number;
+  archived: number;
+  byPlan: { planId: string | null; planName: string; count: number }[];
+}
+export async function getPlatformCompanyMetrics(): Promise<CompanyMetrics> {
+  const [plans, firstPage] = await Promise.all([
+    getPlatformPlans(), getPlatformCompanies({ page: 1, limit: 100 }),
+  ]);
+  const rows = [...firstPage.data];
+  // A listagem é paginada: contar só a página visível truncaria os cards.
+  for (let page = 2; page <= firstPage.meta.totalPages; page += 1) {
+    rows.push(...(await getPlatformCompanies({ page, limit: 100 })).data);
+  }
+  const companies = [...new Map(rows.map(company => [company.id, company])).values()];
+  const byPlan: CompanyMetrics['byPlan'] = plans.map(plan => ({
+    planId: plan.id, planName: plan.name,
+    count: companies.filter(company => company.plan_id != null && String(company.plan_id) === String(plan.id)).length,
+  }));
+  const knownPlans = new Set(plans.map(plan => String(plan.id)));
+  const missingPlans = new Set(companies.filter(company => company.plan_id != null && !knownPlans.has(String(company.plan_id))).map(company => String(company.plan_id)));
+  for (const planId of missingPlans) {
+    byPlan.push({ planId, planName: 'Plano indisponível', count: companies.filter(company => String(company.plan_id) === planId).length });
+  }
+  const withoutPlan = companies.filter(company => company.plan_id == null).length;
+  if (withoutPlan) byPlan.push({ planId: null, planName: 'Sem plano', count: withoutPlan });
+  const archived = companies.filter(company => company.deleted_at != null).length;
+  const active = companies.filter(company => company.deleted_at == null && company.status !== 'inativo').length;
+  const inactive = companies.filter(company => company.deleted_at == null && company.status === 'inativo').length;
+  return { total: companies.length, active, inactive, archived, byPlan };
+}
+
 export interface PlatformSale {
   id: string; companyId: string; companyName?: string; planId: string | null; planName: string | null;
   origin: 'company_creation' | 'manual'; pricingMode: 'company_plan' | 'manual_amount';
