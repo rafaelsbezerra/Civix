@@ -319,7 +319,7 @@ describe('Empresas do superadmin', () => {
     renderCompanyRoutes('/dashboard/super-admin/companies/company-1');
 
     expect(await screen.findByText('Restauração preserva a empresa inativa. Reative explicitamente para liberar catálogo e acesso.')).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Empresa arquivada' })).toBeInTheDocument();
+    expect(screen.getByText('Arquivada')).toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Editar empresa' })).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'Restaurar empresa' }));
