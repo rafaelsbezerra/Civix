@@ -91,6 +91,19 @@ dark:hover:bg-input/50` no escuro) ao gatilho dos componentes `Select`
 idempotência por `operationId`, o envio separado da logo após confirmação da
 empresa/venda inicial e a reutilização de `CompanyForm` na edição de empresa.
 
+## Perfil da empresa e confirmação de ações — shadcn e Tailwind, 2026-11-05
+
+Migrar `CompanyDetail.tsx` e `ActionConfirmation.tsx` para componentes
+`shadcn/ui` (`Card`, `CardHeader`, `CardContent`, `CardFooter`, `Badge`,
+`Button`, `Field`, `FieldLabel`, `FieldError`, `Textarea`) e utilitários
+Tailwind, removendo os botões e blocos em CSS puro (`.sa-panel`,
+`.sa-inline-actions`, `.sa-button`). Manter o botão “Voltar para empresas” no
+topo, um card dedicado de `Situação` com `Badge` de estado (`Ativa`, `Inativa`,
+`Arquivada`) junto aos demais cards de dados da empresa (sem badge ao lado do
+título nem texto redundante `Empresa ativa`), os alertas de motivo/restauração
+e o diálogo acessível de confirmação com justificativa obrigatória para
+desativação e arquivamento.
+
 Requisitos visuais confirmados em 2026-11-02. Complementa a [spec](spec.md).
 Design implementado; evidências e limites de verificação estão no task backend.
 
