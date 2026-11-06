@@ -23,7 +23,7 @@ export function SuperAdminSidebar() {
   return <Sidebar variant="inset" collapsible="icon">
     <SidebarHeader className="p-3">
       <SidebarMenu><SidebarMenuItem>
-        <SidebarMenuButton size="lg" className="h-12 rounded-xl p-2" tooltip="Início da administração"
+        <SidebarMenuButton size="lg" className="h-12 rounded-xl p-2 hover:bg-transparent active:bg-transparent data-open:hover:bg-transparent" tooltip="Início da administração"
           render={<NavLink to="/dashboard/super-admin" aria-label="Civix — início da administração" onClick={() => setOpenMobile(false)} />}>
           {state === 'collapsed' && !isMobile ? <img src="/icon.svg" alt="" className="size-8 shrink-0 object-contain" /> : <>
             <img src={logoCivix} alt="Civix" className="sa-brand-logo sa-brand-logo-light" />

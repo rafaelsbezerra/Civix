@@ -51,7 +51,11 @@ export function SuperAdminLayout() {
         <SidebarInset id="admin-content" tabIndex={-1} className="min-w-0 md:border md:border-border/70">
           <SuperAdminHeader title={title} name={session.user.name || 'Superadmin'} dark={theme === 'dark'}
             onToggleTheme={() => setTheme(theme === 'dark' ? 'light' : 'dark')} onLogout={logout} />
-          <div className="sa-content"><Outlet context={{ session, setProfile: user => setSession({ ...session, user }), handleError } satisfies SuperAdminContext} /></div>
+          <div className="sa-content">
+            <div key={pathname} className="sa-page-enter">
+              <Outlet context={{ session, setProfile: user => setSession({ ...session, user }), handleError } satisfies SuperAdminContext} />
+            </div>
+          </div>
           <footer className="sa-footer">Civix · Administração da plataforma<span>Valores em BRL · Datas em UTC</span></footer>
         </SidebarInset>
       </SidebarProvider>
