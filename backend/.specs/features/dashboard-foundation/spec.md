@@ -48,3 +48,20 @@ escopo, exceto mudanças explicitamente necessárias da sessão aprovada.
 
 P07 DTOs/URLs/destinos e resumos mínimos necessários. Não criar endpoint
 universal de contagens, websocket, cache ou biblioteca de estado por antecipação.
+
+## Atualização — decisões de escopo de 2026-11-02
+
+Escopo empresarial aprovado: Home, dados/configurações da empresa, equipe,
+leads e conversas para admin_empresa/atendente. A Home não apresenta métricas
+até aprovação das fontes/indicadores. O dashboard super_admin não faz parte
+desta entrega.
+
+A matriz aprovada e centralizada está em
+[decisions.md](../../roadmaps/dashboards/decisions.md), DASH-D10–D18.
+O shell pode consumir apenas operações reais; módulos sem API permanecem
+indisponíveis e não contam como E2E concluído.
+
+**Aguardando resposta:** URLs e contratos HTTP/DTO finais; estados e origem
+das conversas; campos editáveis do perfil de atendente; política de recurso
+fora do escopo (403/404); modelo de concorrência da atribuição. Não criar
+migrations/endpoints antes de aprovar seus contratos.

@@ -143,15 +143,23 @@ describe('Formulários existentes integrados ao backend', () => {
     expect(signal?.aborted).toBe(true)
     await act(async () => { finish?.(new Response(JSON.stringify({ data: { email: 'pessoa@example.test' } }))) })
   })
-  it.each(['admin_empresa', 'atendente'] as const)('Login %s usa a sessão HTTP e mantém o destino público', async role => {
+  it.each([
+    ['admin_empresa', 'empresa', '/dashboard-empresa'],
+    ['atendente', 'atendente', '/dashboard-atendente'],
+  ] as const)('Login %s usa a sessão HTTP e abre sua área', async (role, access, destination) => {
     const setItem = vi.fn()
     vi.stubGlobal('localStorage', { setItem })
     respond({ data: { user: { id: 'user-1', name: 'Teste', email: 'pessoa@example.test', role, companyId: 'company-1' } } })
-    renderPage(<Login />, '/login')
+    renderPage(<Login access={access} />, `/login/${access}`)
     fireEvent.change(screen.getByPlaceholderText('seu_email@email.com'), { target: { value: 'pessoa@example.test' } })
     fireEvent.change(screen.getByPlaceholderText('••••••••'), { target: { value: 'senha-teste' } })
     fireEvent.click(screen.getByRole('button', { name: 'Login' }))
-    await waitFor(() => expect(navigate).toHaveBeenCalledWith('/'))
+    await waitFor(() => expect(navigate).toHaveBeenCalledWith(destination))
+    expect(JSON.parse(String(fetchMock.mock.calls[0][1]?.body))).toEqual({
+      email: 'pessoa@example.test',
+      password: 'senha-teste',
+      role,
+    })
     expect(setItem).not.toHaveBeenCalled()
   })
 

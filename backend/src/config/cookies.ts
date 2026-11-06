@@ -1,4 +1,4 @@
-import { CookieOptions } from "express";
+import type { CookieOptions } from "express";
 
 const isProd = process.env.NODE_ENV === "production";
 

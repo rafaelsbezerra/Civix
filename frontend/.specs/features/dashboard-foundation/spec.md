@@ -1,13 +1,14 @@
 # Base dos dashboards autenticados
 
-**Estado:** planejada, não implementada. Autorização somente para documentar.
+**Estado:** implementação parcial do shell; operações de domínio não implementadas.
 **Ordem:** 06. Tarefas novas permanecem abertas.
 
 ## Baseline observada
 
-AppRoute contém site público/acesso, sem dashboard/guard. Login encaminha
-empresa a /dashboard-empresa, inexistente. Componentes/tokens visuais do site
-não são layout operacional autenticado nem indicadores reais.
+AppRoute contém o site público e o dashboard empresarial protegido. Login
+encaminha admin_empresa e atendente para /dashboard-empresa após autenticação.
+O shell usa o perfil confirmado pelo backend; suas áreas de domínio ainda não
+estão integradas.
 
 ## Dependências e referências
 
@@ -23,14 +24,17 @@ Fontes: [rotas](../../../src/routes/AppRoute.tsx), [API](../../../src/lib/api.ts
 
 - Planejar áreas distintas de dono, atendente e superadmin.
 - Menu/contexto derivam do bootstrap, não da escolha visual no login.
-- Superadmin não recebe navegação de conversas; atendente só vê atribuídos.
+- Superadmin não recebe navegação empresarial. A matriz do atendente permite
+  itens atribuídos e disponíveis, conforme DASH-D13; as consultas ainda não
+  existem neste shell.
 - Site institucional e acesso não se tornam dashboard público.
 - Reutilizar o padrão visual atual, sem impor biblioteca/animar login.
 
 ## Contrato frontend/backend
 
 Consumir a evolução de GET /api/v1/users/profile para bootstrap.
-DTO/rotas frontend privadas e recursos do shell aguardam CT-06-DASHBOARD.
+As rotas frontend do shell são /dashboard-empresa e suas seções. Endpoints,
+DTOs de domínio e operações privadas aguardam contratos aprovados.
 Não inventar resumo/métricas antes da etapa 08. Ausência de dados não vira
 zero fictício; distinguir loading, vazio legítimo e erro.
 Sucesso usa { data, meta? }; erro público em produção usa status/message.
@@ -50,10 +54,16 @@ Não acessar produção; dados/e-mails de teste são isolados.
 
 ## Tarefas planejadas
 
-- [ ] FE-06-01: Implementar shell/menu/contexto e rotas aprovadas por perfil.
-- [ ] FE-06-02: Implementar bootstrap, loading/erro e acessibilidade do shell.
+- [x] FE-06-01: Implementar shell/menu/contexto e rotas do dashboard empresarial.
+- [x] FE-06-02: Reutilizar bootstrap existente, loading/erro e acessibilidade básica.
 - [ ] FE-06-03: Integrar saída da sessão e limpeza de estado privado.
 - [ ] FE-06-04: Testar E2E da navegação autenticada com API real.
+
+FE-06-01/02 cobrem o shell e a apresentação visual da Home. As opções de
+navegação ficam no menu lateral; a visão geral inclui gráficos e indicadores
+fictícios somente para demonstração, com aviso visível de que não são dados da
+empresa. Equipe e configurações são rotas de proprietário; leads e conversas
+são telas com estado explícito de indisponibilidade para os perfis empresariais.
 
 ## Aceite
 
@@ -64,8 +74,43 @@ Não acessar produção; dados/e-mails de teste são isolados.
 
 ## Definições pendentes
 
-**Aguardando resposta:** URLs/nomes das áreas privadas e DTO mínimo do shell.
-Sessão depende da etapa 03; não escolher storage ou renovação silenciosamente.
+**Aguardando resposta:** contratos HTTP/DTOs para operações do domínio, política
+de recursos fora de escopo e decisões de sessão/revogação ainda listadas nas
+etapas relacionadas. Não escolher armazenamento ou renovação silenciosamente.
 Indicadores comerciais permanecem na etapa 08.
 
-Não houve implementação ou execução de teste ao criar esta spec.
+## Atualização — decisões de escopo de 2026-11-02
+
+O escopo aprovado para o dashboard empresarial inclui Home sem métricas,
+empresa/configurações, equipe, leads e conversas. A matriz de capacidades
+está em [decisions.md](../../../../backend/.specs/roadmaps/dashboards/decisions.md),
+DASH-D10–D18. Cadastro de usuário cliente não concede dashboard; usuário
+de equipe não é lead; o contato com uma empresa pelo perfil público cria o
+lead vinculado àquela empresa.
+
+O shell não apresenta conteúdo de exemplo nem transforma módulo sem API em
+funcionalidade concluída. O menu deriva do perfil verificado; rotas de
+proprietário não são acessíveis ao atendente. O guard do frontend é apenas
+controle de navegação e não substitui autorização backend por requisição.
+
+O shell não repete as opções do menu em cartões de navegação na visão geral.
+A Home usa a paleta institucional Civix (marinho, dourado e marfim), mantém o
+conteúdo demonstrativo sem o aviso destacado “Modo demonstração” e oferece
+alternância entre tema escuro e claro. A navegação lateral exibe a logo Civix
+com contraste adequado ao fundo marinho. Cada destino tem título,
+descrição e motivo específico de indisponibilidade; não apresenta ausência de
+registros como uma lista vazia legítima. Os gráficos não comprovam integração,
+fonte real ou funcionalidade dos módulos. Ainda não há fluxos E2E de operações
+reais, autorização por tenant, logout, equipe, perfil empresarial, leads,
+conversas ou capa.
+
+**Aguardando resposta:** DTOs e contratos HTTP de domínio, catálogo de status e
+política de 403/404 para recurso fora do escopo. A implementação de conversas
+depende das decisões de domínio e persistência da etapa 07.
+
+Verificações: 4 testes do layout (incluindo alternância de tema) e 4 testes
+focados das rotas do dashboard passaram; ESLint, TypeScript e `git diff
+--check` também passaram. A paleta clara e escura foi verificada no navegador
+com a API local. O teste geral de rotas continua incluindo uma falha de
+assertiva da página About, não relacionada ao dashboard. Indicadores na Home
+são mock visual, não integração real.

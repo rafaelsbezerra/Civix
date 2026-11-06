@@ -285,6 +285,20 @@ h2 {
   letter-spacing: -1px;
 }
 
+.company-dashboard h1#company-dashboard-title {
+  color: #f7f9fc;
+  font-size: clamp(30px, 3vw, 40px);
+  letter-spacing: normal;
+  line-height: 1.15;
+  margin-bottom: 0;
+  text-transform: none;
+}
+
+.company-dashboard h2 {
+  color: #f7f9fc !important;
+  letter-spacing: normal;
+}
+
 .clear-button {
   background: none;
   color: #6f7b82;

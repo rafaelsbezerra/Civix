@@ -31,10 +31,11 @@ describe('Escolha e formulários de acesso', () => {
   it.each([
     ['Sou empresa', '/login/empresa'],
     ['Sou cliente', '/login/cliente'],
-  ])('escolha %s contém somente dois destinos e abre %s', (label, destination) => {
+    ['Sou atendente', '/login/atendente'],
+  ])('escolha %s abre %s', (label, destination) => {
     const { container } = render(<MemoryRouter initialEntries={['/login']}><AccessChoice /></MemoryRouter>)
     expect(screen.getByRole('heading', { name: 'Escolha seu acesso' })).toBeInTheDocument()
-    expect(screen.getAllByRole('button')).toHaveLength(2)
+    expect(screen.getAllByRole('button')).toHaveLength(3)
     expect(container.querySelector('form')).toBeNull()
     expect(screen.queryByRole('textbox')).not.toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: new RegExp(label) }))
@@ -53,8 +54,8 @@ describe('Escolha e formulários de acesso', () => {
     expect(navigate).not.toHaveBeenCalled()
   })
 
-  it('acesso empresarial envia e-mail e senha sem escolher perfil e mantém destino Home', async () => {
-    respond({ data: { token: 'token-teste', user: {
+  it('login empresarial encaminha admin_empresa para o dashboard após autenticação', async () => {
+    respond({ data: { user: {
       id: 'user-1', email: 'empresa@example.test', role: 'admin_empresa', companyId: 'company-1',
     } } }, 200)
     render(<MemoryRouter initialEntries={['/login/empresa']}><Login /></MemoryRouter>)
@@ -62,8 +63,34 @@ describe('Escolha e formulários de acesso', () => {
     fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'empresa@example.test' } })
     fireEvent.change(screen.getByLabelText('Senha'), { target: { value: 'senha-teste' } })
     fireEvent.click(screen.getByRole('button', { name: 'Login' }))
-    await waitFor(() => expect(setItem).toHaveBeenCalledWith('token', 'token-teste'))
-    expect(JSON.parse(String(fetchMock.mock.calls[0][1]?.body))).toEqual({ email: 'empresa@example.test', password: 'senha-teste' })
-    expect(navigate).toHaveBeenCalledWith('/')
+    await waitFor(() => expect(navigate).toHaveBeenCalledWith('/dashboard-empresa'))
+    expect(JSON.parse(String(fetchMock.mock.calls[0][1]?.body))).toEqual({
+      email: 'empresa@example.test',
+      password: 'senha-teste',
+      role: 'admin_empresa',
+    })
+    expect(setItem).not.toHaveBeenCalled()
+  })
+
+  it('login do atendente envia o papel esperado e abre o dashboard operacional', async () => {
+    respond({ data: { user: {
+      id: 'attendant-1',
+      email: 'atendente@example.test',
+      role: 'atendente',
+      companyId: 'company-1',
+    } } }, 200)
+    render(<MemoryRouter initialEntries={['/login/atendente']}><Login access="atendente" /></MemoryRouter>)
+
+    fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'atendente@example.test' } })
+    fireEvent.change(screen.getByLabelText('Senha'), { target: { value: 'senha-teste' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Login' }))
+
+    await waitFor(() => expect(navigate).toHaveBeenCalledWith('/dashboard-atendente'))
+    expect(JSON.parse(String(fetchMock.mock.calls[0][1]?.body))).toEqual({
+      email: 'atendente@example.test',
+      password: 'senha-teste',
+      role: 'atendente',
+    })
+    expect(setItem).not.toHaveBeenCalled()
   })
 })

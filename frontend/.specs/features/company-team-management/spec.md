@@ -68,4 +68,18 @@ Não acessar produção; dados/e-mails de teste são isolados.
 Convites de equipe, remoção/desativação e mudanças de perfil precisam de limites
 canônicos; não decidir exclusão de dados ou regra comercial na UI.
 
+## Atualização — decisões de 2026-11-02
+
+O dono pode convidar, consultar, editar perfil, bloquear/desbloquear e remover
+atendentes; consultar atividades; e transferir a propriedade para atendente
+ativo da mesma empresa. O dono anterior passa a atendente. Bloquear revoga
+acesso imediatamente; remover encerra o vínculo, preserva histórico e deixa
+atendimentos sem responsável para o dono reassumir/atribuir. Detalhes da matriz
+estão em DASH-D15/D16 de
+[decisions.md](../../../../backend/.specs/roadmaps/dashboards/decisions.md).
+
+**Aguardando resposta:** campos editáveis do integrante, rotas/DTOs finais,
+política de bloqueio da empresa e regras de concorrência/idempotência. A UI
+não deve oferecer ações além das capabilities retornadas pelo backend.
+
 Não houve implementação ou execução de teste ao criar esta spec.

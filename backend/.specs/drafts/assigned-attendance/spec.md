@@ -52,6 +52,14 @@ Canal ausente é limite explícito, sem simular entrega como confirmação funci
 
 ## Aguardando resposta
 
-P01/P06/P07/P08: estados, canais, integração IA/WhatsApp, fonte de mensagens,
-retenção/anexos, lead/contato e atualização em tempo real versus consulta.
-Não escolher fila, websocket, provedor ou automação nesta documentação.
+P06/P07/P08: estados, canais, integração IA/WhatsApp, fonte de mensagens além
+do contato inicial, retenção/anexos e atualização em tempo real versus consulta.
+O dono pode ler/responder conversas da própria empresa; o atendente vê e
+responde atribuídos ou assumidos; somente atendentes ativos da mesma empresa
+são destinos de atribuição/transferência; super_admin não acessa conversas.
+Regras aprovadas em DASH-D13/D14 de
+[decisions.md](../../roadmaps/dashboards/decisions.md).
+
+Quem pode atribuir/transferir e assumir disponíveis não está mais pendente:
+ver matriz acima. Permanecem pendentes o catálogo de estados, o canal além do
+contato inicial, concorrência de atribuição e as URLs/DTOs HTTP finais.
