@@ -13,6 +13,7 @@ import {
 import { useAsyncQuery } from '../../hooks/useAsyncQuery';
 import { ActionConfirmation } from '../../components/dashboard-super-admin/ActionConfirmation';
 import { CompanyPagination } from '../../components/dashboard-super-admin/CompanyPagination';
+import { DashboardPageLoader } from '../../components/dashboard-super-admin/DashboardPageLoader';
 import { UserForm } from '../../components/dashboard-super-admin/UserForm';
 import type { SuperAdminContext } from '../../components/dashboard-super-admin/layout/SuperAdminLayout';
 import { Badge } from '../../components/ui/badge';
@@ -77,6 +78,7 @@ function UsersWorkspace({ companyId }: { companyId: string | null }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
+  const [ready, setReady] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -94,6 +96,9 @@ function UsersWorkspace({ companyId }: { companyId: string | null }) {
   }, [companyId, filters, page, handleError]);
 
   const query = useAsyncQuery(JSON.stringify([companyId, filters, page, retry]), load);
+  if (!ready && !query.loading) {
+    setReady(true);
+  }
   const unavailable =
     !!query.data?.company &&
     (!!query.data.company.deleted_at || query.data.company.status === 'inativo');
@@ -168,6 +173,8 @@ function UsersWorkspace({ companyId }: { companyId: string | null }) {
 
   return (
     <div ref={setPortal} style={theme} className="space-y-6">
+      {!ready && <DashboardPageLoader label="Carregando usuários…" />}
+      <div className={ready ? 'sa-page-enter space-y-6' : 'hidden'}>
       <div className="flex flex-wrap items-center justify-between gap-3">
         {companyId ? (
           <div className="flex flex-wrap items-center gap-3">
@@ -526,6 +533,7 @@ function UsersWorkspace({ companyId }: { companyId: string | null }) {
           }}
         />
       )}
+      </div>
     </div>
   );
 }

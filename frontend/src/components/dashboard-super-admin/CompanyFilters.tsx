@@ -1,4 +1,4 @@
-import { useCallback, useId, useState } from 'react';
+import { useCallback, useEffect, useId, useState } from 'react';
 import { Search } from 'lucide-react';
 import { getPlatformPlans } from '../../lib/api';
 import { useAsyncQuery } from '../../hooks/useAsyncQuery';
@@ -8,14 +8,17 @@ import { Input } from '../ui/input';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../ui/select';
 
 const selectClass = 'w-full min-h-11 border-input! bg-muted/40 text-foreground hover:bg-muted/60 dark:bg-input/30 dark:hover:bg-input/50';
-export function CompanyFilters({ onError, onApply }: {
-  onError: (error: unknown) => string; onApply: (filters: { q: string; status: string; planId: string }) => void;
+export function CompanyFilters({ onError, onApply, onLoadingChange }: {
+  onError: (error: unknown) => string; onApply: (filters: { q: string; status: string; planId: string }) => void; onLoadingChange?: (loading: boolean) => void;
 }) {
   const [retry, setRetry] = useState(0);
   const [portal, setPortal] = useState<HTMLDivElement | null>(null);
   const id = useId();
   const load = useCallback(() => getPlatformPlans().catch(error => { throw new Error(onError(error), { cause: error }); }), [onError]);
   const plans = useAsyncQuery('company-filter-plans:' + retry, load);
+  useEffect(() => {
+    onLoadingChange?.(plans.loading);
+  }, [plans.loading, onLoadingChange]);
   const statuses = [{ value: '', label: 'Todos' }, { value: 'ativo', label: 'Ativas' }, { value: 'inativo', label: 'Inativas' }, { value: 'archived', label: 'Arquivadas' }];
   const planOptions = [{ value: '', label: plans.loading ? 'Carregando planos…' : 'Todos os planos' }, ...(plans.data ?? []).map(plan => ({ value: plan.id, label: plan.name + (plan.isActive ? '' : ' (inativo)') }))];
   return <div ref={setPortal}><Card className="rounded-2xl py-5"><CardContent className="px-5">

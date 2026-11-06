@@ -1,4 +1,4 @@
-import { useCallback, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { Search } from 'lucide-react';
 import { getPlatformCompanies, type PlatformCompany } from '../../lib/api';
 import { useAsyncQuery } from '../../hooks/useAsyncQuery';
@@ -14,11 +14,13 @@ export function CompanyPicker({
   onSelect,
   onError,
   includeArchived = false,
+  onLoadingChange,
 }: {
   selectedId: string;
   onSelect: (company: PlatformCompany) => void;
   onError: (error: unknown) => string;
   includeArchived?: boolean;
+  onLoadingChange?: (loading: boolean) => void;
 }) {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
@@ -37,6 +39,10 @@ export function CompanyPicker({
   );
 
   const query = useAsyncQuery(JSON.stringify([search, page, retry, includeArchived]), load);
+
+  useEffect(() => {
+    onLoadingChange?.(query.loading);
+  }, [query.loading, onLoadingChange]);
 
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();

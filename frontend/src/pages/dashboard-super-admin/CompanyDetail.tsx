@@ -4,6 +4,7 @@ import { Archive, ArrowLeft, Building2, CircleCheckBig, Layers3, Mail, MapPin, P
 import { changePlatformCompanyState, getPlatformCompany, getPlatformPlans, type PlatformCompany } from '../../lib/api';
 import { useAsyncQuery } from '../../hooks/useAsyncQuery';
 import { ActionConfirmation } from '../../components/dashboard-super-admin/ActionConfirmation';
+import { DashboardPageLoader } from '../../components/dashboard-super-admin/DashboardPageLoader';
 import type { SuperAdminContext } from '../../components/dashboard-super-admin/layout/SuperAdminLayout';
 import { Badge } from '../../components/ui/badge';
 import { Button } from '../../components/ui/button';
@@ -64,32 +65,30 @@ export default function CompanyDetail() {
 
   return (
     <div className="space-y-6 text-foreground" style={theme}>
-      <div className="flex items-center justify-between gap-4">
-        <Button variant="outline" className="min-h-10 rounded-xl px-4" render={<Link to="/dashboard/super-admin/companies" role="link" />} nativeButton={false}>
-          <ArrowLeft aria-hidden="true" />Voltar para empresas
-        </Button>
-      </div>
-
-      {notice && (
-        <div role="status" className="rounded-xl border bg-muted/50 p-4 text-sm font-medium">
-          {notice}
-        </div>
-      )}
-
       {query.loading ? (
-        <Card className="rounded-2xl py-10">
-          <CardContent className="text-center text-sm text-muted-foreground" role="status">
-            Carregando empresa…
-          </CardContent>
-        </Card>
-      ) : query.error ? (
-        <div role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive">
-          <p>{(query.error as Error).message}</p>
-          <Button variant="outline" className="min-h-10 rounded-xl" onClick={() => setRetry(value => value + 1)}>
-            Tentar novamente
-          </Button>
-        </div>
-      ) : company && (
+        <DashboardPageLoader label="Carregando empresa…" />
+      ) : (
+        <div className="sa-page-enter space-y-6">
+          <div className="flex items-center justify-between gap-4">
+            <Button variant="outline" className="min-h-10 rounded-xl px-4" render={<Link to="/dashboard/super-admin/companies" role="link" />} nativeButton={false}>
+              <ArrowLeft aria-hidden="true" />Voltar para empresas
+            </Button>
+          </div>
+
+          {notice && (
+            <div role="status" className="rounded-xl border bg-muted/50 p-4 text-sm font-medium">
+              {notice}
+            </div>
+          )}
+
+          {query.error ? (
+            <div role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive">
+              <p>{(query.error as Error).message}</p>
+              <Button variant="outline" className="min-h-10 rounded-xl" onClick={() => setRetry(value => value + 1)}>
+                Tentar novamente
+              </Button>
+            </div>
+          ) : company && (
         <>
           <Card className="rounded-2xl py-6">
             <CardHeader className="px-6">
@@ -218,6 +217,8 @@ export default function CompanyDetail() {
             />
           )}
         </>
+          )}
+        </div>
       )}
     </div>
   );

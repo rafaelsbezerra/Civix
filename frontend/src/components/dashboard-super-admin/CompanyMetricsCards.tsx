@@ -1,6 +1,7 @@
 import { Building2, CircleCheckBig, Layers3 } from 'lucide-react';
 import type { CompanyMetrics } from '../../lib/api';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '../ui/card';
+import { CountUpNumber } from './CountUpNumber';
 
 export function CompanyMetricsCards({ metrics }: { metrics: CompanyMetrics }) {
   const visiblePlans = metrics.byPlan.filter(plan => !/\bplano\b/i.test(plan.planName));
@@ -21,7 +22,7 @@ export function CompanyMetricsCards({ metrics }: { metrics: CompanyMetrics }) {
         </CardHeader>
         <CardContent className="px-4">
           <p className="text-3xl font-semibold tracking-tight tabular-nums">
-            {number.format(metrics.total)}
+            <CountUpNumber value={metrics.total} />
           </p>
           <CardDescription className="mt-1 text-xs">Toda a base cadastrada</CardDescription>
         </CardContent>
@@ -37,10 +38,10 @@ export function CompanyMetricsCards({ metrics }: { metrics: CompanyMetrics }) {
         <CardContent className="px-4">
           <div className="flex items-end justify-between gap-3">
             <p className="text-3xl font-semibold tracking-tight tabular-nums">
-              {number.format(metrics.active)}
+              <CountUpNumber value={metrics.active} />
             </p>
             <span className="pb-1 text-xs font-medium text-muted-foreground">
-              {number.format(activePercentage)}% da base
+              <CountUpNumber value={activePercentage} suffix="% da base" />
             </span>
           </div>
           <div
@@ -58,7 +59,8 @@ export function CompanyMetricsCards({ metrics }: { metrics: CompanyMetrics }) {
             />
           </div>
           <CardDescription className="mt-2 text-xs">
-            {number.format(metrics.inactive)} inativas · {number.format(metrics.archived)} arquivadas
+            <CountUpNumber value={metrics.inactive} suffix=" inativas" /> ·{' '}
+            <CountUpNumber value={metrics.archived} suffix=" arquivadas" />
           </CardDescription>
         </CardContent>
       </Card>
@@ -96,7 +98,7 @@ export function CompanyMetricsCards({ metrics }: { metrics: CompanyMetrics }) {
                     />
                   </div>
                   <span className="shrink-0 font-medium tabular-nums">
-                    {number.format(plan.count)}
+                    <CountUpNumber value={plan.count} />
                   </span>
                 </li>
               ))}

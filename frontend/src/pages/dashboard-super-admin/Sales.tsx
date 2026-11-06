@@ -20,6 +20,7 @@ import {
 import { ActionConfirmation } from '../../components/dashboard-super-admin/ActionConfirmation';
 import { CompanyPagination } from '../../components/dashboard-super-admin/CompanyPagination';
 import { CompanyPicker } from '../../components/dashboard-super-admin/CompanyPicker';
+import { DashboardPageLoader } from '../../components/dashboard-super-admin/DashboardPageLoader';
 import { PlanFilter } from '../../components/dashboard-super-admin/PlanFilter';
 import { SalesMetricsCards } from '../../components/dashboard-super-admin/SalesMetricsCards';
 import type { SuperAdminContext } from '../../components/dashboard-super-admin/layout/SuperAdminLayout';
@@ -53,6 +54,8 @@ export default function Sales() {
   const [draftPlanId, setDraftPlanId] = useState('');
   const [draftOrigin, setDraftOrigin] = useState('');
   const [plans, setPlans] = useState<Plan[]>([]);
+  const [plansLoading, setPlansLoading] = useState(true);
+  const [ready, setReady] = useState(false);
   const [companyName, setCompanyName] = useState('');
   const [page, setPage] = useState(1);
   const [retry, setRetry] = useState(0);
@@ -69,6 +72,10 @@ export default function Sales() {
   );
 
   const query = useAsyncQuery(JSON.stringify([filters, page, retry]), load);
+
+  if (!ready && !query.loading && !plansLoading) {
+    setReady(true);
+  }
 
   const filter = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -87,6 +94,8 @@ export default function Sales() {
 
   return (
     <div ref={setPortal} style={theme} className="space-y-6">
+      {!ready && <DashboardPageLoader label="Carregando vendas…" />}
+      <div className={ready ? 'sa-page-enter space-y-6' : 'hidden'}>
       <div className="flex flex-col gap-4 xl:flex-row xl:items-start">
         <div className="order-2 min-w-0 flex-1 xl:order-1">
           <SalesMetricsCards sales={query.data?.data ?? []} plans={plans} />
@@ -128,6 +137,7 @@ export default function Sales() {
               onValueChange={setDraftPlanId}
               portalContainer={portal}
               onPlansLoaded={setPlans}
+              onLoadingChange={setPlansLoading}
             />
 
             <Field>
@@ -349,6 +359,7 @@ export default function Sales() {
           }}
         />
       )}
+      </div>
     </div>
   );
 }

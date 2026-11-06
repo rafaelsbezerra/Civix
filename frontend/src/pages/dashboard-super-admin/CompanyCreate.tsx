@@ -5,6 +5,7 @@ import { getPlatformPlans, registerCompany, uploadCompanyImage, type CompanyRegi
 import { Button } from '../../components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader } from '../../components/ui/card';
 import { CompanyForm } from '../../components/dashboard-super-admin/CompanyForm';
+import { DashboardPageLoader } from '../../components/dashboard-super-admin/DashboardPageLoader';
 import type { SuperAdminContext } from '../../components/dashboard-super-admin/layout/SuperAdminLayout';
 
 const theme = {
@@ -59,23 +60,21 @@ export default function CompanyCreate() {
   };
   return (
     <div className="space-y-6 text-foreground" style={theme}>
-      <div className="flex items-center justify-between gap-4">
-        <Button variant="outline" className="min-h-10 rounded-xl" render={<Link to="/dashboard/super-admin/companies" />} nativeButton={false}>
-          <ArrowLeft aria-hidden="true" />Voltar para empresas
-        </Button>
-      </div>
-      {error && (
-        <div role="alert" className="rounded-xl border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive">
-          {error}
-        </div>
-      )}
       {loading ? (
-        <Card className="rounded-2xl py-10">
-          <CardContent className="text-center text-sm text-muted-foreground" role="status">
-            Carregando planos disponíveis…
-          </CardContent>
-        </Card>
-      ) : result ? (
+        <DashboardPageLoader label="Carregando planos disponíveis…" />
+      ) : (
+        <div className="sa-page-enter space-y-6">
+          <div className="flex items-center justify-between gap-4">
+            <Button variant="outline" className="min-h-10 rounded-xl" render={<Link to="/dashboard/super-admin/companies" />} nativeButton={false}>
+              <ArrowLeft aria-hidden="true" />Voltar para empresas
+            </Button>
+          </div>
+          {error && (
+            <div role="alert" className="rounded-xl border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive">
+              {error}
+            </div>
+          )}
+          {result ? (
         <Card className="max-w-3xl rounded-2xl py-6" role="region" aria-labelledby="company-created-title">
           <CardHeader className="px-6">
             <div className="flex items-center gap-3">
@@ -147,8 +146,10 @@ export default function CompanyCreate() {
             </div>
           </CardContent>
         </Card>
-      ) : (
-        <CompanyForm plans={plans} busy={busy} onSave={save} />
+          ) : (
+            <CompanyForm plans={plans} busy={busy} onSave={save} />
+          )}
+        </div>
       )}
     </div>
   );

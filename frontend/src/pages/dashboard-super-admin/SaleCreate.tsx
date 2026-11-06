@@ -12,6 +12,7 @@ import { useAsyncQuery } from '../../hooks/useAsyncQuery';
 import { Button } from '../../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { CompanyPicker } from '../../components/dashboard-super-admin/CompanyPicker';
+import { DashboardPageLoader } from '../../components/dashboard-super-admin/DashboardPageLoader';
 import { SaleForm } from '../../components/dashboard-super-admin/SaleForm';
 import type { SuperAdminContext } from '../../components/dashboard-super-admin/layout/SuperAdminLayout';
 
@@ -33,6 +34,8 @@ export default function SaleCreate() {
   const [error, setError] = useState('');
   const [result, setResult] = useState<PlatformSale | null>(null);
   const [retry, setRetry] = useState(0);
+  const [pickerLoading, setPickerLoading] = useState(true);
+  const [ready, setReady] = useState(false);
   const operation = useRef<{ id: string; payload: string } | null>(null);
 
   const load = useCallback(
@@ -48,6 +51,10 @@ export default function SaleCreate() {
   );
 
   const query = useAsyncQuery(companyId + ':' + retry, load);
+
+  if (!ready && !pickerLoading && (!companyId || !query.loading)) {
+    setReady(true);
+  }
 
   const save = async (input: ManualSaleDraft) => {
     if (busy) return;
@@ -68,6 +75,8 @@ export default function SaleCreate() {
 
   return (
     <div style={theme} className="space-y-6">
+      {!ready && <DashboardPageLoader label="Carregando lançamento de venda…" />}
+      <div className={ready ? 'sa-page-enter space-y-6' : 'hidden'}>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Button
           variant="outline"
@@ -133,6 +142,7 @@ export default function SaleCreate() {
           <CompanyPicker
             selectedId={companyId}
             onError={handleError}
+            onLoadingChange={setPickerLoading}
             onSelect={company => {
               setCompanyId(company.id);
               operation.current = null;
@@ -177,6 +187,7 @@ export default function SaleCreate() {
             ))}
         </>
       )}
+      </div>
     </div>
   );
 }

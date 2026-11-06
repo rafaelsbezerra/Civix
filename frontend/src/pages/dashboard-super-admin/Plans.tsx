@@ -21,6 +21,8 @@ import {
   TableRow,
 } from '../../components/ui/table';
 import { PlanForm } from '../../components/dashboard-super-admin/PlanForm';
+import { CountUpNumber } from '../../components/dashboard-super-admin/CountUpNumber';
+import { DashboardPageLoader } from '../../components/dashboard-super-admin/DashboardPageLoader';
 import type { SuperAdminContext } from '../../components/dashboard-super-admin/layout/SuperAdminLayout';
 
 const periods = { monthly: 'Mensal', yearly: 'Anual', one_time: 'Único' } as const;
@@ -112,6 +114,8 @@ export default function Plans() {
 
   return (
     <div style={theme} className="space-y-6">
+      {loading && <DashboardPageLoader label="Carregando planos…" />}
+      <div className={!loading ? 'sa-page-enter space-y-6' : 'hidden'}>
       <div className="flex flex-wrap items-center justify-end gap-3">
         <Button
           className="min-h-11 rounded-xl px-5"
@@ -168,8 +172,8 @@ export default function Plans() {
         <div className="flex flex-wrap items-center justify-between gap-4 border-b px-6 py-4">
           <div className="flex items-center gap-2.5">
             <h2 className="text-base font-semibold">Catálogo de planos</h2>
-            <Badge variant="outline" className="rounded-full px-2.5 py-0.5 text-xs">
-              {plans.length}
+            <Badge variant="outline" className="rounded-full px-2.5 py-0.5 text-xs tabular-nums">
+              <CountUpNumber value={plans.length} />
             </Badge>
           </div>
           <label htmlFor="plan-search" className="relative block w-full sm:w-72">
@@ -286,6 +290,7 @@ export default function Plans() {
           </Table>
         )}
       </Card>
+      </div>
     </div>
   );
 }

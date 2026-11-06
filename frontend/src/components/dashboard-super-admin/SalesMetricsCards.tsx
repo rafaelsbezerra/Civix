@@ -1,6 +1,7 @@
 import { Calendar, DollarSign, Layers3 } from 'lucide-react';
 import type { Plan, PlatformSale } from '../../lib/api';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
+import { CountUpNumber } from './CountUpNumber';
 
 export function SalesMetricsCards({
   sales,
@@ -70,10 +71,10 @@ export function SalesMetricsCards({
         </CardHeader>
         <CardContent className="px-4">
           <p className="text-3xl font-semibold tracking-tight tabular-nums">
-            {currency.format(totalRevenue)}
+            <CountUpNumber value={totalRevenue} format="currency" />
           </p>
           <CardDescription className="mt-1 text-xs">
-            Soma de todas as vendas ({number.format(sales.length)})
+            Soma de todas as vendas (<CountUpNumber value={sales.length} />)
           </CardDescription>
         </CardContent>
       </Card>
@@ -88,10 +89,10 @@ export function SalesMetricsCards({
         <CardContent className="px-4">
           <div className="flex items-end justify-between gap-3">
             <p className="text-3xl font-semibold tracking-tight tabular-nums">
-              {currency.format(monthlyRevenue)}
+              <CountUpNumber value={monthlyRevenue} format="currency" />
             </p>
             <span className="pb-1 text-xs font-medium text-muted-foreground">
-              {number.format(monthlyShare)}% do total
+              <CountUpNumber value={monthlyShare} suffix="% do total" />
             </span>
           </div>
           <div
@@ -109,7 +110,7 @@ export function SalesMetricsCards({
             />
           </div>
           <CardDescription className="mt-2 text-xs">
-            {number.format(monthlySales.length)} vendas no mês atual (UTC)
+            <CountUpNumber value={monthlySales.length} suffix=" vendas no mês atual (UTC)" />
           </CardDescription>
         </CardContent>
       </Card>
@@ -147,7 +148,7 @@ export function SalesMetricsCards({
                     />
                   </div>
                   <span className="shrink-0 font-medium tabular-nums">
-                    {currency.format(item.revenue)}
+                    <CountUpNumber value={item.revenue} format="currency" />
                   </span>
                 </li>
               ))}

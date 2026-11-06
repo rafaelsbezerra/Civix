@@ -11,12 +11,14 @@ export function PlanFilter({
   onValueChange,
   portalContainer,
   onPlansLoaded,
+  onLoadingChange,
 }: {
   onError: (error: unknown) => string;
   value?: string;
   onValueChange?: (value: string) => void;
   portalContainer?: HTMLElement | null;
   onPlansLoaded?: (plans: Plan[]) => void;
+  onLoadingChange?: (loading: boolean) => void;
 }) {
   const [retry, setRetry] = useState(0);
   const [internalValue, setInternalValue] = useState('');
@@ -38,6 +40,10 @@ export function PlanFilter({
   );
 
   const query = useAsyncQuery('plan-filter:' + retry, load);
+
+  useEffect(() => {
+    onLoadingChange?.(query.loading);
+  }, [query.loading, onLoadingChange]);
 
   useEffect(() => {
     if (query.data) {
