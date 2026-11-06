@@ -1,7 +1,7 @@
 # Design do dashboard superadmin
 
 Requisitos visuais confirmados em 2026-11-02. Complementa a [spec](spec.md).
-Somente especificação: tema/alternância não foram implementados nesta tarefa.
+Design implementado; evidências e limites de verificação estão no task backend.
 
 ## Identidade visual e referências
 
@@ -62,9 +62,9 @@ rolagem de tabela quando necessária e sem esconder ações essenciais.
 Disponibilizar controle acessível e identificado para alternar claro/escuro
 no layout administrativo. Não depender apenas de ícone sem nome acessível.
 Modo claro é o padrão, independentemente do tema do sistema no primeiro uso.
-**Aguardando resposta:** persistir a preferência entre visitas? Se sim,
-definir armazenamento/escopo antes de implementar essa parte; não criar
-coluna de usuário, cookie ou nova API de preferências por antecipação.
+Preferência claro/escuro deve ser lembrada neste navegador, conforme decisão
+do usuário em 2026-11-02. Usar armazenamento local de preferência, sem API,
+coluna de usuário ou cookie; primeiro uso permanece claro.
 
 Escopar o tema ao dashboard e aos seus diálogos/portais. Evitar mudar a
 aparência do site público ao visitar a área administrativa ou sair dela.
@@ -82,11 +82,11 @@ identidade por página. Layout não redesenha a navegação do site público.
 
 - frontend/src/index.css: mapear tokens de tema e variantes escopadas ao
   dashboard, preservando os tokens de marca e o site público.
-- frontend/src/components/layout/SuperAdminLayout.tsx: aplicar contexto
+- frontend/src/components/dashboard-super-admin/layout/SuperAdminLayout.tsx: aplicar contexto
   visual e renderizar o controle de tema.
-- frontend/src/components/super-admin/ThemeToggle.tsx: controle de alternância
+- frontend/src/components/dashboard-super-admin/ThemeToggle.tsx: controle de alternância
   se extração for necessária, sem instalar biblioteca apenas para isso.
-- frontend/src/pages/super-admin/*.tsx e components/super-admin/*.tsx:
+- frontend/src/pages/dashboard-super-admin/*.tsx e components/dashboard-super-admin/*.tsx:
   consumir tokens semânticos, sem duplicar paletas por tela.
 
 ## Aceite visual

@@ -152,7 +152,7 @@ test('Papéis e sessão consultam identidade persistida sem banco externo', asyn
     await t.test('Contexto de acesso rejeita usuário persistido sem vínculo mesmo com senha', async context => {
       await seed();
       const { userRepository } = await import('../src/persistence/user.repository.js');
-      const { getAuthenticatedUser } = await import('../src/services/user.access.service.js');
+      const { getAuthenticatedUser } = await import('../src/services/user.service.js');
       context.mock.method(userRepository, 'getById', async () => ({ ...user(), company_id: null }));
       await assert.rejects(getAuthenticatedUser(userId), { status: 401 });
     });

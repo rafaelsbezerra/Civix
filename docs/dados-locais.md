@@ -94,7 +94,7 @@ npm run dev
 
 O comando aceita os quatro papéis: admin_empresa, super_admin, atendente e cliente. Os três primeiros exigem senha; admin/atendente exigem empresa existente. Somente o hash bcrypt é persistido. E-mail é único independentemente do papel e de maiúsculas/minúsculas. Não há cadastro público de cliente.
 
-Para preparar um ambiente vazio, use primeiro npm run user:bootstrap-super-admin em terminal interativo, faça login e cadastre a empresa pela API. Depois crie usuários vinculados. Não há dados comerciais nem senhas padrão.
+Para preparar um ambiente vazio, defina USE_MOCK_DATA=true e use npm run mock:user:create em terminal interativo, escolhendo super_admin, faça login e cadastre a empresa pela API. Depois crie usuários vinculados. Não há dados comerciais nem senhas padrão.
 
 Login recebe email/password; role é filtro opcional. Cliente não autentica. O token está em data.token e tokens antigos exigem novo login. Para conversão explícita de JSON legado com backup, consulte o [guia de usuários e storage](storage.md).
 

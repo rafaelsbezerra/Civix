@@ -1,0 +1,262 @@
+name: 'Civix Local'
+values:
+  - key: baseUrl
+    value: 'http://localhost:3000'
+    enabled: true
+    type: default
+    description: 'Origem do backend, sem barra final.'
+  - key: confirmedWriteBaseUrl
+    value: ''
+    enabled: true
+    type: default
+    description: 'Repita exatamente baseUrl para confirmar mutações neste ambiente.'
+  - key: accessToken
+    value: ''
+    enabled: true
+    type: secret
+    description: 'JWT opcional. O fluxo padrão usa o cookie sessao.'
+  - key: allowWrites
+    value: 'false'
+    enabled: true
+    type: default
+    description: 'Defina true para permitir operações que criam ou alteram dados.'
+  - key: allowDestructive
+    value: 'false'
+    enabled: true
+    type: default
+    description: 'Defina true, junto de allowWrites, para suspender, arquivar ou excluir.'
+  - key: allowAdministrativeWrites
+    value: 'false'
+    enabled: true
+    type: default
+    description: 'Permite alterações administrativas depois da confirmação do ambiente.'
+  - key: allowEmails
+    value: 'false'
+    enabled: true
+    type: default
+    description: 'Permite fluxos que podem enviar e-mails.'
+  - key: allowIdentityWrites
+    value: 'false'
+    enabled: true
+    type: default
+    description: 'Permite redefinição e definição de senha.'
+  - key: allowStorage
+    value: 'false'
+    enabled: true
+    type: default
+    description: 'Permite gravar arquivos no storage configurado.'
+  - key: allowProfileUpdate
+    value: 'false'
+    enabled: true
+    type: default
+    description: 'Permite alterar o próprio perfil e invalidar a sessão.'
+  - key: allowRoleSwitch
+    value: 'false'
+    enabled: true
+    type: default
+    description: 'Permite substituir a sessão ativa por outro papel.'
+  - key: superAdminEmail
+    value: ''
+    enabled: true
+    type: secret
+    description: 'E-mail do superadmin usado no login.'
+  - key: superAdminPassword
+    value: ''
+    enabled: true
+    type: secret
+    description: 'Senha do superadmin usado no login.'
+  - key: companyAdminEmail
+    value: ''
+    enabled: true
+    type: secret
+    description: 'E-mail de um admin_empresa.'
+  - key: companyAdminPassword
+    value: ''
+    enabled: true
+    type: secret
+    description: 'Senha de um admin_empresa.'
+  - key: attendantEmail
+    value: ''
+    enabled: true
+    type: secret
+    description: 'E-mail de um atendente.'
+  - key: attendantPassword
+    value: ''
+    enabled: true
+    type: secret
+    description: 'Senha de um atendente.'
+  - key: newPassword
+    value: ''
+    enabled: true
+    type: secret
+    description: 'Nova senha com no mínimo 8 caracteres.'
+  - key: resetToken
+    value: ''
+    enabled: true
+    type: secret
+    description: 'Token recebido pelo fluxo de recuperação.'
+  - key: inviteToken
+    value: ''
+    enabled: true
+    type: secret
+    description: 'Token recebido pelo convite.'
+  - key: inviteEmail
+    value: ''
+    enabled: true
+    type: secret
+    description: 'E-mail usado no reenvio de convite.'
+  - key: passwordRecoveryEmail
+    value: ''
+    enabled: true
+    type: secret
+    description: 'E-mail usado na recuperação de senha.'
+  - key: profileName
+    value: ''
+    enabled: true
+    type: default
+    description: 'Nome usado na edição do próprio perfil.'
+  - key: profileEmail
+    value: ''
+    enabled: true
+    type: secret
+    description: 'E-mail usado na edição do próprio perfil.'
+  - key: companyId
+    value: ''
+    enabled: true
+    type: default
+    description: 'UUID capturado das respostas de empresa.'
+  - key: companyUserId
+    value: ''
+    enabled: true
+    type: default
+    description: 'ID capturado do usuário empresarial.'
+  - key: administratorId
+    value: ''
+    enabled: true
+    type: default
+    description: 'ID capturado de outro superadmin.'
+  - key: planId
+    value: ''
+    enabled: true
+    type: default
+    description: 'ID capturado de um plano.'
+  - key: saleId
+    value: ''
+    enabled: true
+    type: default
+    description: 'UUID capturado de uma venda manual.'
+  - key: initialSaleId
+    value: ''
+    enabled: true
+    type: default
+    description: 'UUID capturado da venda de criação da empresa.'
+  - key: imageId
+    value: ''
+    enabled: true
+    type: default
+    description: 'UUID capturado após upload de capa.'
+  - key: companyOperationId
+    value: ''
+    enabled: true
+    type: default
+    description: 'UUID de idempotência do cadastro da empresa.'
+  - key: salePlanOperationId
+    value: ''
+    enabled: true
+    type: default
+    description: 'UUID de idempotência da venda manual vinculada ao plano.'
+  - key: saleAmountOperationId
+    value: ''
+    enabled: true
+    type: default
+    description: 'UUID de idempotência da venda manual com valor informado.'
+  - key: imageFilePath
+    value: 'postman/fixtures/company-cover.png'
+    enabled: true
+    type: default
+    description: 'Caminho de PNG, JPG ou WEBP de até 10 MB, relativo à raiz do repositório.'
+  - key: searchTerm
+    value: 'Civix'
+    enabled: true
+    type: default
+    description: 'Termo da busca pública.'
+  - key: category
+    value: 'Serviços'
+    enabled: true
+    type: default
+    description: 'Categoria usada nos filtros e cadastros.'
+  - key: state
+    value: 'CE'
+    enabled: true
+    type: default
+    description: 'Estado usado nos filtros e cadastros.'
+  - key: companySize
+    value: 'pequena'
+    enabled: true
+    type: default
+    description: 'pequena, media ou grande.'
+  - key: page
+    value: '1'
+    enabled: true
+    type: default
+    description: 'Página administrativa.'
+  - key: limit
+    value: '20'
+    enabled: true
+    type: default
+    description: 'Itens por página, máximo 100.'
+  - key: companyName
+    value: ''
+    enabled: true
+    type: default
+    description: 'Gerado antes do cadastro quando vazio.'
+  - key: companyCnpj
+    value: ''
+    enabled: true
+    type: default
+    description: 'Gerado antes do cadastro quando vazio.'
+  - key: companyEmail
+    value: ''
+    enabled: true
+    type: secret
+    description: 'Gerado antes do cadastro quando vazio.'
+  - key: planName
+    value: ''
+    enabled: true
+    type: default
+    description: 'Gerado antes da criação quando vazio.'
+  - key: planSlug
+    value: ''
+    enabled: true
+    type: default
+    description: 'Gerado antes da criação quando vazio.'
+  - key: managedUserName
+    value: 'Atendente Postman'
+    enabled: true
+    type: default
+    description: 'Nome usado no convite empresarial.'
+  - key: managedUserEmail
+    value: ''
+    enabled: true
+    type: secret
+    description: 'Gerado antes do convite quando vazio.'
+  - key: administratorName
+    value: 'Superadmin Postman'
+    enabled: true
+    type: default
+    description: 'Nome usado no convite de superadmin.'
+  - key: administratorEmail
+    value: ''
+    enabled: true
+    type: secret
+    description: 'Gerado antes do convite quando vazio.'
+  - key: deactivationReason
+    value: 'Validação administrativa via Postman.'
+    enabled: true
+    type: default
+    description: 'Motivo obrigatório das desativações e exclusões.'
+  - key: soldAt
+    value: ''
+    enabled: true
+    type: default
+    description: 'Data UTC da venda; gerada quando vazia.'

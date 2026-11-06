@@ -8,6 +8,66 @@ import { AppError } from '../shared/errors/app.error.js';
 import { ErrorCode } from '../shared/errors/error.code.js';
 import { getPresignedImageUrl } from './storage.service.js';
 import { storageRepository } from '../persistence/storage.repository.js';
+import { z } from 'zod';
+import { createHash } from 'node:crypto';
+import type { UserId } from '../entities/user.entity.js';
+import { getAuthenticatedUser } from './user.service.js';
+import { validatePlanId } from './plan.service.js';
+import { requireSuperAdminActor } from './user.service.js';
+import { parsePagination, createPaginationMeta } from '../shared/contracts/pagination.contract.js';
+import type { CompanyAdministrationChange } from '../dtos/company.create.dto.js';
+import { presentSale } from './sale.service.js';
+
+function presentPlatformCompany(company: Company) {
+  const { cover_key: _cover, logo_key: _logo, ...result } = company;
+  return result;
+}
+export async function listPlatformCompanies(actorId: UserId, input: unknown) {
+  await requireSuperAdminActor(actorId);
+  const parsed = z.object({ q: z.string().trim().max(200).optional(), status: z.enum(['ativo','inativo','archived']).optional(),
+    planId: z.string().optional(), page: z.unknown().optional(), limit: z.unknown().optional() }).strict().safeParse(input);
+  if (!parsed.success) throw new AppError({ status: 400, code: ErrorCode.VALIDATION_ERROR, message: 'Filtros de empresa inválidos.' });
+  if (parsed.data.planId !== undefined) validatePlanId(parsed.data.planId);
+  const pagination = parsePagination({ page: parsed.data.page, pageSize: parsed.data.limit });
+  const { items, total } = await companyRepository.listPlatformCompanies({ ...parsed.data, ...pagination });
+  return { data: items.map(presentPlatformCompany), meta: createPaginationMeta(pagination, total) };
+}
+export async function getPlatformCompany(actorId: UserId, companyId: string) {
+  await requireSuperAdminActor(actorId);
+  if (!z.string().uuid().safeParse(companyId).success) throw new AppError({ status: 400, code: ErrorCode.VALIDATION_ERROR, message: 'ID da empresa inválido.' });
+  const company = await companyRepository.getById(companyId);
+  if (!company) throw new AppError({ status: 404, code: ErrorCode.NOT_FOUND, message: 'Empresa não encontrada.' });
+  return presentPlatformCompany(company);
+}
+export async function changeCompanyAdministration(actorId: UserId, companyId: string, action: CompanyAdministrationChange['action'], input: unknown) {
+  await requireSuperAdminActor(actorId);
+  if (!z.string().uuid().safeParse(companyId).success) throw new AppError({ status: 400, code: ErrorCode.VALIDATION_ERROR, message: 'ID da empresa inválido.' });
+  const schema = action === 'update' ? companyCreateSchema.extend({ planId: z.string() })
+    : action === 'suspend' || action === 'archive' ? z.object({ reason: z.string().trim().min(1).max(2000) }).strict() : z.object({}).strict();
+  const parsed = schema.safeParse(input ?? {});
+  if (!parsed.success) throw new AppError({ status: 400, code: ErrorCode.VALIDATION_ERROR, message: 'Dados da alteração inválidos; desativação e arquivamento exigem motivo.' });
+  const fields = action === 'update' ? parsed.data as unknown as CompanyAdministrationChange['fields'] : undefined;
+  if (fields) validatePlanId(fields.planId);
+  const reason = 'reason' in parsed.data ? String(parsed.data.reason) : undefined;
+  return presentPlatformCompany(await companyRepository.changeCompanyAdministration({ actorId, companyId, action, fields, reason, changedAt: new Date().toISOString() }));
+}
+
+const registrationSchema = companyCreateSchema.extend({
+  planId: z.string().trim().min(1).max(128), operationId: z.string().uuid().transform(value => value.toLowerCase()),
+}).strict();
+
+export async function createCompanyWithInitialSale(input: unknown, actorId: UserId) {
+  const actor = await getAuthenticatedUser(actorId);
+  if (actor.role !== 'super_admin') throw new AppError({ status: 403, code: ErrorCode.FORBIDDEN, message: 'Acesso exclusivo da administração da Civix.' });
+  const parsed = registrationSchema.safeParse(input);
+  if (!parsed.success) throw new AppError({ status: 400, code: ErrorCode.VALIDATION_ERROR, message: 'Dados da empresa, plano ou operação inválidos.' });
+  const { planId, operationId, ...fields } = parsed.data;
+  validatePlanId(planId);
+  const fingerprint = createHash('sha256').update(JSON.stringify({ ...fields, planId })).digest('hex');
+  const company: Company = { ...fields, id: randomUUID(), data_cadastro: new Date().toISOString(), status: 'ativo', verificado: false };
+  const result = await companyRepository.createCompanyWithInitialSale({ company, planId, operationId, fingerprint, actorId });
+  return { ...result, sale: presentSale(result.sale) };
+}
 
 export async function updateCompanyCoverKey(companyId: string, key: string | null, expectedKey: string | null): Promise<void> {
   if (!await companyRepository.updateCoverKey(companyId, key, expectedKey)) {
@@ -54,7 +114,7 @@ export async function createCompany(input: unknown): Promise<Company> {
 }
 
 export async function getCompanies(): Promise<Company[]> {
-  const companies = await companyRepository.getAll();
+  const companies = (await companyRepository.getAll()).filter(company => company.status !== 'inativo' && !company.deleted_at);
 
   logger().debug({
     event: 'company.queried',
@@ -67,7 +127,7 @@ export async function getCompanies(): Promise<Company[]> {
 }
 
 export async function getVerifiedCompanies(): Promise<Company[]> {
-  const companies = await companyRepository.getVerified();
+  const companies = (await companyRepository.getVerified()).filter(company => company.status !== 'inativo' && !company.deleted_at);
 
   logger().debug({
     event: 'company.queried',
@@ -80,7 +140,7 @@ export async function getVerifiedCompanies(): Promise<Company[]> {
 }
 
 export async function getCompaniesByCategory(category: string): Promise<Company[]> {
-  const companies = await companyRepository.getByCategory(category);
+  const companies = (await companyRepository.getByCategory(category)).filter(company => company.status !== 'inativo' && !company.deleted_at);
 
   logger().debug({
     event: 'company.queried',
@@ -93,7 +153,7 @@ export async function getCompaniesByCategory(category: string): Promise<Company[
 }
 
 export async function getCompaniesByState(state: string): Promise<Company[]> {
-  const companies = await companyRepository.getByState(state);
+  const companies = (await companyRepository.getByState(state)).filter(company => company.status !== 'inativo' && !company.deleted_at);
 
   logger().debug({
     event: 'company.queried',
@@ -106,7 +166,7 @@ export async function getCompaniesByState(state: string): Promise<Company[]> {
 }
 
 export async function getCompaniesBySize(size: 'pequena' | 'media' | 'grande'): Promise<Company[]> {
-  const companies = await companyRepository.getBySize(size);
+  const companies = (await companyRepository.getBySize(size)).filter(company => company.status !== 'inativo' && !company.deleted_at);
 
   logger().debug({
     event: 'company.queried',
@@ -119,7 +179,7 @@ export async function getCompaniesBySize(size: 'pequena' | 'media' | 'grande'): 
 }
 
 export async function searchCompanies(name: string): Promise<Company[]> {
-  const companies = await companyRepository.searchByName(name);
+  const companies = (await companyRepository.searchByName(name)).filter(company => company.status !== 'inativo' && !company.deleted_at);
 
   logger().debug({
     event: 'company.queried',
@@ -134,7 +194,7 @@ export async function searchCompanies(name: string): Promise<Company[]> {
 export async function getCompanyById(id: string): Promise<Company> {
   const company = await companyRepository.getById(id);
 
-  if (!company) {
+  if (!company || company.status === 'inativo' || company.deleted_at) {
     throw new AppError({
       status: 404,
       code: ErrorCode.NOT_FOUND,
@@ -153,8 +213,10 @@ export async function getCompanyById(id: string): Promise<Company> {
 }
 
 export async function presentCompany(company: Company) {
-  const { cover_key, logo_key: _logoKey, ...publicCompany } = company;
-  if (!cover_key || company.status === 'inativo') {
+  const { cover_key, logo_key: _logoKey, plan_id: _planId,
+    deleted_at: _deletedAt, deactivation_reason: _reason, deactivated_at: _deactivatedAt,
+    deactivated_by: _actor, ...publicCompany } = company;
+  if (!cover_key || company.status === 'inativo' || company.deleted_at) {
     return { ...publicCompany, cover_image_url: null };
   }
   const image = await storageRepository.getByObjectKey(cover_key);
@@ -163,7 +225,7 @@ export async function presentCompany(company: Company) {
   }
   try {
     const signed = await getPresignedImageUrl(image.id);
-    return { ...publicCompany, cover_image_url: signed.url, cover_image_url_expires_in: signed.expiresInSeconds };
+    return { ...publicCompany, cover_image_url: signed.url };
   } catch (error) {
     // Uma troca concorrente pode invalidar a imagem, mas não a empresa consultada.
     if (error instanceof AppError && error.status === 404) {

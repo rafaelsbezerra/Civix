@@ -9,9 +9,8 @@ import {
 
 import { useState } from "react";
 import type { FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
-import { ApiError, login } from "../lib/api";
-
+import { useNavigate, useLocation } from "react-router-dom";
+import { ApiError, login, logout } from "../lib/api";
 import civixLogo from "../assets/civix/logoCivix.png";
 import civixLogoDark from "../assets/civix/logoBackground.png";
 
@@ -132,6 +131,7 @@ export default function Login({ access = "empresa" }: { access?: "empresa" | "at
   const [error, setError] = useState<string | null>(null);
 
   const navigate = useNavigate();
+  const { state } = useLocation();
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -158,7 +158,13 @@ export default function Login({ access = "empresa" }: { access?: "empresa" | "at
         role: role === "empresa" ? "admin_empresa" : role === "atendente" ? "atendente" : undefined,
       });
 
-      localStorage.setItem("token", result.token);
+      // localStorage.setItem("token", result.token);
+
+      if (result.user.role === 'super_admin') {
+        await logout().catch(() => undefined);
+        setError("Credenciais inválidas.");
+        return;
+      }
 
       if (result.user.role === "atendente") {
         navigate("/dashboard-atendente");
@@ -222,11 +228,10 @@ export default function Login({ access = "empresa" }: { access?: "empresa" | "at
                 <button
                   type="button"
                   onClick={() => navigate("/login/empresa")}
-                  className={`w-full h-[clamp(70px,2vh,72px)] rounded-[6px] transition flex items-center px-[clamp(12px,1vw,20px)] text-left border ${
-                    role === "empresa"
+                  className={`w-full h-[clamp(70px,2vh,72px)] rounded-[6px] transition flex items-center px-[clamp(12px,1vw,20px)] text-left border ${role === "empresa"
                       ? "bg-[#d0d0d0] border-[#b5b5b5]"
                       : "bg-[#dedede] border-transparent hover:bg-[#d5d5d5]"
-                  }`}
+                    }`}
                 >
                   <div className="w-[clamp(30px,2.2vw,42px)] h-[clamp(30px,2.2vw,42px)] rounded-[5px] flex items-center justify-center mr-[clamp(10px,0.8vw,16px)] shrink-0 bg-[#c0c0c0]">
                     <Building2
@@ -252,11 +257,10 @@ export default function Login({ access = "empresa" }: { access?: "empresa" | "at
                 <button
                   type="button"
                   onClick={() => navigate("/login/cliente")}
-                  className={`w-full h-[clamp(70px,5vh,72px)] rounded-[6px] transition flex items-center px-[clamp(12px,1vw,20px)] text-left border ${
-                    role === "cliente"
+                  className={`w-full h-[clamp(70px,5vh,72px)] rounded-[6px] transition flex items-center px-[clamp(12px,1vw,20px)] text-left border ${role === "cliente"
                       ? "bg-[#d0d0d0] border-[#b5b5b5]"
                       : "bg-[#dedede] border-transparent hover:bg-[#d5d5d5]"
-                  }`}
+                    }`}
                 >
                   <div className="w-[clamp(30px,2.2vw,42px)] h-[clamp(30px,2.2vw,42px)] rounded-[5px] flex items-center justify-center mr-[clamp(10px,0.8vw,16px)] shrink-0 bg-[#c0c0c0]">
                     <User
@@ -301,6 +305,7 @@ export default function Login({ access = "empresa" }: { access?: "empresa" | "at
                 </button>
               </div>}
 
+              {state?.profileChanged && access === 'empresa' && <p role="status" className="mb-4 text-sm text-[#07192a]">Perfil atualizado. Entre novamente com seu novo e-mail.</p>}
               {error && (
                 <div role="alert" className="mb-4 p-3 rounded bg-red-100 border border-red-300 text-red-700 text-xs">
                   {error}

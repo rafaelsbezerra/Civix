@@ -1,58 +1,74 @@
 # Tarefas frontend — superadmin
 
+## Complemento de imagens — 2026-11-02
+
+- [x] IMG-F01: uploadCompanyImage e getCompanyImageUrl em lib/api.ts, Bearer
+  somente no upload, FormData com boundary gerado pelo navegador.
+- [x] IMG-F02: seletor e prévia de logo somente no cadastro; upload depois
+  de empresa/venda confirmadas, com reenvio isolado em falha.
+- [x] IMG-F03: envio separado da capa na edição, sem alterar vendas/plano;
+  validar arquivo e apresentar prévia e feedback, bloquear empresa inativa.
+- [x] IMG-F04: revisar, verificar testes de recuperação/multipart e navegador;
+  registrar resultados no PR da spec antes do commit funcional.
+
+Arquivos: lib/api.ts; components/dashboard-super-admin/CompanyImageInput.tsx,
+CompanyForm.tsx; pages/dashboard-super-admin/CompanyCreate.tsx e CompanyEdit.tsx;
+index.css. Sugestão de commit: feat(storage): support company image uploads.
+
 [Spec](spec.md) · [SDD](../../../../backend/.specs/features/super-admin-dashboard/sdd.md) ·
 [Plano E2E e revisão](../../../../backend/.specs/features/super-admin-dashboard/task.md).
-Somente planejamento. Não commitar sem revisão. Commits abaixo são sugestões;
+G0 a G4 e equivalentes concluídos. G5 a G8 autorizados para continuação,
+com decisões resolvidas; G5 a G7 implementados, G8 validado localmente; abertura do PR depende de acesso ao GitHub. Não commitar sem revisão. Commits abaixo são sugestões;
 não repetir commits para os mesmos grupos do plano backend.
 
 ## FE-SA-01 — Shell, após G1
 
-- [ ] Montar SuperAdminLayout.tsx e páginas/rotas privadas usando profile e
+- [x] Montar SuperAdminLayout.tsx e páginas/rotas privadas usando profile e
   ProtectedRoute, com loading/401/403/erro e logout local.
-- [ ] Ajustar login.tsx e AppRoute.tsx; preservar acesso público e destinos
+- [x] Ajustar login.tsx e AppRoute.tsx; preservar acesso público e destinos
   existentes de outros perfis. Não oferecer abas de módulos indisponíveis.
-- [ ] Testar acesso direto, reload, rede e teclado; revisar antes de commit.
+- [x] Testar acesso direto, reload, rede e teclado; revisar antes de commit.
 
 Alterar frontend/src/{routes/AppRoute.tsx,pages/login.tsx}; criar
-frontend/src/components/layout/SuperAdminLayout.tsx,
-frontend/src/pages/super-admin/Overview.tsx e frontend/src/lib/platform.api.ts.
+frontend/src/components/dashboard-super-admin/layout/SuperAdminLayout.tsx,
+frontend/src/pages/dashboard-super-admin/Overview.tsx; estender frontend/src/lib/api.ts existente.
 Sugestão: `feat(super-admin): add protected administration shell` (G2).
 
 ## FE-SA-01D — Identidade visual e temas, junto de G2
 
-- [ ] Aplicar o [design](design.md): branco/marfim, azul e amarelo do site;
+- [x] Aplicar o [design](design.md): branco/marfim, azul e amarelo do site;
   tema claro padrão e escuro de base azul-marinho.
-- [ ] Mapear tokens em frontend/src/index.css e aplicá-los ao
+- [x] Mapear tokens em frontend/src/index.css e aplicá-los ao
   SuperAdminLayout.tsx e componentes administrativos, incluindo portais.
-- [ ] Implementar alternância acessível em components/super-admin/ThemeToggle.tsx
-  se necessário. Definir persistência da preferência antes de implementá-la.
-- [ ] Conferir tipografia, responsividade, estados e contraste nos dois temas;
+- [x] Implementar alternância acessível em components/dashboard-super-admin/ThemeToggle.tsx
+  se necessário. Persistir preferência neste navegador, conforme aprovação.
+- [x] Conferir tipografia, responsividade, estados e contraste nos dois temas;
   verificar que o site público não muda. Revisar antes de commit.
 
 Sugestão após revisão: `feat(super-admin): add brand-aligned light and dark themes`.
-Nenhum CSS ou componente foi alterado nesta tarefa documental.
+CSS e componentes implementados com tema restrito ao dashboard.
 
 ## FE-SA-01L — Layout raiz compartilhado
 
-- [ ] Criar SuperAdminLayout.tsx, SuperAdminSidebar.tsx e SuperAdminHeader.tsx
-  em frontend/src/components/layout, com rotas filhas via Outlet e região main.
-- [ ] Sidebar com marca, itens aprovados/ativos e acesso ao perfil; header
+- [x] Criar SuperAdminLayout.tsx, SuperAdminSidebar.tsx e SuperAdminHeader.tsx
+  em frontend/src/components/dashboard-super-admin/layout, com rotas filhas via Outlet e região main.
+- [x] Sidebar com marca, itens aprovados/ativos e acesso ao perfil; header
   com título, identidade, alternância de tema, perfil e saída.
-- [ ] Integrar navegação aninhada em frontend/src/routes/AppRoute.tsx;
+- [x] Integrar navegação aninhada em frontend/src/routes/AppRoute.tsx;
   verificar comportamento responsivo, drawer/foco/teclado e os dois temas.
-- [ ] Revisar antes do commit; sem menus/ações sem suporte no backend.
+- [x] Revisar antes do commit; sem menus/ações sem suporte no backend.
 
 Sugestão: `feat(super-admin): add shared sidebar and header layout` (G2).
 
 ## FE-SA-01P — Configurações do perfil
 
-- [ ] Criar frontend/src/pages/super-admin/ProfileSettings.tsx e
-  frontend/src/components/super-admin/ProfileForm.tsx para nome/e-mail.
-- [ ] Integrar leitura/gravação do próprio usuário em
-  frontend/src/lib/platform.api.ts, reutilizando contrato de sessão aprovado.
-- [ ] Tratar erros, e-mail duplicado e mudança do contexto/header; alinhar
+- [x] Criar frontend/src/pages/dashboard-super-admin/ProfileSettings.tsx e
+  frontend/src/components/dashboard-super-admin/ProfileForm.tsx para nome/e-mail.
+- [x] Integrar leitura/gravação do próprio usuário em
+  frontend/src/lib/api.ts, reutilizando contrato de sessão aprovado.
+- [x] Tratar erros, e-mail duplicado e mudança do contexto/header; alinhar
   sessão após mudar e-mail com o backend. Não manter claims divergentes.
-- [ ] Verificar isolamento do próprio perfil, teclado e ambos os temas;
+- [x] Verificar isolamento do próprio perfil, teclado e ambos os temas;
   revisar antes do commit. Senha fica em backlog, sem formulário ativo.
 
 Sugestão: `feat(profile): add personal name and email settings`.
@@ -60,53 +76,92 @@ Dependência: regra e endpoint do perfil no SDD; sem nova área de configuraçõ
 
 ## FE-SA-02 — Planos e cadastro, junto de G3/G4
 
-- [ ] Criar Plans.tsx, CompanyCreate.tsx, PlanForm.tsx e CompanyForm.tsx nos
-  diretórios pages/super-admin e components/super-admin em frontend/src.
-- [ ] Buscar planos ativos/positivos para cadastro; mostrar erros e resultado
+- [x] Criar Plans.tsx, CompanyCreate.tsx, PlanForm.tsx e CompanyForm.tsx nos
+  diretórios pages/dashboard-super-admin e components/dashboard-super-admin em frontend/src.
+- [x] Buscar planos ativos/positivos para cadastro; mostrar erros e resultado
   empresa/venda. Não hardcodar preços ou capacidade por plano.
-- [ ] Repetir envio com a mesma operação segura, conforme contrato aprovado.
-- [ ] Testar plano inativo, falha parcial e submit repetido; revisar grupo.
+- [x] Repetir envio com a mesma operação segura, conforme contrato aprovado.
+- [x] Testar plano inativo, falha parcial e submit repetido; revisar grupo.
 
-Completar frontend/src/lib/platform.api.ts. Sugestões (G3/G4):
+Completar frontend/src/lib/api.ts. Sugestões (G3/G4):
 `feat(plans): add commercial plan administration` e
 `feat(companies): register company and initial sale atomically`.
 
 ## FE-SA-03 — Empresas e vendas, junto de G5
 
-- [ ] Criar Companies.tsx, CompanyDetail.tsx, CompanyEdit.tsx, Sales.tsx e
-  SaleCreate.tsx em frontend/src/pages/super-admin; SaleForm.tsx em
-  frontend/src/components/super-admin.
-- [ ] Mostrar aviso de venda manual ao editar empresa; link contextual não
+- [x] Criar Companies.tsx, CompanyDetail.tsx, CompanyEdit.tsx, Sales.tsx e
+  SaleCreate.tsx em frontend/src/pages/dashboard-super-admin; SaleForm.tsx em
+  frontend/src/components/dashboard-super-admin.
+- [x] Mostrar aviso de venda manual ao editar empresa; link contextual não
   cria venda. Diferenciar valor comercial de pagamento recebido.
-- [ ] Confirmar suspensão/arquivamento e preservar histórico visível no admin.
-- [ ] Integrar filtros/paginação aprovados, loading/vazio/erro e conflito;
-  testar troca de plano e valor histórico. Revisar antes de commit.
+- [x] Não criar edição de venda. Implementar confirmação de exclusão
+  definitiva e acesso a novo lançamento; explicar correção de plano errado
+  no cadastro sem disparar venda automática após editar empresa.
+- [x] Confirmar suspensão/arquivamento e preservar histórico visível no admin.
+- [x] Exigir motivo ao desativar empresa, oferecer reativação/restauração
+  permitidas; restaurada continua desativada até reativar explicitamente.
+  Convites antigos inválidos e motivo vazio/espaços não envia.
+- [x] Venda por plano atual com preço somente leitura e motivo opcional;
+  venda por valor manual com montante e descrição/motivo obrigatórios.
+  Permitir data comercial passada e UTC em entrada/exibição/filtros.
+- [x] Integrar filtros/paginação aprovados, loading/vazio/erro e conflito;
+  testar troca de plano sem venda, exclusão e relançamento manual, além dos
+  valores históricos das vendas preservadas. Revisar antes de commit.
 
 Sugestões (G5): `feat(companies): add platform lifecycle management` e
 `feat(sales): add commercial sales and manual registration`.
 
 ## FE-SA-04 — Equipe e superadmins, junto de G6/G7
 
-- [ ] Criar CompanyUsers.tsx/Administrators.tsx em pages/super-admin e
-  CompanyUserForm.tsx/AdministratorForm.tsx em components/super-admin.
-- [ ] Validar contexto empresarial, estados de convites e campos permitidos;
-  mutações globais dependem de SA-P05. Não editar permissões indefinidas.
-- [ ] Testar empresa A/B, retirada de acesso e informações não secretas;
+- [x] Criar Users.tsx em frontend/src/pages/dashboard-super-admin e UserForm.tsx
+  em frontend/src/components/dashboard-super-admin, reutilizados pelos contextos
+  de empresa e superadmins sem duplicar tela/formulário por papel.
+- [x] Validar contexto empresarial, estados de convites e campos permitidos;
+  exigir motivo para desativar usuários/superadmins. Criação por outro
+  superadmin usa convite para definir senha; permitir reativação por outro
+  ativo, com poderes iguais. Sem editor de permissões individuais.
+- [x] Permitir troca admin_empresa/atendente e desativar último admin da
+  empresa; exclusão/desativação de atendente finaliza seus atendimentos
+  atribuídos quando o domínio existir. Não duplicar módulo de atendimento.
+- [x] Impedir pela UI desativação da própria conta superadmin e do último
+  superadmin ativo, tratando também recusa da API sob concorrência. Testar
+  motivo vazio e início com somente uma conta. Não editar permissões indefinidas.
+  A proteção do último ativo é de superadmin, não de admin empresarial.
+- [x] Testar empresa A/B, retirada de acesso e informações não secretas;
   revisar grupos separadamente.
 
-Sugestões: `feat(company-users): add platform team administration` (G6) e
-`feat(platform-users): add reviewed administrator management` (G7).
+Sugestões: `feat(users): add company-scoped administration` (G6) e
+`feat(users): add reviewed superadmin management` (G7).
 
 ## FE-SA-05 — Verificação da entrega
 
-- [ ] Implementar testes de componentes nos diretórios correspondentes e
+- [x] Implementar testes de componentes nos diretórios correspondentes e
   cenários E2E com API/persistência isoladas; runner/local a confirmar em G8.
-- [ ] Executar scripts existentes de testes, TypeScript, lint e build
+- [x] Executar scripts existentes de testes, TypeScript, lint e build
   pertinentes; registrar limites e falhas atuais, sem reutilizar prova antiga.
-- [ ] Atualizar docs/frontend-backend.md e specs da entrega após implementar.
-- [ ] Revisar antes de commit; registrar revisor/evidências no task backend.
+- [x] Atualizar docs/frontend-backend.md e specs da entrega após implementar.
+- [x] Revisar antes de commit; registrar revisor/evidências no task backend.
 
 Sugestão: `test(super-admin): verify platform workflows end to end` (G8).
 
 Backlog segue a spec canônica: billing, configurações sem definição,
-trial e funcionalidades/limites/regras por plano. Nenhum código criado aqui.
+trial e funcionalidades/limites/regras por plano. G5 a G7 implementados; G8 em verificação final.
+
+## Regra de organização
+
+Manter todas as funções HTTP no frontend/src/lib/api.ts existente, com
+nomes que indiquem ação e escopo. Componentes exclusivos usam
+frontend/src/components/dashboard-super-admin; compartilháveis por outros
+dashboards (busca, botões, campos genéricos) seguem a estrutura atual do
+projeto. Não criar pastas/arquivos novos apenas por papel de usuário.
+
+Planos demo atuais são referência; dados/planos ativos no banco não bloqueiam
+construção dos módulos. Testes usam fixtures; cadastro real valida existência
+do plano e a UI trata catálogo vazio sem bloquear navegação administrativa.
+
+Evidências G0 a G4 e limites de build/integração real estão registrados no
+[task backend](../../../../backend/.specs/features/super-admin-dashboard/task.md#evidências-da-implementação--2026-11-02).
+
+Verificação atual: 55 testes direcionados, TypeScript, lint e E2E real do
+dashboard aprovados. A suíte completa mantém 11 falhas herdadas e o build
+para no gate About/dashboard.png. Ver o task backend para números e limites.

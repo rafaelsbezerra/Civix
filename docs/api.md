@@ -129,4 +129,73 @@ distintos, sem expor identidade/segredos ao consumidor. Admin continua desmontad
 
 ## Capas de empresas
 
-POST /api/v1/storage/images recebe multipart autenticado; GET /api/v1/storage/images/:imageId/url é público para a capa vigente. Consultas de empresa incluem cover_image_url e cover_image_url_expires_in, sem chaves internas. Contratos, validações, status e preparação estão no [guia de storage](storage.md) e na [spec](../backend/.specs/features/storage/spec.md).
+POST /api/v1/storage/images recebe multipart autenticado; GET /api/v1/storage/images/:imageId/url é público para a capa vigente. Consultas de empresa incluem cover_image_url, sem chaves internas. Contratos, validações, status e preparação estão no [guia de storage](storage.md) e na [spec](../backend/.specs/features/storage/spec.md).
+
+## Plataforma superadmin — G0 a G4
+
+Rotas Bearer com identidade vigente e papel super_admin:
+
+- GET/POST `/api/v1/platform/plans`: listar todos ou criar plano.
+- GET/PUT `/api/v1/platform/plans/:planId`: consultar ou editar plano.
+- POST `/api/v1/platform/plans/:planId/activation`: body `{ "active": true }`. Ativar exige preço positivo.
+- POST `/api/v1/platform/companies`: campos de empresa + `planId` + `operationId` UUID.
+- PUT `/api/v1/users/profile`: somente `{ "name": "Nome", "email": "nome@example.test" }`, para o próprio usuário autenticado.
+
+O cadastro retorna 201 com `data.company`, `data.sale` e `data.replayed`.
+Repetir ator/operação/payload retorna o resultado original; outro payload na
+mesma operação gera 409. Plano ausente/inativo ou inválido impede gravação.
+O POST existente `/api/v1/empresas` exige o mesmo contrato. Perfil retorna
+`data.user` e `data.requiresLogin`; mudar e-mail invalida o token anterior.
+Validação retorna 400, falta de sessão 401 e perfil sem permissão 403.
+As migrations incrementais precisam ser aplicadas no ambiente autorizado.
+Ver [estado e limites da implementação](super-admin.md). O router admin legado
+permanece desmontado; apenas as operações acima foram montadas na plataforma.
+
+## Plataforma superadmin — gestão G5 a G7
+
+Todas as operações abaixo exigem Bearer e super_admin vigente.
+
+- GET `/api/v1/platform/companies` e GET/PUT `/companies/:companyId`:
+  consulta administrativa e edição. Novo plano precisa ser ativo/positivo;
+  manter o vínculo atual inativo permite editar os outros dados. Sem nova venda.
+- POST `/companies/:companyId/suspension` com `{ "reason": "Motivo" }`;
+  DELETE `/companies/:companyId` também exige reason e arquiva logicamente.
+  POST `/reactivation` reativa; POST `/restoration` restaura ainda inativa.
+  Esses sufixos usam o mesmo prefixo `/api/v1/platform/companies/:companyId`.
+- GET `/api/v1/platform/sales` e GET `/sales/:saleId`; POST `/sales` registra
+  venda manual; DELETE `/sales/:saleId` exclui definitivamente e retorna 204.
+  Não há edição de venda. Excluir não altera empresa ou plano.
+- GET `/api/v1/platform/companies/:companyId/users`, POST `/invitations`,
+  PUT `/:userId`, POST `/:userId/suspension`, POST `/:userId/reactivation`
+  e DELETE `/:userId` para atendente: todos os sufixos são relativos à rota
+  de usuários da empresa. Suspensão/exclusão exigem reason; exclusão é lógica.
+- GET `/api/v1/platform/administrators`, POST `/invitations`, PUT `/:userId`,
+  POST `/:userId/suspension` e POST `/:userId/reactivation`: sufixos relativos
+  à lista de administradores. Não aceitar role/companyId para promover conta.
+
+Listas administrativas de empresas/vendas/usuários aceitam page/limit
+(padrão 20, máximo 100). Resposta: data array e meta com page, pageSize, total,
+totalPages. Empresa filtra q/status/planId; status permite ativo/inativo/archived.
+Venda filtra companyId/planId/origin/from/to; datas ISO em UTC e limites
+inclusivos. Usuários filtram q/status e, no contexto empresarial, role.
+
+POST de venda manual exige companyId, operationId UUID, soldAt ISO UTC e
+pricingMode. company_plan usa preço do vínculo atual no backend e não aceita
+amount/planId no body; manual_amount exige amount decimal string e description
+não vazia. Os dois modos preservam snapshots e não mudam o plano da empresa.
+
+A operação é única por ator: dados normalizados iguais retornam a venda
+existente com replayed=true; dados diferentes geram 409. Fingerprint é interno.
+Depois do DELETE a venda manual não entra nessa verificação e um novo
+lançamento pode ocorrer; a proteção do cadastro inicial permanece distinta.
+
+Convites empresariais recebem email/name opcional/role admin_empresa ou
+atendente; convites globais não recebem role/companyId. A conta fica pending
+até primeiro acesso. Falha de envio após salvar retorna 502 e permite reenvio
+sem duplicar conta. Alterar e-mail/perfil invalida sessões/convites anteriores.
+Reativação de usuário sem senha mantém pending e exige novo convite.
+
+Desativar usuário ou empresa revoga as sessões afetadas em todas as chamadas
+seguintes. Reativar preserva tokens_revoked_at e exige login novo. Usuário
+excluído logicamente não autentica. Hashes, tokens e campos de recuperação
+não fazem parte das respostas administrativas. Ver [SDD canônico](../backend/.specs/features/super-admin-dashboard/sdd.md).

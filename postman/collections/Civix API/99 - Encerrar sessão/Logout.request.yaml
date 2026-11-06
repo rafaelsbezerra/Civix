@@ -1,0 +1,16 @@
+$kind: http-request
+description: Limpa o cookie e a variável Bearer. Execute ao final do fluxo.
+url: "{{baseUrl}}/api/v1/users/logout"
+method: POST
+auth:
+  type: noauth
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Status 200', () => pm.response.to.have.status(200));
+      let body;
+      pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });
+      pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));
+      pm.environment.unset('accessToken');
+    language: text/javascript
+order: 1000

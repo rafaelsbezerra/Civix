@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "test": "vitest run",
     "test:e2e": "node scripts/verify-about-browser.mjs",
+    "test:e2e:super-admin": "node scripts/verify-super-admin-browser.mjs",
     "preview": "vite preview"
   },
   "dependencies": {

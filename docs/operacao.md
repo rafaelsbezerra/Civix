@@ -204,4 +204,32 @@ O destino Contato permanece como estava; nenhum ID novo foi criado.
 
 ## Usuários e storage
 
-A migration de 2026-11-01 acrescenta o vínculo único users.company_id e as restrições dos quatro papéis. Não foi aplicada. Bootstrap, conversão JSON com backup, configuração R2 e homologação pendente estão no [guia de usuários e capas](storage.md). Use as quatro variáveis R2_* consumidas pelo provider; os nomes CLOUDFLARE_R2_* do scaffold não são lidos por ele.
+A migration 20261102000100_user_company_scope define o vínculo único e as regras dos quatro papéis. Preparação local, R2 e limites de homologação estão no [guia de usuários e capas](storage.md). O cliente R2 é inicializado sob demanda; prefira as quatro variáveis R2_* e consulte os aliases legados em r2.client.ts.
+
+## Implantação da administração superadmin
+
+O usuário informou que as tabelas anteriores a create_images já existem.
+Preservar suas migrations originais; mudanças nessas tabelas usam migrations
+novas de ALTER. Não recriar users/companies nem repetir suas criações.
+Conferir o histórico aplicado e seguir a baseline indicada neste guia.
+Nenhuma migration foi aplicada pelo agente nesta entrega.
+
+Novas migrations da branch, em ordem:
+
+1. 20261102000200_company_administration: vínculo de plano e metadados de empresa.
+2. 20261102000300_create_sales: vendas, operação/fingerprint manual e recibo
+   separado do cadastro inicial.
+3. 20261102000400_user_administration: ALTER users com deleted_at,
+   deactivation_reason TEXT e tokens_revoked_at TIMESTAMPTZ.
+
+O responsável deve revisar/aplicar somente as migrations pendentes em ambiente
+autorizado antes de habilitar essas operações com PostgreSQL. Não editar uma
+migration histórica já aplicada. Modo JSON não requer migrations nem R2 para
+consultar empresas sem capa. Homologação de PostgreSQL e R2 reais continua
+necessária; os testes SQL desta entrega usam conexão simulada.
+
+Para verificar sem dados reais: backend npm run test:foundation e npm run
+test:platform; frontend npm test -- src/pages/dashboard-super-admin. O runner
+E2E do dashboard usa Chrome, Vite e backend JSON em portas/diretórios
+temporários, com ambiente sintético e limpeza dos processos ao terminar.
+Nunca apontar o verificador para staging ou para arquivos locais pessoais.

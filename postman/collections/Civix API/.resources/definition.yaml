@@ -1,0 +1,61 @@
+$kind: collection
+description: Todos os endpoints efetivamente montados no backend Civix, com fluxos e validações reutilizáveis.
+variables:
+  baseUrl: http://localhost:3000
+  confirmedWriteBaseUrl: ""
+  accessToken: ""
+  allowWrites: "false"
+  allowDestructive: "false"
+  allowAdministrativeWrites: "false"
+  allowEmails: "false"
+  allowIdentityWrites: "false"
+  allowStorage: "false"
+  allowProfileUpdate: "false"
+  allowRoleSwitch: "false"
+  superAdminEmail: ""
+  superAdminPassword: ""
+  companyAdminEmail: ""
+  companyAdminPassword: ""
+  attendantEmail: ""
+  attendantPassword: ""
+  newPassword: ""
+  resetToken: ""
+  inviteToken: ""
+  inviteEmail: ""
+  passwordRecoveryEmail: ""
+  profileName: ""
+  profileEmail: ""
+  companyId: ""
+  companyUserId: ""
+  administratorId: ""
+  planId: ""
+  saleId: ""
+  initialSaleId: ""
+  imageId: ""
+  companyOperationId: ""
+  salePlanOperationId: ""
+  saleAmountOperationId: ""
+  imageFilePath: postman/fixtures/company-cover.png
+  searchTerm: Civix
+  category: Serviços
+  state: CE
+  companySize: pequena
+  page: "1"
+  limit: "20"
+  companyName: ""
+  companyCnpj: ""
+  companyEmail: ""
+  planName: ""
+  planSlug: ""
+  managedUserName: Atendente Postman
+  managedUserEmail: ""
+  administratorName: Superadmin Postman
+  administratorEmail: ""
+  deactivationReason: Validação administrativa via Postman.
+  soldAt: ""
+auth:
+  - id: 6e00bc59-2ee6-4228-8625-b3213d33c26d
+    type: bearer
+    name: bearer auth
+    credentials:
+      token: "{{accessToken}}"

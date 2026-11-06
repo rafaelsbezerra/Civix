@@ -1,0 +1,3 @@
+$kind: collection
+description: Operações administrativas de empresa executadas após os fluxos superadmin dependentes.
+order: 7000

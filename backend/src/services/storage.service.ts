@@ -10,6 +10,7 @@ import { AppError } from '../shared/errors/app.error.js';
 import { ErrorCode } from '../shared/errors/error.code.js';
 import { logger } from '../shared/logging/log.context.js';
 import { getAuthenticatedUser } from './user.service.js';
+import { imageObjectStore } from '../shared/integrations/cloudflare/storage.provider.js';
 
 export const MAX_IMAGE_BYTES = 10000000;
 export const IMAGE_URL_SECONDS = 300;
@@ -25,7 +26,7 @@ export async function validateImageTargetAccess(target: ImageTarget, actor: Stor
     throw new AppError({ status: 403, code: ErrorCode.FORBIDDEN, message: 'Sem permissão para alterar a capa desta empresa.' });
   }
   const company = await companyRepository.getById(target.resourceId);
-  if (!company) throw new AppError({ status: 404, code: ErrorCode.NOT_FOUND, message: 'Empresa não encontrada.' });
+  if (!company || company.status === 'inativo' || company.deleted_at) throw new AppError({ status: 404, code: ErrorCode.NOT_FOUND, message: 'Empresa não encontrada.' });
 }
 
 export async function updateTargetImageKey(target: ImageTarget, key: string, expectedKey: string | null): Promise<void> {
@@ -110,7 +111,7 @@ export async function getPresignedImageUrl(imageId: string): Promise<PresignedIm
   const image = await storageRepository.getById(imageId);
   const company = image?.module === 'companies' && image.purpose === 'cover'
     ? await companyRepository.getById(image.resource_id) : undefined;
-  if (!image || !company || company.cover_key !== image.object_key || company.status === 'inativo') {
+  if (!image || !company || company.cover_key !== image.object_key || company.status === 'inativo' || company.deleted_at) {
     throw new AppError({ status: 404, code: ErrorCode.NOT_FOUND, message: 'Capa não encontrada.' });
   }
   return { url: await imageObjectStore.getPresignedUrl(image.object_key, IMAGE_URL_SECONDS), expiresInSeconds: IMAGE_URL_SECONDS };

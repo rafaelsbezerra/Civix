@@ -4,6 +4,23 @@ import { AppError } from '../shared/errors/app.error.js';
 import { ErrorCode } from '../shared/errors/error.code.js';
 import { createSuccessResponse } from '../shared/contracts/response.contract.js';
 import { isUserRole } from '../entities/user.entity.js';
+import { SESSION_COOKIE, sessionCookieOptions } from '../config/cookies.js';
+
+export async function getUsersByCompanyId(req: Request, res: Response) { return res.json(await userService.getUsersByCompanyId(req.authenticatedUser!.id,String(req.params.companyId),req.query)); }
+export async function inviteCompanyUser(req: Request, res: Response) { return res.status(201).json(createSuccessResponse(await userService.inviteCompanyUser(req.authenticatedUser!.id,String(req.params.companyId),req.body))); }
+export async function updateCompanyUser(req: Request, res: Response) { return res.json(createSuccessResponse(await userService.updateCompanyUser(req.authenticatedUser!.id,String(req.params.companyId),String(req.params.userId),req.body))); }
+export async function suspendCompanyUser(req: Request, res: Response) { return res.json(createSuccessResponse(await userService.suspendCompanyUser(req.authenticatedUser!.id,String(req.params.companyId),String(req.params.userId),req.body))); }
+export async function reactivateCompanyUser(req: Request, res: Response) { return res.json(createSuccessResponse(await userService.reactivateCompanyUser(req.authenticatedUser!.id,String(req.params.companyId),String(req.params.userId),req.body))); }
+export async function deleteCompanyAttendant(req: Request, res: Response) { await userService.deleteCompanyAttendant(req.authenticatedUser!.id,String(req.params.companyId),String(req.params.userId),req.body);return res.status(204).end(); }
+export async function getSuperAdmins(req: Request, res: Response) { return res.json(await userService.getSuperAdmins(req.authenticatedUser!.id,req.query)); }
+export async function inviteSuperAdmin(req: Request, res: Response) { return res.status(201).json(createSuccessResponse(await userService.inviteSuperAdmin(req.authenticatedUser!.id,req.body))); }
+export async function updateSuperAdmin(req: Request, res: Response) { return res.json(createSuccessResponse(await userService.updateSuperAdmin(req.authenticatedUser!.id,String(req.params.userId),req.body))); }
+export async function suspendSuperAdmin(req: Request, res: Response) { return res.json(createSuccessResponse(await userService.suspendSuperAdmin(req.authenticatedUser!.id,String(req.params.userId),req.body))); }
+export async function reactivateSuperAdmin(req: Request, res: Response) { return res.json(createSuccessResponse(await userService.reactivateSuperAdmin(req.authenticatedUser!.id,String(req.params.userId),req.body))); }
+
+export async function updateOwnProfile(req: Request, res: Response): Promise<Response> {
+  return res.json(createSuccessResponse(await userService.updateOwnProfile(req.authenticatedUser!.id, req.body)));
+}
 
 export async function login(req: Request, res: Response): Promise<Response> {
   const { email, password, role } = req.body ?? {};
@@ -24,9 +41,29 @@ export async function login(req: Request, res: Response): Promise<Response> {
     });
   }
 
-  const result = await userService.login({ email, password, role });
+  const { token, ...result } = await userService.login({ email, password, role });
+
+  const enteredAsSuperAdmin = role === 'super_admin';
+  const isSuperAdmin = result.user.role === 'super_admin';
+  if (enteredAsSuperAdmin && !isSuperAdmin) {
+    throw new AppError({
+      status: 401,
+      code: ErrorCode.UNAUTHORIZED,
+      message: 'Acesso restrito a superadmins.',
+    });
+  }
+
+  res.cookie(SESSION_COOKIE, token, sessionCookieOptions);
 
   return res.status(200).json(createSuccessResponse(result));
+}
+
+export function logout(_req: Request, res: Response): Response {
+  const { maxAge: _maxAge, ...clearOptions } = sessionCookieOptions;
+  res.clearCookie(SESSION_COOKIE, clearOptions);
+  return res.status(200).json(createSuccessResponse({
+    message: 'Logout realizado com sucesso.',
+  }));
 }
 
 export async function forgotPassword(req: Request, res: Response): Promise<Response> {

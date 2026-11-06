@@ -1,0 +1,13 @@
+$kind: http-request
+description: Lista planos ativos e inativos para o superadmin.
+url: "{{baseUrl}}/api/v1/platform/plans"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Status 200', () => pm.response.to.have.status(200));
+      let body;
+      pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });
+      pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));
+    language: text/javascript
+order: 1000

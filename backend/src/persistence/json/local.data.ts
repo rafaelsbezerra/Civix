@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { companyDataSchema } from '../../entities/company.entity.js';
 import { USER_ROLES } from '../../entities/user.entity.js';
+import { saleSchema } from '../../entities/sale.entity.js';
 
 const identifier = z.union([z.string().min(1), z.number()]);
 export const localUserSchema = z.object({
@@ -10,6 +11,9 @@ export const localUserSchema = z.object({
   name: z.string().optional(),
   password_hash: z.string().optional(),
   status: z.string().optional(),
+  deleted_at: z.string().datetime().nullable().optional(),
+  deactivation_reason: z.string().nullable().optional(),
+  tokens_revoked_at: z.string().datetime().nullable().optional(),
   company_id: z.string().uuid().nullable().default(null),
   invite_token: z.string().nullable().optional(),
   reset_password_token: z.string().nullable().optional(),
@@ -29,6 +33,10 @@ export const localDataSchema = z.object({
   companies: z.array(companyDataSchema),
   users: z.array(localUserSchema),
   images: z.array(imageSchema).default([]),
+  sales: z.array(saleSchema).default([]),
+  companyRegistrationOperations: z.array(z.object({ actorId: z.string(), operationId: z.string().uuid(),
+    fingerprint: z.string().length(64), companyId: z.string().uuid(), saleId: z.string().uuid().nullable(),
+    createdAt: z.string().datetime() })).default([]),
   plans: z.array(z.object({
     id: identifier, name: z.string(), slug: z.string(), description: z.string(),
     price: z.union([z.string(), z.number()]), billing_period: z.enum(['monthly', 'yearly', 'one_time']),
@@ -54,5 +62,5 @@ export const localDataSchema = z.object({
 export type LocalData = z.infer<typeof localDataSchema>;
 export type LocalUser = z.infer<typeof localUserSchema>;
 export function emptyLocalData(): LocalData {
-  return { version: 1, companies: [], users: [], images: [], plans: [], outbox: [] };
+  return { version: 1, companies: [], users: [], images: [], plans: [], sales: [], companyRegistrationOperations: [], outbox: [] };
 }

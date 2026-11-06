@@ -1,0 +1,47 @@
+$kind: http-request
+description: Usa o preço do plano vigente da empresa.
+url: "{{baseUrl}}/api/v1/platform/sales"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "companyId": "{{companyId}}",
+      "operationId": "{{salePlanOperationId}}",
+      "soldAt": "{{soldAt}}",
+      "pricingMode": "company_plan",
+      "description": "Venda pelo preço do plano atual."
+    }
+scripts:
+  - type: beforeRequest
+    code: |-
+      const requiredFlags = ["allowWrites","allowAdministrativeWrites"];
+      const requiredVariables = ["companyId"];
+      const missingFlags = requiredFlags.filter((flag) => pm.environment.get(flag) !== 'true');
+      const missingVariables = requiredVariables.filter((variable) => !String(pm.environment.get(variable) || '').trim());
+      const baseUrl = (pm.environment.get('baseUrl') || '').replace(/[/]$/, '');
+      const confirmedWriteBaseUrl = (pm.environment.get('confirmedWriteBaseUrl') || '').replace(/[/]$/, '');
+      const environmentNotConfirmed = !baseUrl || confirmedWriteBaseUrl !== baseUrl;
+      if (missingFlags.length || missingVariables.length || environmentNotConfirmed) {
+        const reasons = [];
+        if (missingFlags.length) reasons.push(`flags ausentes: ${missingFlags.join(', ')}`);
+        if (missingVariables.length) reasons.push(`variáveis ausentes: ${missingVariables.join(', ')}`);
+        if (environmentNotConfirmed) reasons.push('confirmedWriteBaseUrl deve ser igual a baseUrl');
+        console.warn(`Request ignorada: ${reasons.join('; ')}.`);
+        pm.execution.skipRequest();
+      }
+      if (!pm.environment.get('salePlanOperationId')) pm.environment.set('salePlanOperationId', pm.variables.replaceIn('{{$guid}}'));
+      if (!pm.environment.get('soldAt')) pm.environment.set('soldAt', new Date().toISOString());
+    language: text/javascript
+  - type: afterResponse
+    code: |-
+      pm.test('Status 201', () => pm.response.to.have.status(201));
+      let body;
+      pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });
+      pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));
+      const saleIdValue = "data.sale.id".split('.').reduce((value, key) => value?.[key], body);
+      if (saleIdValue !== undefined && saleIdValue !== null && saleIdValue !== '') pm.environment.set("saleId", String(saleIdValue));
+    language: text/javascript
+order: 3000

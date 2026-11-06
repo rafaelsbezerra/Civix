@@ -41,6 +41,71 @@
 - Follow the worktree and branch rules below; explicit user instructions about the current task take precedence.
 - Commit messages follow the Conventional Commits specification and use english language.
 
+## Code formatting and readability
+
+- Write all new and modified code with consistent indentation and readable
+  line breaks. Follow the indentation already used by the file.
+- Do not introduce compressed or "truncated" code that places several
+  statements, JSX elements, conditions, or callbacks on the same line.
+- Expand complex JSX props, nested ternaries, object literals, chained calls,
+  and function arguments across multiple lines.
+- Use braces and line breaks when a condition performs an action. Do not
+  sacrifice readability to reduce the number of lines.
+- When modifying an existing compressed section, format the lines directly
+  affected by the change when this can be done without creating unrelated
+  behavior changes. A broader cleanup remains a separate task.
+- Run the formatter configured by the affected package before delivery. Run
+  lint separately when the package provides a lint command; lint does not
+  replace automated formatting.
+- If the package has no formatter, preserve the local style and report that
+  automated formatting was not available.
+- Treat the examples below as structure and indentation guidance. Preserve
+  local punctuation conventions, including the existing use or omission of
+  semicolons.
+
+**Preferred TypeScript formatting:**
+
+```typescript
+async function fetchUserById(id: string): Promise<User> {
+  if (!id) {
+    throw new Error('O ID do usuário é obrigatório');
+  }
+
+  const response = await api.get(`/users/${id}`);
+
+  return response.data;
+}
+```
+
+**Preferred TSX formatting:**
+
+```tsx
+export function UserCard({ user }: UserCardProps) {
+  return (
+    <article className="user-card">
+      <header>
+        <h2>{user.name}</h2>
+        <span>{user.role}</span>
+      </header>
+
+      <Button
+        type="button"
+        variant="outline"
+        onClick={() => openUserDetails(user.id)}
+      >
+        Ver detalhes
+      </Button>
+    </article>
+  );
+}
+```
+
+Avoid compressed formatting such as:
+
+```tsx
+export function UserCard({ user }: UserCardProps) { return <article><h2>{user.name}</h2><Button onClick={() => openUserDetails(user.id)}>Ver detalhes</Button></article>; }
+```
+
 ## Always do
 
 - Before any task, read the applicable `AGENTS.md` and the active task spec, when one exists.
