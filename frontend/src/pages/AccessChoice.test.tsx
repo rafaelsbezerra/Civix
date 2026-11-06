@@ -55,7 +55,7 @@ describe('Escolha e formulários de acesso', () => {
   })
 
   it('login empresarial encaminha admin_empresa para o dashboard após autenticação', async () => {
-    respond({ data: { token: 'token-teste', user: {
+    respond({ data: { user: {
       id: 'user-1', email: 'empresa@example.test', role: 'admin_empresa', companyId: 'company-1',
     } } }, 200)
     render(<MemoryRouter initialEntries={['/login/empresa']}><Login /></MemoryRouter>)
@@ -63,17 +63,17 @@ describe('Escolha e formulários de acesso', () => {
     fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'empresa@example.test' } })
     fireEvent.change(screen.getByLabelText('Senha'), { target: { value: 'senha-teste' } })
     fireEvent.click(screen.getByRole('button', { name: 'Login' }))
-    await waitFor(() => expect(setItem).toHaveBeenCalledWith('token', 'token-teste'))
+    await waitFor(() => expect(navigate).toHaveBeenCalledWith('/dashboard-empresa'))
     expect(JSON.parse(String(fetchMock.mock.calls[0][1]?.body))).toEqual({
       email: 'empresa@example.test',
       password: 'senha-teste',
       role: 'admin_empresa',
     })
-    expect(navigate).toHaveBeenCalledWith('/dashboard-empresa')
+    expect(setItem).not.toHaveBeenCalled()
   })
 
   it('login do atendente envia o papel esperado e abre o dashboard operacional', async () => {
-    respond({ data: { token: 'token-atendente', user: {
+    respond({ data: { user: {
       id: 'attendant-1',
       email: 'atendente@example.test',
       role: 'atendente',
@@ -85,12 +85,12 @@ describe('Escolha e formulários de acesso', () => {
     fireEvent.change(screen.getByLabelText('Senha'), { target: { value: 'senha-teste' } })
     fireEvent.click(screen.getByRole('button', { name: 'Login' }))
 
-    await waitFor(() => expect(setItem).toHaveBeenCalledWith('token', 'token-atendente'))
+    await waitFor(() => expect(navigate).toHaveBeenCalledWith('/dashboard-atendente'))
     expect(JSON.parse(String(fetchMock.mock.calls[0][1]?.body))).toEqual({
       email: 'atendente@example.test',
       password: 'senha-teste',
       role: 'atendente',
     })
-    expect(navigate).toHaveBeenCalledWith('/dashboard-atendente')
+    expect(setItem).not.toHaveBeenCalled()
   })
 })

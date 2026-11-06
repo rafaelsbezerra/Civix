@@ -15,12 +15,11 @@ const profileMock = vi.mocked(getSessionProfile)
 describe('AppRoutes', () => {
   beforeEach(() => {
     profileMock.mockReset()
-    localStorage.setItem('token', 'test-token')
   })
 
-  it('renders the About page at /sobre', () => {
+  it('renders the Home page with the About section at /', () => {
     render(
-      <MemoryRouter initialEntries={['/sobre']}>
+      <MemoryRouter initialEntries={['/']}>
         <AppRoutes />
       </MemoryRouter>,
     )
