@@ -27,10 +27,10 @@ Refatorar a página de listagem de vendas (`frontend/src/pages/dashboard-super-a
 
 Passos:
 
-- [ ] Refatorar `CompanyPicker.tsx` substituindo `<section className="sa-panel" aria-label="Escolher empresa">` por um `Card` (`rounded-2xl`) que preserve `<section aria-label="Escolher empresa">`, com `CardHeader` (`CardTitle`: `"Escolha a empresa"`) e `CardContent`.
-- [ ] Em `CompanyPicker.tsx`, substituir o formulário de busca por `Field`, `FieldLabel` (`"Buscar empresa por nome ou CNPJ"`), `Input` (`name="company-search"`, `maxLength={200}`) e `Button type="submit" variant="outline"` (`"Buscar empresa"`).
-- [ ] Estilizar a lista de empresas em `CompanyPicker.tsx` com botões/cartões Tailwind mantendo `type="button"` e `aria-pressed={selectedId === company.id}`, e trocar `Pagination` legado por `CompanyPagination`.
-- [ ] Refatorar `PlanFilter.tsx` para receber `value`, `onValueChange` e `portalContainer` (ou manter controle compatível com o formulário de filtro), utilizando `Field`, `FieldLabel` (`"Plano"`), `Select`, `SelectTrigger` (`aria-label="Plano"` com `bg-muted/40 hover:bg-muted/60 dark:bg-input/30 dark:hover:bg-input/50`), `SelectValue`, `SelectContent` e `SelectItem`, preservando o aviso `role="alert"` com o botão `"Tentar novamente"` em caso de falha.
+- [x] Refatorar `CompanyPicker.tsx` substituindo `<section className="sa-panel" aria-label="Escolher empresa">` por um `Card` (`rounded-2xl`) que preserve `<section aria-label="Escolher empresa">`, com `CardHeader` (`CardTitle`: `"Escolha a empresa"`) e `CardContent`.
+- [x] Em `CompanyPicker.tsx`, substituir o formulário de busca por `Field`, `FieldLabel` (`"Buscar empresa por nome ou CNPJ"`), `Input` (`name="company-search"`, `maxLength={200}`) e `Button type="submit" variant="outline"` (`"Buscar empresa"`).
+- [x] Estilizar a lista de empresas em `CompanyPicker.tsx` com botões/cartões Tailwind mantendo `type="button"` e `aria-pressed={selectedId === company.id}`, e trocar `Pagination` legado por `CompanyPagination`.
+- [x] Refatorar `PlanFilter.tsx` para receber `value`, `onValueChange` e `portalContainer` (ou manter controle compatível com o formulário de filtro), utilizando `Field`, `FieldLabel` (`"Plano"`), `Select`, `SelectTrigger` (`aria-label="Plano"` com `bg-muted/40 hover:bg-muted/60 dark:bg-input/30 dark:hover:bg-input/50`), `SelectValue`, `SelectContent` e `SelectItem`, preservando o aviso `role="alert"` com o botão `"Tentar novamente"` em caso de falha.
 
 Pronto quando:
 - `CompanyPicker.tsx` e `PlanFilter.tsx` não utilizam mais classes `.sa-*` e seguem o design de cards, inputs, selects e paginação do `shadcn/ui`.
@@ -46,15 +46,15 @@ Commit sugerido:
 
 Passos:
 
-- [ ] Definir o schema `saleFormSchema` com `zod` em `SaleForm.tsx` validando:
+- [x] Definir o schema `saleFormSchema` com `zod` em `SaleForm.tsx` validando:
   - `soldAt`: string de data/hora convertível para ISO UTC válido (`'Informe uma data comercial válida em UTC.'`)
   - `pricingMode`: `z.enum(['company_plan', 'manual_amount'])`
   - `amount`: string validada quando `pricingMode === 'manual_amount'` (`/^\d+(?:[.,]\d{1,2})?$/` e `Number > 0`, `'Informe um valor manual positivo em reais.'`)
   - `description`: string obrigatória quando `pricingMode === 'manual_amount'` (`trim().min(1, 'Informe a descrição ou motivo do lançamento manual.')`) e opcional quando `pricingMode === 'company_plan'`
-- [ ] Configurar `useForm` + `zodResolver` em `SaleForm.tsx`, observando `pricingMode` (`useWatch`) para exibir a prévia somente leitura (`${plan ? `${plan.price} BRL` : 'Sem plano comercial ativo'}`) no modo `'company_plan'` e renderizar o campo `"Valor em reais"` apenas no modo `'manual_amount'`.
-- [ ] Manter a lógica de `operationId` (`useRef<{ signature: string; id: string } | null>(null)`) comparando a assinatura JSON do payload para reutilizar o mesmo UUID em retentativas idênticas e gerar novo UUID quando os dados mudarem.
-- [ ] Estruturar `SaleForm.tsx` dentro de `Card` (`rounded-2xl`) com `FieldSet`, `FieldGroup`, `Field`, `FieldLabel`, `Input`, `Select`, `Textarea`, `FieldError` e `Button type="submit"` (`"Registrar venda manual"` / `"Registrando venda…"`).
-- [ ] Refatorar `SaleCreate.tsx` removendo `.sa-page-heading`, aplicando o objeto `theme` (`CSSProperties`), estilizando o botão `"Voltar para vendas"` (`Button variant="outline"` com `<Link to="/dashboard/super-admin/sales" role="link" />`) e transformando o painel de sucesso em um `Card` com `role="region" aria-label="Venda registrada"`.
+- [x] Configurar `useForm` + `zodResolver` em `SaleForm.tsx`, observando `pricingMode` (`useWatch`) para exibir a prévia somente leitura (`${plan ? `${plan.price} BRL` : 'Sem plano comercial ativo'}`) no modo `'company_plan'` e renderizar o campo `"Valor em reais"` apenas no modo `'manual_amount'`.
+- [x] Manter a lógica de `operationId` (`useRef<{ signature: string; id: string } | null>(null)`) comparando a assinatura JSON do payload para reutilizar o mesmo UUID em retentativas idênticas e gerar novo UUID quando os dados mudarem.
+- [x] Estruturar `SaleForm.tsx` dentro de `Card` (`rounded-2xl`) com `FieldSet`, `FieldGroup`, `Field`, `FieldLabel`, `Input`, `Select`, `Textarea`, `FieldError` e `Button type="submit"` (`"Registrar venda manual"` / `"Registrando venda…"`).
+- [x] Refatorar `SaleCreate.tsx` removendo `.sa-page-heading`, aplicando o objeto `theme` (`CSSProperties`), estilizando o botão `"Voltar para vendas"` (`Button variant="outline"` com `<Link to="/dashboard/super-admin/sales" role="link" />`) e transformando o painel de sucesso em um `Card` com `role="region" aria-label="Venda registrada"`.
 
 Pronto quando:
 - O fluxo de lançamento manual em `SaleCreate.tsx` e `SaleForm.tsx` opera com `react-hook-form`, `zod` e `shadcn/ui`, respeitando as regras de `company_plan` vs `manual_amount` e de idempotência (`operationId`).
@@ -62,20 +62,21 @@ Pronto quando:
 Commit sugerido:
 `refactor(dashboard): redesign manual sale creation form with shadcn and react-hook-form`
 
-## Task 3: Refatorar `Sales.tsx` e atualizar interações de `Select` em `Sales.test.tsx`
+## Task 3: Refatorar `Sales.tsx`, criar `SalesMetricsCards.tsx` e atualizar interações de `Select` em `Sales.test.tsx`
 
 **Arquivos:**
 - Modificar: `frontend/src/pages/dashboard-super-admin/Sales.tsx`, `frontend/src/pages/dashboard-super-admin/Sales.test.tsx`
-- Criar: nenhum
+- Criar: `frontend/src/components/dashboard-super-admin/SalesMetricsCards.tsx`
 
 Passos:
 
-- [ ] Remover `.sa-page-heading` em `Sales.tsx`, adicionando o objeto `theme` (`CSSProperties`) no container raiz `div.space-y-6` e posicionando o botão `"Lançar venda manual"` (`Button` com `<Link to="/dashboard/super-admin/sales/new" role="link" />`) na barra superior.
-- [ ] Estruturar o formulário de filtros dentro de um `Card` (`rounded-2xl py-5`) com `PlanFilter`, `Select` para `"Origem"`, `Input type="datetime-local"` para `"De (UTC)"` e `"Até (UTC)"`, botão `"Filtrar por empresa"` / `"Ocultar empresas"`, badge `<span>{company.nome}</span>` + botão `"Limpar empresa"` e botão `"Filtrar"`.
-- [ ] Substituir `<section className="sa-panel">` e `<table className="sa-table">` por `Card` (`gap-0 rounded-2xl py-0`), `Table`, `TableHeader`, `TableBody`, `TableRow`, `TableHead`, `TableCell`, `Badge` (para a coluna `"Origem"`) e `CompanyPagination`.
-- [ ] Estilizar o botão `"Excluir definitivamente"` com `Button variant="destructive" size="sm"` e o banner pós-exclusão (`role="status"`) com o link `"Fazer novo lançamento"`.
-- [ ] Atualizar `frontend/src/pages/dashboard-super-admin/Sales.test.tsx` para interagir com os componentes `Select` (`"Origem do valor"`, `"Plano"` e `"Origem"`) via clique no trigger e seleção da opção `role="option"`.
-- [ ] Executar `npx vitest run src/pages/dashboard-super-admin/Sales.test.tsx` e `npx eslint src/pages/dashboard-super-admin/Sales.tsx src/pages/dashboard-super-admin/SaleCreate.tsx src/components/dashboard-super-admin/SaleForm.tsx src/components/dashboard-super-admin/CompanyPicker.tsx src/components/dashboard-super-admin/PlanFilter.tsx src/pages/dashboard-super-admin/Sales.test.tsx`.
+- [x] Criar `SalesMetricsCards.tsx` com 3 cards calculados no frontend a partir dos dados retornados pelo backend (1: `Faturamento total`, 2: `Faturamento no mês`, 3: `Faturamento por plano`), mantendo rotas de métricas no backend em backlog.
+- [x] Remover `.sa-page-heading` em `Sales.tsx`, adicionando o objeto `theme` (`CSSProperties`) no container raiz `div.space-y-6`, os 3 cards de `SalesMetricsCards` e o botão `"Lançar venda manual"` (`Button` com `<Link to="/dashboard/super-admin/sales/new" role="link" />`) na barra superior.
+- [x] Estruturar o formulário de filtros dentro de um `Card` (`rounded-2xl py-5`) com `PlanFilter`, `Select` para `"Origem"`, `Input type="datetime-local"` para `"De (UTC)"` e `"Até (UTC)"`, botão `"Filtrar por empresa"` / `"Ocultar empresas"`, badge `<span>{company.nome}</span>` + botão `"Limpar empresa"` e botão `"Filtrar"`.
+- [x] Substituir `<section className="sa-panel">` e `<table className="sa-table">` por `Card` (`gap-0 rounded-2xl py-0`), `Table`, `TableHeader`, `TableBody`, `TableRow`, `TableHead`, `TableCell`, `Badge` (para a coluna `"Origem"`) e `CompanyPagination`.
+- [x] Estilizar o botão `"Excluir definitivamente"` com `Button variant="destructive" size="sm"` e o banner pós-exclusão (`role="status"`) com o link `"Fazer novo lançamento"`.
+- [x] Atualizar `frontend/src/pages/dashboard-super-admin/Sales.test.tsx` para interagir com os componentes `Select` (`"Origem do valor"`, `"Plano"` e `"Origem"`) via clique no trigger e seleção da opção `role="option"`.
+- [x] Executar `npx vitest run src/pages/dashboard-super-admin/Sales.test.tsx` e `npx eslint src/pages/dashboard-super-admin/Sales.tsx src/pages/dashboard-super-admin/SaleCreate.tsx src/components/dashboard-super-admin/SaleForm.tsx src/components/dashboard-super-admin/CompanyPicker.tsx src/components/dashboard-super-admin/PlanFilter.tsx src/pages/dashboard-super-admin/Sales.test.tsx`.
 
 Pronto quando:
 - A listagem e o cadastro de vendas utilizam exclusivamente o novo padrão visual `shadcn/ui` nos temas claro e escuro, e todos os 6 testes de `Sales.test.tsx` passam sem erros de lint ou TypeScript.

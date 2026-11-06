@@ -26,10 +26,14 @@
 
 ## Padrão visual e estrutural
 
-1. **Remoção do cabeçalho duplicado (`.sa-page-heading`)**:
+1. **Remoção do cabeçalho duplicado (`.sa-page-heading`) e Cards de Métricas (`SalesMetricsCards.tsx`)**:
    - O título `"Vendas"` já é exibido pelo `SuperAdminHeader.tsx`.
-   - Em `Sales.tsx`, a barra de topo exibe o botão `"Lançar venda manual"` (`Button` com `<Link to="/dashboard/super-admin/sales/new" role="link" />`).
-   - Em `SaleCreate.tsx`, a barra de topo exibe o botão `"Voltar para vendas"` (`Button variant="outline"` com `<Link to="/dashboard/super-admin/sales" role="link" />`).
+   - Em `Sales.tsx`, o topo exibe 3 cards de métricas (`SalesMetricsCards.tsx`, calculados no frontend com os dados retornados pelo backend, igual à página de empresas; rotas dedicadas de métricas no backend ficam em backlog):
+     1. **Faturamento total**: soma de todas as vendas.
+     2. **Faturamento no mês**: soma das vendas do mês atual (UTC) e percentual sobre o total.
+     3. **Faturamento por plano**: distribuição do faturamento por plano comercial com barra proporcional (`role="meter"`).
+   - Ao lado dos cards, a barra de topo exibe o botão `"Lançar venda manual"` (`Button` com `<Link to="/dashboard/super-admin/sales/new" role="link" />`).
+   - Em `SaleCreate.tsx`, a barra de topo exibe o botão `"Vendas"` (`Button variant="outline"` com `<Link to="/dashboard/super-admin/sales" role="link" />`).
 2. **Escopo de variáveis de tema (`theme`)**:
    - Os containers raiz de `Sales.tsx` e `SaleCreate.tsx` aplicam o objeto `theme` (`--card`, `--card-foreground`, `--popover`, `--popover-foreground`, `--input`, `--accent`, `--accent-foreground`) e mantêm `portalRef` para portais de `SelectContent`.
 3. **Filtros de vendas (`Sales.tsx` e `PlanFilter.tsx`)**:

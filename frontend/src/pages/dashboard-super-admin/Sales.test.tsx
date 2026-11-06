@@ -1,4 +1,5 @@
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Outlet, Route, Routes } from 'react-router-dom';
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { PageResult, PlatformCompany, PlatformSale, Plan, SessionProfile } from '../../lib/api';
@@ -151,7 +152,7 @@ describe('Vendas do superadmin', () => {
 
     await chooseCompanyForNewSale();
 
-    expect(screen.getByLabelText('Origem do valor')).toHaveValue('company_plan');
+    expect(screen.getByLabelText('Origem do valor')).toHaveTextContent('Plano atual da empresa');
     expect(screen.queryByLabelText('Valor em reais')).not.toBeInTheDocument();
     expect(screen.getByText('59.90 BRL')).toBeInTheDocument();
     expect(getPlatformCompany).toHaveBeenCalledWith(company.id);
@@ -174,8 +175,10 @@ describe('Vendas do superadmin', () => {
   });
 
   it('exige justificativa não vazia no modo de valor manual', async () => {
+    const user = userEvent.setup();
     await chooseCompanyForNewSale();
-    fireEvent.change(screen.getByLabelText('Origem do valor'), { target: { value: 'manual_amount' } });
+    await user.click(screen.getByLabelText('Origem do valor'));
+    await user.click(await screen.findByRole('option', { name: 'Valor manual com motivo' }));
     fireEvent.change(screen.getByLabelText('Valor em reais'), { target: { value: '120,50' } });
     fireEvent.change(screen.getByLabelText(/Descrição \/ motivo/), { target: { value: '   ' } });
     fireEvent.click(screen.getByRole('button', { name: 'Registrar venda manual' }));
@@ -184,6 +187,7 @@ describe('Vendas do superadmin', () => {
   });
 
   it('reutiliza operationId após falha idêntica e cria outra chave quando o conteúdo muda', async () => {
+    const user = userEvent.setup();
     const firstOperationId = '00000000-0000-4000-8000-000000000001';
     const secondOperationId = '00000000-0000-4000-8000-000000000002';
     vi.spyOn(globalThis.crypto, 'randomUUID')
@@ -201,7 +205,8 @@ describe('Vendas do superadmin', () => {
       .mockResolvedValueOnce({ sale: returnedSale, replayed: false });
 
     await chooseCompanyForNewSale();
-    fireEvent.change(screen.getByLabelText('Origem do valor'), { target: { value: 'manual_amount' } });
+    await user.click(screen.getByLabelText('Origem do valor'));
+    await user.click(await screen.findByRole('option', { name: 'Valor manual com motivo' }));
     fireEvent.change(screen.getByLabelText('Data comercial (UTC)'), { target: { value: '2020-01-02T03:04' } });
     fireEvent.change(screen.getByLabelText('Valor em reais'), { target: { value: '120,50' } });
     fireEvent.change(screen.getByLabelText(/Descrição \/ motivo/), { target: { value: 'Ajuste autorizado' } });
@@ -241,6 +246,7 @@ describe('Vendas do superadmin', () => {
   });
 
   it('filtra por origem, empresa e datas UTC e pagina mantendo os filtros', async () => {
+    const user = userEvent.setup();
     const filteredSale = { ...sale, id: 'sale-filtered', description: 'Venda filtrada' };
     const secondPageSale = { ...sale, id: 'sale-page-2', description: 'Venda da página 2' };
     vi.mocked(getPlatformSales).mockImplementation(async query => {
@@ -255,8 +261,10 @@ describe('Vendas do superadmin', () => {
     expect(screen.getByRole('navigation', { name: 'Paginação' })).toHaveTextContent('Página 1 de 3');
     expect(screen.queryByRole('button', { name: /Editar/ })).not.toBeInTheDocument();
 
-    fireEvent.change(screen.getByLabelText('Plano'), { target: { value: plan.id } });
-    fireEvent.change(screen.getByLabelText('Origem'), { target: { value: 'manual' } });
+    await user.click(screen.getByLabelText('Plano'));
+    await user.click(await screen.findByRole('option', { name: 'Profissional' }));
+    await user.click(screen.getByLabelText('Origem'));
+    await user.click(await screen.findByRole('option', { name: 'Manual' }));
     fireEvent.change(screen.getByLabelText('De (UTC)'), { target: { value: '2025-03-01T08:30' } });
     fireEvent.change(screen.getByLabelText('Até (UTC)'), { target: { value: '2025-03-31T18:45' } });
     fireEvent.click(screen.getByRole('button', { name: 'Filtrar' }));
