@@ -96,9 +96,9 @@ export function SiteHeader({
 
   return (
     <>
-      <div aria-hidden="true" className="h-[76px] shrink-0" />
+      <div aria-hidden="true" className="h-[111px] shrink-0" />
       <header data-site-header="" data-scrolled={isScrolled} className={`fixed inset-x-0 top-0 z-40 w-full rounded-b-2xl transition-all duration-300 motion-reduce:transition-none ${isScrolled || isMenuOpen ? 'border-b border-[var(--color-civix-navy)]/8 bg-[var(--color-civix-ivory)]/88 shadow-[0_8px_28px_rgba(7,25,42,0.06)] backdrop-blur-md' : 'bg-transparent'}`}>
-        <div ref={headerRef} className="relative mx-auto flex h-[76px] w-full max-w-[1728px] items-center justify-between px-6 sm:px-10 lg:px-16 xl:px-32">
+        <div ref={headerRef} className="relative mx-auto flex h-[85px] w-full max-w-[1728px] items-center justify-between px-6 pb-[20px] pt-2 sm:px-10 lg:px-16 xl:px-32">
           <a
             data-motion="item"
             data-motion-trigger="mount"
