@@ -230,7 +230,7 @@ async function signInThroughUi(page, email) {
   await page.getByLabel('Email').fill(email)
   await page.getByRole('textbox', { name: 'Senha' }).fill(password)
   await page.getByRole('button', { name: 'Login' }).click()
-  await page.waitForURL('**/super-admin', { timeout: 15000 })
+  await page.waitForURL('**/dashboard/super-admin', { timeout: 15000 })
   await page.getByRole('main').waitFor({ state: 'visible' })
 }
 
@@ -352,7 +352,7 @@ async function main() {
   await page.getByRole('button', { name: 'Ativar modo claro' }).click()
 
   logStep('CRUD de planos pelo catálogo comercial')
-  await page.goto(appBase + '/super-admin/plans', { waitUntil: 'domcontentloaded' })
+  await page.goto(appBase + '/dashboard/super-admin/plans', { waitUntil: 'domcontentloaded' })
   await page.getByRole('button', { name: 'Novo plano' }).click()
   const planForm = page.getByRole('form', { name: 'Novo plano' })
   await planForm.getByLabel('Nome do plano').fill('Plano Aurora E2E')
@@ -380,7 +380,7 @@ async function main() {
   assert.equal(planAfterUi?.is_active, true, 'A reativação do plano não foi persistida em JSON.')
 
   logStep('cadastro de empresa, falha recuperável e operação idempotente')
-  await page.goto(appBase + '/super-admin/companies/new', { waitUntil: 'domcontentloaded' })
+  await page.goto(appBase + '/dashboard/super-admin/companies/new', { waitUntil: 'domcontentloaded' })
   const companyForm = page.getByRole('form', { name: 'Cadastrar empresa com plano' })
   await companyForm.getByLabel('Nome da empresa').fill('Empresa de teste browser E2E')
   await companyForm.getByLabel('CNPJ').fill('00998877665544')
@@ -417,7 +417,7 @@ async function main() {
 
   logStep('edição de empresa sem venda automática e limpeza de contatos')
   const saleCountBeforeEdit = dataAfterCreation.sales.length
-  await page.goto(appBase + '/super-admin/companies/' + createdCompanyId + '/edit', { waitUntil: 'domcontentloaded' })
+  await page.goto(appBase + '/dashboard/super-admin/companies/' + createdCompanyId + '/edit', { waitUntil: 'domcontentloaded' })
   await expect(page.getByText(/A alteração do plano não gera uma venda automática/).first()).toBeVisible()
   const companyEditForm = page.getByRole('form', { name: 'Editar empresa' })
   await companyEditForm.getByLabel('Plano comercial').selectOption(planOneId)
@@ -432,13 +432,13 @@ async function main() {
   assert.equal(afterEdit.companies.find(item => item.id === createdCompanyId)?.plan_id, planOneId)
   assert.equal(afterEdit.companies.find(item => item.id === createdCompanyId)?.email, null)
   assert.equal(afterEdit.sales.length, saleCountBeforeEdit, 'A troca de plano lançou uma venda automática.')
-  await page.goto(appBase + '/super-admin/companies/' + createdCompanyId, { waitUntil: 'domcontentloaded' })
+  await page.goto(appBase + '/dashboard/super-admin/companies/' + createdCompanyId, { waitUntil: 'domcontentloaded' })
   await expect(page.getByText('Plano Horizonte E2E', { exact: true })).toBeVisible()
   await captureScreenshot(page, 'company-detail.png')
 
   logStep('lançamentos por plano e valor manual em UTC passado')
   const salesCountBeforeManual = (await readFixture()).sales.length
-  await page.goto(appBase + '/super-admin/sales/new?companyId=' + createdCompanyId, { waitUntil: 'domcontentloaded' })
+  await page.goto(appBase + '/dashboard/super-admin/sales/new?companyId=' + createdCompanyId, { waitUntil: 'domcontentloaded' })
   const planSaleForm = page.getByRole('form', { name: 'Lançar venda manual' })
   await expect(planSaleForm).toBeVisible()
   await expect(planSaleForm.getByLabel('Valor em reais')).toHaveCount(0)
@@ -481,7 +481,7 @@ async function main() {
   assert.equal(salesAfterManual.sales.length, salesCountBeforeManual + 2, 'O replay gravou uma venda manual duplicada.')
 
   logStep('listagem, filtros, exclusão confirmada e responsividade móvel')
-  await page.goto(appBase + '/super-admin/sales', { waitUntil: 'domcontentloaded' })
+  await page.goto(appBase + '/dashboard/super-admin/sales', { waitUntil: 'domcontentloaded' })
   await page.getByRole('heading', { name: 'Vendas' }).waitFor({ state: 'visible' })
   await expect(page.getByText('Empresa de teste browser E2E', { exact: true }).first()).toBeVisible()
   const salesListScreenshot = 'sales.png'
@@ -554,7 +554,7 @@ async function main() {
   logStep('suspensão, bloqueio público e revogação de sessão empresarial')
   const previousCompanyAdminToken = await apiSignIn(companyAdminEmail, 'admin_empresa')
   await page.setViewportSize({ width: 1440, height: 1000 })
-  await page.goto(appBase + '/super-admin/companies/' + seedCompanyId, { waitUntil: 'domcontentloaded' })
+  await page.goto(appBase + '/dashboard/super-admin/companies/' + seedCompanyId, { waitUntil: 'domcontentloaded' })
   await page.getByRole('button', { name: 'Desativar empresa' }).click()
   const suspendDialog = page.getByRole('dialog')
   await suspendDialog.getByLabel('Motivo').fill('   ')
@@ -579,7 +579,7 @@ async function main() {
   expectStatus(await requestJson('/api/v1/users/profile', { token: renewedCompanyAdminToken }), 200, 'Novo login empresarial após reativação')
 
   logStep('convite empresarial, primeiro acesso e exclusão lógica de atendente')
-  await page.goto(appBase + '/super-admin/companies/' + seedCompanyId + '/users', { waitUntil: 'domcontentloaded' })
+  await page.goto(appBase + '/dashboard/super-admin/companies/' + seedCompanyId + '/users', { waitUntil: 'domcontentloaded' })
   await expect(page.getByRole('heading', { name: 'Equipe empresarial' })).toBeVisible()
   await expect(page.getByText(attendantEmail)).toBeVisible()
   await captureScreenshot(page, 'users.png')
@@ -611,7 +611,7 @@ async function main() {
   assert.equal(activeTeamUser?.status, 'active', 'O primeiro acesso não ativou o usuário empresarial.')
   assert.equal(activeTeamUser?.invite_token, null, 'O primeiro acesso não invalidou o token de convite.')
   const newAttendantToken = await apiSignIn(teamInvitePayload.email, 'atendente', 'SyntheticUser-934!')
-  await page.goto(appBase + '/super-admin/companies/' + seedCompanyId + '/users', { waitUntil: 'domcontentloaded' })
+  await page.goto(appBase + '/dashboard/super-admin/companies/' + seedCompanyId + '/users', { waitUntil: 'domcontentloaded' })
   const invitedUserRow = page.getByRole('row').filter({ hasText: teamInvitePayload.email })
   await invitedUserRow.getByRole('button', { name: 'Excluir atendente' }).click()
   const deleteUserDialog = page.getByRole('dialog')
@@ -627,7 +627,7 @@ async function main() {
 
   logStep('convite global, bloqueio próprio e suspensão/reativação de outro superadmin')
   const previousOtherAdminToken = await apiSignIn(otherAdminEmail, 'super_admin')
-  await page.goto(appBase + '/super-admin/administrators', { waitUntil: 'domcontentloaded' })
+  await page.goto(appBase + '/dashboard/super-admin/administrators', { waitUntil: 'domcontentloaded' })
   await expect(page.getByRole('heading', { name: 'Superadmins' })).toBeVisible()
   const ownAdminRow = page.getByRole('row').filter({ has: page.getByText(rootEmail, { exact: true }) })
   await expect(ownAdminRow.getByRole('button', { name: 'Desativar' })).toBeDisabled()
@@ -665,7 +665,7 @@ async function main() {
   assert.equal((await readFixture()).users.find(user => user.email === otherAdminEmail)?.status, 'active')
 
   logStep('perfil próprio, atualização do cabeçalho e troca de e-mail')
-  await page.goto(appBase + '/super-admin/settings/profile', { waitUntil: 'domcontentloaded' })
+  await page.goto(appBase + '/dashboard/super-admin/settings/profile', { waitUntil: 'domcontentloaded' })
   const profileForm = page.getByRole('form', { name: 'Atualizar meu perfil' })
   await profileForm.getByLabel('Nome').fill('Root E2E Atualizado')
   await profileForm.getByRole('button', { name: 'Salvar perfil' }).click()
@@ -683,7 +683,7 @@ async function main() {
 
   logStep('arquivamento, restauração inativa e reativação explícita')
   await page.setViewportSize({ width: 1440, height: 1000 })
-  await page.goto(appBase + '/super-admin/companies/' + createdCompanyId, { waitUntil: 'domcontentloaded' })
+  await page.goto(appBase + '/dashboard/super-admin/companies/' + createdCompanyId, { waitUntil: 'domcontentloaded' })
   await page.getByRole('button', { name: 'Arquivar empresa' }).click()
   const archiveDialog = page.getByRole('dialog')
   await archiveDialog.getByLabel('Motivo').fill('Arquivamento sintético para validar restauração.')

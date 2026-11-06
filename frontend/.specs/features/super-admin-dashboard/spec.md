@@ -25,7 +25,7 @@ spec de negócio; detalhes visuais ficam em [design](design.md).
 ## Base e objetivo
 
 frontend/src/routes/AppRoute.tsx monta o dashboard; login super_admin vai
-para /super-admin. ProtectedRoute.tsx consulta profile para a área exclusiva de
+para /dashboard/super-admin. ProtectedRoute.tsx consulta profile para a área exclusiva de
 super_admin; a segurança definitiva está no backend, mesmo sem o guard.
 Reutilizar UI e transporte atuais; não mudar design do site institucional.
 
@@ -71,7 +71,7 @@ Criar a tela de configurações do superadmin autenticado, com edição de
 integra o escopo aprovado. Não confundir configurações pessoais com regras
 globais da plataforma nem com gestão de outros administradores.
 
-Proposta: /super-admin/settings/profile em
+Rota: /dashboard/super-admin/settings/profile em
 frontend/src/pages/dashboard-super-admin/ProfileSettings.tsx e formulário em
 frontend/src/components/dashboard-super-admin/ProfileForm.tsx. Carregar dados reais
 do perfil, validar campos e e-mail único sem distinção de caixa no backend,
@@ -81,7 +81,8 @@ Não enviar userId/role/companyId editáveis. Após mudança de e-mail,
 reconciliar sessão conforme política aprovada no SDD, pois o JWT atual inclui
 e-mail. Não tratar edição apenas local como persistência concluída.
 
-Rotas/contratos G0 a G7 adotados em SA-P07 e implementados. Prefixo /super-admin, com layout em
+Rotas/contratos G0 a G7 adotados em SA-P07 e implementados. Prefixo de interface
+/dashboard/super-admin, com layout em
 frontend/src/components/dashboard-super-admin/layout/SuperAdminLayout.tsx, protegido por
 frontend/src/components/auth/ProtectedRoute.tsx. Montagem em AppRoute.tsx.
 
@@ -118,7 +119,7 @@ compartilhada atual (por exemplo components/ui), sem duplicação nessa pasta.
 ## Fluxos de UI
 
 1. Login válido consulta identidade; superadmin vai para rota existente.
-   Outros perfis são impedidos de acessar /super-admin e suas APIs.
+   Outros perfis são impedidos de acessar /dashboard/super-admin e suas APIs.
 2. Criar empresa busca planos válidos, valida formulário e envia uma operação
    repetível com segurança. Desabilitar submit ajuda UX, mas deduplicação
    obrigatória está no backend. Falha não vira sucesso fictício.

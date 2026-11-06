@@ -105,7 +105,7 @@ Não aceitar role, actorId, deletedAt, moeda livre ou object_key do cliente.
 ## 3. Autenticação e navegação
 
 1. Login valida senha e papel persistido; só super_admin é encaminhado à
-   rota proposta /super-admin, depois de ela existir. Outros perfis mantêm
+   rota /dashboard/super-admin, depois de ela existir. Outros perfis mantêm
    destinos disponíveis; cliente continua sem login.
 2. ProtectedRoute busca GET /api/v1/users/profile. Loading bloqueia conteúdo;
    401 limpa token/estado e volta ao login; erro de rede não finge logout.
@@ -334,11 +334,13 @@ sale.controller, SaleRepository e adapters; migrations versionadas próprias.
 
 ## 8. Telas e integração
 
-Proposta de navegação: /super-admin, /super-admin/companies,
-/super-admin/companies/new, /super-admin/companies/:companyId,
-/super-admin/companies/:companyId/edit, /super-admin/companies/:companyId/users,
-/super-admin/plans, /super-admin/sales, /super-admin/sales/new e
-/super-admin/administrators. Detalhes de planos/vendas podem ser páginas ou
+Navegação: /dashboard/super-admin, /dashboard/super-admin/companies,
+/dashboard/super-admin/companies/new, /dashboard/super-admin/companies/:companyId,
+/dashboard/super-admin/companies/:companyId/edit,
+/dashboard/super-admin/companies/:companyId/users,
+/dashboard/super-admin/plans, /dashboard/super-admin/sales,
+/dashboard/super-admin/sales/new e /dashboard/super-admin/administrators.
+Detalhes de planos/vendas podem ser páginas ou
 painéis; URLs e DTOs devem ser aprovados sem depender de estado invisível.
 
 Formulários buscam dados/planos reais e distinguem carregamento, vazio, erro,

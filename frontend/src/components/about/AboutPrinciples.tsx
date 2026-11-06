@@ -31,7 +31,7 @@ export function AboutPrinciples() {
   return (
     <section
       aria-label="Princípios da Civix"
-      className="relative z-10 flex w-full flex-col px-6 sm:px-10 2xl:absolute 2xl:left-[calc(58.333%_-_19px)] 2xl:top-[446px] 2xl:w-[611px] 2xl:px-0"
+      className="relative z-10 flex w-full flex-col px-6 sm:px-10 2xl:absolute 2xl:left-[calc(41.667%+93px)] 2xl:top-[446px] 2xl:w-[611px] 2xl:px-0"
     >
       {principles.map((principle, index) => (
         <article

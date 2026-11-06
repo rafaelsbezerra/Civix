@@ -54,7 +54,7 @@ reativados por outro ativo e têm poderes iguais, sem editor individual.
 
 ## Estado da implementação G0 a G7
 
-Rotas privadas em `/super-admin`: início, empresas, planos, vendas, equipe, superadmins e perfil.
+Rotas privadas em `/dashboard/super-admin`: início, empresas, planos, vendas, equipe, superadmins e perfil.
 Tema claro inicial e preferência claro/escuro persistida neste navegador.
 Alterar nome atualiza o header; alterar e-mail exige novo login.
 

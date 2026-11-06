@@ -22,7 +22,7 @@ export function AboutVisual() {
       />
 
       <div
-        className="absolute left-1/2 top-10 h-[270px] w-[min(92vw,470px)] -translate-x-1/2 sm:top-9 sm:h-[360px] sm:w-[570px] 2xl:left-[128px] 2xl:top-[247px] 2xl:h-[477px] 2xl:w-[635px] 2xl:translate-x-0"
+        className="absolute left-1/2 top-10 h-[270px] w-[min(92vw,470px)] -translate-x-1/2 sm:top-9 sm:h-[360px] sm:w-[570px] 2xl:left-[36px] 2xl:top-[255px] 2xl:h-[450px] 2xl:w-[600px] 2xl:translate-x-0"
         data-testid="about-laptop"
       >
         <img
@@ -39,7 +39,7 @@ export function AboutVisual() {
       <img
         aria-hidden="true"
         alt=""
-        className="absolute right-2 top-2 size-[70px] sm:right-0 sm:top-5 sm:size-[90px] 2xl:left-[672px] 2xl:right-auto 2xl:top-[289px] 2xl:size-[104px]"
+        className="absolute right-2 top-2 size-[70px] sm:right-0 sm:top-5 sm:size-[90px] 2xl:left-[552px] 2xl:right-auto 2xl:top-[295px] 2xl:size-[104px]"
         data-testid="about-scribble"
         data-motion="item"
         data-motion-delay="120"
