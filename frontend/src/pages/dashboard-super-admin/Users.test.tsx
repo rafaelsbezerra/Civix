@@ -1,4 +1,5 @@
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Link, Outlet, Route, Routes } from 'react-router-dom';
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ManagedUser, ManagedUserInput, PageResult, PlatformCompany, SessionProfile } from '../../lib/api';
@@ -203,6 +204,7 @@ describe('Gestão de usuários do superadmin', () => {
   });
 
   it('aplica nome, estado e perfil e navega as páginas sem perder filtros', async () => {
+    const user = userEvent.setup();
     const filteredUser = { ...companyAttendant, id: 'filtered-user', name: 'Atendente encontrado' };
     const secondPageUser = { ...companyAttendant, id: 'page-two-user', name: 'Atendente da página 2' };
     vi.mocked(getManagedUsers)
@@ -215,8 +217,10 @@ describe('Gestão de usuários do superadmin', () => {
     expect(await screen.findByText(companyAdminA.name)).toBeInTheDocument();
     expect(screen.getByRole('navigation', { name: 'Paginação' })).toHaveTextContent('Página 1 de 3');
     fireEvent.change(screen.getByLabelText('Nome ou e-mail'), { target: { value: 'atendente' } });
-    fireEvent.change(screen.getByLabelText('Estado do acesso'), { target: { value: 'pending' } });
-    fireEvent.change(screen.getByLabelText('Perfil'), { target: { value: 'atendente' } });
+    await user.click(screen.getByLabelText('Estado do acesso'));
+    await user.click(await screen.findByRole('option', { name: 'Aguardando senha' }));
+    await user.click(screen.getByLabelText('Perfil'));
+    await user.click(await screen.findByRole('option', { name: 'Atendente' }));
     fireEvent.click(screen.getByRole('button', { name: 'Filtrar' }));
 
     expect(await screen.findByText(filteredUser.name)).toBeInTheDocument();
@@ -276,10 +280,11 @@ describe('Gestão de usuários do superadmin', () => {
     fireEvent.click(await screen.findByRole('button', { name: 'Convidar usuário' }));
     const form = screen.getByRole('form', { name: 'Convidar usuário' });
     const role = within(form).getByLabelText('Perfil');
-    expect(within(role).queryByRole('option', { name: 'Superadmin' })).not.toBeInTheDocument();
+    fireEvent.click(role);
+    expect(screen.queryByRole('option', { name: 'Superadmin' })).not.toBeInTheDocument();
+    fireEvent.click(await screen.findByRole('option', { name: 'Atendente' }));
     fireEvent.change(within(form).getByLabelText('Nome'), { target: { value: 'Novo Atendente' } });
     fireEvent.change(within(form).getByLabelText('E-mail'), { target: { value: 'novo-atendente@example.test' } });
-    fireEvent.change(role, { target: { value: 'atendente' } });
     fireEvent.click(within(form).getByRole('button', { name: 'Enviar convite' }));
 
     expect(await screen.findByRole('status')).toHaveTextContent('Convite enviado.');
@@ -441,7 +446,7 @@ describe('Gestão de usuários do superadmin', () => {
       name: 'Nome Atualizado',
       email: selfAdmin.email,
     });
-    expect(screen.getByRole('link', { name: /Nome Atualizado/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Abrir menu de Nome Atualizado' })).toBeInTheDocument();
   });
 
   it('encerra a sessão e pede novo login quando o próprio e-mail muda', async () => {

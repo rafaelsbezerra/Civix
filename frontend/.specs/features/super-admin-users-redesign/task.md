@@ -26,16 +26,16 @@ Refatorar a tela compartilhada de administração de superadmins e equipe empres
 
 Passos:
 
-- [ ] Definir o schema `userFormSchema` com `zod` validando:
+- [x] Definir o schema `userFormSchema` com `zod` validando:
   - `name`: `z.string().trim().min(1, 'Informe nome e e-mail válido.').max(120)`
   - `email`: `z.string().trim().regex(/^\S+@\S+\.\S+$/, 'Informe nome e e-mail válido.').max(254)`
   - `role`: `z.enum(['admin_empresa', 'atendente'])`
-- [ ] Inicializar `useForm` com `zodResolver(userFormSchema)` e sincronizar os valores quando `initial` mudar (`name`, `email`, `role`).
-- [ ] Substituir `<form className="sa-form sa-panel">` por um `Card` (`rounded-2xl`) com `CardHeader` (`CardTitle` e `CardDescription`) e `CardContent` contendo `<form noValidate aria-label={initial ? 'Editar usuário' : 'Convidar usuário'}>`.
-- [ ] Substituir os inputs nativos por `FieldSet`, `FieldGroup`, `Field`, `FieldLabel`, `Input` e `FieldError` para `"Nome"` e `"E-mail"`.
-- [ ] Quando `!global`, renderizar `Field` + `Controller` + `Select` para `"Perfil"` (`SelectTrigger` com `bg-muted/40 hover:bg-muted/60 dark:bg-input/30 dark:hover:bg-input/50` e `SelectContent` com `container={portalRef.current} alignItemWithTrigger={false}`), oferecendo apenas `"Admin da empresa"` (`admin_empresa`) e `"Atendente"` (`atendente`).
-- [ ] No submit, montar o payload `{ name: values.name.trim(), email: values.email.trim(), ...(global ? {} : { role: values.role }) }` garantindo que `role`, `companyId` e `password` nunca sejam enviados no modo global.
-- [ ] Substituir os botões por `Button variant="outline"` (`"Cancelar"`) e `Button type="submit"` (`initial ? 'Salvar usuário' : 'Enviar convite'` / `"Salvando…"`).
+- [x] Inicializar `useForm` com `zodResolver(userFormSchema)` e sincronizar os valores quando `initial` mudar (`name`, `email`, `role`).
+- [x] Substituir `<form className="sa-form sa-panel">` por um `Card` (`rounded-2xl`) com `CardHeader` (`CardTitle` e `CardDescription`) e `CardContent` contendo `<form noValidate aria-label={initial ? 'Editar usuário' : 'Convidar usuário'}>`.
+- [x] Substituir os inputs nativos por `FieldSet`, `FieldGroup`, `Field`, `FieldLabel`, `Input` e `FieldError` para `"Nome"` e `"E-mail"`.
+- [x] Quando `!global`, renderizar `Field` + `Controller` + `Select` para `"Perfil"` (`SelectTrigger` com `bg-muted/40 hover:bg-muted/60 dark:bg-input/30 dark:hover:bg-input/50` e `SelectContent` com `container={portalRef.current} alignItemWithTrigger={false}`), oferecendo apenas `"Admin da empresa"` (`admin_empresa`) e `"Atendente"` (`atendente`).
+- [x] No submit, montar o payload `{ name: values.name.trim(), email: values.email.trim(), ...(global ? {} : { role: values.role }) }` garantindo que `role`, `companyId` e `password` nunca sejam enviados no modo global.
+- [x] Substituir os botões por `Button variant="outline"` (`"Cancelar"`) e `Button type="submit"` (`initial ? 'Salvar usuário' : 'Enviar convite'` / `"Salvando…"`).
 
 Pronto quando:
 - `UserForm.tsx` renderiza dentro de um `Card` com componentes `shadcn/ui`, valida campos via `zod` + `react-hook-form` e preserva as regras de payload para convite/edição global e empresarial.
@@ -51,15 +51,15 @@ Commit sugerido:
 
 Passos:
 
-- [ ] Remover `.sa-page-heading` em `Users.tsx` e criar a barra superior com:
+- [x] Remover `.sa-page-heading` em `Users.tsx` e criar a barra superior com:
   - Quando `companyId !== null`: `Button variant="outline"` com `<Link to={\`/dashboard/super-admin/companies/\${companyId}\`} role="link">` (`"Voltar à empresa"`) e identificação visível do nome da empresa (`company.data?.nome || companyId`).
   - `Button` `"Convidar usuário"` (desabilitado se `archived`).
-- [ ] Adicionar o objeto `theme` (`CSSProperties`) e `portalRef` no container raiz `div.space-y-6` de `Users.tsx`.
-- [ ] Substituir `<form className="sa-form sa-filter-form">` por um `Card` (`rounded-2xl py-5`) com `CardContent`, utilizando `Field`, `FieldLabel`, `Input` (`"Nome ou e-mail"`), `Select` (`"Estado do acesso"` e, quando `companyId !== null`, `"Perfil"`, ambos com `bg-muted/40 hover:bg-muted/60 dark:bg-input/30 dark:hover:bg-input/50`) e `Button type="submit"` (`"Filtrar"`).
-- [ ] Substituir `<section className="sa-panel">` e `<table className="sa-table">` por `Card` (`gap-0 rounded-2xl py-0`), `Table`, `TableHeader`, `TableBody`, `TableRow`, `TableHead` e `TableCell`, usando `Badge` para as colunas `"Estado"` e `"Convite"` e `Button variant="outline" size="sm"` (ou `variant="destructive" size="sm"` para `"Excluir atendente"`) na coluna `"Ações"`.
-- [ ] Substituir `Pagination` legado por `CompanyPagination` (`frontend/src/components/dashboard-super-admin/CompanyPagination.tsx`).
-- [ ] Atualizar as interações de `Select` (linhas 218–219 e 278–282) e a asserção do botão de perfil no header (linha 444) em `frontend/src/pages/dashboard-super-admin/Users.test.tsx`.
-- [ ] Executar `npx vitest run src/pages/dashboard-super-admin/Users.test.tsx` e `npx eslint src/pages/dashboard-super-admin/Users.tsx src/components/dashboard-super-admin/UserForm.tsx src/pages/dashboard-super-admin/Users.test.tsx`.
+- [x] Adicionar o objeto `theme` (`CSSProperties`) e `portalRef` no container raiz `div.space-y-6` de `Users.tsx`.
+- [x] Substituir `<form className="sa-form sa-filter-form">` por um `Card` (`rounded-2xl py-5`) com `CardContent`, utilizando `Field`, `FieldLabel`, `Input` (`"Nome ou e-mail"`), `Select` (`"Estado do acesso"` e, quando `companyId !== null`, `"Perfil"`, ambos com `bg-muted/40 hover:bg-muted/60 dark:bg-input/30 dark:hover:bg-input/50`) e `Button type="submit"` (`"Filtrar"`).
+- [x] Substituir `<section className="sa-panel">` e `<table className="sa-table">` por `Card` (`gap-0 rounded-2xl py-0`), `Table`, `TableHeader`, `TableBody`, `TableRow`, `TableHead` e `TableCell`, usando `Badge` para as colunas `"Estado"` e `"Convite"` e `Button variant="outline" size="sm"` (ou `variant="destructive" size="sm"` para `"Excluir atendente"`) na coluna `"Ações"`.
+- [x] Substituir `Pagination` legado por `CompanyPagination` (`frontend/src/components/dashboard-super-admin/CompanyPagination.tsx`).
+- [x] Atualizar as interações de `Select` (linhas 218–219 e 278–282) e a asserção do botão de perfil no header (linha 444) em `frontend/src/pages/dashboard-super-admin/Users.test.tsx`.
+- [x] Executar `npx vitest run src/pages/dashboard-super-admin/Users.test.tsx` e `npx eslint src/pages/dashboard-super-admin/Users.tsx src/components/dashboard-super-admin/UserForm.tsx src/pages/dashboard-super-admin/Users.test.tsx`.
 
 Pronto quando:
 - `Users.tsx` opera nos contextos de Superadmins e Equipe da Empresa com visual `shadcn/ui` completo nos temas claro e escuro, e todos os 11 testes de `Users.test.tsx` passam sem erros de lint.
