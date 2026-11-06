@@ -52,3 +52,17 @@ de envio não aparece como convite entregue. Conta removida perde acesso.
 P03/P04/P05/P06/P07, mudança de dono, limites de equipe por plano e efeito
 de bloqueio da empresa/remoção com atendimentos atribuídos. Não implementar
 cobrança ou pagamento no onboarding.
+
+## Atualização — decisões de 2026-11-02
+
+O dono pode convidar atendentes, consultar equipe e atividades, editar perfil,
+bloquear/desbloquear, remover vínculo e transferir a propriedade para um
+atendente ativo da mesma empresa. Na transferência, o dono anterior passa a
+atendente. Bloqueio revoga acesso imediatamente; remoção preserva histórico
+e deixa atendimentos sem responsável para o dono reassumir/atribuir. Campos
+editáveis do perfil da equipe, idempotência e concorrência ainda precisam de
+contrato. A matriz canônica está em DASH-D15/D16 de
+[decisions.md](../../roadmaps/dashboards/decisions.md).
+
+**Aguardando resposta:** política para bloqueio da empresa; DTOs/rotas finais;
+campos permitidos para edição do integrante; limites comerciais de equipe.

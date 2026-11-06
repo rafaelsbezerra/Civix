@@ -120,7 +120,7 @@ const AnimatedWave = ({ className = "" }: { className?: string }) => {
   );
 };
 
-export default function Login({ access = "empresa" }: { access?: "empresa" | "cliente" | "selection" }) {
+export default function Login({ access = "empresa" }: { access?: "empresa" | "atendente" | "cliente" | "selection" }) {
   const role = access;
 
   const [email, setEmail] = useState("");
@@ -143,7 +143,7 @@ export default function Login({ access = "empresa" }: { access?: "empresa" | "cl
       return;
     }
 
-    if (role === "empresa" && !password) {
+    if ((role === "empresa" || role === "atendente") && !password) {
       setError("Por favor, informe sua senha.");
       return;
     }
@@ -155,11 +155,18 @@ export default function Login({ access = "empresa" }: { access?: "empresa" | "cl
       const result = await login({
         email,
         password,
+        role: role === "empresa" ? "admin_empresa" : role === "atendente" ? "atendente" : undefined,
       });
 
       localStorage.setItem("token", result.token);
 
-      navigate("/");
+      if (result.user.role === "atendente") {
+        navigate("/dashboard-atendente");
+      } else if (result.user.role === "admin_empresa") {
+        navigate("/dashboard-empresa");
+      } else {
+        navigate("/");
+      }
     } catch (err: unknown) {
       setError(err instanceof ApiError
         ? err.message
@@ -205,6 +212,8 @@ export default function Login({ access = "empresa" }: { access?: "empresa" | "cl
               >
                 {access === "selection" ? "Escolha seu acesso" : access === "cliente"
                   ? "A área logada do cliente está sendo construída."
+                  : access === "atendente"
+                    ? "Acesse seu painel de atendimentos"
                   : "Faça login para ter acesso"}
                 {access === "empresa" && <><br />ao sistema</>}
               </h1>
@@ -267,6 +276,29 @@ export default function Login({ access = "empresa" }: { access?: "empresa" | "cl
                     </p>
                   </div>
                 </button>
+
+                <button
+                  type="button"
+                  onClick={() => navigate("/login/atendente")}
+                  className="w-full min-h-[70px] rounded-[6px] transition flex items-center px-[clamp(12px,1vw,20px)] text-left border border-transparent bg-[#dedede] hover:bg-[#d5d5d5]"
+                >
+                  <div className="w-[clamp(30px,2.2vw,42px)] h-[clamp(30px,2.2vw,42px)] rounded-[5px] flex items-center justify-center mr-[clamp(10px,0.8vw,16px)] shrink-0 bg-[#c0c0c0]">
+                    <User
+                      size={18}
+                      className="w-[clamp(15px,1vw,20px)] h-[clamp(15px,1vw,20px)] text-[#35404a]"
+                      strokeWidth={1.5}
+                    />
+                  </div>
+
+                  <div>
+                    <p className="text-[clamp(14px,0.55vw,12px)] font-semibold text-[#101010]">
+                      Sou atendente
+                    </p>
+                    <p className="text-[clamp(12px,0.48vw,11px)] leading-[1.25] text-[#626262]">
+                      Acesse seus atendimentos atribuídos.
+                    </p>
+                  </div>
+                </button>
               </div>}
 
               {error && (
@@ -275,7 +307,7 @@ export default function Login({ access = "empresa" }: { access?: "empresa" | "cl
                 </div>
               )}
 
-              {access === "empresa" && <form
+              {(access === "empresa" || access === "atendente") && <form
                 onSubmit={handleSubmit}
                 className="space-y-[clamp(10px,1.2vh,18px)]"
               >
@@ -297,7 +329,7 @@ export default function Login({ access = "empresa" }: { access?: "empresa" | "cl
                   />
                 </div>
 
-                {role === "empresa" && (
+                {(role === "empresa" || role === "atendente") && (
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
                       <label

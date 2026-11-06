@@ -42,7 +42,9 @@ altere o .env automaticamente como parte dos testes.
 | --- | --- |
 | USE_MOCK_DATA | true usa JSON; false ou ausência usa PostgreSQL/Resend |
 | MOCK_DATA_DIR | Diretório absoluto ou relativo à raiz do backend |
-| DATABASE_URL | Conexão Neon no modo real e configuração Prisma |
+| DATABASE_URL | Conexão PostgreSQL/Neon no modo real e configuração Prisma; variável efetivamente lida pelo backend |
+| DB_HOST, DB_USER, DB_PASSWORD, DB_NAME | Partes informativas da conexão; o backend não as lê separadamente |
+| DB_SSLMODE, DB_CHANNELBINDING | Opções refletidas na DATABASE_URL; o backend não as lê separadamente |
 | PORT | Porta backend, default 3000 |
 | JWT_SECRET | Assinatura/verificação do access token |
 | LOG_LEVEL | debug/info/warn/error/fatal; override validado do nível interno de logs |

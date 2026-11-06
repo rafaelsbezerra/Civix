@@ -22,5 +22,5 @@ export function ProtectedRoute({ allowedRoles }: { allowedRoles: readonly Authen
   if (state === 'unauthorized') return <Navigate to="/login" replace />;
   if (state === 'error') return <p role="alert">Não foi possível verificar seu acesso. Tente novamente.</p>;
   if (!session || !allowedRoles.includes(session.user.role)) return <p role="alert">Acesso não permitido.</p>;
-  return <Outlet />;
+  return <Outlet context={session} />;
 }

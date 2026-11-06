@@ -1,13 +1,17 @@
 # Atendimentos atribuídos e mensagens
 
-**Estado:** planejada, não implementada. Autorização somente para documentar.
+**Estado:** shell visual e entrada de login separados implementados; operações
+de atendimento, histórico e perfil continuam não implementadas.
 **Ordem:** 07. Tarefas novas permanecem abertas.
 
 ## Baseline observada
 
-Não há telas/módulo de conversas, mensagens ou atribuição. Catálogo público
-não é um sistema operacional de atendimento. Mensagens locais de exemplo
-não comprovariam comunicação e autorização backend.
+O frontend tem `/login/atendente` e `/dashboard-atendente` com Início,
+Conversas, Histórico e Perfil. O perfil é consultado pelo guard e apenas
+`atendente` acessa essa área. O shell é visual: não há módulo backend de
+conversas, mensagens ou atribuição. Catálogo público não é um sistema
+operacional de atendimento. Mensagens locais de exemplo não comprovariam
+comunicação e autorização backend.
 
 ## Dependências e referências
 
@@ -51,10 +55,20 @@ Não acessar produção; dados/e-mails de teste são isolados.
 
 ## Tarefas planejadas
 
+- [x] FE-07-00: Criar entrada de login e shell protegido do atendente, com
+  estados explícitos para telas sem contrato ou integração.
 - [ ] FE-07-01: Implementar lista/detalhe/mensagens conforme autorização backend.
 - [ ] FE-07-02: Implementar loading/erro/atualização sem conteúdo fictício.
 - [ ] FE-07-03: Implementar ações após aprovação de atribuição/transferência.
 - [ ] FE-07-04: Testar E2E entre empresas/atendentes, negando conversas ao superadmin.
+
+Verificação do shell e entrada local: login com perfil `atendente` abriu
+`/dashboard-atendente` após confirmação de `/api/v1/users/profile`; a
+navegação exibiu Início, Conversas, Histórico e Perfil. Testes focados de
+login/layout e rotas, ESLint e TypeScript passaram. O usuário local de
+demonstração fica em `backend/.local-data/data.json` (ignorado pelo Git);
+isso valida somente o shell, não os fluxos E2E de conversas ou persistência
+de atendimentos.
 
 ## Aceite
 
@@ -65,8 +79,12 @@ Não acessar produção; dados/e-mails de teste são isolados.
 
 ## Definições pendentes
 
-**Aguardando resposta:** quem atribui/transfere (dono, atendente ou outro fluxo),
-regras de transferência, estados/canais e método de atualizar mensagens.
-Payloads de leitura também precisam de aprovação antes de implementar.
+**Aguardando resposta:** catálogo de estados, canal/fonte de mensagens além do
+contato inicial, concorrência de atribuição, método de atualização e contratos
+HTTP/DTO finais. Matriz aprovada: atendente consulta atribuídos e disponíveis,
+pode assumir disponíveis, responder e transferir apenas itens atribuídos/
+assumidos para atendente ativo da mesma empresa; dono lê/responde conversas
+da própria empresa; super_admin não acessa conversas. Ver DASH-D13/D14 em
+[decisions.md](../../../../backend/.specs/roadmaps/dashboards/decisions.md).
 
 Não houve implementação ou execução de teste ao criar esta spec.

@@ -60,6 +60,90 @@
   --sidebar-ring: oklch(0.708 0 0);
 }
 
+.company-dashboard-shell {
+  --dashboard-bg: var(--color-civix-navy);
+  --dashboard-sidebar: #091827;
+  --dashboard-surface: #10273b;
+  --dashboard-surface-raised: #15334b;
+  --dashboard-hero-from: #15334b;
+  --dashboard-hero-to: #091827;
+  --dashboard-border: rgb(250 249 246 / 12%);
+  --dashboard-sidebar-text: var(--color-civix-ivory);
+  --dashboard-sidebar-muted: #bdc7cf;
+  --dashboard-text: var(--color-civix-ivory);
+  --dashboard-muted: #bdc7cf;
+  --dashboard-subtle: #91a1af;
+  --dashboard-accent: #d89c28;
+  --dashboard-accent-text: #f3c66e;
+  --dashboard-on-accent: var(--color-civix-navy);
+  --dashboard-accent-soft: rgb(216 156 40 / 15%);
+  --dashboard-chart-secondary: #345472;
+  --dashboard-chart-grid: #294254;
+  --dashboard-warning-bg: rgb(216 156 40 / 10%);
+  --dashboard-warning-border: rgb(216 156 40 / 38%);
+  --dashboard-warning-text: #f4d99e;
+  --dashboard-positive-bg: rgb(91 167 119 / 18%);
+  --dashboard-positive-text: #a9ddb8;
+  color: var(--dashboard-text);
+  background: var(--dashboard-bg);
+  color-scheme: dark;
+}
+
+.company-dashboard-shell[data-theme='light'] {
+  --dashboard-bg: var(--color-civix-ivory);
+  --dashboard-sidebar: var(--color-civix-navy);
+  --dashboard-surface: #ffffff;
+  --dashboard-surface-raised: #f1f3f2;
+  --dashboard-hero-from: #f1f3f2;
+  --dashboard-hero-to: #ffffff;
+  --dashboard-border: rgb(7 25 42 / 14%);
+  --dashboard-sidebar-text: var(--color-civix-ivory);
+  --dashboard-sidebar-muted: #bdc7cf;
+  --dashboard-text: var(--color-civix-navy);
+  --dashboard-muted: #33495b;
+  --dashboard-subtle: #596c7a;
+  --dashboard-accent: var(--color-civix-gold-accessible);
+  --dashboard-accent-text: var(--color-civix-gold-accessible);
+  --dashboard-on-accent: #ffffff;
+  --dashboard-accent-soft: rgb(216 156 40 / 14%);
+  --dashboard-chart-secondary: #536d86;
+  --dashboard-chart-grid: #d9e0e3;
+  --dashboard-warning-bg: rgb(216 156 40 / 12%);
+  --dashboard-warning-border: rgb(154 101 0 / 35%);
+  --dashboard-warning-text: #59400e;
+  --dashboard-positive-bg: rgb(52 119 75 / 10%);
+  --dashboard-positive-text: #27623b;
+  color-scheme: light;
+}
+
+.dashboard-channel-donut {
+  background: conic-gradient(
+    var(--dashboard-accent) 0 57%,
+    var(--dashboard-bg) 57% 58%,
+    var(--dashboard-chart-secondary) 58% 84%,
+    var(--dashboard-bg) 84% 85%,
+    var(--dashboard-subtle) 85% 99%,
+    var(--dashboard-bg) 99% 100%
+  );
+}
+
+.company-dashboard-shell h2 {
+  color: var(--dashboard-text) !important;
+}
+
+.company-dashboard-shell h2.dashboard-muted-heading {
+  color: var(--dashboard-muted) !important;
+}
+
+.company-dashboard-shell h1#company-dashboard-title {
+  color: var(--dashboard-text);
+  font-size: clamp(30px, 3vw, 40px);
+  letter-spacing: normal;
+  line-height: 1.15;
+  margin-bottom: 0;
+  text-transform: none;
+}
+
 * {
   box-sizing: border-box;
 }
