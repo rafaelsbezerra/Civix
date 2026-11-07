@@ -1,5 +1,4 @@
 import React from 'react';
-import { CompanyPageTransition } from '@/components/motion/CompanyPageTransition';
 import { MotionRoot } from '@/components/motion/MotionRoot';
 import { Routes, Route } from 'react-router-dom';
 import HomePage from '@/pages/Home';
@@ -40,7 +39,6 @@ import { DashboardSectionUnavailable } from '@/components/dashboard/DashboardSec
 export const AppRoutes: React.FC = () => (
   <MotionRoot>
     <PublicSmoothScroll />
-    <CompanyPageTransition />
     <CookieBanner />
     <Routes>
       <Route

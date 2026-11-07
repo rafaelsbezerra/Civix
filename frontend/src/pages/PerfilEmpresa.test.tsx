@@ -222,22 +222,17 @@ describe('Perfil da empresa e respostas assíncronas', () => {
   });
 
   for (const outcome of ['success', 'error'] as const) {
-    it(`a cortina termina com API ainda pendente e não reaparece após ${outcome}`, async () => {
+    it(`não exibe cortina de transição com API pendente nem após ${outcome}`, async () => {
       const pending = deferred<Empresa>();
       fetchCompany.mockReturnValue(pending.promise);
       fixture('/catalogo');
       fireEvent.click(screen.getByRole('button', { name: 'Abrir outra empresa' }));
-      expect(screen.getByTestId('company-page-transition')).toBeInTheDocument();
+      expect(screen.queryByTestId('company-page-transition')).not.toBeInTheDocument();
       expect(
         screen.getByRole('status', { name: 'Carregando empresa' }),
       ).toBeInTheDocument();
       expect(fetchCompany).toHaveBeenCalledWith('company-two');
 
-      act(() => animations.at(-1)!());
-      expect(screen.queryByTestId('company-page-transition')).not.toBeInTheDocument();
-      expect(
-        screen.getByRole('status', { name: 'Carregando empresa' }),
-      ).toBeInTheDocument();
       if (outcome === 'success') {
         await act(async () => pending.resolve(company('company-two', 'Empresa atual')));
         expect(
@@ -272,7 +267,6 @@ describe('Perfil da empresa e respostas assíncronas', () => {
       variants: {
         static: {
           opacity: [1, 1],
-          y: [0, 0],
           transition: { duration: 0, delayChildren: 0, staggerChildren: 0 },
         },
       },
@@ -282,20 +276,19 @@ describe('Perfil da empresa e respostas assíncronas', () => {
     ).toBeInTheDocument();
   });
 
-  it('resposta tardia monta o hero sem repetir a espera da cortina já concluída', async () => {
+  it('resposta tardia monta o hero com fade-in sem atraso de cortina', async () => {
     const clock = vi.spyOn(Date, 'now').mockReturnValue(5000);
     const pending = deferred<Empresa>();
     fetchCompany.mockReturnValue(pending.promise);
     fixture('/catalogo');
     fireEvent.click(screen.getByRole('button', { name: 'Abrir outra empresa' }));
-    act(() => animations.at(-1)!());
     clock.mockReturnValue(6500);
 
     await act(async () => pending.resolve(company('company-two', 'Empresa atual')));
 
     expect(heroSnapshots.at(-1)).toMatchObject({
       animate: 'visible',
-      variants: { visible: { transition: { delay: 0, duration: 0.42 } } },
+      variants: { visible: { transition: { delay: 0, duration: 0.65 } } },
     });
     expect(screen.queryByTestId('company-page-transition')).not.toBeInTheDocument();
   });
