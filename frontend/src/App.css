@@ -26,7 +26,7 @@
   overflow: hidden;
 }
 
-.page-shell+.page-shell {
+.page-shell + .page-shell {
   border-top: 12px solid #e7e9e7;
 }
 
@@ -42,7 +42,9 @@
 
 .brand {
   color: white;
-  font: 700 26px/1 'Space Grotesk', sans-serif;
+  font:
+    700 26px/1 'Space Grotesk',
+    sans-serif;
   letter-spacing: -1.5px;
   text-decoration: none;
 }
@@ -98,7 +100,9 @@ button {
 .catalog-hero,
 .profile-hero {
   background-color: var(--navy);
-  background-image: linear-gradient(rgba(123, 157, 174, .055) 1px, transparent 1px), linear-gradient(90deg, rgba(123, 157, 174, .055) 1px, transparent 1px);
+  background-image:
+    linear-gradient(rgba(123, 157, 174, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(123, 157, 174, 0.055) 1px, transparent 1px);
   background-size: 46px 46px;
   color: white;
   min-height: 360px;
@@ -147,7 +151,7 @@ h3 {
 #login-title {
   font-size: clamp(24px, 3vw, 25px);
   letter-spacing: -1.5px;
-  line-height: 1.0;
+  line-height: 1;
   margin-bottom: 20px;
 }
 
@@ -155,7 +159,7 @@ h3 {
 .profile-hero h1 {
   font-size: clamp(36px, 4vw, 56px);
   letter-spacing: -2.5px;
-  line-height: .98;
+  line-height: 0.98;
   text-transform: uppercase;
   margin-bottom: 20px;
 }
@@ -174,7 +178,7 @@ h1 em {
 }
 
 .hero-orbit {
-  border: 1px solid rgba(192, 211, 222, .15);
+  border: 1px solid rgba(192, 211, 222, 0.15);
   border-radius: 50%;
   height: 220px;
   position: absolute;
@@ -184,7 +188,7 @@ h1 em {
 }
 
 .hero-orbit-one {
-  background: rgba(245, 173, 37, .82);
+  background: rgba(245, 173, 37, 0.82);
   filter: blur(1px);
   height: 245px;
   right: -70px;
@@ -205,7 +209,7 @@ h1 em {
   background: white;
   border-radius: 7px;
   bottom: -35px;
-  box-shadow: 0 14px 25px rgba(5, 15, 25, .25);
+  box-shadow: 0 14px 25px rgba(5, 15, 25, 0.25);
   color: var(--ink);
   display: grid;
   gap: 22px;
@@ -235,7 +239,9 @@ h1 em {
   background: transparent;
   border: 0;
   color: var(--ink);
-  font: 12px 'DM Sans', sans-serif;
+  font:
+    12px 'DM Sans',
+    sans-serif;
   outline: 0;
   padding: 0 0 8px;
   width: 100%;
@@ -322,11 +328,13 @@ h1 em {
   border: 1px solid #e3e6e6;
   border-radius: 6px;
   overflow: hidden;
-  transition: box-shadow .25s ease, transform .25s ease;
+  transition:
+    box-shadow 0.25s ease,
+    transform 0.25s ease;
 }
 
 .company-card:hover {
-  box-shadow: 0 16px 28px rgba(9, 24, 39, .13);
+  box-shadow: 0 16px 28px rgba(9, 24, 39, 0.13);
   transform: translateY(-4px);
 }
 
@@ -340,7 +348,7 @@ h1 em {
 }
 
 .company-art::after {
-  border: 1px solid rgba(255, 255, 255, .2);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 50%;
   content: '';
   height: 125px;
@@ -378,7 +386,7 @@ h1 em {
   fill: none;
   height: 75px;
   position: relative;
-  stroke: rgba(255, 255, 255, .8);
+  stroke: rgba(255, 255, 255, 0.8);
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-width: 1.2;
@@ -520,7 +528,10 @@ h1 em {
 .primary-button,
 .outline-button,
 .header-cta {
-  transition: background .2s ease, border-color .2s ease, transform .2s ease;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
 }
 
 .primary-button:hover,
@@ -539,7 +550,7 @@ h1 em {
   border-radius: 7px;
   bottom: -35px;
   margin-bottom: 45px;
-  box-shadow: 0 14px 25px rgba(5, 15, 25, .25);
+  box-shadow: 0 14px 25px rgba(5, 15, 25, 0.25);
   color: var(--ink);
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -552,7 +563,7 @@ h1 em {
   z-index: 2;
 }
 
-.company-info-panel>div {
+.company-info-panel > div {
   align-items: center;
   border-right: 1px solid #e4e6e6;
   display: flex;
@@ -560,7 +571,7 @@ h1 em {
   padding: 0 20px;
 }
 
-.company-info-panel>div:last-child {
+.company-info-panel > div:last-child {
   border: 0;
 }
 
@@ -682,19 +693,19 @@ h1 em {
     padding: 14px 8px;
   }
 
-  .company-info-panel>div {
+  .company-info-panel > div {
     border-bottom: 1px solid #e4e6e6;
     border-right: 1px solid #e4e6e6;
     min-height: 72px;
     padding: 8px 12px;
   }
 
-  .company-info-panel>div:nth-child(2) {
+  .company-info-panel > div:nth-child(2) {
     border-right: 0;
   }
 
-  .company-info-panel>div:nth-child(3),
-  .company-info-panel>div:nth-child(4) {
+  .company-info-panel > div:nth-child(3),
+  .company-info-panel > div:nth-child(4) {
     border-bottom: 0;
   }
 
@@ -753,7 +764,8 @@ h1 em {
     z-index: 1;
     top: 34px;
     height: 28px;
-    transform: perspective(2000px) rotateZ(300deg) rotateX(44deg) rotateY(39deg) scale(1.4);
+    transform: perspective(2000px) rotateZ(300deg) rotateX(44deg) rotateY(39deg)
+      scale(1.4);
   }
 
   .vite {
@@ -761,7 +773,8 @@ h1 em {
     top: 107px;
     height: 26px;
     width: auto;
-    transform: perspective(2000px) rotateZ(300deg) rotateX(40deg) rotateY(39deg) scale(0.8);
+    transform: perspective(2000px) rotateZ(300deg) rotateX(40deg) rotateY(39deg)
+      scale(0.8);
   }
 }
 
@@ -784,7 +797,7 @@ h1 em {
   border-top: 1px solid var(--border);
   text-align: left;
 
-  &>div {
+  & > div {
     flex: 1 1 0;
     padding: 32px;
 

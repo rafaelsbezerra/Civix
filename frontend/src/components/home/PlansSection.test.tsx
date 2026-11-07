@@ -1,13 +1,13 @@
-import { render, screen } from '@testing-library/react'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import type { Plan } from '@/lib/api'
-import { usePlans } from '@/components/plans/usePlans'
-import { PlansSection } from './PlansSection'
+import type { Plan } from '@/lib/api';
+import { usePlans } from '@/components/plans/usePlans';
+import { PlansSection } from './PlansSection';
 
 vi.mock('@/components/plans/usePlans', () => ({
   usePlans: vi.fn(),
-}))
+}));
 
 const plans: Plan[] = [
   {
@@ -36,48 +36,52 @@ const plans: Plan[] = [
     isActive: true,
     displayOrder: 20,
   },
-]
+];
 
 describe('PlansSection', () => {
   afterEach(() => {
-    vi.clearAllMocks()
-  })
+    vi.clearAllMocks();
+  });
 
   it('renders plans from the shared source and links to the full page', () => {
     vi.mocked(usePlans).mockReturnValue({
       plans,
       loading: false,
       error: null,
-    })
+    });
 
-    render(<PlansSection />)
+    render(<PlansSection />);
 
     expect(
       screen.getByRole('heading', {
         name: 'O plano certo para cada etapa do seu crescimento',
       }),
-    ).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Plano Inicial' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Plano Profissional' })).toBeInTheDocument()
-    expect(screen.getByText('Recomendado')).toBeInTheDocument()
+    ).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Plano Inicial' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: 'Plano Profissional' }),
+    ).toBeInTheDocument();
+    expect(screen.getByText('Recomendado')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Ver todos os planos' })).toHaveAttribute(
       'href',
       '/planos',
-    )
-  })
+    );
+  });
 
   it('announces API errors instead of hiding the plans section failure', () => {
     vi.mocked(usePlans).mockReturnValue({
       plans: [],
       loading: false,
       error: 'Não foi possível carregar os planos agora.',
-    })
+    });
 
-    render(<PlansSection />)
+    render(<PlansSection />);
 
     expect(screen.getByRole('alert')).toHaveTextContent(
       'Não foi possível carregar os planos agora.',
-    )
-    expect(screen.getByRole('link', { name: 'Ver todos os planos' })).toBeInTheDocument()
-  })
-})
+    );
+    expect(
+      screen.getByRole('link', { name: 'Ver todos os planos' }),
+    ).toBeInTheDocument();
+  });
+});

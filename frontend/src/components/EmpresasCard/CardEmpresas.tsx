@@ -1,64 +1,90 @@
-import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { ActionButton } from '@/components/ui/ActionButton'
-import { fetchEmpresas } from '@/lib/api'
-import type { Empresa } from '@/lib/api'
-import { MapPin, SearchX, Loader2 } from 'lucide-react'
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ActionButton } from '@/components/ui/ActionButton';
+import { fetchEmpresas } from '@/lib/api';
+import type { Empresa } from '@/lib/api';
+import { MapPin, SearchX, Loader2 } from 'lucide-react';
 
 function BuildingMark() {
   return (
-    <svg aria-hidden="true" viewBox="0 0 48 48" className="w-8 h-8 text-[var(--color-civix-gold)]">
-      <path d="M10 40V15l14-7 14 7v25" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M7 40h34M17 21h4M27 21h4M17 28h4M27 28h4M21 40V34h6v6" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 48 48"
+      className="w-8 h-8 text-[var(--color-civix-gold)]"
+    >
+      <path
+        d="M10 40V15l14-7 14 7v25"
+        stroke="currentColor"
+        fill="none"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M7 40h34M17 21h4M27 21h4M17 28h4M27 28h4M21 40V34h6v6"
+        stroke="currentColor"
+        fill="none"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
-  )
+  );
 }
 
 export default function CatalogoEmpresas() {
-  const [empresas, setEmpresas] = useState<Empresa[]>([])
-  const [loading, setLoading] = useState<boolean>(true)
-  const [error, setError] = useState<string | null>(null)
-  const navigate = useNavigate()
+  const [empresas, setEmpresas] = useState<Empresa[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    let isMounted = true
+    let isMounted = true;
 
     async function loadData() {
       try {
-        const data = await fetchEmpresas()
-        
+        const data = await fetchEmpresas();
+
         if (isMounted) {
           // Exibe apenas as primeiras 6 empresas na Home
-          setEmpresas(data.slice(0, 6))
-          setError(null)
+          setEmpresas(data.slice(0, 6));
+          setError(null);
         }
       } catch (err) {
-        console.error('Erro ao carregar empresas para a home:', err)
+        console.error('Erro ao carregar empresas para a home:', err);
         if (isMounted) {
-          setError(err instanceof Error ? err.message : 'Erro ao carregar lista de empresas.')
+          setError(
+            err instanceof Error ? err.message : 'Erro ao carregar lista de empresas.',
+          );
         }
       } finally {
         if (isMounted) {
-          setLoading(false)
+          setLoading(false);
         }
       }
     }
 
-    loadData()
+    loadData();
 
     return () => {
-      isMounted = false
-    }
-  }, [])
+      isMounted = false;
+    };
+  }, []);
 
   const handleEmpresaClick = (id: string, startedAt: number) => {
-    navigate(`/empresa/${id}`, { state: { companyTransition: { startedAt } } })
-  }
+    navigate(`/empresa/${id}`, { state: { companyTransition: { startedAt } } });
+  };
 
   return (
-    <section className="py-16 px-6 sm:px-10 lg:px-16 xl:px-32 max-w-[1728px] mx-auto" id="empresas">
+    <section
+      className="py-16 px-6 sm:px-10 lg:px-16 xl:px-32 max-w-[1728px] mx-auto"
+      id="empresas"
+    >
       {/* Cabeçalho da Seção */}
-      <div data-motion="section" className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 border-b border-gray-200 pb-6 gap-4">
+      <div
+        data-motion="section"
+        className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 border-b border-gray-200 pb-6 gap-4"
+      >
         <div>
           <p className="font-[family-name:var(--font-display)] text-base font-medium leading-[normal] text-[var(--color-civix-navy)]">
             <span className="text-[var(--color-civix-gold-accessible)]">//</span>{' '}
@@ -75,7 +101,10 @@ export default function CatalogoEmpresas() {
 
       {/* Estado de Carregamento */}
       {loading && (
-        <div role="status" className="flex justify-center items-center py-20 text-gray-500 gap-2">
+        <div
+          role="status"
+          className="flex justify-center items-center py-20 text-gray-500 gap-2"
+        >
           <Loader2 className="animate-spin motion-reduce:animate-none w-6 h-6 text-[var(--color-civix-navy)]" />
           <span>Carregando empresas...</span>
         </div>
@@ -83,16 +112,28 @@ export default function CatalogoEmpresas() {
 
       {/* Estado de Erro */}
       {error && (
-        <div role="alert" data-motion="feedback" data-motion-trigger="mount" className="p-6 rounded-lg bg-red-50 text-red-600 font-medium text-center my-8 border border-red-200">
+        <div
+          role="alert"
+          data-motion="feedback"
+          data-motion-trigger="mount"
+          className="p-6 rounded-lg bg-red-50 text-red-600 font-medium text-center my-8 border border-red-200"
+        >
           {error}
         </div>
       )}
 
       {/* Estado Sem Registros */}
       {!loading && !error && empresas.length === 0 && (
-        <div role="status" data-motion="feedback" data-motion-trigger="mount" className="flex flex-col items-center justify-center py-16 text-center">
+        <div
+          role="status"
+          data-motion="feedback"
+          data-motion-trigger="mount"
+          className="flex flex-col items-center justify-center py-16 text-center"
+        >
           <SearchX className="w-16 h-16 text-gray-300 mb-4" />
-          <h3 className="text-xl font-semibold text-gray-700 mb-2">Nenhuma empresa encontrada</h3>
+          <h3 className="text-xl font-semibold text-gray-700 mb-2">
+            Nenhuma empresa encontrada
+          </h3>
           <p className="text-gray-500 max-w-md">
             Não há empresas disponíveis para exibição no momento.
           </p>
@@ -116,12 +157,12 @@ export default function CatalogoEmpresas() {
                   empresa.tone === 'blue'
                     ? 'from-blue-50 to-blue-100'
                     : empresa.tone === 'green'
-                    ? 'from-green-50 to-green-100'
-                    : empresa.tone === 'orange'
-                    ? 'from-orange-50 to-orange-100'
-                    : empresa.tone === 'purple'
-                    ? 'from-purple-50 to-purple-100'
-                    : 'from-gray-50 to-gray-100'
+                      ? 'from-green-50 to-green-100'
+                      : empresa.tone === 'orange'
+                        ? 'from-orange-50 to-orange-100'
+                        : empresa.tone === 'purple'
+                          ? 'from-purple-50 to-purple-100'
+                          : 'from-gray-50 to-gray-100'
                 }`}
               >
                 <div className="absolute right-0 bottom-0 opacity-10 translate-x-4 translate-y-4">
@@ -146,11 +187,17 @@ export default function CatalogoEmpresas() {
 
                 <div className="mt-auto">
                   <p className="flex items-center text-sm text-gray-500 mb-4">
-                    <MapPin size={16} className="mr-1 text-[var(--color-civix-gold)] flex-shrink-0" />
+                    <MapPin
+                      size={16}
+                      className="mr-1 text-[var(--color-civix-gold)] flex-shrink-0"
+                    />
                     {empresa.cidade}, {empresa.estado}
                   </p>
                   <div className="flex items-center text-sm font-semibold text-[var(--color-civix-navy)] group-hover:text-[var(--color-civix-gold)] transition-colors">
-                    Ver perfil <span className="ml-1 group-hover:translate-x-1 transition-transform">&rarr;</span>
+                    Ver perfil{' '}
+                    <span className="ml-1 group-hover:translate-x-1 transition-transform">
+                      &rarr;
+                    </span>
                   </div>
                 </div>
               </div>
@@ -159,5 +206,5 @@ export default function CatalogoEmpresas() {
         </div>
       )}
     </section>
-  )
+  );
 }

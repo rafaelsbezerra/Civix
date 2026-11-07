@@ -17,12 +17,22 @@ export function SuperAdminLayout() {
   const initialSession = useOutletContext<SessionProfile>();
   const [session, setSession] = useState(initialSession);
   const [theme, setTheme] = useState(() => {
-    try { return localStorage.getItem(THEME_KEY) === 'dark' ? 'dark' : 'light'; } catch { return 'light'; }
+    try {
+      return localStorage.getItem(THEME_KEY) === 'dark' ? 'dark' : 'light';
+    } catch {
+      return 'light';
+    }
   });
 
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  useEffect(() => { try { localStorage.setItem(THEME_KEY, theme); } catch { /* Preferência indisponível não bloqueia acesso. */ } }, [theme]);
+  useEffect(() => {
+    try {
+      localStorage.setItem(THEME_KEY, theme);
+    } catch {
+      /* Preferência indisponível não bloqueia acesso. */
+    }
+  }, [theme]);
 
   const logout = useCallback(async () => {
     try {
@@ -34,31 +44,79 @@ export function SuperAdminLayout() {
     }
   }, [navigate]);
 
-  const handleError = useCallback((error: unknown) => {
-    if (error instanceof ApiError && error.status === 401) void logout();
-    return error instanceof Error ? error.message : 'Não foi possível concluir a operação.';
-  }, [logout]);
+  const handleError = useCallback(
+    (error: unknown) => {
+      if (error instanceof ApiError && error.status === 401) {
+        void logout();
+      }
+      return error instanceof Error
+        ? error.message
+        : 'Não foi possível concluir a operação.';
+    },
+    [logout],
+  );
 
-  const title = pathname.endsWith('/plans') ? 'Planos comerciais' : pathname.endsWith('/companies/new') ? 'Cadastrar empresa'
-    : pathname.includes('/companies') ? 'Empresas' : pathname.includes('/sales') ? 'Vendas comerciais' : pathname.includes('/administrators') ? 'Superadmins' : pathname.endsWith('/settings/profile') ? 'Meu perfil' : 'Visão geral';
-  const sidebarVariables = { '--sidebar-width': '17rem', '--header-height': '4rem' } as CSSProperties;
+  const title = pathname.endsWith('/plans')
+    ? 'Planos comerciais'
+    : pathname.endsWith('/companies/new')
+      ? 'Cadastrar empresa'
+      : pathname.includes('/companies')
+        ? 'Empresas'
+        : pathname.includes('/sales')
+          ? 'Vendas comerciais'
+          : pathname.includes('/administrators')
+            ? 'Superadmins'
+            : pathname.endsWith('/settings/profile')
+              ? 'Meu perfil'
+              : 'Visão geral';
+  const sidebarVariables = {
+    '--sidebar-width': '17rem',
+    '--header-height': '4rem',
+  } as CSSProperties;
 
-  return <div className={`super-admin-root${theme === 'dark' ? ' dark' : ''}`} data-theme={theme}>
-    <a className="sa-skip-link" href="#admin-content">Pular para o conteúdo</a>
-    <TooltipProvider>
-      <SidebarProvider style={sidebarVariables}>
-        <SuperAdminSidebar />
-        <SidebarInset id="admin-content" tabIndex={-1} className="min-w-0 md:border md:border-border/70">
-          <SuperAdminHeader title={title} name={session.user.name || 'Superadmin'} dark={theme === 'dark'}
-            onToggleTheme={() => setTheme(theme === 'dark' ? 'light' : 'dark')} onLogout={logout} />
-          <div className="sa-content">
-            <div key={pathname} className="sa-page-enter">
-              <Outlet context={{ session, setProfile: user => setSession({ ...session, user }), handleError } satisfies SuperAdminContext} />
+  return (
+    <div
+      className={`super-admin-root${theme === 'dark' ? ' dark' : ''}`}
+      data-theme={theme}
+    >
+      <a className="sa-skip-link" href="#admin-content">
+        Pular para o conteúdo
+      </a>
+      <TooltipProvider>
+        <SidebarProvider style={sidebarVariables}>
+          <SuperAdminSidebar />
+          <SidebarInset
+            id="admin-content"
+            tabIndex={-1}
+            className="min-w-0 md:border md:border-border/70"
+          >
+            <SuperAdminHeader
+              title={title}
+              name={session.user.name || 'Superadmin'}
+              dark={theme === 'dark'}
+              onToggleTheme={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              onLogout={logout}
+            />
+            <div className="sa-content">
+              <div key={pathname} className="sa-page-enter">
+                <Outlet
+                  context={
+                    {
+                      session,
+                      setProfile: (user) => setSession({ ...session, user }),
+                      handleError,
+                    } satisfies SuperAdminContext
+                  }
+                />
+              </div>
             </div>
-          </div>
-          <footer className="sa-footer">Civix · Administração da plataforma<span>Valores em BRL · Datas em UTC</span></footer>
-        </SidebarInset>
-      </SidebarProvider>
-    </TooltipProvider>
-  </div>;
+            <footer className="sa-footer">
+              Civix · Administração da plataforma
+              <span>Valores em BRL · Datas em UTC</span>
+            </footer>
+          </SidebarInset>
+        </SidebarProvider>
+      </TooltipProvider>
+    </div>
+  );
 }

@@ -1,11 +1,11 @@
-import { SiteHeader } from '@/components/layout/SiteHeader'
-import { HeroSection } from '@/components/home/HeroSection'
-import Footer from '@/components/layout/SiteFooter'
-import CardEmpresas from '@/components/EmpresasCard/CardEmpresas'
-import FAQ from '@/pages/FAQ'
-import AboutPage from './About'
-import SignSelect from '@/components/pop-up/SignSelect'
-import { PlansSection } from '@/components/home/PlansSection'
+import { SiteHeader } from '@/components/layout/SiteHeader';
+import { HeroSection } from '@/components/home/HeroSection';
+import Footer from '@/components/layout/SiteFooter';
+import CardEmpresas from '@/components/EmpresasCard/CardEmpresas';
+import FAQ from '@/pages/FAQ';
+import AboutPage from './About';
+import SignSelect from '@/components/pop-up/SignSelect';
+import { PlansSection } from '@/components/home/PlansSection';
 
 export default function HomePage() {
   return (
@@ -22,5 +22,5 @@ export default function HomePage() {
         <Footer />
       </main>
     </div>
-  )
+  );
 }

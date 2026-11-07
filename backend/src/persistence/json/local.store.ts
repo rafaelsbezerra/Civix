@@ -20,7 +20,10 @@ function enqueue<T>(operation: () => Promise<T>): Promise<T> {
   const pending = queue.then(operation);
 
   // Uma falha não deve bloquear as próximas operações.
-  queue = pending.then(() => undefined, () => undefined);
+  queue = pending.then(
+    () => undefined,
+    () => undefined,
+  );
 
   return pending;
 }
@@ -56,7 +59,10 @@ async function saveStoredData(data: LocalData): Promise<void> {
 
   await mkdir(MOCK_DATA_DIR, { recursive: true });
 
-  const temporaryFile = join(MOCK_DATA_DIR, 'data.' + process.pid + '.' + randomUUID() + '.tmp');
+  const temporaryFile = join(
+    MOCK_DATA_DIR,
+    'data.' + process.pid + '.' + randomUUID() + '.tmp',
+  );
 
   try {
     const file = await open(temporaryFile, 'wx', 0o600);
@@ -70,7 +76,7 @@ async function saveStoredData(data: LocalData): Promise<void> {
 
     await rename(temporaryFile, LOCAL_DATA_FILE);
   } finally {
-    await unlink(temporaryFile).catch(error => {
+    await unlink(temporaryFile).catch((error) => {
       if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
         throw error;
       }
@@ -82,7 +88,9 @@ export function readLocalData(): Promise<LocalData> {
   return enqueue(readStoredData);
 }
 
-export function updateLocalData<T>(update: (data: LocalData) => T | Promise<T>): Promise<T> {
+export function updateLocalData<T>(
+  update: (data: LocalData) => T | Promise<T>,
+): Promise<T> {
   return enqueue(async () => {
     await mkdir(MOCK_DATA_DIR, { recursive: true });
 

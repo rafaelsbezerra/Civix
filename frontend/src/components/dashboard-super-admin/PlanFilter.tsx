@@ -3,7 +3,13 @@ import { getPlatformPlans, type Plan } from '../../lib/api';
 import { useAsyncQuery } from '../../hooks/useAsyncQuery';
 import { Button } from '../ui/button';
 import { Field, FieldLabel } from '../ui/field';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../ui/select';
 
 export function PlanFilter({
   onError,
@@ -33,7 +39,7 @@ export function PlanFilter({
 
   const load = useCallback(
     () =>
-      getPlatformPlans().catch(error => {
+      getPlatformPlans().catch((error) => {
         throw new Error(onError(error), { cause: error });
       }),
     [onError],
@@ -50,7 +56,7 @@ export function PlanFilter({
       onPlansLoaded?.(query.data);
     }
   }, [query.data, onPlansLoaded]);
-  const selectedPlan = query.data?.find(plan => plan.id === selected);
+  const selectedPlan = query.data?.find((plan) => plan.id === selected);
   const label = query.loading
     ? 'Carregando planos…'
     : selectedPlan
@@ -81,7 +87,7 @@ export function PlanFilter({
             <SelectItem value="__all__">
               {query.loading ? 'Carregando planos…' : 'Todos os planos'}
             </SelectItem>
-            {query.data?.map(plan => (
+            {query.data?.map((plan) => (
               <SelectItem key={plan.id} value={plan.id}>
                 {plan.name}
                 {plan.isActive ? '' : ' (inativo)'}
@@ -90,13 +96,16 @@ export function PlanFilter({
           </SelectContent>
         </Select>
         {!!query.error && (
-          <div role="alert" className="mt-1 flex items-center gap-2 text-xs text-destructive">
+          <div
+            role="alert"
+            className="mt-1 flex items-center gap-2 text-xs text-destructive"
+          >
             <span>Não foi possível carregar os planos.</span>
             <Button
               type="button"
               variant="outline"
               size="xs"
-              onClick={() => setRetry(current => current + 1)}
+              onClick={() => setRetry((current) => current + 1)}
             >
               Tentar novamente
             </Button>

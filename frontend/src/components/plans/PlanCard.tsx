@@ -1,24 +1,24 @@
-import { Check } from 'lucide-react'
+import { Check } from 'lucide-react';
 
-import type { Plan } from '@/lib/api'
+import type { Plan } from '@/lib/api';
 
 interface PlanCardProps {
-  plan: Plan
+  plan: Plan;
 }
 
 const billingLabels: Record<Plan['billingPeriod'], string> = {
   monthly: 'por mês',
   yearly: 'por ano',
   one_time: 'pagamento único',
-}
+};
 
 const currencyFormatter = new Intl.NumberFormat('pt-BR', {
   minimumFractionDigits: 2,
   maximumFractionDigits: 2,
-})
+});
 
 export function PlanCard({ plan }: PlanCardProps) {
-  const isFeatured = plan.isFeatured
+  const isFeatured = plan.isFeatured;
 
   return (
     <article
@@ -69,5 +69,5 @@ export function PlanCard({ plan }: PlanCardProps) {
         Começar agora
       </a>
     </article>
-  )
+  );
 }

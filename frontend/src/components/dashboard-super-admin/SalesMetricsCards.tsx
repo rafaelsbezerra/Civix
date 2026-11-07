@@ -21,20 +21,30 @@ export function SalesMetricsCards({
   const currentMonth = now.getUTCMonth();
 
   const totalRevenue = sales.reduce((sum, sale) => sum + Number(sale.amount || 0), 0);
-  const monthlySales = sales.filter(sale => {
+  const monthlySales = sales.filter((sale) => {
     const soldDate = new Date(sale.soldAt);
     return (
-      soldDate.getUTCFullYear() === currentYear && soldDate.getUTCMonth() === currentMonth
+      soldDate.getUTCFullYear() === currentYear &&
+      soldDate.getUTCMonth() === currentMonth
     );
   });
-  const monthlyRevenue = monthlySales.reduce((sum, sale) => sum + Number(sale.amount || 0), 0);
+  const monthlyRevenue = monthlySales.reduce(
+    (sum, sale) => sum + Number(sale.amount || 0),
+    0,
+  );
   const monthlyShare =
-    totalRevenue > 0 ? Math.min(100, Math.round((monthlyRevenue / totalRevenue) * 100)) : 0;
+    totalRevenue > 0
+      ? Math.min(100, Math.round((monthlyRevenue / totalRevenue) * 100))
+      : 0;
 
   const planTotals = new Map<string, { id: string; name: string; revenue: number }>();
   for (const plan of plans) {
     if (!/\bplano\b/i.test(plan.name)) {
-      planTotals.set(String(plan.id), { id: String(plan.id), name: plan.name, revenue: 0 });
+      planTotals.set(String(plan.id), {
+        id: String(plan.id),
+        name: plan.name,
+        revenue: 0,
+      });
     }
   }
   for (const sale of sales) {
@@ -55,7 +65,7 @@ export function SalesMetricsCards({
   }
 
   const byPlan = [...planTotals.values()];
-  const maxPlanRevenue = Math.max(1, ...byPlan.map(item => item.revenue));
+  const maxPlanRevenue = Math.max(1, ...byPlan.map((item) => item.revenue));
 
   return (
     <section
@@ -79,7 +89,11 @@ export function SalesMetricsCards({
         </CardContent>
       </Card>
 
-      <Card className="gap-3 rounded-2xl py-4" role="region" aria-label="Faturamento no mês">
+      <Card
+        className="gap-3 rounded-2xl py-4"
+        role="region"
+        aria-label="Faturamento no mês"
+      >
         <CardHeader className="flex flex-row items-center justify-between gap-3 px-4">
           <CardTitle className="text-sm font-medium text-muted-foreground">
             Faturamento no mês
@@ -110,12 +124,19 @@ export function SalesMetricsCards({
             />
           </div>
           <CardDescription className="mt-2 text-xs">
-            <CountUpNumber value={monthlySales.length} suffix=" vendas no mês atual (UTC)" />
+            <CountUpNumber
+              value={monthlySales.length}
+              suffix=" vendas no mês atual (UTC)"
+            />
           </CardDescription>
         </CardContent>
       </Card>
 
-      <Card className="gap-3 rounded-2xl py-4" role="region" aria-label="Faturamento por plano">
+      <Card
+        className="gap-3 rounded-2xl py-4"
+        role="region"
+        aria-label="Faturamento por plano"
+      >
         <CardHeader className="flex flex-row items-center justify-between gap-3 px-4">
           <CardTitle className="text-sm font-medium text-muted-foreground">
             Faturamento por plano
@@ -127,7 +148,7 @@ export function SalesMetricsCards({
             <p className="text-sm text-muted-foreground">Nenhum plano para exibir.</p>
           ) : (
             <ul className="space-y-2">
-              {byPlan.map(item => (
+              {byPlan.map((item) => (
                 <li
                   key={item.id}
                   className="grid grid-cols-[minmax(0,96px)_minmax(0,1fr)_auto] items-center gap-2 text-xs"
@@ -159,4 +180,3 @@ export function SalesMetricsCards({
     </section>
   );
 }
-

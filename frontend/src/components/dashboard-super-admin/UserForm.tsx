@@ -7,7 +7,13 @@ import { Button } from '../ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Field, FieldError, FieldGroup, FieldLabel, FieldSet } from '../ui/field';
 import { Input } from '../ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../ui/select';
 
 const ROLE_LABELS: Record<'admin_empresa' | 'atendente', string> = {
   atendente: 'Atendente',
@@ -16,7 +22,11 @@ const ROLE_LABELS: Record<'admin_empresa' | 'atendente', string> = {
 
 const userFormSchema = z.object({
   name: z.string().trim().min(1, 'Informe o nome do usuário.').max(120),
-  email: z.string().trim().regex(/^\S+@\S+\.\S+$/, 'Informe um e-mail válido.').max(254),
+  email: z
+    .string()
+    .trim()
+    .regex(/^\S+@\S+\.\S+$/, 'Informe um e-mail válido.')
+    .max(254),
   role: z.enum(['admin_empresa', 'atendente']),
 });
 
@@ -138,9 +148,14 @@ export function UserForm({
                           >
                             <SelectValue>{ROLE_LABELS[field.value]}</SelectValue>
                           </SelectTrigger>
-                          <SelectContent container={portal} alignItemWithTrigger={false}>
+                          <SelectContent
+                            container={portal}
+                            alignItemWithTrigger={false}
+                          >
                             <SelectItem value="atendente">Atendente</SelectItem>
-                            <SelectItem value="admin_empresa">Admin da empresa</SelectItem>
+                            <SelectItem value="admin_empresa">
+                              Admin da empresa
+                            </SelectItem>
                           </SelectContent>
                         </Select>
                         <FieldError errors={[errors.role]} />

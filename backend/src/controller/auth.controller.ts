@@ -4,7 +4,10 @@ import { AppError } from '../shared/errors/app.error.js';
 import { ErrorCode } from '../shared/errors/error.code.js';
 import { createSuccessResponse } from '../shared/contracts/response.contract.js';
 
-export async function validateTokenController(req: Request, res: Response): Promise<Response> {
+export async function validateTokenController(
+  req: Request,
+  res: Response,
+): Promise<Response> {
   const { token } = req.query;
 
   if (!token || typeof token !== 'string') {
@@ -20,10 +23,18 @@ export async function validateTokenController(req: Request, res: Response): Prom
   return res.status(200).json(createSuccessResponse(result));
 }
 
-export async function firstAccessController(req: Request, res: Response): Promise<Response> {
+export async function firstAccessController(
+  req: Request,
+  res: Response,
+): Promise<Response> {
   const { token, password } = req.body ?? {};
 
-  if (typeof token !== 'string' || !token || typeof password !== 'string' || !password) {
+  if (
+    typeof token !== 'string' ||
+    !token ||
+    typeof password !== 'string' ||
+    !password
+  ) {
     throw new AppError({
       status: 400,
       code: ErrorCode.VALIDATION_ERROR,
@@ -41,12 +52,17 @@ export async function firstAccessController(req: Request, res: Response): Promis
 
   await authService.firstAccess(token, password);
 
-  return res.status(200).json(createSuccessResponse({
-    message: 'Senha cadastrada com sucesso! Sua conta está ativa.',
-  }));
+  return res.status(200).json(
+    createSuccessResponse({
+      message: 'Senha cadastrada com sucesso! Sua conta está ativa.',
+    }),
+  );
 }
 
-export async function resendInviteEmailController(req: Request, res: Response): Promise<Response> {
+export async function resendInviteEmailController(
+  req: Request,
+  res: Response,
+): Promise<Response> {
   const { email } = req.body ?? {};
 
   if (typeof email !== 'string' || !email) {
@@ -59,7 +75,9 @@ export async function resendInviteEmailController(req: Request, res: Response): 
 
   await authService.resendInviteEmail(email);
 
-  return res.status(200).json(createSuccessResponse({
-    message: 'Se o e-mail estiver cadastrado, um link de redefinição será enviado.',
-  }));
+  return res.status(200).json(
+    createSuccessResponse({
+      message: 'Se o e-mail estiver cadastrado, um link de redefinição será enviado.',
+    }),
+  );
 }

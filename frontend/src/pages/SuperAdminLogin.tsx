@@ -1,11 +1,11 @@
-import { useEffect, useState } from "react";
-import type { FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
-import { ArrowLeft, ArrowRight, Eye, EyeOff, Loader2 } from "lucide-react";
-import { ApiError, getSessionProfile, login, logout } from "../lib/api";
+import { useEffect, useState } from 'react';
+import type { FormEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, ArrowRight, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { ApiError, getSessionProfile, login, logout } from '../lib/api';
 
-import civixLogo from "../assets/civix/logoCivix.png";
-import civixLogoDark from "../assets/civix/logoBackground.png";
+import civixLogo from '../assets/civix/logoCivix.png';
+import civixLogoDark from '../assets/civix/logoBackground.png';
 
 function AnimatedWave() {
   return (
@@ -18,35 +18,17 @@ function AnimatedWave() {
         aria-hidden="true"
       >
         <defs>
-          <linearGradient
-            id="superAdminWaveGrad1"
-            x1="0%"
-            y1="0%"
-            x2="100%"
-            y2="0%"
-          >
+          <linearGradient id="superAdminWaveGrad1" x1="0%" y1="0%" x2="100%" y2="0%">
             <stop offset="0%" stopColor="#E5A93B" />
             <stop offset="100%" stopColor="#FBBF24" />
           </linearGradient>
 
-          <linearGradient
-            id="superAdminWaveGrad2"
-            x1="0%"
-            y1="0%"
-            x2="100%"
-            y2="0%"
-          >
+          <linearGradient id="superAdminWaveGrad2" x1="0%" y1="0%" x2="100%" y2="0%">
             <stop offset="0%" stopColor="#D97706" />
             <stop offset="100%" stopColor="#E5A93B" />
           </linearGradient>
 
-          <linearGradient
-            id="superAdminWaveGrad3"
-            x1="0%"
-            y1="0%"
-            x2="100%"
-            y2="0%"
-          >
+          <linearGradient id="superAdminWaveGrad3" x1="0%" y1="0%" x2="100%" y2="0%">
             <stop offset="0%" stopColor="#B45309" />
             <stop offset="100%" stopColor="#D97706" />
           </linearGradient>
@@ -78,8 +60,8 @@ function AnimatedWave() {
 }
 
 export default function SuperAdminLogin() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -90,8 +72,8 @@ export default function SuperAdminLogin() {
 
     getSessionProfile()
       .then((profile) => {
-        if (active && profile.user.role === "super_admin") {
-          navigate("/dashboard/super-admin", { replace: true });
+        if (active && profile.user.role === 'super_admin') {
+          navigate('/dashboard/super-admin', { replace: true });
         }
       })
       .catch(() => undefined);
@@ -106,7 +88,7 @@ export default function SuperAdminLogin() {
     setError(null);
 
     if (!email.trim() || !password) {
-      setError("Informe e-mail e senha para continuar.");
+      setError('Informe e-mail e senha para continuar.');
       return;
     }
 
@@ -115,21 +97,21 @@ export default function SuperAdminLogin() {
       const result = await login({
         email: email.trim(),
         password,
-        role: "super_admin",
+        role: 'super_admin',
       });
 
-      if (result.user.role !== "super_admin") {
+      if (result.user.role !== 'super_admin') {
         await logout().catch(() => undefined);
-        setError("Acesso não autorizado.");
+        setError('Acesso não autorizado.');
         return;
       }
 
-      navigate("/dashboard/super-admin", { replace: true });
+      navigate('/dashboard/super-admin', { replace: true });
     } catch (failure: unknown) {
       setError(
         failure instanceof ApiError
           ? failure.message
-          : "Não foi possível entrar. Tente novamente.",
+          : 'Não foi possível entrar. Tente novamente.',
       );
     } finally {
       setIsLoading(false);
@@ -208,7 +190,7 @@ export default function SuperAdminLogin() {
         <section className="super-admin-login-entry-left relative flex min-h-screen w-full flex-col lg:w-1/2">
           <button
             type="button"
-            onClick={() => navigate("/")}
+            onClick={() => navigate('/')}
             className="absolute left-6 top-6 inline-flex items-center gap-2 rounded-[5px] px-2 py-2 text-sm font-medium text-[#071b2b] transition hover:bg-[#f0efec] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#071b2b] sm:left-10 sm:top-8"
           >
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
@@ -225,8 +207,8 @@ export default function SuperAdminLogin() {
               </h1>
 
               <p className="mt-4 max-w-[46ch] text-[clamp(13px,0.85vw,16px)] leading-relaxed text-[#66717b]">
-                Área exclusiva da equipe Civix para gerenciar empresas, planos e
-                vendas da plataforma.
+                Área exclusiva da equipe Civix para gerenciar empresas, planos e vendas
+                da plataforma.
               </p>
 
               {error && (
@@ -274,7 +256,7 @@ export default function SuperAdminLogin() {
                   <div className="relative">
                     <input
                       id="sa-password"
-                      type={showPassword ? "text" : "password"}
+                      type={showPassword ? 'text' : 'password'}
                       value={password}
                       onChange={(event) => setPassword(event.target.value)}
                       autoComplete="current-password"
@@ -284,12 +266,8 @@ export default function SuperAdminLogin() {
 
                     <button
                       type="button"
-                      onClick={() =>
-                        setShowPassword((current) => !current)
-                      }
-                      aria-label={
-                        showPassword ? "Ocultar senha" : "Mostrar senha"
-                      }
+                      onClick={() => setShowPassword((current) => !current)}
+                      aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
                       className="absolute right-3 top-1/2 -translate-y-1/2 rounded p-1 text-[#999] transition hover:text-[#071b2b] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#071b2b]"
                     >
                       {showPassword ? (
@@ -306,7 +284,7 @@ export default function SuperAdminLogin() {
                   disabled={isLoading}
                   className="flex h-[clamp(44px,4vh,52px)] w-full items-center justify-between rounded-[5px] bg-[#061c2c] px-[clamp(12px,0.8vw,18px)] text-[clamp(12px,0.6vw,14px)] font-medium text-white transition hover:bg-[#0b293d] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#061c2c] disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  <span>{isLoading ? "Entrando..." : "Entrar no painel"}</span>
+                  <span>{isLoading ? 'Entrando...' : 'Entrar no painel'}</span>
 
                   {isLoading ? (
                     <Loader2

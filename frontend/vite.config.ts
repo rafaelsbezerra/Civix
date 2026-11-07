@@ -1,12 +1,12 @@
-import { defineConfig } from 'vitest/config'
-import react from '@vitejs/plugin-react'
-import tailwind from "@tailwindcss/vite"
-import path from 'path'
+import { defineConfig } from 'vitest/config';
+import react from '@vitejs/plugin-react';
+import tailwind from '@tailwindcss/vite';
+import path from 'path';
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwind()],
-server: {
+  server: {
     proxy: {
       '/api': {
         target: 'http://localhost:3000', // URL do seu backend Express
@@ -20,7 +20,7 @@ server: {
   },
   resolve: {
     alias: {
-      "@": path.resolve(import.meta.dirname, "./src"),
+      '@': path.resolve(import.meta.dirname, './src'),
     },
   },
   test: {
@@ -31,4 +31,4 @@ server: {
     fileParallelism: false,
     maxWorkers: 1,
   },
-})
+});

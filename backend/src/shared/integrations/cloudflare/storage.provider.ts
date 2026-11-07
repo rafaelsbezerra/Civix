@@ -10,7 +10,9 @@ function getStorage(): R2StorageService {
   return storage;
 }
 export const imageObjectStore = {
-  upload: (key: string, body: Buffer, mime: string) => getStorage().upload(key, body, mime),
+  upload: (key: string, body: Buffer, mime: string) =>
+    getStorage().upload(key, body, mime),
   delete: (key: string) => getStorage().delete(key),
-  getPresignedUrl: (key: string, seconds: number) => getStorage().getPresignedUrl(key, seconds),
+  getPresignedUrl: (key: string, seconds: number) =>
+    getStorage().getPresignedUrl(key, seconds),
 };

@@ -1,10 +1,10 @@
-import { useState } from 'react'
-import { Plus, Minus } from 'lucide-react'
-import ctaContainer from "@/assets/civix/ctaconhtainer.png"
-import { ActionButton } from '@/components/ui/ActionButton'
+import { useState } from 'react';
+import { Plus, Minus } from 'lucide-react';
+import ctaContainer from '@/assets/civix/ctaconhtainer.png';
+import { ActionButton } from '@/components/ui/ActionButton';
 interface FAQItem {
-  question: string
-  answer: string
+  question: string;
+  answer: string;
 }
 
 const faqData: FAQItem[] = [
@@ -48,22 +48,24 @@ const faqData: FAQItem[] = [
     answer:
       'Sim! Dependendo do seu plano, auxiliamos na otimização da vitrine do seu negócio para impulsionar sua visibilidade na região.',
   },
-]
+];
 
 export default function FAQSection() {
   // Define o índice 0 (primeira pergunta) aberto por padrão como no layout
-  const [openIndex, setOpenIndex] = useState<number | null>(0)
+  const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   const toggleFAQ = (index: number) => {
-    setOpenIndex(openIndex === index ? null : index)
-  }
+    setOpenIndex(openIndex === index ? null : index);
+  };
 
   return (
-    <section className="flex w-full flex-col items-center bg-[#f8f7f5] px-4 py-16 sm:px-8 lg:px-16" id='faq'>
+    <section
+      className="flex w-full flex-col items-center bg-[#f8f7f5] px-4 py-16 sm:px-8 lg:px-16"
+      id="faq"
+    >
       <div className="max-w-3xl w-full">
         {/* Subtítulo e Título */}
         <div data-motion="section" className="text-center mb-10">
-
           <p
             className="font-[family-name:var(--font-display)] text-base font-medium leading-[normal] text-[var(--color-civix-navy)]"
             data-testid="about-marker"
@@ -81,16 +83,17 @@ export default function FAQSection() {
         {/* Lista Accordion */}
         <div className="space-y-3">
           {faqData.map((item, index) => {
-            const isOpen = openIndex === index
+            const isOpen = openIndex === index;
             return (
               <div
                 key={index}
                 data-motion="item"
                 data-motion-step="40"
-                className={`rounded-xl transition-all duration-300 overflow-hidden ${isOpen
-                  ? 'bg-[#98a1a8] text-[#071b2b]'
-                  : 'bg-[#eeeeed] hover:bg-[#e7e6e4] text-[#071b2b]'
-                  }`}
+                className={`rounded-xl transition-all duration-300 overflow-hidden ${
+                  isOpen
+                    ? 'bg-[#98a1a8] text-[#071b2b]'
+                    : 'bg-[#eeeeed] hover:bg-[#e7e6e4] text-[#071b2b]'
+                }`}
               >
                 <button
                   type="button"
@@ -102,10 +105,9 @@ export default function FAQSection() {
                 >
                   <span>{item.question}</span>
                   <div
-                    className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 transition-colors ${isOpen
-                      ? 'bg-[#071b2b] text-white'
-                      : 'bg-[#e0dfdc] text-[#071b2b]'
-                      }`}
+                    className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 transition-colors ${
+                      isOpen ? 'bg-[#071b2b] text-white' : 'bg-[#e0dfdc] text-[#071b2b]'
+                    }`}
                   >
                     {isOpen ? <Minus size={16} /> : <Plus size={16} />}
                   </div>
@@ -118,15 +120,15 @@ export default function FAQSection() {
                     aria-labelledby={`faq-question-${index}`}
                     data-motion="feedback"
                     data-motion-trigger="mount"
-                    className="px-6 pb-5 text-sm md:text-base leading-relaxed text-[#071b2b]/90 border-t border-black/5 pt-2">
+                    className="px-6 pb-5 text-sm md:text-base leading-relaxed text-[#071b2b]/90 border-t border-black/5 pt-2"
+                  >
                     {item.answer}
                   </div>
                 )}
               </div>
-            )
+            );
           })}
         </div>
-
       </div>
 
       {/* Banner CTA com a mesma largura máxima do Hero */}
@@ -139,22 +141,23 @@ export default function FAQSection() {
         />
 
         <div className="relative z-10 flex w-full flex-col items-center px-6 py-16 text-center text-[var(--color-civix-ivory)] sm:px-12">
-          <h3 data-motion="section" className="mx-auto max-w-[1000px] font-[family-name:var(--font-display)] text-[clamp(2rem,5vw,4rem)] font-semibold leading-[1.08] tracking-[-0.02em]">
+          <h3
+            data-motion="section"
+            className="mx-auto max-w-[1000px] font-[family-name:var(--font-display)] text-[clamp(2rem,5vw,4rem)] font-semibold leading-[1.08] tracking-[-0.02em]"
+          >
             Preparado para transformar o atendimento da sua empresa?
           </h3>
           <ActionButton
-            href='#'
+            href="#"
             data-motion="section"
             data-motion-delay="60"
-            variant='yellow'
-            className='mt-10'
+            variant="yellow"
+            className="mt-10"
           >
-
             Contato
-
           </ActionButton>
         </div>
       </div>
     </section>
-  )
+  );
 }

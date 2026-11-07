@@ -21,14 +21,14 @@ export default function Companies() {
 
   const load = useCallback(
     () =>
-      getPlatformCompanies({ ...filters, page }).catch(error => {
+      getPlatformCompanies({ ...filters, page }).catch((error) => {
         throw new Error(handleError(error), { cause: error });
       }),
     [filters, page, handleError],
   );
   const loadMetrics = useCallback(
     () =>
-      getPlatformCompanyMetrics().catch(error => {
+      getPlatformCompanyMetrics().catch((error) => {
         throw new Error(handleError(error), { cause: error });
       }),
     [handleError],
@@ -65,8 +65,14 @@ export default function Companies() {
                 role="alert"
                 className="flex flex-wrap items-center justify-between gap-3 rounded-xl border p-4 text-sm"
               >
-                <p>Não foi possível carregar as métricas. {(metrics.error as Error).message}</p>
-                <Button variant="outline" onClick={() => setMetricsRetry(value => value + 1)}>
+                <p>
+                  Não foi possível carregar as métricas.{' '}
+                  {(metrics.error as Error).message}
+                </p>
+                <Button
+                  variant="outline"
+                  onClick={() => setMetricsRetry((value) => value + 1)}
+                >
                   Tentar novamente métricas
                 </Button>
               </div>
@@ -88,7 +94,7 @@ export default function Companies() {
         <CompanyFilters
           onError={handleError}
           onLoadingChange={setFiltersLoading}
-          onApply={value => {
+          onApply={(value) => {
             setPage(1);
             setFilters(value);
           }}
@@ -103,7 +109,7 @@ export default function Companies() {
             className="flex flex-wrap items-center justify-between gap-3 rounded-xl border p-4 text-sm"
           >
             <p>{(query.error as Error).message}</p>
-            <Button variant="outline" onClick={() => setRetry(value => value + 1)}>
+            <Button variant="outline" onClick={() => setRetry((value) => value + 1)}>
               Tentar novamente
             </Button>
           </div>

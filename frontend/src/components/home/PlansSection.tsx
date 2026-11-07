@@ -1,10 +1,10 @@
-import { AlertCircle, Loader2 } from 'lucide-react'
+import { AlertCircle, Loader2 } from 'lucide-react';
 
-import { PlanCard } from '@/components/plans/PlanCard'
-import { usePlans } from '@/components/plans/usePlans'
+import { PlanCard } from '@/components/plans/PlanCard';
+import { usePlans } from '@/components/plans/usePlans';
 
 export function PlansSection() {
-  const { plans, loading, error } = usePlans()
+  const { plans, loading, error } = usePlans();
 
   return (
     <section
@@ -34,7 +34,10 @@ export function PlansSection() {
             className="flex min-h-48 items-center justify-center text-[var(--color-civix-navy)]"
             role="status"
           >
-            <Loader2 aria-hidden="true" className="mr-3 size-5 animate-spin motion-reduce:animate-none" />
+            <Loader2
+              aria-hidden="true"
+              className="mr-3 size-5 animate-spin motion-reduce:animate-none"
+            />
             Carregando planos...
           </div>
         )}
@@ -52,7 +55,12 @@ export function PlansSection() {
         )}
 
         {!loading && !error && plans.length === 0 && (
-          <p role="status" data-motion="feedback" data-motion-trigger="mount" className="border border-black/10 bg-white p-8 text-center text-black/60">
+          <p
+            role="status"
+            data-motion="feedback"
+            data-motion-trigger="mount"
+            className="border border-black/10 bg-white p-8 text-center text-black/60"
+          >
             Nenhum plano disponível no momento.
           </p>
         )}
@@ -75,5 +83,5 @@ export function PlansSection() {
         </div>
       </div>
     </section>
-  )
+  );
 }

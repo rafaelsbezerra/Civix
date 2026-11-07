@@ -1,5 +1,10 @@
-export const USER_ROLES = ['admin_empresa', 'super_admin', 'cliente', 'atendente'] as const;
-export type UserRole = typeof USER_ROLES[number];
+export const USER_ROLES = [
+  'admin_empresa',
+  'super_admin',
+  'cliente',
+  'atendente',
+] as const;
+export type UserRole = (typeof USER_ROLES)[number];
 export type AuthenticatedRole = Exclude<UserRole, 'cliente'>;
 // PostgreSQL utiliza UUID; números são preservados apenas para snapshots locais legados.
 export type UserId = string | number;

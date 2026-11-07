@@ -13,15 +13,29 @@ import type { UserRow } from '../interfaces/auth.user.row.js';
 
 async function getInviteUser(token: string): Promise<UserRow> {
   const jwtSecret = process.env.JWT_INVITE_SECRET;
-  if (!jwtSecret) throw new AppError({ status: 500, code: ErrorCode.INTERNAL_ERROR, message: 'Erro interno do servidor' });
+  if (!jwtSecret) {
+    throw new AppError({
+      status: 500,
+      code: ErrorCode.INTERNAL_ERROR,
+      message: 'Erro interno do servidor',
+    });
+  }
   let decoded: JwtInvitePayload;
 
   try {
     decoded = jwt.verify(token, jwtSecret) as JwtInvitePayload;
 
-    if (!decoded || typeof decoded !== 'object' || typeof decoded.email !== 'string'
-      || !decoded.email || !isAuthenticatedRole(decoded.role)
-      || decoded.purpose !== 'invite' || (decoded.role === 'super_admin' ? decoded.companyId !== null : typeof decoded.companyId !== 'string')) {
+    if (
+      !decoded ||
+      typeof decoded !== 'object' ||
+      typeof decoded.email !== 'string' ||
+      !decoded.email ||
+      !isAuthenticatedRole(decoded.role) ||
+      decoded.purpose !== 'invite' ||
+      (decoded.role === 'super_admin'
+        ? decoded.companyId !== null
+        : typeof decoded.companyId !== 'string')
+    ) {
       throw new Error('O token de convite não contém uma identidade válida.');
     }
   } catch (cause) {
@@ -43,9 +57,16 @@ async function getInviteUser(token: string): Promise<UserRow> {
     });
   }
 
-  const company = decoded.companyId ? await companyRepository.getById(decoded.companyId) : undefined;
-  if (user.deleted_at || user.status !== 'pending' || user.company_id !== decoded.companyId
-    || (decoded.role !== 'super_admin' && (!company || company.status === 'inativo' || company.deleted_at))) {
+  const company = decoded.companyId
+    ? await companyRepository.getById(decoded.companyId)
+    : undefined;
+  if (
+    user.deleted_at ||
+    user.status !== 'pending' ||
+    user.company_id !== decoded.companyId ||
+    (decoded.role !== 'super_admin' &&
+      (!company || company.status === 'inativo' || company.deleted_at))
+  ) {
     throw new AppError({
       status: 400,
       code: ErrorCode.VALIDATION_ERROR,
@@ -53,9 +74,17 @@ async function getInviteUser(token: string): Promise<UserRow> {
     });
   }
 
-  if (user.tokens_revoked_at && (typeof decoded.issuedAt !== 'string' || !Number.isFinite(Date.parse(decoded.issuedAt))
-    || Date.parse(decoded.issuedAt) <= new Date(user.tokens_revoked_at).getTime())) {
-    throw new AppError({ status:401,code:ErrorCode.UNAUTHORIZED,message:'Convite revogado. Solicite um novo link.' });
+  if (
+    user.tokens_revoked_at &&
+    (typeof decoded.issuedAt !== 'string' ||
+      !Number.isFinite(Date.parse(decoded.issuedAt)) ||
+      Date.parse(decoded.issuedAt) <= new Date(user.tokens_revoked_at).getTime())
+  ) {
+    throw new AppError({
+      status: 401,
+      code: ErrorCode.UNAUTHORIZED,
+      message: 'Convite revogado. Solicite um novo link.',
+    });
   }
 
   if (user.invite_token !== token) {
@@ -70,7 +99,11 @@ async function getInviteUser(token: string): Promise<UserRow> {
     event: 'auth.invite.validated',
     module: 'auth',
     message: 'Convite validado',
-    context: { userId: user.id, role: decoded.role, persistenceMode: USE_MOCK_DATA ? 'json' : 'postgres' },
+    context: {
+      userId: user.id,
+      role: decoded.role,
+      persistenceMode: USE_MOCK_DATA ? 'json' : 'postgres',
+    },
   });
 
   return user;
@@ -107,7 +140,15 @@ export async function firstAccess(token: string, password: string): Promise<void
 
 export async function resendInviteEmail(email: string): Promise<void> {
   const user = await authRepository.getResetUserByEmail(email);
-  if (!user || user.status !== 'pending' || !isAuthenticatedRole(user.role) || user.role === 'super_admin' || !user.company_id) return;
+  if (
+    !user ||
+    user.status !== 'pending' ||
+    !isAuthenticatedRole(user.role) ||
+    user.role === 'super_admin' ||
+    !user.company_id
+  ) {
+    return;
+  }
   const adminService = await import('./admin.service.js');
   await adminService.inviteUser(email, user.role, user.company_id);
 }

@@ -10,18 +10,25 @@ import {
   UserRound,
   UserRoundCog,
   X,
-} from 'lucide-react'
-import { useState } from 'react'
-import { Link, Navigate, NavLink, Outlet, useLocation, useOutletContext } from 'react-router-dom'
+} from 'lucide-react';
+import { useState } from 'react';
+import {
+  Link,
+  Navigate,
+  NavLink,
+  Outlet,
+  useLocation,
+  useOutletContext,
+} from 'react-router-dom';
 
-import logoCivix from '@/assets/civix/logo-civix-white.png'
-import type { SessionProfile } from '@/lib/api'
+import logoCivix from '@/assets/civix/logo-civix-white.png';
+import type { SessionProfile } from '@/lib/api';
 
 interface DashboardNavigationItem {
-  to: string
-  label: string
-  icon: typeof LayoutDashboard
-  ownerOnly?: boolean
+  to: string;
+  label: string;
+  icon: typeof LayoutDashboard;
+  ownerOnly?: boolean;
 }
 
 const ownerNavigationItems: DashboardNavigationItem[] = [
@@ -44,27 +51,30 @@ const ownerNavigationItems: DashboardNavigationItem[] = [
     icon: Building2,
     ownerOnly: true,
   },
-]
+];
 
 const attendantNavigationItems: DashboardNavigationItem[] = [
   { to: '/dashboard-atendente', label: 'Início', icon: LayoutDashboard },
   { to: '/dashboard-atendente/conversas', label: 'Conversas', icon: MessageSquareText },
   { to: '/dashboard-atendente/historico', label: 'Histórico', icon: ClipboardList },
   { to: '/dashboard-atendente/perfil', label: 'Perfil', icon: UserRoundCog },
-]
+];
 
 export function CompanyDashboardLayout() {
-  const session = useOutletContext<SessionProfile>()
-  const { pathname } = useLocation()
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark')
-  const isOwner = session.user.role === 'admin_empresa'
-  const navigationItems = isOwner ? ownerNavigationItems : attendantNavigationItems
-  const visibleItems = navigationItems.filter((item) => !item.ownerOnly || isOwner)
-  const displayName = session.user.name?.trim() || session.user.email
-  const activeItem = navigationItems.find((item) => item.to === pathname)
-  const sectionTitle = activeItem?.label ?? (isOwner ? 'Visão geral' : 'Painel do atendente')
-  const sectionSubtitle = isOwner ? 'Acompanhe a operação da empresa' : 'Atendimentos da sua empresa'
+  const session = useOutletContext<SessionProfile>();
+  const { pathname } = useLocation();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  const isOwner = session.user.role === 'admin_empresa';
+  const navigationItems = isOwner ? ownerNavigationItems : attendantNavigationItems;
+  const visibleItems = navigationItems.filter((item) => !item.ownerOnly || isOwner);
+  const displayName = session.user.name?.trim() || session.user.email;
+  const activeItem = navigationItems.find((item) => item.to === pathname);
+  const sectionTitle =
+    activeItem?.label ?? (isOwner ? 'Visão geral' : 'Painel do atendente');
+  const sectionSubtitle = isOwner
+    ? 'Acompanhe a operação da empresa'
+    : 'Atendimentos da sua empresa';
 
   function renderNavigation(mobile = false) {
     return (
@@ -91,7 +101,7 @@ export function CompanyDashboardLayout() {
           ))}
         </ul>
       </nav>
-    )
+    );
   }
 
   const initials = displayName
@@ -99,7 +109,7 @@ export function CompanyDashboardLayout() {
     .filter(Boolean)
     .slice(0, 2)
     .map((part) => part[0]?.toUpperCase())
-    .join('')
+    .join('');
 
   return (
     <div
@@ -112,7 +122,13 @@ export function CompanyDashboardLayout() {
           className="inline-flex flex-col items-start gap-2"
           to="/"
         >
-          <img alt="Civix" className="h-8 w-[99px] object-contain" height="32" src={logoCivix} width="99" />
+          <img
+            alt="Civix"
+            className="h-8 w-[99px] object-contain"
+            height="32"
+            src={logoCivix}
+            width="99"
+          />
           <span className="mt-1 block text-xs font-medium uppercase tracking-[0.16em] text-[var(--dashboard-sidebar-muted)]">
             Painel da empresa
           </span>
@@ -151,7 +167,11 @@ export function CompanyDashboardLayout() {
               <button
                 aria-label={`Ativar tema ${theme === 'dark' ? 'claro' : 'escuro'}`}
                 className="grid size-11 shrink-0 place-items-center rounded-lg border border-[var(--dashboard-border)] text-[var(--dashboard-accent)] transition-colors hover:bg-[var(--dashboard-accent-soft)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--dashboard-accent)]"
-                onClick={() => setTheme((currentTheme) => currentTheme === 'dark' ? 'light' : 'dark')}
+                onClick={() =>
+                  setTheme((currentTheme) =>
+                    currentTheme === 'dark' ? 'light' : 'dark',
+                  )
+                }
                 type="button"
               >
                 {theme === 'dark' ? (
@@ -167,7 +187,9 @@ export function CompanyDashboardLayout() {
                 >
                   {initials}
                 </span>
-                <p className="truncate text-sm text-[var(--dashboard-text)]">{displayName}</p>
+                <p className="truncate text-sm text-[var(--dashboard-text)]">
+                  {displayName}
+                </p>
               </div>
             </div>
           </div>
@@ -187,15 +209,15 @@ export function CompanyDashboardLayout() {
         </main>
       </div>
     </div>
-  )
+  );
 }
 
 export function OwnerDashboardRoute() {
-  const session = useOutletContext<SessionProfile>()
+  const session = useOutletContext<SessionProfile>();
 
   if (session.user.role !== 'admin_empresa') {
-    return <Navigate replace to="/dashboard-empresa" />
+    return <Navigate replace to="/dashboard-empresa" />;
   }
 
-  return <Outlet context={session} />
+  return <Outlet context={session} />;
 }

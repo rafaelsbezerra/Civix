@@ -45,7 +45,10 @@ function parseInteger(value: unknown, fallback: number): number {
   return invalidPagination();
 }
 
-export function parsePagination(query: { page?: unknown; pageSize?: unknown }): PaginationInput {
+export function parsePagination(query: {
+  page?: unknown;
+  pageSize?: unknown;
+}): PaginationInput {
   const page = parseInteger(query.page, 1);
   const pageSize = parseInteger(query.pageSize, DEFAULT_PAGE_SIZE);
   const offset = (page - 1) * pageSize;
@@ -57,7 +60,10 @@ export function parsePagination(query: { page?: unknown; pageSize?: unknown }): 
   return { page, pageSize, offset };
 }
 
-export function createPaginationMeta(input: PaginationInput, total: number): PaginationMeta {
+export function createPaginationMeta(
+  input: PaginationInput,
+  total: number,
+): PaginationMeta {
   if (!Number.isSafeInteger(total) || total < 0) {
     throw new RangeError('O total deve ser um inteiro seguro maior ou igual a zero');
   }
@@ -65,7 +71,9 @@ export function createPaginationMeta(input: PaginationInput, total: number): Pag
   const checked = parsePagination(input);
 
   if (checked.offset !== input.offset) {
-    throw new RangeError('O deslocamento não corresponde à página e ao tamanho da página');
+    throw new RangeError(
+      'O deslocamento não corresponde à página e ao tamanho da página',
+    );
   }
 
   return {

@@ -7,13 +7,13 @@ import {
   UserRound,
   UserRoundCog,
   Users,
-} from 'lucide-react'
+} from 'lucide-react';
 
 interface DashboardSectionUnavailableProps {
-  title: string
-  description: string
-  reason: string
-  icon: 'home' | 'leads' | 'conversations' | 'history' | 'profile' | 'team' | 'company'
+  title: string;
+  description: string;
+  reason: string;
+  icon: 'home' | 'leads' | 'conversations' | 'history' | 'profile' | 'team' | 'company';
 }
 
 const sectionIcons = {
@@ -24,7 +24,7 @@ const sectionIcons = {
   profile: UserRoundCog,
   team: Users,
   company: Building2,
-}
+};
 
 export function DashboardSectionUnavailable({
   title,
@@ -32,7 +32,7 @@ export function DashboardSectionUnavailable({
   reason,
   icon,
 }: DashboardSectionUnavailableProps) {
-  const Icon = sectionIcons[icon]
+  const Icon = sectionIcons[icon];
 
   return (
     <div className="mx-auto max-w-7xl">
@@ -75,12 +75,12 @@ export function DashboardSectionUnavailable({
             </p>
             <p className="mt-4 text-xs leading-5 text-[var(--dashboard-subtle)]">
               Nenhum dado foi carregado ou criado nesta tela. Quando a integração
-              estiver pronta, esta área mostrará dados da empresa confirmados
-              pelo servidor.
+              estiver pronta, esta área mostrará dados da empresa confirmados pelo
+              servidor.
             </p>
           </div>
         </div>
       </section>
     </div>
-  )
+  );
 }

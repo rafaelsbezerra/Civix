@@ -1,19 +1,21 @@
-import { ArrowLeft, ArrowRight, Headphones } from "lucide-react";
-import laptop404 from "../assets/civix/404_page.png";
-import { SiteHeader } from '@/components/layout/SiteHeader'
+import { ArrowLeft, ArrowRight, Headphones } from 'lucide-react';
+import laptop404 from '../assets/civix/404_page.png';
+import { SiteHeader } from '@/components/layout/SiteHeader';
 
 export default function NotFound() {
   return (
     <div className="min-h-screen w-full overflow-hidden bg-[#f8f7f4] text-[#102846]">
       <SiteHeader />
       <main className="relative mx-auto flex min-h-[calc(100svh-106px)] w-full max-w-[1600px] flex-col px-8 py-8 sm:px-12 lg:px-16">
-
         <section className="relative flex flex-1 items-center">
           <div className="pointer-events-none absolute -bottom-32 -left-32 h-[480px] w-[480px] rounded-full border-[80px] border-[#f2e8ce] opacity-90" />
 
           <div className="relative z-10 grid w-full grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-4">
-
-            <div data-motion="page" data-motion-trigger="mount" className="max-w-[570px] pl-2 sm:pl-8 lg:pl-12">
+            <div
+              data-motion="page"
+              data-motion-trigger="mount"
+              className="max-w-[570px] pl-2 sm:pl-8 lg:pl-12"
+            >
               <div className="mb-7 flex items-center gap-1 text-[15px] font-medium">
                 <span className="text-[#f5b51b]">//</span>
                 <span>Página não encontrada</span>
@@ -28,11 +30,10 @@ export default function NotFound() {
               </h2>
 
               <p className="mt-5 max-w-[500px] text-base leading-7 text-[#64748b] sm:text-lg">
-                A página que você está procurando pode ter sido
-                movida, excluída ou nunca existiu.
+                A página que você está procurando pode ter sido movida, excluída ou
+                nunca existiu.
                 <br />
-                Mas não se preocupe, vamos te ajudar a encontrar
-                o que você precisa.
+                Mas não se preocupe, vamos te ajudar a encontrar o que você precisa.
               </p>
 
               <div className="mt-9 flex flex-col gap-4 sm:flex-row">
@@ -47,12 +48,10 @@ export default function NotFound() {
                   />
                   Voltar para o início
                 </button>
-
               </div>
             </div>
 
             <div className="relative flex min-h-[400px] items-center justify-center lg:min-h-[560px]">
-
               <div className="absolute left-[15%] top-[15%] h-[260px] w-[260px] rounded-full border border-dashed border-[#102846] opacity-90" />
 
               <div className="absolute right-[10%] top-[20%] flex gap-2">
@@ -81,31 +80,19 @@ export default function NotFound() {
         <footer className="relative z-10 border-t border-[#deddd9] pt-7">
           <div className="flex items-center gap-5 pl-8 sm:pl-12">
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#f6e9c9]">
-              <Headphones
-                size={23}
-                strokeWidth={1.7}
-                className="text-[#102846]"
-              />
+              <Headphones size={23} strokeWidth={1.7} className="text-[#102846]" />
             </div>
 
             <div className="flex flex-col">
-              <span className="text-[15px] font-medium">
-                Precisa de ajuda?
-              </span>
-              <span className="text-[15px]">
-                Fale com nosso suporte
-              </span>
+              <span className="text-[15px] font-medium">Precisa de ajuda?</span>
+              <span className="text-[15px]">Fale com nosso suporte</span>
             </div>
 
             <button
               aria-label="Falar com suporte"
               className="ml-4 transition-transform duration-200 hover:translate-x-1"
             >
-              <ArrowRight
-                size={25}
-                strokeWidth={1.6}
-                className="text-[#102846]"
-              />
+              <ArrowRight size={25} strokeWidth={1.6} className="text-[#102846]" />
             </button>
           </div>
         </footer>

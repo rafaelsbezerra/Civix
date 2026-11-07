@@ -8,9 +8,23 @@ import { SuperAdminSidebar } from './SuperAdminSidebar';
 
 function setup(dark = false) {
   const callbacks = { onLogout: vi.fn(), onToggleTheme: vi.fn() };
-  render(<MemoryRouter><div className={`super-admin-root${dark ? ' dark' : ''}`} data-theme={dark ? 'dark' : 'light'}>
-    <SidebarProvider><SuperAdminHeader title="Empresas" name="Admin Teste" dark={dark} {...callbacks} /></SidebarProvider>
-  </div></MemoryRouter>);
+  render(
+    <MemoryRouter>
+      <div
+        className={`super-admin-root${dark ? ' dark' : ''}`}
+        data-theme={dark ? 'dark' : 'light'}
+      >
+        <SidebarProvider>
+          <SuperAdminHeader
+            title="Empresas"
+            name="Admin Teste"
+            dark={dark}
+            {...callbacks}
+          />
+        </SidebarProvider>
+      </div>
+    </MemoryRouter>,
+  );
   return { user: userEvent.setup(), ...callbacks };
 }
 
@@ -18,9 +32,14 @@ describe('Header do superadmin', () => {
   it('abre o menu com perfil e preserva a saída', async () => {
     const { user, onLogout } = setup();
     await user.click(screen.getByRole('button', { name: 'Abrir menu de Admin Teste' }));
-    expect(await screen.findByRole('menuitem', { name: 'Meu perfil' })).toHaveAttribute('href', '/dashboard/super-admin/settings/profile');
+    expect(await screen.findByRole('menuitem', { name: 'Meu perfil' })).toHaveAttribute(
+      'href',
+      '/dashboard/super-admin/settings/profile',
+    );
     expect(screen.getAllByRole('menuitem')).toHaveLength(2);
-    const portal = screen.getByRole('menu').closest('[data-slot="super-admin-user-menu-portal"]');
+    const portal = screen
+      .getByRole('menu')
+      .closest('[data-slot="super-admin-user-menu-portal"]');
     expect(portal).not.toBeNull();
     expect(portal).toHaveClass('absolute');
     await user.click(screen.getByRole('menuitem', { name: 'Sair da conta' }));
@@ -41,7 +60,9 @@ describe('Header do superadmin', () => {
   it('preserva o tema e oferece o controle da barra lateral', async () => {
     const { user, onToggleTheme } = setup(true);
     await user.click(screen.getByRole('button', { name: 'Ativar modo claro' }));
-    const sidebarTrigger = screen.getByRole('button', { name: 'Alternar menu lateral' });
+    const sidebarTrigger = screen.getByRole('button', {
+      name: 'Alternar menu lateral',
+    });
     await user.click(sidebarTrigger);
     expect(onToggleTheme).toHaveBeenCalledTimes(1);
     expect(sidebarTrigger).toHaveAttribute('data-sidebar', 'trigger');
@@ -56,7 +77,9 @@ describe('Header do superadmin', () => {
       </MemoryRouter>,
     );
     const nav = screen.getByRole('navigation', { name: 'Navegação administrativa' });
-    expect(screen.queryByRole('link', { name: 'Cadastrar empresa' })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('link', { name: 'Cadastrar empresa' }),
+    ).not.toBeInTheDocument();
     const companiesLink = screen.getByRole('link', { name: 'Empresas' });
     expect(nav).toContainElement(companiesLink);
     expect(companiesLink).toHaveAttribute('data-active');

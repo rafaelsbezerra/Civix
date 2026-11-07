@@ -2,7 +2,9 @@ import type { Plan } from '../entities/plan.entity.js';
 import type { PlanRow } from '../interfaces/plan.row.js';
 
 function parseFeatures(value: unknown): string[] {
-  return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : [];
+  return Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === 'string')
+    : [];
 }
 
 function parseLimits(value: unknown): Record<string, number | string | boolean> {
@@ -11,7 +13,9 @@ function parseLimits(value: unknown): Record<string, number | string | boolean> 
   }
 
   return Object.fromEntries(
-    Object.entries(value).filter(([, item]) => ['number', 'string', 'boolean'].includes(typeof item)),
+    Object.entries(value).filter(([, item]) =>
+      ['number', 'string', 'boolean'].includes(typeof item),
+    ),
   ) as Record<string, number | string | boolean>;
 }
 

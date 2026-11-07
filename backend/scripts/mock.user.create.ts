@@ -20,27 +20,35 @@ async function main(): Promise<void> {
 
   try {
     const email = await input.question('E-mail do usuário local: ');
-    const role = await input.question('Perfil (admin_empresa, super_admin, atendente ou cliente): ');
+    const role = await input.question(
+      'Perfil (admin_empresa, super_admin, atendente ou cliente): ',
+    );
     const name = await input.question('Nome (opcional): ');
-    const companyId = role === 'admin_empresa' || role === 'atendente' ? await input.question('ID da empresa: ') : null;
-    const password = role !== 'cliente'
-      ? await input.question('Senha (mínimo de 8 caracteres): ')
-      : undefined;
+    const companyId =
+      role === 'admin_empresa' || role === 'atendente'
+        ? await input.question('ID da empresa: ')
+        : null;
+    const password =
+      role !== 'cliente'
+        ? await input.question('Senha (mínimo de 8 caracteres): ')
+        : undefined;
     await createMockUser({ email, role, name, password, companyId });
   } finally {
     input.close();
   }
 }
 
-main().catch(error => {
-  commandLogger ??= createLogger({ level: 'info', pretty: false });
-  commandLogger.error({
-    event: 'mock.user-command.failed',
-    module: 'mock',
-    message: 'Não foi possível criar o usuário local',
-    error,
+main()
+  .catch((error) => {
+    commandLogger ??= createLogger({ level: 'info', pretty: false });
+    commandLogger.error({
+      event: 'mock.user-command.failed',
+      module: 'mock',
+      message: 'Não foi possível criar o usuário local',
+      error,
+    });
+    process.exitCode = 1;
+  })
+  .finally(async () => {
+    await commandLogger?.close();
   });
-  process.exitCode = 1;
-}).finally(async () => {
-  await commandLogger?.close();
-});

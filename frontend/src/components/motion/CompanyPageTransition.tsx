@@ -1,20 +1,24 @@
-import { useEffect, useState } from 'react'
-import { motion } from 'motion/react'
-import { useCompanyTransition } from './useCompanyTransition'
+import { useEffect, useState } from 'react';
+import { motion } from 'motion/react';
+import { useCompanyTransition } from './useCompanyTransition';
 
 function CompanyCurtain() {
-  const { reducedMotion } = useCompanyTransition()
-  const [finished, setFinished] = useState(reducedMotion)
+  const { reducedMotion } = useCompanyTransition();
+  const [finished, setFinished] = useState(reducedMotion);
 
   useEffect(() => {
-    const preference = window.matchMedia?.('(prefers-reduced-motion: reduce)')
+    const preference = window.matchMedia?.('(prefers-reduced-motion: reduce)');
     const finishOnReduction = () => {
-      if (preference?.matches) setFinished(true)
-    }
-    preference?.addEventListener('change', finishOnReduction)
-    return () => preference?.removeEventListener('change', finishOnReduction)
-  }, [])
-  if (finished || reducedMotion) return null
+      if (preference?.matches) {
+        setFinished(true);
+      }
+    };
+    preference?.addEventListener('change', finishOnReduction);
+    return () => preference?.removeEventListener('change', finishOnReduction);
+  }, []);
+  if (finished || reducedMotion) {
+    return null;
+  }
 
   return (
     <div
@@ -34,13 +38,15 @@ function CompanyCurtain() {
         onAnimationComplete={() => setFinished(true)}
       />
     </div>
-  )
+  );
 }
 
 export function CompanyPageTransition() {
-  const { fromCard, navigationKey } = useCompanyTransition()
-  if (!fromCard) return null
+  const { fromCard, navigationKey } = useCompanyTransition();
+  if (!fromCard) {
+    return null;
+  }
 
   // Cada clique tem sua própria animação; o histórico não repete o marcador antigo.
-  return <CompanyCurtain key={navigationKey} />
+  return <CompanyCurtain key={navigationKey} />;
 }

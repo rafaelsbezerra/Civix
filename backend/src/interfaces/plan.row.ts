@@ -13,4 +13,3 @@ export interface PlanRow {
   is_active: boolean;
   display_order: number;
 }
-

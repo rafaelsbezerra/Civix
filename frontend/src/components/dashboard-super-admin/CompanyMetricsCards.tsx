@@ -4,10 +4,14 @@ import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '../ui
 import { CountUpNumber } from './CountUpNumber';
 
 export function CompanyMetricsCards({ metrics }: { metrics: CompanyMetrics }) {
-  const visiblePlans = metrics.byPlan.filter(plan => !/\bplano\b/i.test(plan.planName));
-  const maximum = Math.max(1, ...visiblePlans.map(plan => plan.count));
+  const visiblePlans = metrics.byPlan.filter(
+    (plan) => !/\bplano\b/i.test(plan.planName),
+  );
+  const maximum = Math.max(1, ...visiblePlans.map((plan) => plan.count));
   const number = new Intl.NumberFormat('pt-BR');
-  const activePercentage = metrics.total ? Math.round((metrics.active / metrics.total) * 100) : 0;
+  const activePercentage = metrics.total
+    ? Math.round((metrics.active / metrics.total) * 100)
+    : 0;
   return (
     <section
       aria-label="Métricas de empresas"
@@ -24,11 +28,17 @@ export function CompanyMetricsCards({ metrics }: { metrics: CompanyMetrics }) {
           <p className="text-3xl font-semibold tracking-tight tabular-nums">
             <CountUpNumber value={metrics.total} />
           </p>
-          <CardDescription className="mt-1 text-xs">Toda a base cadastrada</CardDescription>
+          <CardDescription className="mt-1 text-xs">
+            Toda a base cadastrada
+          </CardDescription>
         </CardContent>
       </Card>
 
-      <Card className="gap-3 rounded-2xl py-4" role="region" aria-label="Situação das empresas">
+      <Card
+        className="gap-3 rounded-2xl py-4"
+        role="region"
+        aria-label="Situação das empresas"
+      >
         <CardHeader className="flex flex-row items-center justify-between gap-3 px-4">
           <CardTitle className="text-sm font-medium text-muted-foreground">
             Empresas ativas
@@ -65,7 +75,11 @@ export function CompanyMetricsCards({ metrics }: { metrics: CompanyMetrics }) {
         </CardContent>
       </Card>
 
-      <Card className="gap-3 rounded-2xl py-4" role="region" aria-label="Empresas por plano">
+      <Card
+        className="gap-3 rounded-2xl py-4"
+        role="region"
+        aria-label="Empresas por plano"
+      >
         <CardHeader className="flex flex-row items-center justify-between gap-3 px-4">
           <CardTitle className="text-sm font-medium text-muted-foreground">
             Empresas por plano
@@ -77,7 +91,7 @@ export function CompanyMetricsCards({ metrics }: { metrics: CompanyMetrics }) {
             <p className="text-sm text-muted-foreground">Nenhum plano para exibir.</p>
           ) : (
             <ul className="space-y-2">
-              {visiblePlans.map(plan => (
+              {visiblePlans.map((plan) => (
                 <li
                   key={plan.planId ?? 'without-plan'}
                   className="grid grid-cols-[minmax(0,96px)_minmax(0,1fr)_auto] items-center gap-2 text-xs"

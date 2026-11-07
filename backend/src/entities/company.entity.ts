@@ -32,8 +32,10 @@ export interface Company {
 
 export const companyDataSchema = z.object({
   plan_id: z.string().nullable().optional(),
-  deleted_at: z.string().nullable().optional(), deactivation_reason: z.string().nullable().optional(),
-  deactivated_at: z.string().nullable().optional(), deactivated_by: z.string().nullable().optional(),
+  deleted_at: z.string().nullable().optional(),
+  deactivation_reason: z.string().nullable().optional(),
+  deactivated_at: z.string().nullable().optional(),
+  deactivated_by: z.string().nullable().optional(),
   id: z.string().min(1),
   nome: z.string().min(1),
   cnpj: z.string().min(1),

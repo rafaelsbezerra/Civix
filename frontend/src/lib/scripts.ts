@@ -7,10 +7,12 @@ declare global {
 }
 
 export function loadAnalytics() {
-  if (!GA_ID || document.getElementById("ga-script")) return;
+  if (!GA_ID || document.getElementById('ga-script')) {
+    return;
+  }
 
-  const s = document.createElement("script");
-  s.id = "ga-script";
+  const s = document.createElement('script');
+  s.id = 'ga-script';
   s.async = true;
   s.src = `https://www.googletagmanager.com/gtag/js?id=${GA_ID}`;
   document.head.appendChild(s);
@@ -25,9 +27,9 @@ export function loadAnalytics() {
   }
 
   // @ts-expect-error: o gtag aceita argumentos via "arguments"
-  gtag("js", new Date());
+  gtag('js', new Date());
   // @ts-expect-error: idem
-  gtag("config", GA_ID, { anonymize_ip: true });
+  gtag('config', GA_ID, { anonymize_ip: true });
 }
 
 export function loadMarketing() {

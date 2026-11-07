@@ -5,9 +5,22 @@ import { z } from 'zod';
 import type { ManualSaleDraft, Plan, PlatformCompany } from '../../lib/api';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel, FieldSet } from '../ui/field';
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldSet,
+} from '../ui/field';
 import { Input } from '../ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../ui/select';
 import { Textarea } from '../ui/textarea';
 
 const PRICING_MODE_LABELS: Record<'company_plan' | 'manual_amount', string> = {
@@ -109,11 +122,13 @@ export function SaleForm({
     <div ref={setPortal}>
       <Card className="rounded-2xl">
         <CardHeader className="border-b pb-5">
-          <CardTitle className="text-base font-semibold">Venda para {company.nome}</CardTitle>
+          <CardTitle className="text-base font-semibold">
+            Venda para {company.nome}
+          </CardTitle>
           <CardDescription>
-            Datas interpretadas em UTC, inclusive datas passadas. Este lançamento não muda o plano
-            da empresa. Vendas não podem ser editadas; correções exigem exclusão definitiva e novo
-            lançamento.
+            Datas interpretadas em UTC, inclusive datas passadas. Este lançamento não
+            muda o plano da empresa. Vendas não podem ser editadas; correções exigem
+            exclusão definitiva e novo lançamento.
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-6">
@@ -130,7 +145,9 @@ export function SaleForm({
                   name="pricingMode"
                   render={({ field }) => (
                     <Field data-invalid={!!errors.pricingMode}>
-                      <FieldLabel htmlFor="sale-pricing-mode">Origem do valor</FieldLabel>
+                      <FieldLabel htmlFor="sale-pricing-mode">
+                        Origem do valor
+                      </FieldLabel>
                       <Select value={field.value} onValueChange={field.onChange}>
                         <SelectTrigger
                           id="sale-pricing-mode"
@@ -143,7 +160,9 @@ export function SaleForm({
                           <SelectItem value="company_plan" disabled={!planEligible}>
                             Plano atual da empresa
                           </SelectItem>
-                          <SelectItem value="manual_amount">Valor manual com motivo</SelectItem>
+                          <SelectItem value="manual_amount">
+                            Valor manual com motivo
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                       <FieldError errors={[errors.pricingMode]} />
@@ -172,7 +191,8 @@ export function SaleForm({
                       <span className="text-sm font-semibold">{plan?.price} BRL</span>
                     </div>
                     <p className="mt-1 text-xs text-muted-foreground">
-                      O backend usará o preço vigente do plano ao confirmar. Não é uma cobrança.
+                      O backend usará o preço vigente do plano ao confirmar. Não é uma
+                      cobrança.
                     </p>
                   </div>
                 ) : (
@@ -186,7 +206,9 @@ export function SaleForm({
                       className="h-10"
                       {...register('amount')}
                     />
-                    <FieldDescription>Informe um valor positivo (ex.: 120.50).</FieldDescription>
+                    <FieldDescription>
+                      Informe um valor positivo (ex.: 120.50).
+                    </FieldDescription>
                     <FieldError errors={[errors.amount]} />
                   </Field>
                 )}

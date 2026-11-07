@@ -1,10 +1,13 @@
-import { AboutPrinciples } from '@/components/about/AboutPrinciples'
-import { AboutVisual } from '@/components/about/AboutVisual'
+import { AboutPrinciples } from '@/components/about/AboutPrinciples';
+import { AboutVisual } from '@/components/about/AboutVisual';
 
 /** Renders the public institutional page from Figma frame 103:1987. */
 export default function AboutPage() {
   return (
-    <main className="about-page mt-8 min-h-screen bg-[var(--color-civix-ivory)] sm:mt-12 lg:mt-18" id='sobre'>
+    <main
+      className="about-page mt-8 min-h-screen bg-[var(--color-civix-ivory)] sm:mt-12 lg:mt-18"
+      id="sobre"
+    >
       <section
         aria-label="Sobre a Civix"
         className="relative mx-auto min-h-screen w-full overflow-hidden bg-[var(--color-civix-ivory)] pb-12 2xl:h-[760px] 2xl:min-h-[760px] 2xl:max-w-[1728px] 2xl:pb-0"
@@ -35,10 +38,10 @@ export default function AboutPage() {
               data-motion="section"
               data-motion-delay="60"
             >
-              A Civix nasceu para tornar o atendimento comercial mais inteligente, ágil e
-              eficiente. Unimos inteligência artificial, automação e gestão para ajudar
-              empresas a se relacionarem melhor com seus clientes, identificarem novas
-              oportunidades e transformarem conversas em negócios.
+              A Civix nasceu para tornar o atendimento comercial mais inteligente, ágil
+              e eficiente. Unimos inteligência artificial, automação e gestão para
+              ajudar empresas a se relacionarem melhor com seus clientes, identificarem
+              novas oportunidades e transformarem conversas em negócios.
             </p>
           </div>
         </div>
@@ -47,5 +50,5 @@ export default function AboutPage() {
         <AboutPrinciples />
       </section>
     </main>
-  )
+  );
 }

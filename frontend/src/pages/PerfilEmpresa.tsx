@@ -6,9 +6,16 @@ import { fetchEmpresaById } from '@/lib/api';
 import type { Empresa } from '@/lib/api';
 import { SiteHeader } from '@/components/layout/SiteHeader';
 import Footer from '@/components/layout/SiteFooter';
-import { MapPin, Phone, LayoutGrid, Briefcase, ExternalLink, MessageCircle } from 'lucide-react';
-import decorativeShape from "@/assets/civix/decorative-shape.svg";
-import heroArtwork from "@/assets/civix/hero-artwork.svg";
+import {
+  MapPin,
+  Phone,
+  LayoutGrid,
+  Briefcase,
+  ExternalLink,
+  MessageCircle,
+} from 'lucide-react';
+import decorativeShape from '@/assets/civix/decorative-shape.svg';
+import heroArtwork from '@/assets/civix/hero-artwork.svg';
 
 const profileItemVariants: Variants = {
   hidden: { opacity: 0, y: 12 },
@@ -20,9 +27,10 @@ function CompanyHeroReveal({ children }: PropsWithChildren) {
   const { reducedMotion, startedAt } = useCompanyTransition();
   const [mountedAt] = useState(() => Date.now());
   // Respostas tardias não esperam novamente o tempo da cortina.
-  const delay = !reducedMotion && startedAt !== undefined
-    ? Math.max(0, Math.min(0.22, (startedAt + 220 - mountedAt) / 1000))
-    : 0;
+  const delay =
+    !reducedMotion && startedAt !== undefined
+      ? Math.max(0, Math.min(0.22, (startedAt + 220 - mountedAt) / 1000))
+      : 0;
 
   return (
     <motion.div
@@ -78,26 +86,40 @@ export default function PerfilEmpresa() {
         setLoading(true);
         setError(null);
         const data = await fetchEmpresaById(id);
-        if (isMounted) setEmpresa(data);
+        if (isMounted) {
+          setEmpresa(data);
+        }
       } catch (err) {
         if (isMounted) {
           console.error('Erro ao carregar empresa:', err);
-          setError(err instanceof Error ? err.message : 'Erro ao carregar detalhes da empresa. Tente novamente mais tarde.');
+          setError(
+            err instanceof Error
+              ? err.message
+              : 'Erro ao carregar detalhes da empresa. Tente novamente mais tarde.',
+          );
         }
       } finally {
-        if (isMounted) setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
     loadEmpresa();
-    return () => { isMounted = false; };
+    return () => {
+      isMounted = false;
+    };
   }, [id]);
 
   if (loading) {
     return (
       <div className="min-h-screen bg-[var(--color-civix-ivory)] flex flex-col">
         <SiteHeader />
-        <main role="status" aria-label="Carregando empresa" className="flex-1 flex justify-center items-center">
+        <main
+          role="status"
+          aria-label="Carregando empresa"
+          className="flex-1 flex justify-center items-center"
+        >
           <div className="animate-spin motion-reduce:animate-none rounded-full h-12 w-12 border-b-2 border-[var(--color-civix-navy)]"></div>
         </main>
         <Footer />
@@ -109,8 +131,14 @@ export default function PerfilEmpresa() {
     return (
       <div className="min-h-screen bg-[var(--color-civix-ivory)] flex flex-col">
         <SiteHeader />
-        <main data-motion="feedback" data-motion-trigger="mount" className="flex-1 flex flex-col justify-center items-center p-6 text-center">
-          <p role="alert" className="text-red-500 font-semibold text-lg mb-4">{error || 'Empresa não encontrada'}</p>
+        <main
+          data-motion="feedback"
+          data-motion-trigger="mount"
+          className="flex-1 flex flex-col justify-center items-center p-6 text-center"
+        >
+          <p role="alert" className="text-red-500 font-semibold text-lg mb-4">
+            {error || 'Empresa não encontrada'}
+          </p>
           <button
             className="bg-[var(--color-civix-navy)] text-white px-6 py-2 rounded-lg font-medium hover:bg-opacity-90 transition-colors"
             onClick={() => navigate('/catalogo')}
@@ -123,7 +151,8 @@ export default function PerfilEmpresa() {
     );
   }
 
-  const textoDescricaoDetalhada = empresa.descricao_detalhada || empresa.descricao || '';
+  const textoDescricaoDetalhada =
+    empresa.descricao_detalhada || empresa.descricao || '';
 
   return (
     <div className="min-h-screen bg-[var(--color-civix-ivory)] flex flex-col font-[family-name:var(--font-body)]">
@@ -162,20 +191,32 @@ export default function PerfilEmpresa() {
                   {empresa.verificado ? 'PERFIL VERIFICADO / CIVIX' : 'PERFIL / CIVIX'}
                 </p>
 
-                <motion.h1 variants={itemVariants} className="max-w-[643px] break-words font-[family-name:var(--font-display)] text-[clamp(2.5rem,5vw,4rem)] font-semibold uppercase leading-[1.1] tracking-[-0.02em] lg:leading-[80px] lg:tracking-[-0.034em]">
+                <motion.h1
+                  variants={itemVariants}
+                  className="max-w-[643px] break-words font-[family-name:var(--font-display)] text-[clamp(2.5rem,5vw,4rem)] font-semibold uppercase leading-[1.1] tracking-[-0.02em] lg:leading-[80px] lg:tracking-[-0.034em]"
+                >
                   {empresa.nome}
                 </motion.h1>
 
-                <motion.p variants={itemVariants} className="mt-2 text-xl italic text-[var(--color-civix-ivory)]/70 md:text-2xl">
+                <motion.p
+                  variants={itemVariants}
+                  className="mt-2 text-xl italic text-[var(--color-civix-ivory)]/70 md:text-2xl"
+                >
                   {empresa.categoria?.toUpperCase()}
                 </motion.p>
                 {empresa.descritivo ? (
-                  <motion.p variants={itemVariants} className="mt-5 max-w-2xl text-lg leading-relaxed text-[var(--color-civix-ivory)]/90">
+                  <motion.p
+                    variants={itemVariants}
+                    className="mt-5 max-w-2xl text-lg leading-relaxed text-[var(--color-civix-ivory)]/90"
+                  >
                     {empresa.descritivo}
                   </motion.p>
                 ) : null}
 
-                <motion.div variants={itemVariants} className="mt-10 flex flex-wrap gap-4">
+                <motion.div
+                  variants={itemVariants}
+                  className="mt-10 flex flex-wrap gap-4"
+                >
                   {empresa.website ? (
                     <a
                       className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-[var(--color-civix-ivory)]/30 bg-transparent px-6 py-3 font-semibold text-[var(--color-civix-ivory)] transition-colors hover:border-[var(--color-civix-ivory)] hover:bg-white/10"
@@ -201,36 +242,69 @@ export default function PerfilEmpresa() {
                 </motion.div>
               </div>
 
-              <motion.div variants={itemVariants} className="grid h-fit w-full shrink-0 grid-cols-1 gap-4 sm:grid-cols-2 lg:w-[500px]">
+              <motion.div
+                variants={itemVariants}
+                className="grid h-fit w-full shrink-0 grid-cols-1 gap-4 sm:grid-cols-2 lg:w-[500px]"
+              >
                 <div className="rounded-xl border border-[#425466] bg-[#faf9f6] p-5 text-[var(--color-civix-navy)]">
                   <div className="mb-3 flex size-10 items-center justify-center rounded-lg bg-[#f3e6c9]">
-                    <MapPin aria-hidden="true" className="text-[var(--color-civix-gold)]" size={20} />
+                    <MapPin
+                      aria-hidden="true"
+                      className="text-[var(--color-civix-gold)]"
+                      size={20}
+                    />
                   </div>
-                  <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-[#5f6b75]">Localização</p>
-                  <p className="break-words text-base font-medium">{empresa.cidade}, {empresa.estado}</p>
+                  <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-[#5f6b75]">
+                    Localização
+                  </p>
+                  <p className="break-words text-base font-medium">
+                    {empresa.cidade}, {empresa.estado}
+                  </p>
                 </div>
 
                 <div className="rounded-xl border border-[#dfe3e5] bg-[#faf9f6] p-5 text-[var(--color-civix-navy)]">
                   <div className="mb-3 flex size-10 items-center justify-center rounded-lg bg-[#f3e6c9]">
-                    <Phone aria-hidden="true" className="text-[var(--color-civix-gold)]" size={20} />
+                    <Phone
+                      aria-hidden="true"
+                      className="text-[var(--color-civix-gold)]"
+                      size={20}
+                    />
                   </div>
-                  <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-[#5f6b75]">Telefone</p>
-                  <p className="break-words text-base font-medium">{empresa.telefone || 'Não informado'}</p>
+                  <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-[#5f6b75]">
+                    Telefone
+                  </p>
+                  <p className="break-words text-base font-medium">
+                    {empresa.telefone || 'Não informado'}
+                  </p>
                 </div>
 
                 <div className="rounded-xl border border-[#dfe3e5] bg-[#faf9f6] p-5 text-[var(--color-civix-navy)]">
                   <div className="mb-3 flex size-10 items-center justify-center rounded-lg bg-[#f3e6c9]">
-                    <LayoutGrid aria-hidden="true" className="text-[var(--color-civix-gold)]" size={20} />
+                    <LayoutGrid
+                      aria-hidden="true"
+                      className="text-[var(--color-civix-gold)]"
+                      size={20}
+                    />
                   </div>
-                  <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-[#5f6b75]">Segmento</p>
-                  <p className="break-words text-base font-medium">{empresa.categoria}</p>
+                  <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-[#5f6b75]">
+                    Segmento
+                  </p>
+                  <p className="break-words text-base font-medium">
+                    {empresa.categoria}
+                  </p>
                 </div>
 
                 <div className="rounded-xl border border-[#dfe3e5] bg-[#faf9f6] p-5 text-[var(--color-civix-navy)]">
                   <div className="mb-3 flex size-10 items-center justify-center rounded-lg bg-[#f3e6c9]">
-                    <Briefcase aria-hidden="true" className="text-[var(--color-civix-gold)]" size={20} />
+                    <Briefcase
+                      aria-hidden="true"
+                      className="text-[var(--color-civix-gold)]"
+                      size={20}
+                    />
                   </div>
-                  <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-[#5f6b75]">Porte</p>
+                  <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-[#5f6b75]">
+                    Porte
+                  </p>
                   <p className="text-base font-medium capitalize">{empresa.tamanho}</p>
                 </div>
               </motion.div>
@@ -240,15 +314,24 @@ export default function PerfilEmpresa() {
 
         {/* Descrição da empresa */}
         <section className="py-20 px-6 sm:px-10 lg:px-16 xl:px-32 max-w-[1728px] mx-auto -mt-10 relative z-20">
-          <div data-motion="section" className="bg-white rounded-2xl shadow-xl p-8 md:p-12 border border-gray-100 max-w-5xl">
-            <p className="text-sm font-bold text-gray-400 tracking-wider mb-2">SOBRE A EMPRESA</p>
+          <div
+            data-motion="section"
+            className="bg-white rounded-2xl shadow-xl p-8 md:p-12 border border-gray-100 max-w-5xl"
+          >
+            <p className="text-sm font-bold text-gray-400 tracking-wider mb-2">
+              SOBRE A EMPRESA
+            </p>
             <h2 className="text-3xl font-[family-name:var(--font-display)] font-semibold text-[var(--color-civix-navy)] mb-8">
               Quem é {empresa.nome}?
             </h2>
             <div className="prose prose-lg max-w-none text-gray-600 leading-relaxed">
-              {textoDescricaoDetalhada.split('\n').map((paragraph: string, index: number) => (
-                <p key={index} className="mb-4">{paragraph}</p>
-              ))}
+              {textoDescricaoDetalhada
+                .split('\n')
+                .map((paragraph: string, index: number) => (
+                  <p key={index} className="mb-4">
+                    {paragraph}
+                  </p>
+                ))}
             </div>
           </div>
         </section>

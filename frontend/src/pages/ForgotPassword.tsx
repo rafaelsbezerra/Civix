@@ -1,24 +1,24 @@
-import { useState } from "react";
-import type { FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
-import { Mail, ArrowLeft, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
-import { requestPasswordReset } from "@/lib/api";
+import { useState } from 'react';
+import type { FormEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Mail, ArrowLeft, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
+import { requestPasswordReset } from '@/lib/api';
 
-import civixLogo from "../assets/civix/logoCivix.png";
+import civixLogo from '../assets/civix/logoCivix.png';
 
 export default function ForgotPassword() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
   const [submitted, setSubmitted] = useState(false);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setError("");
+    setError('');
 
     if (!email) {
-      setError("Por favor, digite seu e-mail.");
+      setError('Por favor, digite seu e-mail.');
       return;
     }
 
@@ -29,7 +29,11 @@ export default function ForgotPassword() {
 
       setSubmitted(true);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Ocorreu um erro ao enviar o e-mail de recuperação.");
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Ocorreu um erro ao enviar o e-mail de recuperação.',
+      );
     } finally {
       setLoading(false);
     }
@@ -48,12 +52,15 @@ export default function ForgotPassword() {
             /* Confirmando Envio */
             <div className="text-center py-2">
               <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto mb-3" />
-              <h2 className="text-xl font-semibold text-[#071b2b] mb-2">E-mail Enviado!</h2>
+              <h2 className="text-xl font-semibold text-[#071b2b] mb-2">
+                E-mail Enviado!
+              </h2>
               <p className="text-xs text-[#626262] leading-relaxed mb-6">
-                Se a conta <strong>{email}</strong> existir no sistema, você receberá um e-mail com instruções para redefinir sua senha.
+                Se a conta <strong>{email}</strong> existir no sistema, você receberá um
+                e-mail com instruções para redefinir sua senha.
               </p>
               <button
-                onClick={() => navigate("/login")}
+                onClick={() => navigate('/login')}
                 className="w-full py-2.5 rounded-lg bg-[#061c2c] text-white text-xs font-semibold hover:bg-[#0b293d] transition"
               >
                 Voltar para o Login
@@ -63,7 +70,9 @@ export default function ForgotPassword() {
             /* Form de Solicitação */
             <>
               <div className="text-center mb-6">
-                <h1 className="text-2xl font-bold text-[#071b2b] mb-1">Recuperar Senha</h1>
+                <h1 className="text-2xl font-bold text-[#071b2b] mb-1">
+                  Recuperar Senha
+                </h1>
                 <p className="text-xs text-[#737373]">
                   Informe seu e-mail para receber o link de redefinição
                 </p>
@@ -105,7 +114,7 @@ export default function ForgotPassword() {
                       Enviando...
                     </div>
                   ) : (
-                    "Enviar Link de Recuperação"
+                    'Enviar Link de Recuperação'
                   )}
                 </button>
               </form>
@@ -113,7 +122,7 @@ export default function ForgotPassword() {
               <div className="mt-6 text-center">
                 <button
                   type="button"
-                  onClick={() => navigate("/login")}
+                  onClick={() => navigate('/login')}
                   className="inline-flex items-center gap-1.5 text-xs text-[#737373] hover:text-[#071b2b] transition font-medium"
                 >
                   <ArrowLeft size={14} />

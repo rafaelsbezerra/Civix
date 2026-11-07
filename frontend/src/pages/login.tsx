@@ -1,20 +1,13 @@
-import {
-  Building2,
-  User,
-  Eye,
-  ArrowRight,
-  EyeOff,
-  Loader2,
-} from "lucide-react";
+import { Building2, User, Eye, ArrowRight, EyeOff, Loader2 } from 'lucide-react';
 
-import { useState } from "react";
-import type { FormEvent } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { ApiError, login, logout } from "../lib/api";
-import civixLogo from "../assets/civix/logoCivix.png";
-import civixLogoDark from "../assets/civix/logoBackground.png";
+import { useState } from 'react';
+import type { FormEvent } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { ApiError, login, logout } from '../lib/api';
+import civixLogo from '../assets/civix/logoCivix.png';
+import civixLogoDark from '../assets/civix/logoBackground.png';
 
-const AnimatedWave = ({ className = "" }: { className?: string }) => {
+const AnimatedWave = ({ className = '' }: { className?: string }) => {
   return (
     <div
       className={`absolute bottom-0 left-0 w-full overflow-hidden leading-none z-10 ${className}`}
@@ -58,35 +51,17 @@ const AnimatedWave = ({ className = "" }: { className?: string }) => {
         preserveAspectRatio="none"
       >
         <defs>
-          <linearGradient
-            id="waveGrad1"
-            x1="0%"
-            y1="0%"
-            x2="100%"
-            y2="0%"
-          >
+          <linearGradient id="waveGrad1" x1="0%" y1="0%" x2="100%" y2="0%">
             <stop offset="0%" stopColor="#E5A93B" />
             <stop offset="100%" stopColor="#FBBF24" />
           </linearGradient>
 
-          <linearGradient
-            id="waveGrad2"
-            x1="0%"
-            y1="0%"
-            x2="100%"
-            y2="0%"
-          >
+          <linearGradient id="waveGrad2" x1="0%" y1="0%" x2="100%" y2="0%">
             <stop offset="0%" stopColor="#D97706" />
             <stop offset="100%" stopColor="#E5A93B" />
           </linearGradient>
 
-          <linearGradient
-            id="waveGrad3"
-            x1="0%"
-            y1="0%"
-            x2="100%"
-            y2="0%"
-          >
+          <linearGradient id="waveGrad3" x1="0%" y1="0%" x2="100%" y2="0%">
             <stop offset="0%" stopColor="#B45309" />
             <stop offset="100%" stopColor="#D97706" />
           </linearGradient>
@@ -97,33 +72,25 @@ const AnimatedWave = ({ className = "" }: { className?: string }) => {
           />
         </defs>
 
-        <use
-          href="#waveShape"
-          className="wave-path wave-3"
-          fill="url(#waveGrad3)"
-        />
+        <use href="#waveShape" className="wave-path wave-3" fill="url(#waveGrad3)" />
 
-        <use
-          href="#waveShape"
-          className="wave-path wave-2"
-          fill="url(#waveGrad2)"
-        />
+        <use href="#waveShape" className="wave-path wave-2" fill="url(#waveGrad2)" />
 
-        <use
-          href="#waveShape"
-          className="wave-path wave-1"
-          fill="url(#waveGrad1)"
-        />
+        <use href="#waveShape" className="wave-path wave-1" fill="url(#waveGrad1)" />
       </svg>
     </div>
   );
 };
 
-export default function Login({ access = "empresa" }: { access?: "empresa" | "atendente" | "cliente" | "selection" }) {
+export default function Login({
+  access = 'empresa',
+}: {
+  access?: 'empresa' | 'atendente' | 'cliente' | 'selection';
+}) {
   const role = access;
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -139,44 +106,50 @@ export default function Login({ access = "empresa" }: { access?: "empresa" | "at
     setError(null);
 
     if (!email) {
-      setError("Por favor, informe seu email.");
+      setError('Por favor, informe seu email.');
       return;
     }
 
-    if ((role === "empresa" || role === "atendente") && !password) {
-      setError("Por favor, informe sua senha.");
+    if ((role === 'empresa' || role === 'atendente') && !password) {
+      setError('Por favor, informe sua senha.');
       return;
     }
 
     try {
       setIsLoading(true);
 
-
       const result = await login({
         email,
         password,
-        role: role === "empresa" ? "admin_empresa" : role === "atendente" ? "atendente" : undefined,
+        role:
+          role === 'empresa'
+            ? 'admin_empresa'
+            : role === 'atendente'
+              ? 'atendente'
+              : undefined,
       });
 
       // localStorage.setItem("token", result.token);
 
       if (result.user.role === 'super_admin') {
         await logout().catch(() => undefined);
-        setError("Credenciais inválidas.");
+        setError('Credenciais inválidas.');
         return;
       }
 
-      if (result.user.role === "atendente") {
-        navigate("/dashboard-atendente");
-      } else if (result.user.role === "admin_empresa") {
-        navigate("/dashboard-empresa");
+      if (result.user.role === 'atendente') {
+        navigate('/dashboard-atendente');
+      } else if (result.user.role === 'admin_empresa') {
+        navigate('/dashboard-empresa');
       } else {
-        navigate("/");
+        navigate('/');
       }
     } catch (err: unknown) {
-      setError(err instanceof ApiError
-        ? err.message
-        : "Ocorreu um erro ao realizar o login. Tente novamente.");
+      setError(
+        err instanceof ApiError
+          ? err.message
+          : 'Ocorreu um erro ao realizar o login. Tente novamente.',
+      );
     } finally {
       setIsLoading(false);
     }
@@ -216,193 +189,207 @@ export default function Login({ access = "empresa" }: { access?: "empresa" | "at
                 id="login-title"
                 className="font-sans text-[clamp(24px,1.5vw,30px)] leading-[1.1] font-semibold text-[#071b2b] text-center mb-[clamp(18px,2vh,30px)]"
               >
-                {access === "selection" ? "Escolha seu acesso" : access === "cliente"
-                  ? "A área logada do cliente está sendo construída."
-                  : access === "atendente"
-                    ? "Acesse seu painel de atendimentos"
-                  : "Faça login para ter acesso"}
-                {access === "empresa" && <><br />ao sistema</>}
+                {access === 'selection'
+                  ? 'Escolha seu acesso'
+                  : access === 'cliente'
+                    ? 'A área logada do cliente está sendo construída.'
+                    : access === 'atendente'
+                      ? 'Acesse seu painel de atendimentos'
+                      : 'Faça login para ter acesso'}
+                {access === 'empresa' && (
+                  <>
+                    <br />
+                    ao sistema
+                  </>
+                )}
               </h1>
 
-              {access === "selection" && <div className="space-y-[clamp(8px,0.7vw,14px)] mb-[clamp(18px,2vh,30px)]">
-                <button
-                  type="button"
-                  onClick={() => navigate("/login/empresa")}
-                  className={`w-full h-[clamp(70px,2vh,72px)] rounded-[6px] transition flex items-center px-[clamp(12px,1vw,20px)] text-left border ${role === "empresa"
-                      ? "bg-[#d0d0d0] border-[#b5b5b5]"
-                      : "bg-[#dedede] border-transparent hover:bg-[#d5d5d5]"
+              {access === 'selection' && (
+                <div className="space-y-[clamp(8px,0.7vw,14px)] mb-[clamp(18px,2vh,30px)]">
+                  <button
+                    type="button"
+                    onClick={() => navigate('/login/empresa')}
+                    className={`w-full h-[clamp(70px,2vh,72px)] rounded-[6px] transition flex items-center px-[clamp(12px,1vw,20px)] text-left border ${
+                      role === 'empresa'
+                        ? 'bg-[#d0d0d0] border-[#b5b5b5]'
+                        : 'bg-[#dedede] border-transparent hover:bg-[#d5d5d5]'
                     }`}
-                >
-                  <div className="w-[clamp(30px,2.2vw,42px)] h-[clamp(30px,2.2vw,42px)] rounded-[5px] flex items-center justify-center mr-[clamp(10px,0.8vw,16px)] shrink-0 bg-[#c0c0c0]">
-                    <Building2
-                      size={18}
-                      className="w-[clamp(15px,1vw,20px)] h-[clamp(15px,1vw,20px)] text-[#35404a]"
-                      strokeWidth={1.5}
-                    />
-                  </div>
+                  >
+                    <div className="w-[clamp(30px,2.2vw,42px)] h-[clamp(30px,2.2vw,42px)] rounded-[5px] flex items-center justify-center mr-[clamp(10px,0.8vw,16px)] shrink-0 bg-[#c0c0c0]">
+                      <Building2
+                        size={18}
+                        className="w-[clamp(15px,1vw,20px)] h-[clamp(15px,1vw,20px)] text-[#35404a]"
+                        strokeWidth={1.5}
+                      />
+                    </div>
 
-                  <div>
-                    <p className="text-[clamp(14px,0.55vw,12px)] font-semibold text-[#101010]">
-                      Sou empresa
-                    </p>
+                    <div>
+                      <p className="text-[clamp(14px,0.55vw,12px)] font-semibold text-[#101010]">
+                        Sou empresa
+                      </p>
 
-                    <p className="text-[clamp(12px,0.48vw,11px)] leading-[1.25] text-[#626262]">
-                      Acesse o painel administrativo da
-                      <br />
-                      sua organização.
-                    </p>
-                  </div>
-                </button>
+                      <p className="text-[clamp(12px,0.48vw,11px)] leading-[1.25] text-[#626262]">
+                        Acesse o painel administrativo da
+                        <br />
+                        sua organização.
+                      </p>
+                    </div>
+                  </button>
 
-                <button
-                  type="button"
-                  onClick={() => navigate("/login/cliente")}
-                  className={`w-full h-[clamp(70px,5vh,72px)] rounded-[6px] transition flex items-center px-[clamp(12px,1vw,20px)] text-left border ${role === "cliente"
-                      ? "bg-[#d0d0d0] border-[#b5b5b5]"
-                      : "bg-[#dedede] border-transparent hover:bg-[#d5d5d5]"
+                  <button
+                    type="button"
+                    onClick={() => navigate('/login/cliente')}
+                    className={`w-full h-[clamp(70px,5vh,72px)] rounded-[6px] transition flex items-center px-[clamp(12px,1vw,20px)] text-left border ${
+                      role === 'cliente'
+                        ? 'bg-[#d0d0d0] border-[#b5b5b5]'
+                        : 'bg-[#dedede] border-transparent hover:bg-[#d5d5d5]'
                     }`}
-                >
-                  <div className="w-[clamp(30px,2.2vw,42px)] h-[clamp(30px,2.2vw,42px)] rounded-[5px] flex items-center justify-center mr-[clamp(10px,0.8vw,16px)] shrink-0 bg-[#c0c0c0]">
-                    <User
-                      size={18}
-                      className="w-[clamp(15px,1vw,20px)] h-[clamp(15px,1vw,20px)] text-[#35404a]"
-                      strokeWidth={1.5}
-                    />
-                  </div>
+                  >
+                    <div className="w-[clamp(30px,2.2vw,42px)] h-[clamp(30px,2.2vw,42px)] rounded-[5px] flex items-center justify-center mr-[clamp(10px,0.8vw,16px)] shrink-0 bg-[#c0c0c0]">
+                      <User
+                        size={18}
+                        className="w-[clamp(15px,1vw,20px)] h-[clamp(15px,1vw,20px)] text-[#35404a]"
+                        strokeWidth={1.5}
+                      />
+                    </div>
 
-                  <div>
-                    <p className="text-[clamp(14px,0.55vw,12px)] font-semibold text-[#101010]">
-                      Sou cliente
-                    </p>
+                    <div>
+                      <p className="text-[clamp(14px,0.55vw,12px)] font-semibold text-[#101010]">
+                        Sou cliente
+                      </p>
 
-                    <p className="text-[clamp(12px,0.48vw,11px)] leading-[1.25] text-[#626262]">
-                      Continue como cliente.
-                    </p>
-                  </div>
-                </button>
+                      <p className="text-[clamp(12px,0.48vw,11px)] leading-[1.25] text-[#626262]">
+                        Continue como cliente.
+                      </p>
+                    </div>
+                  </button>
 
-                <button
-                  type="button"
-                  onClick={() => navigate("/login/atendente")}
-                  className="w-full min-h-[70px] rounded-[6px] transition flex items-center px-[clamp(12px,1vw,20px)] text-left border border-transparent bg-[#dedede] hover:bg-[#d5d5d5]"
-                >
-                  <div className="w-[clamp(30px,2.2vw,42px)] h-[clamp(30px,2.2vw,42px)] rounded-[5px] flex items-center justify-center mr-[clamp(10px,0.8vw,16px)] shrink-0 bg-[#c0c0c0]">
-                    <User
-                      size={18}
-                      className="w-[clamp(15px,1vw,20px)] h-[clamp(15px,1vw,20px)] text-[#35404a]"
-                      strokeWidth={1.5}
-                    />
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => navigate('/login/atendente')}
+                    className="w-full min-h-[70px] rounded-[6px] transition flex items-center px-[clamp(12px,1vw,20px)] text-left border border-transparent bg-[#dedede] hover:bg-[#d5d5d5]"
+                  >
+                    <div className="w-[clamp(30px,2.2vw,42px)] h-[clamp(30px,2.2vw,42px)] rounded-[5px] flex items-center justify-center mr-[clamp(10px,0.8vw,16px)] shrink-0 bg-[#c0c0c0]">
+                      <User
+                        size={18}
+                        className="w-[clamp(15px,1vw,20px)] h-[clamp(15px,1vw,20px)] text-[#35404a]"
+                        strokeWidth={1.5}
+                      />
+                    </div>
 
-                  <div>
-                    <p className="text-[clamp(14px,0.55vw,12px)] font-semibold text-[#101010]">
-                      Sou atendente
-                    </p>
-                    <p className="text-[clamp(12px,0.48vw,11px)] leading-[1.25] text-[#626262]">
-                      Acesse seus atendimentos atribuídos.
-                    </p>
-                  </div>
-                </button>
-              </div>}
+                    <div>
+                      <p className="text-[clamp(14px,0.55vw,12px)] font-semibold text-[#101010]">
+                        Sou atendente
+                      </p>
+                      <p className="text-[clamp(12px,0.48vw,11px)] leading-[1.25] text-[#626262]">
+                        Acesse seus atendimentos atribuídos.
+                      </p>
+                    </div>
+                  </button>
+                </div>
+              )}
 
-              {state?.profileChanged && access === 'empresa' && <p role="status" className="mb-4 text-sm text-[#07192a]">Perfil atualizado. Entre novamente com seu novo e-mail.</p>}
+              {state?.profileChanged && access === 'empresa' && (
+                <p role="status" className="mb-4 text-sm text-[#07192a]">
+                  Perfil atualizado. Entre novamente com seu novo e-mail.
+                </p>
+              )}
               {error && (
-                <div role="alert" className="mb-4 p-3 rounded bg-red-100 border border-red-300 text-red-700 text-xs">
+                <div
+                  role="alert"
+                  className="mb-4 p-3 rounded bg-red-100 border border-red-300 text-red-700 text-xs"
+                >
                   {error}
                 </div>
               )}
 
-              {(access === "empresa" || access === "atendente") && <form
-                onSubmit={handleSubmit}
-                className="space-y-[clamp(10px,1.2vh,18px)]"
-              >
-                <div>
-                  <label
-                    htmlFor="email"
-                    className="block text-[clamp(12px,0.5vw,11px)] text-[#737373] mb-1.5"
-                  >
-                    Email
-                  </label>
-
-                  <input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="seu_email@email.com"
-                    className="w-full h-[clamp(50px,4vh,52px)] rounded-[5px] bg-[#f3f3f3] px-[clamp(10px,0.8vw,16px)] text-[clamp(14px,0.6vw,13px)] text-[#222] placeholder:text-[#777] outline-none focus:ring-1 focus:ring-[#0b2030]"
-                  />
-                </div>
-
-                {(role === "empresa" || role === "atendente") && (
-                  <div>
-                    <div className="flex items-center justify-between mb-1.5">
-                      <label
-                        htmlFor="password"
-                        className="block text-[clamp(12px,0.5vw,11px)] text-[#737373]"
-                      >
-                        Senha
-                      </label>
-
-                      {/* Link de Esqueceu a senha */}
-                      <button
-                        type="button"
-                        onClick={() => navigate("/esqueci-senha")}
-                        className="text-[clamp(11px,0.45vw,10px)] font-semibold text-[#061c2c] hover:underline"
-                      >
-                        Esqueceu sua senha?
-                      </button>
-                    </div>
-
-                    <div className="relative">
-                      <input
-                        id="password"
-                        type={showPassword ? "text" : "password"}
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        placeholder="••••••••"
-                        className="w-full h-[clamp(50px,4vh,52px)] rounded-[5px] bg-[#f3f3f3] px-[clamp(10px,0.8vw,16px)] pr-10 text-[clamp(14px,0.6vw,13px)] text-[#222] placeholder:text-[#777] outline-none focus:ring-1 focus:ring-[#0b2030]"
-                      />
-
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[#999]"
-                        aria-label={
-                          showPassword
-                            ? "Ocultar senha"
-                            : "Mostrar senha"
-                        }
-                      >
-                        {showPassword ? (
-                          <Eye className="w-[clamp(12px,0.8vw,18px)] h-[clamp(12px,0.8vw,18px)]" />
-                        ) : (
-                          <EyeOff className="w-[clamp(12px,0.8vw,18px)] h-[clamp(12px,0.8vw,18px)]" />
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full h-[clamp(34px,4vh,52px)] rounded-[5px] bg-[#061c2c] hover:bg-[#0b293d] transition text-white flex items-center justify-between px-[clamp(12px,0.8vw,18px)] text-[clamp(9px,0.6vw,13px)] disabled:opacity-60 disabled:cursor-not-allowed"
+              {(access === 'empresa' || access === 'atendente') && (
+                <form
+                  onSubmit={handleSubmit}
+                  className="space-y-[clamp(10px,1.2vh,18px)]"
                 >
-                  <span>
-                    {isLoading ? "Entrando..." : "Login"}
-                  </span>
+                  <div>
+                    <label
+                      htmlFor="email"
+                      className="block text-[clamp(12px,0.5vw,11px)] text-[#737373] mb-1.5"
+                    >
+                      Email
+                    </label>
 
-                  {isLoading ? (
-                    <Loader2 className="w-[clamp(13px,0.9vw,19px)] h-[clamp(13px,0.9vw,19px)] animate-spin" />
-                  ) : (
-                    <ArrowRight
-                      className="w-[clamp(13px,0.9vw,19px)] h-[clamp(13px,0.9vw,19px)]"
-                      strokeWidth={1.5}
+                    <input
+                      id="email"
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="seu_email@email.com"
+                      className="w-full h-[clamp(50px,4vh,52px)] rounded-[5px] bg-[#f3f3f3] px-[clamp(10px,0.8vw,16px)] text-[clamp(14px,0.6vw,13px)] text-[#222] placeholder:text-[#777] outline-none focus:ring-1 focus:ring-[#0b2030]"
                     />
+                  </div>
+
+                  {(role === 'empresa' || role === 'atendente') && (
+                    <div>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label
+                          htmlFor="password"
+                          className="block text-[clamp(12px,0.5vw,11px)] text-[#737373]"
+                        >
+                          Senha
+                        </label>
+
+                        {/* Link de Esqueceu a senha */}
+                        <button
+                          type="button"
+                          onClick={() => navigate('/esqueci-senha')}
+                          className="text-[clamp(11px,0.45vw,10px)] font-semibold text-[#061c2c] hover:underline"
+                        >
+                          Esqueceu sua senha?
+                        </button>
+                      </div>
+
+                      <div className="relative">
+                        <input
+                          id="password"
+                          type={showPassword ? 'text' : 'password'}
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          placeholder="••••••••"
+                          className="w-full h-[clamp(50px,4vh,52px)] rounded-[5px] bg-[#f3f3f3] px-[clamp(10px,0.8vw,16px)] pr-10 text-[clamp(14px,0.6vw,13px)] text-[#222] placeholder:text-[#777] outline-none focus:ring-1 focus:ring-[#0b2030]"
+                        />
+
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-[#999]"
+                          aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                        >
+                          {showPassword ? (
+                            <Eye className="w-[clamp(12px,0.8vw,18px)] h-[clamp(12px,0.8vw,18px)]" />
+                          ) : (
+                            <EyeOff className="w-[clamp(12px,0.8vw,18px)] h-[clamp(12px,0.8vw,18px)]" />
+                          )}
+                        </button>
+                      </div>
+                    </div>
                   )}
-                </button>
-              </form>}
+
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="w-full h-[clamp(34px,4vh,52px)] rounded-[5px] bg-[#061c2c] hover:bg-[#0b293d] transition text-white flex items-center justify-between px-[clamp(12px,0.8vw,18px)] text-[clamp(9px,0.6vw,13px)] disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    <span>{isLoading ? 'Entrando...' : 'Login'}</span>
+
+                    {isLoading ? (
+                      <Loader2 className="w-[clamp(13px,0.9vw,19px)] h-[clamp(13px,0.9vw,19px)] animate-spin" />
+                    ) : (
+                      <ArrowRight
+                        className="w-[clamp(13px,0.9vw,19px)] h-[clamp(13px,0.9vw,19px)]"
+                        strokeWidth={1.5}
+                      />
+                    )}
+                  </button>
+                </form>
+              )}
             </div>
           </div>
 

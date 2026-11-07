@@ -1,14 +1,16 @@
-import { getCookie, setCookie } from "./cookies";
+import { getCookie, setCookie } from './cookies';
 
 export type Consent = { v: 1; analytics: boolean; marketing: boolean };
 
-const COOKIE = "consentimento";
-const OPEN_EVENT = "cookies:abrir";
+const COOKIE = 'consentimento';
+const OPEN_EVENT = 'cookies:abrir';
 
 export function readConsent(): Consent | null {
   try {
     const raw = getCookie(COOKIE);
-    if (!raw) return null;
+    if (!raw) {
+      return null;
+    }
     const parsed = JSON.parse(raw);
     return parsed?.v === 1 ? parsed : null;
   } catch {
@@ -16,7 +18,7 @@ export function readConsent(): Consent | null {
   }
 }
 
-export function saveConsent(c: Omit<Consent, "v">) {
+export function saveConsent(c: Omit<Consent, 'v'>) {
   setCookie(COOKIE, JSON.stringify({ v: 1, ...c }));
 }
 

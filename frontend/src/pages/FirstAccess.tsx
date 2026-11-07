@@ -1,16 +1,16 @@
-import { useEffect, useState } from "react";
-import { useSearchParams, useNavigate, useParams } from "react-router-dom";
-import { validateInviteToken, completeFirstAccess } from "@/lib/api";
-import { Eye, EyeOff, CheckCircle2, AlertCircle, Lock, Loader2 } from "lucide-react";
+import { useEffect, useState } from 'react';
+import { useSearchParams, useNavigate, useParams } from 'react-router-dom';
+import { validateInviteToken, completeFirstAccess } from '@/lib/api';
+import { Eye, EyeOff, CheckCircle2, AlertCircle, Lock, Loader2 } from 'lucide-react';
 
-import civixLogo from "../assets/civix/logoCivix.png";
+import civixLogo from '../assets/civix/logoCivix.png';
 
 export default function FirstAccess() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
   const { token: pathToken } = useParams<{ token: string }>();
-  const token = pathToken ?? searchParams.get("token");
+  const token = pathToken ?? searchParams.get('token');
 
   // Estados de Validação do Token
   const [isValidatingToken, setIsValidatingToken] = useState(true);
@@ -18,11 +18,11 @@ export default function FirstAccess() {
   const [userEmail, setUserEmail] = useState<string | null>(null);
 
   // Estados do Formulário
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -40,10 +40,10 @@ export default function FirstAccess() {
       setIsValidatingToken(true);
       setIsTokenValid(false);
       setUserEmail(null);
-      setError("");
+      setError('');
 
       if (!token) {
-        setError("Token de convite ausente no link.");
+        setError('Token de convite ausente no link.');
         setIsValidatingToken(false);
         return;
       }
@@ -57,7 +57,7 @@ export default function FirstAccess() {
         }
       } catch (err: unknown) {
         if (active) {
-          setError(err instanceof Error ? err.message : "Erro ao validar o convite.");
+          setError(err instanceof Error ? err.message : 'Erro ao validar o convite.');
         }
       } finally {
         if (active) {
@@ -77,9 +77,11 @@ export default function FirstAccess() {
   // 2. Envio da nova senha
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
+    setError('');
 
-    if (!isFormValid || !token || !isTokenValid) return;
+    if (!isFormValid || !token || !isTokenValid) {
+      return;
+    }
 
     try {
       setLoading(true);
@@ -89,10 +91,13 @@ export default function FirstAccess() {
       setSuccess(true);
 
       setTimeout(() => {
-        navigate("/login");
+        navigate('/login');
       }, 2500);
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : "Ocorreu um erro ao processar sua solicitação.";
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : 'Ocorreu um erro ao processar sua solicitação.';
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -117,12 +122,15 @@ export default function FirstAccess() {
       <main className="w-full min-h-screen bg-[#faf9f7] flex items-center justify-center p-6">
         <div className="bg-white p-8 rounded-xl shadow-md border border-gray-100 max-w-md w-full text-center">
           <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-[#071b2b] mb-2">Convite Indisponível</h2>
+          <h2 className="text-xl font-bold text-[#071b2b] mb-2">
+            Convite Indisponível
+          </h2>
           <p className="text-xs text-[#626262] leading-relaxed mb-6">
-            {error || "O token de ativação é inválido ou expirou. Solicite um novo convite ao administrador."}
+            {error ||
+              'O token de ativação é inválido ou expirou. Solicite um novo convite ao administrador.'}
           </p>
           <button
-            onClick={() => navigate("/login")}
+            onClick={() => navigate('/login')}
             className="w-full py-2.5 rounded bg-[#061c2c] text-white text-xs font-semibold hover:bg-[#0b293d] transition"
           >
             Ir para a Tela de Login
@@ -149,7 +157,8 @@ export default function FirstAccess() {
                 Senha Cadastrada!
               </h2>
               <p className="text-xs text-[#626262] mb-4">
-                Sua conta foi ativada com sucesso. Redirecionando para a tela de login...
+                Sua conta foi ativada com sucesso. Redirecionando para a tela de
+                login...
               </p>
             </div>
           ) : (
@@ -161,9 +170,11 @@ export default function FirstAccess() {
                 </h1>
                 <p className="text-xs text-[#737373]">
                   {userEmail ? (
-                    <>Defina a senha para <strong>{userEmail}</strong></>
+                    <>
+                      Defina a senha para <strong>{userEmail}</strong>
+                    </>
                   ) : (
-                    "Defina sua senha de acesso para ativar sua conta no Civix"
+                    'Defina sua senha de acesso para ativar sua conta no Civix'
                   )}
                 </p>
               </div>
@@ -183,7 +194,7 @@ export default function FirstAccess() {
                   </label>
                   <div className="relative">
                     <input
-                      type={showPassword ? "text" : "password"}
+                      type={showPassword ? 'text' : 'password'}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="Mínimo de 8 caracteres"
@@ -206,7 +217,7 @@ export default function FirstAccess() {
                     Confirmar Senha
                   </label>
                   <input
-                    type={showPassword ? "text" : "password"}
+                    type={showPassword ? 'text' : 'password'}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="Repita a senha digitada"
@@ -219,10 +230,12 @@ export default function FirstAccess() {
                 <div className="p-3 bg-[#faf9f7] rounded-lg border border-gray-100 text-[11px] text-[#737373] space-y-1">
                   <p className="font-medium text-[#071b2b]">Sua senha deve conter:</p>
                   <ul className="list-disc list-inside space-y-0.5">
-                    <li className={hasMinLength ? "text-emerald-600 font-medium" : ""}>
+                    <li className={hasMinLength ? 'text-emerald-600 font-medium' : ''}>
                       Pelo menos 8 caracteres
                     </li>
-                    <li className={passwordsMatch ? "text-emerald-600 font-medium" : ""}>
+                    <li
+                      className={passwordsMatch ? 'text-emerald-600 font-medium' : ''}
+                    >
                       Confirmação coincidente
                     </li>
                   </ul>

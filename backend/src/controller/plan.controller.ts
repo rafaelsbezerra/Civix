@@ -5,19 +5,52 @@ import { ErrorCode } from '../shared/errors/error.code.js';
 import { createSuccessResponse } from '../shared/contracts/response.contract.js';
 
 export async function listPlatformPlans(req: Request, res: Response) {
-  return res.json(createSuccessResponse(await planService.listPlatformPlans(req.authenticatedUser!.id)));
+  return res.json(
+    createSuccessResponse(
+      await planService.listPlatformPlans(req.authenticatedUser!.id),
+    ),
+  );
 }
 export async function getPlatformPlan(req: Request, res: Response) {
-  return res.json(createSuccessResponse(await planService.getPlatformPlan(req.authenticatedUser!.id, String(req.params.planId))));
+  return res.json(
+    createSuccessResponse(
+      await planService.getPlatformPlan(
+        req.authenticatedUser!.id,
+        String(req.params.planId),
+      ),
+    ),
+  );
 }
 export async function createPlatformPlan(req: Request, res: Response) {
-  return res.status(201).json(createSuccessResponse(await planService.savePlatformPlan(req.authenticatedUser!.id, req.body)));
+  return res
+    .status(201)
+    .json(
+      createSuccessResponse(
+        await planService.savePlatformPlan(req.authenticatedUser!.id, req.body),
+      ),
+    );
 }
 export async function updatePlatformPlan(req: Request, res: Response) {
-  return res.json(createSuccessResponse(await planService.savePlatformPlan(req.authenticatedUser!.id, req.body, String(req.params.planId))));
+  return res.json(
+    createSuccessResponse(
+      await planService.savePlatformPlan(
+        req.authenticatedUser!.id,
+        req.body,
+        String(req.params.planId),
+      ),
+    ),
+  );
 }
 export async function activatePlatformPlan(req: Request, res: Response) {
-  return res.json(createSuccessResponse(await planService.activatePlatformPlan(req.authenticatedUser!.id, String(req.params.planId), req.body)));
+  return res.json(
+    createSuccessResponse(
+      await planService.activatePlatformPlan(
+        req.authenticatedUser!.id,
+        String(req.params.planId),
+        req.body,
+      ),
+    ),
+  );
 }
 
 export async function getPlans(_req: Request, res: Response): Promise<Response> {

@@ -1,12 +1,12 @@
-import { AlertCircle, Loader2 } from 'lucide-react'
+import { AlertCircle, Loader2 } from 'lucide-react';
 
-import { SiteHeader } from '@/components/layout/SiteHeader'
-import Footer from '@/components/layout/SiteFooter'
-import { PlanCard } from '@/components/plans/PlanCard'
-import { usePlans } from '@/components/plans/usePlans'
+import { SiteHeader } from '@/components/layout/SiteHeader';
+import Footer from '@/components/layout/SiteFooter';
+import { PlanCard } from '@/components/plans/PlanCard';
+import { usePlans } from '@/components/plans/usePlans';
 
 export default function Plans() {
-  const { plans, loading, error } = usePlans()
+  const { plans, loading, error } = usePlans();
 
   return (
     <div className="min-h-screen bg-[var(--color-civix-ivory)] font-[family-name:var(--font-body)] text-[var(--color-civix-ink)]">
@@ -21,7 +21,8 @@ export default function Plans() {
               Escolha o espaço certo para sua empresa crescer.
             </h1>
             <p className="mt-6 max-w-xl text-base leading-7 text-[var(--color-civix-ivory)]/75">
-              Recursos e limites apresentados diretamente da configuração atual da plataforma.
+              Recursos e limites apresentados diretamente da configuração atual da
+              plataforma.
             </p>
           </div>
         </section>
@@ -55,7 +56,9 @@ export default function Plans() {
               <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold text-[var(--color-civix-navy)]">
                 Nenhum plano disponível
               </h2>
-              <p className="mt-2 text-sm text-black/60">Consulte novamente mais tarde.</p>
+              <p className="mt-2 text-sm text-black/60">
+                Consulte novamente mais tarde.
+              </p>
             </div>
           )}
 
@@ -70,5 +73,5 @@ export default function Plans() {
       </main>
       <Footer />
     </div>
-  )
+  );
 }

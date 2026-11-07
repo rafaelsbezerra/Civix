@@ -53,7 +53,12 @@ export async function sendInviteEmail({ email, role, token }: SendInviteParams) 
     return result;
   }
 
-  const roleText = role === 'super_admin' ? 'Administrador da plataforma' : role === 'atendente' ? 'Atendente' : 'Administrador da empresa';
+  const roleText =
+    role === 'super_admin'
+      ? 'Administrador da plataforma'
+      : role === 'atendente'
+        ? 'Atendente'
+        : 'Administrador da empresa';
 
   try {
     const result = await getResendClient().emails.send({
@@ -128,7 +133,10 @@ interface SendResetPasswordParams {
   resetUrl: string;
 }
 
-export async function sendResetPasswordEmail({ email, resetUrl }: SendResetPasswordParams) {
+export async function sendResetPasswordEmail({
+  email,
+  resetUrl,
+}: SendResetPasswordParams) {
   if (USE_MOCK_DATA) {
     const result = await saveLocalMail('password-reset', email, resetUrl);
 
@@ -177,7 +185,13 @@ export async function sendResetPasswordEmail({ email, resetUrl }: SendResetPassw
   }
 }
 
-export async function sendForgotPasswordEmail({ email, token }: { email: string; token: string }) {
+export async function sendForgotPasswordEmail({
+  email,
+  token,
+}: {
+  email: string;
+  token: string;
+}) {
   const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
   const resetUrl = `${frontendUrl.replace(/\/$/, '')}/redefinir-senha?token=${encodeURIComponent(token)}`;
 

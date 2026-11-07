@@ -32,13 +32,16 @@ export function CompanyPicker({
         q: search,
         page,
         status: includeArchived ? undefined : 'ativo',
-      }).catch(error => {
+      }).catch((error) => {
         throw new Error(onError(error), { cause: error });
       }),
     [search, page, includeArchived, onError],
   );
 
-  const query = useAsyncQuery(JSON.stringify([search, page, retry, includeArchived]), load);
+  const query = useAsyncQuery(
+    JSON.stringify([search, page, retry, includeArchived]),
+    load,
+  );
 
   useEffect(() => {
     onLoadingChange?.(query.loading);
@@ -51,7 +54,11 @@ export function CompanyPicker({
   };
 
   return (
-    <Card role="region" aria-label="Escolher empresa" className="gap-0 rounded-2xl py-0">
+    <Card
+      role="region"
+      aria-label="Escolher empresa"
+      className="gap-0 rounded-2xl py-0"
+    >
       <CardHeader className="border-b py-4">
         <CardTitle className="text-base font-semibold">Escolha a empresa</CardTitle>
       </CardHeader>
@@ -92,16 +99,18 @@ export function CompanyPicker({
               type="button"
               variant="outline"
               size="sm"
-              onClick={() => setRetry(value => value + 1)}
+              onClick={() => setRetry((value) => value + 1)}
             >
               Tentar novamente
             </Button>
           </div>
         ) : !query.data?.data.length ? (
-          <p className="py-4 text-sm text-muted-foreground">Nenhuma empresa encontrada.</p>
+          <p className="py-4 text-sm text-muted-foreground">
+            Nenhuma empresa encontrada.
+          </p>
         ) : (
           <ul className="grid gap-2 sm:grid-cols-2">
-            {query.data.data.map(company => {
+            {query.data.data.map((company) => {
               const selected = selectedId === company.id;
               return (
                 <li key={company.id}>

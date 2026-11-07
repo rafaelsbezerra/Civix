@@ -38,9 +38,7 @@ export function HeroSection() {
               className="max-w-[643px] font-[family-name:var(--font-display)] text-[clamp(2.25rem,5vw,4rem)] font-bold uppercase leading-[1.1] tracking-normal lg:w-[643px] lg:text-[64px] lg:leading-[72px]"
             >
               <span className="lg:block lg:whitespace-nowrap">A TECNOLOGIA QUE</span>{' '}
-              <span className="lg:block lg:whitespace-nowrap">
-                CONSTRÓI O FUTURO
-              </span>
+              <span className="lg:block lg:whitespace-nowrap">CONSTRÓI O FUTURO</span>
             </h1>
             <p
               data-motion="page"
@@ -75,5 +73,5 @@ export function HeroSection() {
         </div>
       </div>
     </section>
-  )
+  );
 }

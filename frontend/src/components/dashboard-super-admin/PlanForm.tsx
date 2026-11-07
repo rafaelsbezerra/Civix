@@ -5,9 +5,22 @@ import { z } from 'zod';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Checkbox } from '../ui/checkbox';
-import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel, FieldSet } from '../ui/field';
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldSet,
+} from '../ui/field';
 import { Input } from '../ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../ui/select';
 import { Textarea } from '../ui/textarea';
 import type { Plan, PlanInput } from '../../lib/api';
 
@@ -31,7 +44,10 @@ const planFormSchema = z.object({
   billingPeriod: z.enum(['monthly', 'yearly', 'one_time']),
   description: z.string().max(3000),
   featuresText: z.string(),
-  displayOrder: z.number().int('Informe um número inteiro.').min(0, 'A ordem deve ser maior ou igual a zero.'),
+  displayOrder: z
+    .number()
+    .int('Informe um número inteiro.')
+    .min(0, 'A ordem deve ser maior ou igual a zero.'),
   isActive: z.boolean(),
   isFeatured: z.boolean(),
 });
@@ -102,7 +118,7 @@ export function PlanForm({
       billingPeriod: values.billingPeriod,
       features: values.featuresText
         .split('\n')
-        .map(item => item.trim())
+        .map((item) => item.trim())
         .filter(Boolean),
       limits: plan?.limits ?? {},
       isFeatured: values.isFeatured,
@@ -164,7 +180,9 @@ export function PlanForm({
                     aria-invalid={!!errors.price}
                     {...register('price')}
                   />
-                  <FieldDescription>Valor positivo, com até duas casas decimais.</FieldDescription>
+                  <FieldDescription>
+                    Valor positivo, com até duas casas decimais.
+                  </FieldDescription>
                   <FieldError errors={[errors.price]} />
                 </Field>
 
@@ -173,7 +191,9 @@ export function PlanForm({
                   name="billingPeriod"
                   render={({ field }) => (
                     <Field data-invalid={!!errors.billingPeriod}>
-                      <FieldLabel htmlFor="plan-billing-period">Período comercial</FieldLabel>
+                      <FieldLabel htmlFor="plan-billing-period">
+                        Período comercial
+                      </FieldLabel>
                       <Select value={field.value} onValueChange={field.onChange}>
                         <SelectTrigger
                           id="plan-billing-period"
@@ -218,7 +238,9 @@ export function PlanForm({
                 </Field>
 
                 <Field data-invalid={!!errors.displayOrder}>
-                  <FieldLabel htmlFor="plan-display-order">Ordem de exibição</FieldLabel>
+                  <FieldLabel htmlFor="plan-display-order">
+                    Ordem de exibição
+                  </FieldLabel>
                   <Input
                     id="plan-display-order"
                     type="number"
@@ -238,9 +260,14 @@ export function PlanForm({
                         <Checkbox
                           id="plan-is-active"
                           checked={field.value}
-                          onCheckedChange={checked => field.onChange(Boolean(checked))}
+                          onCheckedChange={(checked) =>
+                            field.onChange(Boolean(checked))
+                          }
                         />
-                        <FieldLabel htmlFor="plan-is-active" className="cursor-pointer font-normal">
+                        <FieldLabel
+                          htmlFor="plan-is-active"
+                          className="cursor-pointer font-normal"
+                        >
                           Disponível para novos cadastros
                         </FieldLabel>
                       </Field>
@@ -255,9 +282,14 @@ export function PlanForm({
                         <Checkbox
                           id="plan-is-featured"
                           checked={field.value}
-                          onCheckedChange={checked => field.onChange(Boolean(checked))}
+                          onCheckedChange={(checked) =>
+                            field.onChange(Boolean(checked))
+                          }
                         />
-                        <FieldLabel htmlFor="plan-is-featured" className="cursor-pointer font-normal">
+                        <FieldLabel
+                          htmlFor="plan-is-featured"
+                          className="cursor-pointer font-normal"
+                        >
                           Destacar no catálogo
                         </FieldLabel>
                       </Field>

@@ -12,7 +12,10 @@ if (rawFlag !== 'true' && rawFlag !== 'false') {
 
 export const USE_MOCK_DATA = rawFlag === 'true';
 export const BACKEND_ROOT = fileURLToPath(new URL('../../../', import.meta.url));
-export const MOCK_DATA_DIR = resolve(BACKEND_ROOT, process.env.MOCK_DATA_DIR || '.local-data');
+export const MOCK_DATA_DIR = resolve(
+  BACKEND_ROOT,
+  process.env.MOCK_DATA_DIR || '.local-data',
+);
 
 let pool: Pool | undefined;
 
@@ -27,7 +30,9 @@ function getPool(): Pool {
 }
 
 export const db = {
-  async transaction<T>(run: (client: Pick<PoolClient, 'query'>) => Promise<T>): Promise<T> {
+  async transaction<T>(
+    run: (client: Pick<PoolClient, 'query'>) => Promise<T>,
+  ): Promise<T> {
     const client = await getPool().connect();
     try {
       await client.query('BEGIN');
@@ -37,7 +42,9 @@ export const db = {
     } catch (error) {
       await client.query('ROLLBACK').catch(() => undefined);
       throw error;
-    } finally { client.release(); }
+    } finally {
+      client.release();
+    }
   },
   query<T extends QueryResultRow = QueryResultRow>(text: string, values?: unknown[]) {
     return getPool().query<T>(text, values);

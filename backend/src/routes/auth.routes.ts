@@ -2,9 +2,9 @@
 
 import { Router } from 'express';
 import {
-    firstAccessController,
-    resendInviteEmailController,
-    validateTokenController
+  firstAccessController,
+  resendInviteEmailController,
+  validateTokenController,
 } from '../controller/auth.controller.js';
 
 const authRouter = Router();

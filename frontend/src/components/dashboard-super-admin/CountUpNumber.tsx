@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
 
 const intFormatter = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 0 });
-const brlFormatter = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+const brlFormatter = new Intl.NumberFormat('pt-BR', {
+  style: 'currency',
+  currency: 'BRL',
+});
 
 export function CountUpNumber({
   value,
@@ -15,13 +18,17 @@ export function CountUpNumber({
   duration?: number;
 }) {
   const isTestEnv = import.meta.env.MODE === 'test';
-  const [animState, setAnimState] = useState<{ target: number; current: number }>(() => ({
-    target: value,
-    current: isTestEnv || value === 0 ? value : 0,
-  }));
+  const [animState, setAnimState] = useState<{ target: number; current: number }>(
+    () => ({
+      target: value,
+      current: isTestEnv || value === 0 ? value : 0,
+    }),
+  );
 
   useEffect(() => {
-    if (isTestEnv || value === 0) return;
+    if (isTestEnv || value === 0) {
+      return;
+    }
 
     let frameId = 0;
     const startTime = performance.now();
@@ -42,10 +49,16 @@ export function CountUpNumber({
   }, [value, format, duration, isTestEnv]);
 
   const effectiveValue =
-    isTestEnv || value === 0 ? value : animState.target === value ? animState.current : 0;
+    isTestEnv || value === 0
+      ? value
+      : animState.target === value
+        ? animState.current
+        : 0;
 
   const formatted =
-    format === 'currency' ? brlFormatter.format(effectiveValue) : intFormatter.format(effectiveValue);
+    format === 'currency'
+      ? brlFormatter.format(effectiveValue)
+      : intFormatter.format(effectiveValue);
 
   return (
     <>

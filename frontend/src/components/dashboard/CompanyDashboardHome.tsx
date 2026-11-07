@@ -7,10 +7,10 @@ import {
   MessageSquareText,
   TrendingUp,
   UserRound,
-} from 'lucide-react'
-import { useOutletContext } from 'react-router-dom'
+} from 'lucide-react';
+import { useOutletContext } from 'react-router-dom';
 
-import type { SessionProfile } from '@/lib/api'
+import type { SessionProfile } from '@/lib/api';
 
 const mockMetrics = [
   {
@@ -41,22 +41,22 @@ const mockMetrics = [
     detail: 'no período demonstrativo',
     icon: Headset,
   },
-]
+];
 
-const chartMonths = ['Dez', 'Jan', 'Fev', 'Mar', 'Abr']
-const leadCounts = [126, 158, 177, 229, 316]
-const conversationCounts = [34, 46, 57, 72, 91]
+const chartMonths = ['Dez', 'Jan', 'Fev', 'Mar', 'Abr'];
+const leadCounts = [126, 158, 177, 229, 316];
+const conversationCounts = [34, 46, 57, 72, 91];
 const funnelItems = [
   { label: 'Novos leads', value: '316', width: '100%' },
   { label: 'Qualificados', value: '174', width: '72%' },
   { label: 'Em atendimento', value: '91', width: '48%' },
   { label: 'Convertidos', value: '63', width: '31%' },
-]
+];
 const channels = [
   { label: 'WhatsApp', value: '58%', color: 'var(--dashboard-accent)' },
   { label: 'Site', value: '27%', color: 'var(--dashboard-chart-secondary)' },
   { label: 'Perfil da empresa', value: '15%', color: 'var(--dashboard-subtle)' },
-]
+];
 
 function TrendChart() {
   return (
@@ -79,8 +79,8 @@ function TrendChart() {
         />
       ))}
       {conversationCounts.map((value, index) => {
-        const x = 56 + index * 116
-        const barHeight = (value / 100) * 174
+        const x = 56 + index * 116;
+        const barHeight = (value / 100) * 174;
         return (
           <rect
             fill="var(--dashboard-chart-secondary)"
@@ -91,7 +91,7 @@ function TrendChart() {
             x={x + 24}
             y={230 - barHeight}
           />
-        )
+        );
       })}
       <polyline
         fill="none"
@@ -125,7 +125,7 @@ function TrendChart() {
         </text>
       ))}
     </svg>
-  )
+  );
 }
 
 function ChannelDonut() {
@@ -140,12 +140,12 @@ function ChannelDonut() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 export function CompanyDashboardHome() {
-  const { user } = useOutletContext<SessionProfile>()
-  const displayName = user.name?.trim() || user.email
+  const { user } = useOutletContext<SessionProfile>();
+  const displayName = user.name?.trim() || user.email;
 
   return (
     <div className="mx-auto max-w-[1600px] space-y-7">
@@ -160,7 +160,10 @@ export function CompanyDashboardHome() {
         <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
           <div className="max-w-3xl">
             <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-[var(--dashboard-accent-text)]">
-              <span aria-hidden="true" className="size-2 rounded-full bg-[var(--dashboard-accent)]" />
+              <span
+                aria-hidden="true"
+                className="size-2 rounded-full bg-[var(--dashboard-accent)]"
+              />
               Visão geral
             </p>
             <h1
@@ -191,7 +194,9 @@ export function CompanyDashboardHome() {
               key={label}
             >
               <div className="flex items-center justify-between gap-3">
-                <h2 className="dashboard-muted-heading text-sm font-medium text-[var(--dashboard-muted)]">{label}</h2>
+                <h2 className="dashboard-muted-heading text-sm font-medium text-[var(--dashboard-muted)]">
+                  {label}
+                </h2>
                 <span className="grid size-9 place-items-center rounded-lg bg-[var(--dashboard-accent-soft)] text-[var(--dashboard-accent-text)]">
                   <Icon aria-hidden="true" className="size-4" />
                 </span>
@@ -224,17 +229,28 @@ export function CompanyDashboardHome() {
               >
                 Leads e conversas por mês
               </h2>
-              <p className="mt-1 text-xs text-[var(--dashboard-subtle)]">Dezembro — Abril · demonstração</p>
+              <p className="mt-1 text-xs text-[var(--dashboard-subtle)]">
+                Dezembro — Abril · demonstração
+              </p>
             </div>
-            <ChartNoAxesCombined aria-hidden="true" className="size-5 text-[var(--dashboard-accent)]" />
+            <ChartNoAxesCombined
+              aria-hidden="true"
+              className="size-5 text-[var(--dashboard-accent)]"
+            />
           </div>
           <div className="mt-4 flex flex-wrap gap-4 text-xs text-[var(--dashboard-muted)]">
             <span className="inline-flex items-center gap-2">
-              <span aria-hidden="true" className="size-2.5 rounded-full bg-[var(--dashboard-accent)]" />
+              <span
+                aria-hidden="true"
+                className="size-2.5 rounded-full bg-[var(--dashboard-accent)]"
+              />
               Leads
             </span>
             <span className="inline-flex items-center gap-2">
-              <span aria-hidden="true" className="size-2.5 rounded-sm bg-[var(--dashboard-chart-secondary)]" />
+              <span
+                aria-hidden="true"
+                className="size-2.5 rounded-sm bg-[var(--dashboard-chart-secondary)]"
+              />
               Conversas
             </span>
           </div>
@@ -251,7 +267,9 @@ export function CompanyDashboardHome() {
           >
             Origem dos contatos
           </h2>
-          <p className="mt-1 text-xs text-[var(--dashboard-subtle)]">Distribuição ilustrativa por canal</p>
+          <p className="mt-1 text-xs text-[var(--dashboard-subtle)]">
+            Distribuição ilustrativa por canal
+          </p>
           <ChannelDonut />
           <ul aria-label="Canais demonstrativos" className="mt-5 space-y-2.5">
             {channels.map(({ label, value, color }) => (
@@ -260,10 +278,16 @@ export function CompanyDashboardHome() {
                 key={label}
               >
                 <span className="inline-flex items-center gap-2.5 text-[var(--dashboard-text)]">
-                  <span aria-hidden="true" className="size-2.5 rounded-full" style={{ backgroundColor: color }} />
+                  <span
+                    aria-hidden="true"
+                    className="size-2.5 rounded-full"
+                    style={{ backgroundColor: color }}
+                  />
                   {label}
                 </span>
-                <span className="font-semibold text-[var(--dashboard-accent-text)]">{value}</span>
+                <span className="font-semibold text-[var(--dashboard-accent-text)]">
+                  {value}
+                </span>
               </li>
             ))}
           </ul>
@@ -281,13 +305,17 @@ export function CompanyDashboardHome() {
           >
             Funil comercial
           </h2>
-          <p className="mt-1 text-xs text-[var(--dashboard-subtle)]">Etapas ilustrativas de acompanhamento</p>
+          <p className="mt-1 text-xs text-[var(--dashboard-subtle)]">
+            Etapas ilustrativas de acompanhamento
+          </p>
           <ol className="mt-5 space-y-4">
             {funnelItems.map(({ label, value, width }) => (
               <li key={label}>
                 <div className="mb-2 flex items-center justify-between gap-4 text-sm">
                   <span className="text-[var(--dashboard-text)]">{label}</span>
-                  <span className="text-[var(--dashboard-muted)]">{value} registros</span>
+                  <span className="text-[var(--dashboard-muted)]">
+                    {value} registros
+                  </span>
                 </div>
                 <div
                   aria-label={`${label}: ${value} registros, valor demonstrativo`}
@@ -309,7 +337,10 @@ export function CompanyDashboardHome() {
           className="rounded-xl border border-[var(--dashboard-border)] bg-[var(--dashboard-surface)] p-5 sm:p-6"
         >
           <div className="flex items-start gap-3">
-            <CircleAlert aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-[var(--dashboard-accent)]" />
+            <CircleAlert
+              aria-hidden="true"
+              className="mt-0.5 size-5 shrink-0 text-[var(--dashboard-accent)]"
+            />
             <div>
               <h2
                 className="font-[family-name:var(--font-display)] text-lg font-semibold text-[var(--dashboard-text)]"
@@ -318,17 +349,17 @@ export function CompanyDashboardHome() {
                 Atividade recente
               </h2>
               <p className="mt-2 text-sm leading-6 text-[var(--dashboard-muted)]">
-                O histórico de leads e atendimentos será exibido aqui quando
-                essas informações estiverem disponíveis no sistema.
+                O histórico de leads e atendimentos será exibido aqui quando essas
+                informações estiverem disponíveis no sistema.
               </p>
               <p className="mt-3 text-xs text-[var(--dashboard-subtle)]">
-                Ainda não há uma fonte de atividade integrada; nenhum evento
-                fictício é mostrado.
+                Ainda não há uma fonte de atividade integrada; nenhum evento fictício é
+                mostrado.
               </p>
             </div>
           </div>
         </section>
       </div>
     </div>
-  )
+  );
 }

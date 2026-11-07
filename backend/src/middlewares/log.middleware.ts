@@ -3,32 +3,50 @@ import { performance } from 'node:perf_hooks';
 import type { Request, RequestHandler } from 'express';
 import { pinoHttp } from 'pino-http';
 import type { AppLogger, LogHttp } from '../shared/logging/log.contract.js';
-import { createRequestLogger, getBaseLogger, getPinoLogger } from '../shared/logging/log.logger.js';
+import {
+  createRequestLogger,
+  getBaseLogger,
+  getPinoLogger,
+} from '../shared/logging/log.logger.js';
 import { runWithLogContext } from '../shared/logging/log.context.js';
 
 export function getLogHttp(request: Request, statusCode: number): LogHttp {
   const registeredPath = request.route?.path;
-  const path = typeof registeredPath === 'string'
-    ? registeredPath
-    : Array.isArray(registeredPath)
-      ? registeredPath.find((value: unknown) => typeof value === 'string') ?? 'unmatched'
-      : 'unmatched';
+  const path =
+    typeof registeredPath === 'string'
+      ? registeredPath
+      : Array.isArray(registeredPath)
+        ? (registeredPath.find((value: unknown) => typeof value === 'string') ??
+          'unmatched')
+        : 'unmatched';
   let prefix = path === 'unmatched' ? '' : request.baseUrl;
   for (const [key, value] of Object.entries(request.params ?? {})) {
-    if (typeof value === 'string' && value) prefix = prefix.split(value).join(':' + key);
+    if (typeof value === 'string' && value) {
+      prefix = prefix.split(value).join(':' + key);
+    }
   }
-  return { method: request.method, route: prefix + path, statusCode,
-  };
+  return { method: request.method, route: prefix + path, statusCode };
 }
 
-export function createLogMiddleware(logger: AppLogger = getBaseLogger()): RequestHandler {
+export function createLogMiddleware(
+  logger: AppLogger = getBaseLogger(),
+): RequestHandler {
   const raw = getPinoLogger(logger);
-  const httpLogger = raw ? pinoHttp({
-    logger: raw, autoLogging: false,
-    genReqId: () => randomUUID(), quietReqLogger: true, quietResLogger: true,
-    wrapSerializers: false,
-    serializers: { req: () => undefined, res: () => undefined, err: () => undefined },
-  }) : undefined;
+  const httpLogger = raw
+    ? pinoHttp({
+        logger: raw,
+        autoLogging: false,
+        genReqId: () => randomUUID(),
+        quietReqLogger: true,
+        quietResLogger: true,
+        wrapSerializers: false,
+        serializers: {
+          req: () => undefined,
+          res: () => undefined,
+          err: () => undefined,
+        },
+      })
+    : undefined;
 
   return (request, response, next) => {
     let requestId: string = randomUUID();
@@ -48,12 +66,21 @@ export function createLogMiddleware(logger: AppLogger = getBaseLogger()): Reques
     let settled = false;
 
     function complete(aborted: boolean) {
-      if (settled) return;
+      if (settled) {
+        return;
+      }
       settled = true;
-      const level = aborted ? 'warn' : response.statusCode >= 500 ? 'error' : response.statusCode >= 400 ? 'warn' : 'info';
+      const level = aborted
+        ? 'warn'
+        : response.statusCode >= 500
+          ? 'error'
+          : response.statusCode >= 400
+            ? 'warn'
+            : 'info';
       requestLogger[level]({
         event: aborted ? 'http.request.aborted' : 'http.request.completed',
-        module: 'http', message: aborted ? 'Requisição interrompida' : 'Requisição concluída',
+        module: 'http',
+        message: aborted ? 'Requisição interrompida' : 'Requisição concluída',
         http: getLogHttp(request, response.statusCode),
       });
       context.active = false;

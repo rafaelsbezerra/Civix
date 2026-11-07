@@ -14,4 +14,3 @@ export interface Plan {
   isActive: boolean;
   displayOrder: number;
 }
-

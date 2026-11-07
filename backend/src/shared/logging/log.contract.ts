@@ -1,5 +1,15 @@
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error' | 'fatal';
-export type LogModule = 'http' | 'server' | 'companies' | 'plans' | 'users' | 'auth' | 'mail' | 'admin' | 'mock' | 'storage';
+export type LogModule =
+  | 'http'
+  | 'server'
+  | 'companies'
+  | 'plans'
+  | 'users'
+  | 'auth'
+  | 'mail'
+  | 'admin'
+  | 'mock'
+  | 'storage';
 
 export interface LogContext {
   userId?: string | number;

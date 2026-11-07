@@ -16,7 +16,11 @@ export class AppError extends Error {
   constructor(options: AppErrorOptions) {
     super(options.message, { cause: options.cause });
 
-    if (!Number.isInteger(options.status) || options.status < 400 || options.status > 599) {
+    if (
+      !Number.isInteger(options.status) ||
+      options.status < 400 ||
+      options.status > 599
+    ) {
       throw new RangeError('O status de AppError deve estar entre 400 e 599');
     }
     if (!Object.values(ErrorCode).includes(options.code) || !options.message.trim()) {

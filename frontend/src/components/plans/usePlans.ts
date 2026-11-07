@@ -1,12 +1,12 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react';
 
-import { fetchPlans } from '@/lib/api'
-import type { Plan } from '@/lib/api'
+import { fetchPlans } from '@/lib/api';
+import type { Plan } from '@/lib/api';
 
 interface PlansState {
-  plans: Plan[]
-  loading: boolean
-  error: string | null
+  plans: Plan[];
+  loading: boolean;
+  error: string | null;
 }
 
 export function usePlans(): PlansState {
@@ -14,29 +14,34 @@ export function usePlans(): PlansState {
     plans: [],
     loading: true,
     error: null,
-  })
+  });
 
   useEffect(() => {
-    let mounted = true
+    let mounted = true;
 
     fetchPlans()
       .then((plans) => {
-        if (mounted) setState({ plans, loading: false, error: null })
+        if (mounted) {
+          setState({ plans, loading: false, error: null });
+        }
       })
       .catch((error: unknown) => {
         if (mounted) {
           setState({
             plans: [],
             loading: false,
-            error: error instanceof Error ? error.message : 'Não foi possível carregar os planos agora.',
-          })
+            error:
+              error instanceof Error
+                ? error.message
+                : 'Não foi possível carregar os planos agora.',
+          });
         }
-      })
+      });
 
     return () => {
-      mounted = false
-    }
-  }, [])
+      mounted = false;
+    };
+  }, []);
 
-  return state
+  return state;
 }

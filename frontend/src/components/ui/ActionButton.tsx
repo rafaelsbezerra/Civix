@@ -1,29 +1,25 @@
-import type { AnchorHTMLAttributes, ReactNode } from 'react'
-import { LogIn } from 'lucide-react'
+import type { AnchorHTMLAttributes, ReactNode } from 'react';
+import { LogIn } from 'lucide-react';
 
-import arrowRight from '@/assets/civix/arrow-right.svg'
+import arrowRight from '@/assets/civix/arrow-right.svg';
 
-type ActionButtonVariant = 'primary' | 'light' | 'translucent' | 'yellow' | 'login'
+type ActionButtonVariant = 'primary' | 'light' | 'translucent' | 'yellow' | 'login';
 
-export interface ActionButtonProps
-  extends AnchorHTMLAttributes<HTMLAnchorElement> {
-  children: ReactNode
-  showArrow?: boolean
-  variant: ActionButtonVariant
+export interface ActionButtonProps extends AnchorHTMLAttributes<HTMLAnchorElement> {
+  children: ReactNode;
+  showArrow?: boolean;
+  variant: ActionButtonVariant;
 }
 
 const variantClasses: Record<ActionButtonVariant, string> = {
-  primary:
-    'bg-[#07192a] text-[#faf9f6] hover:bg-[#102c43]',
-  light:
-    'bg-[#faf9f6] text-[#07192a] hover:bg-[#e8e7e3]',
+  primary: 'bg-[#07192a] text-[#faf9f6] hover:bg-[#102c43]',
+  light: 'bg-[#faf9f6] text-[#07192a] hover:bg-[#e8e7e3]',
   translucent:
     'bg-[rgba(250,249,246,0.2)] text-[#faf9f6] backdrop-blur-[2px] hover:bg-[rgba(250,249,246,0.32)]',
-  yellow:
-    'bg-[#d89c28] text-[#faf9f6] hover:bg-[#b88320]',
+  yellow: 'bg-[#d89c28] text-[#faf9f6] hover:bg-[#b88320]',
   login:
     'border border-[#07192a]/50 bg-transparent text-[#07192a] hover:border-[#07192a] hover:bg-[#07192a] hover:text-[#faf9f6]',
-}
+};
 
 export function ActionButton({
   children,
@@ -54,5 +50,5 @@ export function ActionButton({
         />
       ) : null}
     </a>
-  )
+  );
 }

@@ -1,41 +1,41 @@
-import { useState } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
-import { Eye, EyeOff, CheckCircle2, AlertCircle, Lock, Loader2 } from "lucide-react";
-import { resetPassword } from "@/lib/api";
+import { useState } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { Eye, EyeOff, CheckCircle2, AlertCircle, Lock, Loader2 } from 'lucide-react';
+import { resetPassword } from '@/lib/api';
 
-import civixLogo from "../assets/civix/logoCivix.png";
+import civixLogo from '../assets/civix/logoCivix.png';
 
 export default function ResetPassword() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
   // Captura o token passado na URL pelo link do e-mail
-  const token = searchParams.get("token");
+  const token = searchParams.get('token');
 
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
+    setError('');
 
     if (!token) {
-      setError("Token de redefinição ausente ou inválido.");
+      setError('Token de redefinição ausente ou inválido.');
       return;
     }
 
     if (password.length < 8) {
-      setError("A nova senha deve conter no mínimo 8 caracteres.");
+      setError('A nova senha deve conter no mínimo 8 caracteres.');
       return;
     }
 
     if (password !== confirmPassword) {
-      setError("As senhas não coincidem.");
+      setError('As senhas não coincidem.');
       return;
     }
 
@@ -49,10 +49,14 @@ export default function ResetPassword() {
 
       // Redireciona para o login após 2.5 segundos
       setTimeout(() => {
-        navigate("/login");
+        navigate('/login');
       }, 2500);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Não foi possível redefinir a senha. O link pode ter expirado.");
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Não foi possível redefinir a senha. O link pode ter expirado.',
+      );
     } finally {
       setLoading(false);
     }
@@ -66,10 +70,11 @@ export default function ResetPassword() {
           <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
           <h2 className="text-xl font-bold text-[#071b2b] mb-2">Link Inválido</h2>
           <p className="text-xs text-[#626262] leading-relaxed mb-6">
-            O token de redefinição de senha não foi encontrado. Solicite um novo link na tela de recuperação.
+            O token de redefinição de senha não foi encontrado. Solicite um novo link na
+            tela de recuperação.
           </p>
           <button
-            onClick={() => navigate("/esqueci-senha")}
+            onClick={() => navigate('/esqueci-senha')}
             className="w-full py-2.5 rounded-lg bg-[#061c2c] text-white text-xs font-semibold hover:bg-[#0b293d] transition"
           >
             Solicitar Novo Link
@@ -96,7 +101,8 @@ export default function ResetPassword() {
                 Senha Alterada!
               </h2>
               <p className="text-xs text-[#626262] mb-4">
-                Sua senha foi atualizada com sucesso. Redirecionando para a tela de login...
+                Sua senha foi atualizada com sucesso. Redirecionando para a tela de
+                login...
               </p>
             </div>
           ) : (
@@ -126,7 +132,7 @@ export default function ResetPassword() {
                   </label>
                   <div className="relative">
                     <input
-                      type={showPassword ? "text" : "password"}
+                      type={showPassword ? 'text' : 'password'}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="Mínimo de 8 caracteres"
@@ -149,7 +155,7 @@ export default function ResetPassword() {
                     Confirmar Nova Senha
                   </label>
                   <input
-                    type={showPassword ? "text" : "password"}
+                    type={showPassword ? 'text' : 'password'}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="Repita a nova senha"
@@ -162,10 +168,20 @@ export default function ResetPassword() {
                 <div className="p-3 bg-[#faf9f7] rounded-lg border border-gray-100 text-[11px] text-[#737373] space-y-1">
                   <p className="font-medium text-[#071b2b]">Requisitos da senha:</p>
                   <ul className="list-disc list-inside space-y-0.5">
-                    <li className={password.length >= 8 ? "text-emerald-600 font-medium" : ""}>
+                    <li
+                      className={
+                        password.length >= 8 ? 'text-emerald-600 font-medium' : ''
+                      }
+                    >
                       Pelo menos 8 caracteres
                     </li>
-                    <li className={password && password === confirmPassword ? "text-emerald-600 font-medium" : ""}>
+                    <li
+                      className={
+                        password && password === confirmPassword
+                          ? 'text-emerald-600 font-medium'
+                          : ''
+                      }
+                    >
                       As senhas devem ser iguais
                     </li>
                   </ul>

@@ -1,18 +1,22 @@
-import { render, screen } from '@testing-library/react'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { fetchPlans } from '@/lib/api'
-import { usePlans } from './usePlans'
+import { fetchPlans } from '@/lib/api';
+import { usePlans } from './usePlans';
 
 vi.mock('@/lib/api', () => ({
   fetchPlans: vi.fn(),
-}))
+}));
 
 function PlansPreview() {
-  const { plans, loading, error } = usePlans()
+  const { plans, loading, error } = usePlans();
 
-  if (loading) return <p>Carregando</p>
-  if (error) return <p role="alert">{error}</p>
+  if (loading) {
+    return <p>Carregando</p>;
+  }
+  if (error) {
+    return <p role="alert">{error}</p>;
+  }
 
   return (
     <ul>
@@ -20,24 +24,26 @@ function PlansPreview() {
         <li key={plan.id}>{plan.name}</li>
       ))}
     </ul>
-  )
+  );
 }
 
 describe('usePlans', () => {
   afterEach(() => {
-    vi.clearAllMocks()
-  })
+    vi.clearAllMocks();
+  });
 
   it('shows an error when the plans API is unavailable without substituting data', async () => {
-    vi.mocked(fetchPlans).mockRejectedValue(new Error('Planos indisponíveis no backend.'))
+    vi.mocked(fetchPlans).mockRejectedValue(
+      new Error('Planos indisponíveis no backend.'),
+    );
 
-    render(<PlansPreview />)
+    render(<PlansPreview />);
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'Planos indisponíveis no backend.',
-    )
-    expect(screen.queryByText('Plano Profissional')).not.toBeInTheDocument()
-  })
+    );
+    expect(screen.queryByText('Plano Profissional')).not.toBeInTheDocument();
+  });
 
   it('renders plans returned by the API', async () => {
     vi.mocked(fetchPlans).mockResolvedValue([
@@ -54,10 +60,10 @@ describe('usePlans', () => {
         isActive: true,
         displayOrder: 1,
       },
-    ])
+    ]);
 
-    render(<PlansPreview />)
+    render(<PlansPreview />);
 
-    expect(await screen.findByText('Plano retornado pela API')).toBeInTheDocument()
-  })
-})
+    expect(await screen.findByText('Plano retornado pela API')).toBeInTheDocument();
+  });
+});

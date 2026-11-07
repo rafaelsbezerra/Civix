@@ -1,7 +1,7 @@
-import backgroundShape from '@/assets/civix/about/background-shape.svg'
+import backgroundShape from '@/assets/civix/about/background-shape.svg';
 // import dashboard from '@/assets/civix/about/dashboard.png'
-import emphasisScribble from '@/assets/civix/about/emphasis-scribble.svg'
-import macbookSilver from '@/assets/civix/about/macbook.png'
+import emphasisScribble from '@/assets/civix/about/emphasis-scribble.svg';
+import macbookSilver from '@/assets/civix/about/macbook.png';
 
 /** Composes the decorative notebook artwork from the original Figma exports. */
 export function AboutVisual() {
@@ -48,5 +48,5 @@ export function AboutVisual() {
         width="104"
       />
     </div>
-  )
+  );
 }

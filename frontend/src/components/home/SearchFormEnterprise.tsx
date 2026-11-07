@@ -1,38 +1,38 @@
-import { useState, type FormEvent } from 'react'
+import { useState, type FormEvent } from 'react';
 
-import arrowRight from '@/assets/civix/arrow-right.svg'
-import selectChevron from '@/assets/civix/select-chevron.svg'
+import arrowRight from '@/assets/civix/arrow-right.svg';
+import selectChevron from '@/assets/civix/select-chevron.svg';
 
 export interface SearchFormValues {
-  priceRange: string
-  query: string
-  region: string
+  priceRange: string;
+  query: string;
+  region: string;
 }
 
 export interface SearchFormProps {
-  initialValues?: Partial<SearchFormValues>
-  onSubmit?: (values: SearchFormValues) => void
+  initialValues?: Partial<SearchFormValues>;
+  onSubmit?: (values: SearchFormValues) => void;
 }
 
 const emptyValues: SearchFormValues = {
   priceRange: '',
   query: '',
   region: '',
-}
+};
 
 const fieldClasses =
-  'h-[52px] w-full border-0 border-b border-[var(--color-civix-navy)] bg-transparent px-5 pb-5 pt-2 font-[family-name:var(--font-display)] text-base font-medium text-[var(--color-civix-navy)] outline-none placeholder:text-[var(--color-civix-navy)] focus:border-[var(--color-civix-gold)]'
+  'h-[52px] w-full border-0 border-b border-[var(--color-civix-navy)] bg-transparent px-5 pb-5 pt-2 font-[family-name:var(--font-display)] text-base font-medium text-[var(--color-civix-navy)] outline-none placeholder:text-[var(--color-civix-navy)] focus:border-[var(--color-civix-gold)]';
 
 export function SearchForm({ initialValues, onSubmit }: SearchFormProps) {
   const [values, setValues] = useState<SearchFormValues>({
     ...emptyValues,
     ...initialValues,
-  })
+  });
 
   const submitSearch = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    onSubmit?.(values)
-  }
+    event.preventDefault();
+    onSubmit?.(values);
+  };
 
   return (
     <form
@@ -41,7 +41,6 @@ export function SearchForm({ initialValues, onSubmit }: SearchFormProps) {
       onSubmit={submitSearch}
       role="search"
     >
-
       <label className="block">
         <span className="sr-only">O que busca?</span>
         <input
@@ -111,5 +110,5 @@ export function SearchForm({ initialValues, onSubmit }: SearchFormProps) {
         />
       </button>
     </form>
-  )
+  );
 }

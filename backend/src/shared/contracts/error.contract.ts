@@ -18,16 +18,20 @@ export interface ErrorContext {
   requestId?: string;
 }
 
-const SENSITIVE_KEY = /password|passwd|secret|token|authorization|cookie|credential|api[-_]?key/i;
+const SENSITIVE_KEY =
+  /password|passwd|secret|token|authorization|cookie|credential|api[-_]?key/i;
 const REDACTED = '[REMOVIDO]';
 
 export function redactText(text: string): string {
   return text
-    .replace(/\b(?:postgres(?:ql)?|https?):\/\/[^\s/@:]+:[^\s/@]+@/gi, match => {
+    .replace(/\b(?:postgres(?:ql)?|https?):\/\/[^\s/@:]+:[^\s/@]+@/gi, (match) => {
       return match.slice(0, match.indexOf('://') + 3) + REDACTED + '@';
     })
     .replace(/\bBearer\s+[^\s,;]+/gi, 'Bearer ' + REDACTED)
-    .replace(/\b(password|passwd|secret|token|authorization|cookie|api[-_]?key)["']?\s*[:=]\s*(?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|[^\s,;}]+)/gi, '$1=' + REDACTED);
+    .replace(
+      /\b(password|passwd|secret|token|authorization|cookie|api[-_]?key)["']?\s*[:=]\s*(?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|[^\s,;}]+)/gi,
+      '$1=' + REDACTED,
+    );
 }
 
 function readErrorProperty(error: Error, key: string): unknown {
@@ -42,7 +46,11 @@ function readErrorProperty(error: Error, key: string): unknown {
       }
 
       // O V8 expõe a pilha calculada sob demanda por um getter nativo.
-      if (key === 'stack' && descriptor.get && Function.prototype.toString.call(descriptor.get).includes('[native code]')) {
+      if (
+        key === 'stack' &&
+        descriptor.get &&
+        Function.prototype.toString.call(descriptor.get).includes('[native code]')
+      ) {
         try {
           return descriptor.get.call(error);
         } catch {
@@ -59,7 +67,11 @@ function readErrorProperty(error: Error, key: string): unknown {
   return undefined;
 }
 
-export function sanitizeDiagnostic(value: unknown, visited = new WeakSet<object>(), depth = 0): unknown {
+export function sanitizeDiagnostic(
+  value: unknown,
+  visited = new WeakSet<object>(),
+  depth = 0,
+): unknown {
   if (typeof value === 'string') {
     return redactText(value);
   }
@@ -89,7 +101,11 @@ export function sanitizeDiagnostic(value: unknown, visited = new WeakSet<object>
   if (value instanceof Error) {
     return {
       name: sanitizeDiagnostic(readErrorProperty(value, 'name'), visited, depth + 1),
-      message: sanitizeDiagnostic(readErrorProperty(value, 'message'), visited, depth + 1),
+      message: sanitizeDiagnostic(
+        readErrorProperty(value, 'message'),
+        visited,
+        depth + 1,
+      ),
       stack: sanitizeDiagnostic(readErrorProperty(value, 'stack'), visited, depth + 1),
       cause: sanitizeDiagnostic(readErrorProperty(value, 'cause'), visited, depth + 1),
     };
@@ -130,7 +146,10 @@ export function sanitizeDiagnostic(value: unknown, visited = new WeakSet<object>
   return result;
 }
 
-export function serializeError(error: unknown, context: ErrorContext = {}): ProductionErrorResponse | DiagnosticErrorResponse {
+export function serializeError(
+  error: unknown,
+  context: ErrorContext = {},
+): ProductionErrorResponse | DiagnosticErrorResponse {
   const known = error instanceof AppError;
   const status = known ? error.status : 500;
   const message = known ? redactText(error.message) : 'Erro interno do servidor';
@@ -139,12 +158,16 @@ export function serializeError(error: unknown, context: ErrorContext = {}): Prod
     return { status, message };
   }
 
-  const originalError = error instanceof Error
-    ? error
-    : new Error('Exceção lançada sem instância de Error');
+  const originalError =
+    error instanceof Error
+      ? error
+      : new Error('Exceção lançada sem instância de Error');
   const stack = readErrorProperty(originalError, 'stack');
   const diagnostic = known
-    ? { details: readErrorProperty(error, 'details'), cause: readErrorProperty(error, 'cause') }
+    ? {
+        details: readErrorProperty(error, 'details'),
+        cause: readErrorProperty(error, 'cause'),
+      }
     : error;
 
   return {

@@ -28,20 +28,28 @@ function checkFailure(error: unknown, original: Error, message: string): boolean
 }
 
 for (const operation of ['upload', 'delete'] as const) {
-  test(`R2 ${operation} preserva causa e usa o erro público do projeto`, async context => {
+  test(`R2 ${operation} preserva causa e usa o erro público do projeto`, async (context) => {
     const client = createClient();
     const original = new Error('Falha técnica simulada do provedor');
-    context.mock.method(client, 'send', async () => { throw original; });
+    context.mock.method(client, 'send', async () => {
+      throw original;
+    });
     const storage = new R2StorageService(client, 'test-bucket');
-    const message = operation === 'upload'
-      ? 'Não foi possível armazenar o arquivo no Cloudflare R2.'
-      : 'Não foi possível remover o arquivo do Cloudflare R2.';
+    const message =
+      operation === 'upload'
+        ? 'Não foi possível armazenar o arquivo no Cloudflare R2.'
+        : 'Não foi possível remover o arquivo do Cloudflare R2.';
 
     try {
-      const request = operation === 'upload'
-        ? storage.upload('companies/test/cover.png', Buffer.from('fixture'), 'image/png')
-        : storage.delete('companies/test/cover.png');
-      await assert.rejects(request, error => checkFailure(error, original, message));
+      const request =
+        operation === 'upload'
+          ? storage.upload(
+              'companies/test/cover.png',
+              Buffer.from('fixture'),
+              'image/png',
+            )
+          : storage.delete('companies/test/cover.png');
+      await assert.rejects(request, (error) => checkFailure(error, original, message));
     } finally {
       client.destroy();
     }
@@ -53,14 +61,20 @@ test('R2 assinatura preserva falha de credenciais sem expor diagnóstico em prod
   const client = new S3Client({
     region: 'auto',
     endpoint: 'https://storage.example.invalid',
-    credentials: async () => { throw original; },
+    credentials: async () => {
+      throw original;
+    },
   });
 
   try {
     const storage = new R2StorageService(client, 'test-bucket');
-    await assert.rejects(storage.getPresignedUrl('cover.png', 300), error => checkFailure(
-      error, original, 'Não foi possível gerar a URL temporária do arquivo.',
-    ));
+    await assert.rejects(storage.getPresignedUrl('cover.png', 300), (error) =>
+      checkFailure(
+        error,
+        original,
+        'Não foi possível gerar a URL temporária do arquivo.',
+      ),
+    );
   } finally {
     client.destroy();
   }
@@ -71,7 +85,9 @@ test('R2 gera assinatura GET com validade de 300 segundos sem chamada de rede', 
 
   try {
     const storage = new R2StorageService(client, 'test-bucket');
-    const result = new URL(await storage.getPresignedUrl('companies/test/cover.png', 300));
+    const result = new URL(
+      await storage.getPresignedUrl('companies/test/cover.png', 300),
+    );
     assert.equal(result.searchParams.get('X-Amz-Expires'), '300');
     assert.ok(result.searchParams.has('X-Amz-Signature'));
     assert.match(result.pathname, /companies\/test\/cover\.png$/);

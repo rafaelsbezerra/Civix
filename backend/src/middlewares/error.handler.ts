@@ -1,5 +1,8 @@
 import type { ErrorRequestHandler, RequestHandler, Request } from 'express';
-import { serializeError, type ErrorContext } from '../shared/contracts/error.contract.js';
+import {
+  serializeError,
+  type ErrorContext,
+} from '../shared/contracts/error.contract.js';
 import { AppError } from '../shared/errors/app.error.js';
 import { logger } from '../shared/logging/log.context.js';
 import { getLogHttp } from './log.middleware.js';
@@ -9,8 +12,11 @@ function logRequestError(error: unknown, request: Request) {
   const status = error instanceof AppError ? error.status : 500;
   try {
     logger()[status < 500 ? 'warn' : 'error']({
-      event: 'http.request.failed', module: 'http', message: 'Falha no processamento da requisição',
-      error, http: getLogHttp(request, status),
+      event: 'http.request.failed',
+      module: 'http',
+      message: 'Falha no processamento da requisição',
+      error,
+      http: getLogHttp(request, status),
     });
   } catch {
     // Logging não deve alterar o tratamento da exceção original.
@@ -26,7 +32,11 @@ export function createErrorHandler(context: ErrorContext = {}): ErrorRequestHand
     }
 
     // O parser do Express identifica JSON inválido antes dos controllers.
-    if (error instanceof SyntaxError && 'type' in error && error.type === 'entity.parse.failed') {
+    if (
+      error instanceof SyntaxError &&
+      'type' in error &&
+      error.type === 'entity.parse.failed'
+    ) {
       error = new AppError({
         status: 400,
         code: ErrorCode.VALIDATION_ERROR,
@@ -35,7 +45,11 @@ export function createErrorHandler(context: ErrorContext = {}): ErrorRequestHand
       });
     }
 
-    if (error instanceof Error && 'type' in error && error.type === 'entity.too.large') {
+    if (
+      error instanceof Error &&
+      'type' in error &&
+      error.type === 'entity.too.large'
+    ) {
       error = new AppError({
         status: 413,
         code: ErrorCode.VALIDATION_ERROR,
@@ -53,16 +67,23 @@ export function createErrorHandler(context: ErrorContext = {}): ErrorRequestHand
 
 export function createNotFoundHandler(): RequestHandler {
   return (_request, _response, next) => {
-    next(new AppError({
-      status: 404,
-      code: ErrorCode.NOT_FOUND,
-      message: 'Recurso não encontrado',
-    }));
+    next(
+      new AppError({
+        status: 404,
+        code: ErrorCode.NOT_FOUND,
+        message: 'Recurso não encontrado',
+      }),
+    );
   };
 }
 
 // Após o handler registrar e encaminhar o erro, fechar a conexão sem o console bruto do Express.
-export const terminateErroredResponse: ErrorRequestHandler = (error, _request, response, next) => {
+export const terminateErroredResponse: ErrorRequestHandler = (
+  error,
+  _request,
+  response,
+  next,
+) => {
   if (!response.headersSent) {
     next(error);
     return;

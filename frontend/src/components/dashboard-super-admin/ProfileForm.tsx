@@ -9,7 +9,11 @@ import { Input } from '../ui/input';
 
 const profileFormSchema = z.object({
   name: z.string().trim().min(1, 'Informe seu nome.').max(120),
-  email: z.string().trim().regex(/^\S+@\S+\.\S+$/, 'Informe um e-mail válido.').max(254),
+  email: z
+    .string()
+    .trim()
+    .regex(/^\S+@\S+\.\S+$/, 'Informe um e-mail válido.')
+    .max(254),
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;

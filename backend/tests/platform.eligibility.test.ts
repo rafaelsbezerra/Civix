@@ -13,9 +13,19 @@ const activeCompanyId = randomUUID();
 const legacyCompanyId = randomUUID();
 const inactiveCompanyId = randomUUID();
 const archivedCompanyId = randomUUID();
-const companyIds = [activeCompanyId, legacyCompanyId, inactiveCompanyId, archivedCompanyId];
-const imageIds = new Map<string, string>(companyIds.map(id => [id, randomUUID()] as const));
-const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/b9sAAAAASUVORK5CYII=', 'base64');
+const companyIds = [
+  activeCompanyId,
+  legacyCompanyId,
+  inactiveCompanyId,
+  archivedCompanyId,
+];
+const imageIds = new Map<string, string>(
+  companyIds.map((id) => [id, randomUUID()] as const),
+);
+const png = Buffer.from(
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/b9sAAAAASUVORK5CYII=',
+  'base64',
+);
 
 Object.assign(process.env, {
   USE_MOCK_DATA: 'true',
@@ -24,7 +34,11 @@ Object.assign(process.env, {
   LOG_LEVEL: 'fatal',
 });
 
-function makeCompany(id: string, status: 'ativo' | 'inativo' | 'verificado', deletedAt: string | null = null) {
+function makeCompany(
+  id: string,
+  status: 'ativo' | 'inativo' | 'verificado',
+  deletedAt: string | null = null,
+) {
   return {
     id,
     nome: 'Elegibilidade Serviços',
@@ -54,9 +68,18 @@ function fixture() {
   return {
     version: 1,
     companies,
-    users: [{ id: superAdminId, email: 'super-admin@example.test', role: 'super_admin', name: 'Superadmin sintético',
-      password_hash: 'hash-sintetico-nao-usado', status: 'active', company_id: null }],
-    images: companies.map(company => ({
+    users: [
+      {
+        id: superAdminId,
+        email: 'super-admin@example.test',
+        role: 'super_admin',
+        name: 'Superadmin sintético',
+        password_hash: 'hash-sintetico-nao-usado',
+        status: 'active',
+        company_id: null,
+      },
+    ],
+    images: companies.map((company) => ({
       id: imageIds.get(company.id)!,
       object_key: company.cover_key,
       original_name: 'capa.png',
@@ -75,25 +98,42 @@ function fixture() {
   };
 }
 
-test('elegibilidade pública exclui empresas suspensas/arquivadas sem apagar histórico ou imagens', async t => {
+test('elegibilidade pública exclui empresas suspensas/arquivadas sem apagar histórico ou imagens', async (t) => {
   const initialData = fixture();
   const { app } = await import('../src/app.js');
   const { signToken } = await import('../src/services/auth.service.js');
   const { readLocalData } = await import('../src/persistence/json/local.store.js');
-  const { imageObjectStore } = await import('../src/shared/integrations/cloudflare/storage.provider.js');
-  const { companyService } = await import('../src/services/company.service.js').then(module => ({ companyService: module }));
+  const { imageObjectStore } =
+    await import('../src/shared/integrations/cloudflare/storage.provider.js');
+  const { companyService } = await import('../src/services/company.service.js').then(
+    (module) => ({ companyService: module }),
+  );
   const signedKeys: string[] = [];
   const uploadedKeys: string[] = [];
 
-  t.mock.method(imageObjectStore, 'getPresignedUrl', async (key: string, seconds: number) => {
-    assert.equal(seconds, 300);
-    signedKeys.push(key);
-    return `https://images.example.test/${encodeURIComponent(key)}?expires=${seconds}`;
+  t.mock.method(
+    imageObjectStore,
+    'getPresignedUrl',
+    async (key: string, seconds: number) => {
+      assert.equal(seconds, 300);
+      signedKeys.push(key);
+      return `https://images.example.test/${encodeURIComponent(key)}?expires=${seconds}`;
+    },
+  );
+  t.mock.method(imageObjectStore, 'upload', async (key: string) => {
+    uploadedKeys.push(key);
   });
-  t.mock.method(imageObjectStore, 'upload', async (key: string) => { uploadedKeys.push(key); });
 
-  const bearer = signToken({ id: superAdminId, email: 'super-admin@example.test', role: 'super_admin',
-    companyId: null, tokenVersion: 2 }, '1h');
+  const bearer = signToken(
+    {
+      id: superAdminId,
+      email: 'super-admin@example.test',
+      role: 'super_admin',
+      companyId: null,
+      tokenVersion: 2,
+    },
+    '1h',
+  );
   const server = app.listen(0, '127.0.0.1');
 
   try {
@@ -107,9 +147,18 @@ test('elegibilidade pública exclui empresas suspensas/arquivadas sem apagar his
     const publicCompanyIds = new Set([activeCompanyId, legacyCompanyId]);
     const publicListPaths = [
       { path: '/api/v1/empresas', expectedIds: publicCompanyIds },
-      { path: '/api/v1/empresas/verificadas/todas', expectedIds: new Set([legacyCompanyId]) },
-      { path: '/api/v1/empresas/buscar?q=Elegibilidade', expectedIds: publicCompanyIds },
-      { path: `/api/v1/empresas/categoria/${encodeURIComponent('Serviços')}`, expectedIds: publicCompanyIds },
+      {
+        path: '/api/v1/empresas/verificadas/todas',
+        expectedIds: new Set([legacyCompanyId]),
+      },
+      {
+        path: '/api/v1/empresas/buscar?q=Elegibilidade',
+        expectedIds: publicCompanyIds,
+      },
+      {
+        path: `/api/v1/empresas/categoria/${encodeURIComponent('Serviços')}`,
+        expectedIds: publicCompanyIds,
+      },
       { path: '/api/v1/empresas/estado/CE', expectedIds: publicCompanyIds },
       { path: '/api/v1/empresas/tamanho/pequena', expectedIds: publicCompanyIds },
     ];
@@ -117,16 +166,34 @@ test('elegibilidade pública exclui empresas suspensas/arquivadas sem apagar his
     for (const { path, expectedIds } of publicListPaths) {
       const response = await fetch(baseUrl + path);
       assert.equal(response.status, 200, path);
-      const body = await response.json() as { data: Array<{ id: string }> };
-      assert.deepEqual(new Set(body.data.map(company => company.id)), expectedIds, path);
+      const body = (await response.json()) as { data: Array<{ id: string }> };
+      assert.deepEqual(
+        new Set(body.data.map((company) => company.id)),
+        expectedIds,
+        path,
+      );
     }
 
-    assert.equal((await fetch(`${baseUrl}/api/v1/empresas/${activeCompanyId}`)).status, 200);
-    assert.equal((await fetch(`${baseUrl}/api/v1/empresas/${legacyCompanyId}`)).status, 200);
-    assert.equal((await fetch(`${baseUrl}/api/v1/empresas/${inactiveCompanyId}`)).status, 404);
-    assert.equal((await fetch(`${baseUrl}/api/v1/empresas/${archivedCompanyId}`)).status, 404);
+    assert.equal(
+      (await fetch(`${baseUrl}/api/v1/empresas/${activeCompanyId}`)).status,
+      200,
+    );
+    assert.equal(
+      (await fetch(`${baseUrl}/api/v1/empresas/${legacyCompanyId}`)).status,
+      200,
+    );
+    assert.equal(
+      (await fetch(`${baseUrl}/api/v1/empresas/${inactiveCompanyId}`)).status,
+      404,
+    );
+    assert.equal(
+      (await fetch(`${baseUrl}/api/v1/empresas/${archivedCompanyId}`)).status,
+      404,
+    );
 
-    const archive = (await readLocalData()).companies.find(company => company.id === archivedCompanyId)!;
+    const archive = (await readLocalData()).companies.find(
+      (company) => company.id === archivedCompanyId,
+    )!;
     signedKeys.length = 0;
     const publicArchive = await companyService.presentCompany(archive);
     assert.equal(publicArchive.cover_image_url, null);
@@ -134,14 +201,20 @@ test('elegibilidade pública exclui empresas suspensas/arquivadas sem apagar his
 
     for (const companyId of [inactiveCompanyId, archivedCompanyId]) {
       const imageId = imageIds.get(companyId)!;
-      const urlResponse = await fetch(`${baseUrl}/api/v1/storage/images/${imageId}/url`);
+      const urlResponse = await fetch(
+        `${baseUrl}/api/v1/storage/images/${imageId}/url`,
+      );
       assert.equal(urlResponse.status, 404);
 
       const form = new FormData();
       form.set('module', 'companies');
       form.set('resourceId', companyId);
       form.set('purpose', 'cover');
-      form.set('file', new Blob([new Uint8Array(png)], { type: 'image/png' }), 'capa.png');
+      form.set(
+        'file',
+        new Blob([new Uint8Array(png)], { type: 'image/png' }),
+        'capa.png',
+      );
       const uploadResponse = await fetch(`${baseUrl}/api/v1/storage/images`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${bearer}` },
@@ -156,7 +229,9 @@ test('elegibilidade pública exclui empresas suspensas/arquivadas sem apagar his
     assert.deepEqual(after.images, initialData.images);
   } finally {
     server.closeAllConnections();
-    await new Promise<void>((resolve, reject) => server.close(error => error ? reject(error) : resolve()));
+    await new Promise<void>((resolve, reject) =>
+      server.close((error) => (error ? reject(error) : resolve())),
+    );
     await rm(temporaryRoot, { recursive: true, force: true });
   }
 });

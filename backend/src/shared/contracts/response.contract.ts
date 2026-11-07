@@ -15,7 +15,11 @@ export interface ResponseWriter {
   end(): unknown;
 }
 
-export function sendSuccess<T, M>(response: ResponseWriter, data: T, meta?: M): unknown {
+export function sendSuccess<T, M>(
+  response: ResponseWriter,
+  data: T,
+  meta?: M,
+): unknown {
   return response.status(200).json(createSuccessResponse(data, meta));
 }
 

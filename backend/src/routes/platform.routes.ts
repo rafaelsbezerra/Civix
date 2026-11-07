@@ -9,16 +9,31 @@ import * as userController from '../controller/user.controller.js';
 const router = Router();
 router.use(authMiddleware, requireSuperAdmin);
 router.get('/companies/:companyId/users', userController.getUsersByCompanyId);
-router.post('/companies/:companyId/users/invitations', userController.inviteCompanyUser);
+router.post(
+  '/companies/:companyId/users/invitations',
+  userController.inviteCompanyUser,
+);
 router.put('/companies/:companyId/users/:userId', userController.updateCompanyUser);
-router.post('/companies/:companyId/users/:userId/suspension', userController.suspendCompanyUser);
-router.post('/companies/:companyId/users/:userId/reactivation', userController.reactivateCompanyUser);
-router.delete('/companies/:companyId/users/:userId', userController.deleteCompanyAttendant);
+router.post(
+  '/companies/:companyId/users/:userId/suspension',
+  userController.suspendCompanyUser,
+);
+router.post(
+  '/companies/:companyId/users/:userId/reactivation',
+  userController.reactivateCompanyUser,
+);
+router.delete(
+  '/companies/:companyId/users/:userId',
+  userController.deleteCompanyAttendant,
+);
 router.get('/administrators', userController.getSuperAdmins);
 router.post('/administrators/invitations', userController.inviteSuperAdmin);
 router.put('/administrators/:userId', userController.updateSuperAdmin);
 router.post('/administrators/:userId/suspension', userController.suspendSuperAdmin);
-router.post('/administrators/:userId/reactivation', userController.reactivateSuperAdmin);
+router.post(
+  '/administrators/:userId/reactivation',
+  userController.reactivateSuperAdmin,
+);
 router.get('/sales', saleController.listPlatformSales);
 router.get('/sales/:saleId', saleController.getPlatformSale);
 router.post('/sales', saleController.createManualSale);
@@ -28,9 +43,18 @@ router.get('/companies', companyController.listPlatformCompanies);
 router.get('/companies/:companyId', companyController.getPlatformCompany);
 router.put('/companies/:companyId', companyController.updatePlatformCompany);
 router.delete('/companies/:companyId', companyController.archivePlatformCompany);
-router.post('/companies/:companyId/suspension', companyController.suspendPlatformCompany);
-router.post('/companies/:companyId/reactivation', companyController.reactivatePlatformCompany);
-router.post('/companies/:companyId/restoration', companyController.restorePlatformCompany);
+router.post(
+  '/companies/:companyId/suspension',
+  companyController.suspendPlatformCompany,
+);
+router.post(
+  '/companies/:companyId/reactivation',
+  companyController.reactivatePlatformCompany,
+);
+router.post(
+  '/companies/:companyId/restoration',
+  companyController.restorePlatformCompany,
+);
 router.get('/plans', planController.listPlatformPlans);
 router.get('/plans/:planId', planController.getPlatformPlan);
 router.post('/plans', planController.createPlatformPlan);

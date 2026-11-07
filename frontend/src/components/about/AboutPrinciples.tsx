@@ -1,10 +1,10 @@
-import valueDivider from '@/assets/civix/about/value-divider.svg'
-import visionDivider from '@/assets/civix/about/vision-divider.svg'
+import valueDivider from '@/assets/civix/about/value-divider.svg';
+import visionDivider from '@/assets/civix/about/vision-divider.svg';
 
 interface AboutPrinciple {
-  title: 'Valor' | 'Visão' | 'Missão'
-  description: string
-  divider: string
+  title: 'Valor' | 'Visão' | 'Missão';
+  description: string;
+  divider: string;
 }
 
 const principles: readonly AboutPrinciple[] = [
@@ -24,7 +24,7 @@ const principles: readonly AboutPrinciple[] = [
       'Simplificar o atendimento e potencializar vendas por meio da tecnologia.',
     divider: valueDivider,
   },
-]
+];
 
 /** Presents Civix's value, vision, and mission in the order defined by Figma. */
 export function AboutPrinciples() {
@@ -59,5 +59,5 @@ export function AboutPrinciples() {
         </article>
       ))}
     </section>
-  )
+  );
 }
