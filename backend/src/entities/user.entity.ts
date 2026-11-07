@@ -30,6 +30,8 @@ export interface User {
   tokens_revoked_at?: string | Date | null;
   invite_token?: string | null;
   company_id?: string | null;
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
 }
 
 export interface AuthenticatedUser extends User {

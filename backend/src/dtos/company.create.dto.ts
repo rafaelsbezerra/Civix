@@ -1,10 +1,18 @@
 import { z } from 'zod';
-import { companyDataSchema } from '../entities/company.entity.js';
+import {
+  BRAZIL_UFS,
+  COMPANY_PRICE_RANGES,
+  companyDataSchema,
+  type BrazilUf,
+  type CompanyPriceRange,
+} from '../entities/company.entity.js';
 
 export const companyCreateSchema = companyDataSchema
   .omit({
     id: true,
     data_cadastro: true,
+    createdAt: true,
+    updatedAt: true,
     status: true,
     verificado: true,
     cover_key: true,
@@ -22,10 +30,47 @@ export const companyCreateSchema = companyDataSchema
     cidade: z.string().trim().min(1, 'Cidade é obrigatória.'),
     estado: z.string().trim().min(1, 'Estado é obrigatório.'),
     email: z.string().trim().email().nullable().optional(),
+    faixa_preco: z.enum(COMPANY_PRICE_RANGES).nullable().optional(),
   })
   .strict();
 
 export type CompanyCreateDTO = z.infer<typeof companyCreateSchema>;
+
+export interface PublicCompanySearchFilters {
+  q?: string;
+  uf?: BrazilUf;
+  priceRange?: CompanyPriceRange;
+}
+
+export const publicCompanySearchQuerySchema = z
+  .object({
+    q: z.string().trim().max(200).optional(),
+    uf: z.string().trim().toUpperCase().pipe(z.enum(BRAZIL_UFS)).optional(),
+    priceRange: z.string().trim().pipe(z.enum(COMPANY_PRICE_RANGES)).optional(),
+  })
+  .strict()
+  .superRefine((data, ctx) => {
+    const hasName = Boolean(data.q && data.q.length > 0);
+    const hasUf = Boolean(data.uf);
+    const hasPriceRange = Boolean(data.priceRange);
+
+    if (hasUf !== hasPriceRange) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: [hasUf ? 'priceRange' : 'uf'],
+        message:
+          'A busca por região e preço exige que UF e faixa de preço sejam informados juntos.',
+      });
+    }
+
+    if (!hasName && !(hasUf && hasPriceRange)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['q'],
+        message: 'Termo de busca é obrigatório',
+      });
+    }
+  });
 
 export interface CompanyListFilters {
   q?: string;

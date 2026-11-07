@@ -124,13 +124,13 @@ test('adapter PostgreSQL de usuários usa SQL e transações simulados', async (
       );
       assert.match(statement, /email ILIKE \$2 OR COALESCE\(name,''\) ILIKE \$2/);
       assert.match(statement, /role=\$3/);
-      assert.match(statement, /COALESCE\(status,'active'\)=\$4/);
+      assert.match(statement, /COALESCE\(status::text,'ACTIVE'\)=UPPER\(\$4\)/);
       assert.match(statement, /ORDER BY email,id LIMIT \$5 OFFSET \$6/);
       assert.deepEqual(values, [
         companyId,
         '%ana\\%\\_%',
         'atendente',
-        'blocked',
+        'BLOCKED',
         5,
         10,
       ]);
@@ -202,7 +202,7 @@ test('adapter PostgreSQL de usuários usa SQL e transações simulados', async (
         update.text,
         /^UPDATE users SET status=\$1,deactivation_reason=\$2,tokens_revoked_at=GREATEST\(\$3::timestamptz,date_trunc\('milliseconds',clock_timestamp\(\)\),COALESCE\(tokens_revoked_at,'epoch'::timestamptz\)\+INTERVAL '2 milliseconds'\),invite_token=\$4,reset_password_token=\$5,reset_password_expires=\$6 WHERE id=\$7 RETURNING \*$/,
       );
-      assert.deepEqual(update.values?.slice(0, 2), ['blocked', 'Motivo sintético']);
+      assert.deepEqual(update.values?.slice(0, 2), ['BLOCKED', 'Motivo sintético']);
       assert.ok(Number.isFinite(Date.parse(String(update.values?.[2]))));
       assert.ok(
         Date.parse(String(update.values?.[2])) >
@@ -357,7 +357,7 @@ test('adapter PostgreSQL de usuários usa SQL e transações simulados', async (
         update.text,
         /invite_token=\$4,reset_password_token=\$5,reset_password_expires=\$6,deleted_at=\$7 WHERE id=\$8/,
       );
-      assert.deepEqual(update.values?.slice(0, 2), ['blocked', 'Desligamento']);
+      assert.deepEqual(update.values?.slice(0, 2), ['BLOCKED', 'Desligamento']);
       assert.deepEqual(update.values?.slice(3, 6), [null, null, null]);
       assert.ok(Math.abs(Date.parse(String(update.values?.[2])) - Date.now()) < 5000);
       assert.ok(Number.isFinite(Date.parse(String(update.values?.[6]))));
@@ -459,7 +459,7 @@ test('adapter PostgreSQL de usuários usa SQL e transações simulados', async (
         update.text,
         /^UPDATE users SET status=\$1,invite_token=\$2 WHERE id=\$3 RETURNING \*$/,
       );
-      assert.deepEqual(update.values, ['pending', null, targetId]);
+      assert.deepEqual(update.values, ['PENDING', null, targetId]);
       assert.equal(update.text.includes('tokens_revoked_at = NULL'), false);
     },
   );
@@ -625,13 +625,16 @@ test('adapter PostgreSQL de usuários usa SQL e transações simulados', async (
           assert.match(queries[0]!.text, /pg_advisory_xact_lock/);
           assert.equal(queries.length, 2);
           assert.match(queries[1]!.text, /invite_token\s*=\s*\$3/);
-          assert.match(queries[1]!.text, /status = 'pending'/);
+          assert.match(queries[1]!.text, /UPPER\(status::text\) = 'PENDING'/);
           assert.match(queries[1]!.text, /deleted_at IS NULL/);
-          assert.match(queries[1]!.text, /companies\.status <> 'inativo'/);
+          assert.match(
+            queries[1]!.text,
+            /UPPER\(companies\.status::text\) <> 'INATIVO'/,
+          );
           assert.match(queries[1]!.text, /companies\.deleted_at IS NULL/);
           assert.deepEqual(queries[1]!.values, [
             'hash-de-senha',
-            'active',
+            'ACTIVE',
             null,
             targetId,
             'token-atual',

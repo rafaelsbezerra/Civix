@@ -54,7 +54,7 @@ export const salePostgresRepository: SaleRepository = {
         !actor ||
         actor.role !== 'super_admin' ||
         actor.deleted_at ||
-        (actor.status != null && actor.status !== 'active')
+        (actor.status != null && actor.status.toLowerCase() !== 'active')
       ) {
         throw new AppError({
           status: 403,
@@ -87,7 +87,11 @@ export const salePostgresRepository: SaleRepository = {
           operation.input.companyId,
         ])
       ).rows[0];
-      if (!company || company.deleted_at || company.status === 'inativo') {
+      if (
+        !company ||
+        company.deleted_at ||
+        company.status.toLowerCase() === 'inativo'
+      ) {
         throw new AppError({
           status: 409,
           code: ErrorCode.CONFLICT,
@@ -143,7 +147,7 @@ export const salePostgresRepository: SaleRepository = {
         !actor ||
         actor.role !== 'super_admin' ||
         actor.deleted_at ||
-        (actor.status != null && actor.status !== 'active')
+        (actor.status != null && actor.status.toLowerCase() !== 'active')
       ) {
         throw new AppError({
           status: 403,

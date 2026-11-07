@@ -5,6 +5,24 @@ import { ErrorCode } from '../../shared/errors/error.code.js';
 import { createInitialSale } from '../../services/sale.service.js';
 import { normalizePlanPrice } from '../../services/plan.service.js';
 
+function createNameRegex(name: string): RegExp {
+  // Mantém os curingas % e _ observados no ILIKE do PostgreSQL.
+  const pattern = [...name]
+    .map((character) => {
+      if (character === '%') {
+        return '.*';
+      }
+
+      if (character === '_') {
+        return '.';
+      }
+
+      return character.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    })
+    .join('');
+  return new RegExp(pattern, 'iu');
+}
+
 export const companyJsonRepository: CompanyRepository = {
   async listPlatformCompanies(filters) {
     const rows = (await readLocalData()).companies
@@ -64,6 +82,7 @@ export const companyJsonRepository: CompanyRepository = {
         }
         company.deleted_at = null;
         company.status = 'inativo';
+        company.updatedAt = new Date().toISOString();
         return company;
       }
       if (company.deleted_at) {
@@ -109,7 +128,10 @@ export const companyJsonRepository: CompanyRepository = {
           });
         }
         const { planId, ...editable } = fields;
-        Object.assign(company, editable, { plan_id: planId });
+        Object.assign(company, editable, {
+          plan_id: planId,
+          updatedAt: new Date().toISOString(),
+        });
       } else if (input.action === 'reactivate') {
         if (company.status !== 'inativo') {
           throw new AppError({
@@ -119,11 +141,13 @@ export const companyJsonRepository: CompanyRepository = {
           });
         }
         company.status = 'ativo';
+        company.updatedAt = new Date().toISOString();
       } else {
         company.status = 'inativo';
         company.deactivation_reason = input.reason;
         company.deactivated_at = new Date().toISOString();
         company.deactivated_by = String(input.actorId);
+        company.updatedAt = company.deactivated_at;
         if (input.action === 'archive') {
           company.deleted_at = company.deactivated_at;
         }
@@ -318,24 +342,34 @@ export const companyJsonRepository: CompanyRepository = {
   },
 
   async searchByName(name) {
-    // Mantém os curingas % e _ observados no ILIKE do PostgreSQL.
-    const pattern = [...name]
-      .map((character) => {
-        if (character === '%') {
-          return '.*';
-        }
-
-        if (character === '_') {
-          return '.';
-        }
-
-        return character.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      })
-      .join('');
-    const search = new RegExp(pattern, 'iu');
+    const search = createNameRegex(name);
 
     return (await readLocalData()).companies.filter((company) =>
       search.test(company.nome),
     );
+  },
+
+  async searchPublicCompanies(filters) {
+    if (filters.q && !filters.uf && !filters.priceRange) {
+      return this.searchByName(filters.q);
+    }
+
+    const search = filters.q ? createNameRegex(filters.q) : null;
+
+    return (await readLocalData()).companies.filter((company) => {
+      if (search && !search.test(company.nome)) {
+        return false;
+      }
+
+      if (filters.uf && company.estado.toUpperCase() !== filters.uf.toUpperCase()) {
+        return false;
+      }
+
+      if (filters.priceRange && company.faixa_preco !== filters.priceRange) {
+        return false;
+      }
+
+      return true;
+    });
   },
 };

@@ -39,7 +39,7 @@ export function presentManagedUser(user: User) {
     name: user.name || '',
     email: user.email,
     role: user.role,
-    status: user.status || 'active',
+    status: user.status ? user.status.toLowerCase() : 'active',
     companyId: user.company_id ?? null,
     deactivationReason: user.deactivation_reason ?? null,
     invitationStatus: user.password_hash
@@ -482,7 +482,7 @@ export async function getAuthenticatedUser(id: UserId): Promise<AuthenticatedUse
     !user ||
     !isAuthenticatedRole(user.role) ||
     !!user.deleted_at ||
-    (user.status != null && user.status !== 'active') ||
+    (user.status != null && user.status.toLowerCase() !== 'active') ||
     !user.password_hash
   ) {
     throw new AppError({
@@ -502,7 +502,7 @@ export async function getAuthenticatedUser(id: UserId): Promise<AuthenticatedUse
     }
   } else {
     const company = companyId ? await companyRepository.getById(companyId) : undefined;
-    if (!company || company.status === 'inativo' || company.deleted_at) {
+    if (!company || company.status.toLowerCase() === 'inativo' || company.deleted_at) {
       throw new AppError({
         status: 401,
         code: ErrorCode.UNAUTHORIZED,

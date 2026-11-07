@@ -1,5 +1,53 @@
 import { z } from 'zod';
 
+export const BRAZIL_UFS = [
+  'AC',
+  'AL',
+  'AP',
+  'AM',
+  'BA',
+  'CE',
+  'DF',
+  'ES',
+  'GO',
+  'MA',
+  'MT',
+  'MS',
+  'MG',
+  'PA',
+  'PB',
+  'PR',
+  'PE',
+  'PI',
+  'RJ',
+  'RN',
+  'RS',
+  'RO',
+  'RR',
+  'SC',
+  'SP',
+  'SE',
+  'TO',
+] as const;
+
+export type BrazilUf = (typeof BRAZIL_UFS)[number];
+
+export const COMPANY_PRICE_RANGES = [
+  '0-100',
+  '100-300',
+  '300-500',
+  '500-plus',
+] as const;
+
+export type CompanyPriceRange = (typeof COMPANY_PRICE_RANGES)[number];
+
+export const PRICE_RANGE_TO_NUMRANGE: Record<CompanyPriceRange, string> = {
+  '0-100': '[0,100]',
+  '100-300': '[100,300]',
+  '300-500': '[300,500]',
+  '500-plus': '[500,)',
+};
+
 export interface Company {
   id: string;
   nome: string;
@@ -19,8 +67,11 @@ export interface Company {
   whatsapp?: string | null;
   status: 'ativo' | 'inativo' | 'verificado';
   data_cadastro?: string;
+  createdAt?: string;
+  updatedAt?: string;
   verificado: boolean;
   tamanho: 'pequena' | 'media' | 'grande';
+  faixa_preco?: CompanyPriceRange | null;
   descritivo?: string | null;
   tone?: 'blue' | 'green' | 'orange' | 'purple' | 'gray' | null;
   plan_id?: string | null;
@@ -47,7 +98,10 @@ export const companyDataSchema = z.object({
   status: z.enum(['ativo', 'inativo', 'verificado']),
   verificado: z.boolean(),
   tamanho: z.enum(['pequena', 'media', 'grande']),
+  faixa_preco: z.enum(COMPANY_PRICE_RANGES).nullable().optional(),
   data_cadastro: z.string().optional(),
+  createdAt: z.string().optional(),
+  updatedAt: z.string().optional(),
   logo: z.string().nullable().optional(),
   cover_key: z.string().nullable().optional(),
   logo_key: z.string().nullable().optional(),

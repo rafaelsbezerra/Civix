@@ -6,6 +6,7 @@ import type {
 import type {
   CompanyListFilters,
   CompanyAdministrationChange,
+  PublicCompanySearchFilters,
 } from '../dtos/company.create.dto.js';
 
 /** Consultas de catálogo sem dependência do driver ou do contrato HTTP. */
@@ -26,6 +27,7 @@ export interface CompanyRepository {
   getByState(state: string): Promise<Company[]>;
   getBySize(size: Company['tamanho']): Promise<Company[]>;
   searchByName(name: string): Promise<Company[]>;
+  searchPublicCompanies(filters: PublicCompanySearchFilters): Promise<Company[]>;
   updateCoverKey(
     id: string,
     coverKey: string | null,

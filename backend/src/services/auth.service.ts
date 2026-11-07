@@ -62,10 +62,10 @@ async function getInviteUser(token: string): Promise<UserRow> {
     : undefined;
   if (
     user.deleted_at ||
-    user.status !== 'pending' ||
+    (user.status ?? '').toLowerCase() !== 'pending' ||
     user.company_id !== decoded.companyId ||
     (decoded.role !== 'super_admin' &&
-      (!company || company.status === 'inativo' || company.deleted_at))
+      (!company || company.status.toLowerCase() === 'inativo' || company.deleted_at))
   ) {
     throw new AppError({
       status: 400,
@@ -142,7 +142,7 @@ export async function resendInviteEmail(email: string): Promise<void> {
   const user = await authRepository.getResetUserByEmail(email);
   if (
     !user ||
-    user.status !== 'pending' ||
+    (user.status ?? '').toLowerCase() !== 'pending' ||
     !isAuthenticatedRole(user.role) ||
     user.role === 'super_admin' ||
     !user.company_id

@@ -41,7 +41,7 @@ async function writePlan(
         actor.company_id !== null ||
         !actor.password_hash ||
         actor.deleted_at ||
-        (actor.status != null && actor.status !== 'active')
+        (actor.status != null && actor.status.toLowerCase() !== 'active')
       ) {
         throw new AppError({
           status: 403,

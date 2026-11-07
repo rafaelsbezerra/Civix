@@ -5,6 +5,19 @@ import { db } from '../../shared/config/data.js';
 import { AppError } from '../../shared/errors/app.error.js';
 import { ErrorCode } from '../../shared/errors/error.code.js';
 
+function normalizeAuthRow<T extends { status?: string }>(
+  row: T | undefined,
+): T | undefined {
+  if (!row) {
+    return undefined;
+  }
+
+  return {
+    ...row,
+    status: row.status == null ? row.status : row.status.toLowerCase(),
+  };
+}
+
 export const authPostgresRepository: AuthRepository = {
   async getInviteUserByEmail(email, role) {
     const query =
@@ -13,14 +26,17 @@ export const authPostgresRepository: AuthRepository = {
         : 'SELECT * FROM users WHERE LOWER(email) = LOWER($1) AND role = $2';
     const values = role === undefined ? [email] : [email, role];
     const { rows } = await db.query<UserRow>(query, values);
+    const normalizedRows = rows.map((row) => normalizeAuthRow(row)!);
 
     if (role !== undefined) {
-      return rows[0];
+      return normalizedRows[0];
     }
 
     // Preservar contas ativas ao verificar reconvites para o mesmo e-mail.
     return (
-      rows.find((user) => user.status === 'active' || user.status == null) ?? rows[0]
+      normalizedRows.find(
+        (user) => user.status?.toLowerCase() === 'active' || user.status == null,
+      ) ?? normalizedRows[0]
     );
   },
 
@@ -32,12 +48,12 @@ export const authPostgresRepository: AuthRepository = {
       const result = await client.query(
         `UPDATE users
        SET password_hash = $1, status = $2, invite_token = $3
-       WHERE id = $4 AND invite_token = $5 AND status = 'pending' AND deleted_at IS NULL
+       WHERE id = $4 AND invite_token = $5 AND UPPER(status::text) = 'PENDING' AND deleted_at IS NULL
        AND ((role = 'super_admin' AND company_id IS NULL) OR
          (role IN ('admin_empresa','atendente') AND EXISTS
-           (SELECT 1 FROM companies WHERE companies.id = users.company_id AND companies.status <> 'inativo' AND companies.deleted_at IS NULL)))
+           (SELECT 1 FROM companies WHERE companies.id = users.company_id AND UPPER(companies.status::text) <> 'INATIVO' AND companies.deleted_at IS NULL)))
        RETURNING id`,
-        [passwordHash, 'active', null, id, token],
+        [passwordHash, 'ACTIVE', null, id, token],
       );
 
       return result.rowCount === 1;
@@ -45,11 +61,13 @@ export const authPostgresRepository: AuthRepository = {
   },
 
   async getResetUserByEmail(email) {
-    return (
-      await db.query<User>('SELECT * FROM users WHERE LOWER(email) = LOWER($1)', [
-        email,
-      ])
-    ).rows[0];
+    return normalizeAuthRow(
+      (
+        await db.query<User>('SELECT * FROM users WHERE LOWER(email) = LOWER($1)', [
+          email,
+        ])
+      ).rows[0],
+    );
   },
 
   async saveResetToken(id, token) {
@@ -70,7 +88,11 @@ export const authPostgresRepository: AuthRepository = {
           [companyId],
         )
       ).rows[0];
-      if (!company || company.deleted_at || company.status === 'inativo') {
+      if (
+        !company ||
+        company.deleted_at ||
+        company.status.toLowerCase() === 'inativo'
+      ) {
         throw new AppError({
           status: 409,
           code: ErrorCode.CONFLICT,
@@ -81,10 +103,10 @@ export const authPostgresRepository: AuthRepository = {
         const result = await client.query(
           `UPDATE users
          SET role = $1, status = $2, invite_token = $3
-         WHERE id = $4 AND status = 'pending' AND company_id = $5 AND role = $1 AND deleted_at IS NULL
+         WHERE id = $4 AND UPPER(status::text) = 'PENDING' AND company_id = $5 AND role = $1 AND deleted_at IS NULL
          AND (tokens_revoked_at IS NULL OR tokens_revoked_at < $6::timestamptz)
          RETURNING id`,
-          [role, 'pending', token, existingId, companyId, issuedAt ?? null],
+          [role, 'PENDING', token, existingId, companyId, issuedAt ?? null],
         );
 
         if (result.rowCount !== 1) {
@@ -102,7 +124,7 @@ export const authPostgresRepository: AuthRepository = {
       await client.query(
         `INSERT INTO users (email, role, status, invite_token, company_id)
        VALUES ($1, $2, $3, $4, $5)`,
-        [email, role, 'pending', token, companyId],
+        [email, role, 'PENDING', token, companyId],
       );
     });
   },
