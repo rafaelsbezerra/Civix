@@ -179,8 +179,8 @@ export default function PerfilEmpresa() {
               width="432"
             />
 
-            <div className="relative z-10 flex min-h-[600px] flex-col justify-center gap-12 px-6 py-16 text-[var(--color-civix-ivory)] sm:px-10 lg:flex-row lg:items-start lg:justify-between lg:px-16 lg:py-16 xl:px-24">
-              <div className="min-w-0 max-w-3xl">
+            <div className="relative z-10 flex min-h-[600px] flex-col justify-center gap-12 px-6 py-16 text-[var(--color-civix-ivory)] sm:px-10 lg:flex-row lg:items-start lg:justify-between lg:gap-16 lg:px-16 lg:py-16 xl:px-24">
+              <div className="min-w-0 flex-1 max-w-3xl lg:pr-4">
                 <p className="mb-4 flex items-center gap-2 text-sm font-bold tracking-widest text-[var(--color-civix-gold)]">
                   {empresa.verificado ? (
                     <span
@@ -193,7 +193,7 @@ export default function PerfilEmpresa() {
 
                 <motion.h1
                   variants={itemVariants}
-                  className="max-w-[643px] break-words font-[family-name:var(--font-display)] text-[clamp(2.5rem,5vw,4rem)] font-semibold uppercase leading-[1.1] tracking-[-0.02em] lg:leading-[80px] lg:tracking-[-0.034em]"
+                  className="max-w-full break-words font-[family-name:var(--font-display)] text-[clamp(1.85rem,3.4vw,2.85rem)] font-bold uppercase leading-[1.15] tracking-normal"
                 >
                   {empresa.nome}
                 </motion.h1>
@@ -316,7 +316,7 @@ export default function PerfilEmpresa() {
         <section className="py-20 px-6 sm:px-10 lg:px-16 xl:px-32 max-w-[1728px] mx-auto -mt-10 relative z-20">
           <div
             data-motion="section"
-            className="bg-white rounded-2xl shadow-xl p-8 md:p-12 border border-gray-100 max-w-5xl"
+            className="mx-auto max-w-5xl rounded-2xl border border-gray-100 bg-white p-8 shadow-xl md:p-12"
           >
             <p className="text-sm font-bold text-gray-400 tracking-wider mb-2">
               SOBRE A EMPRESA
