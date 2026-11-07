@@ -73,6 +73,7 @@ const apiVersion = '/api/v1';
 app.use(`${apiVersion}/users`, userRoutes);
 app.use(`${apiVersion}/auth`, firstAccessRoutes);
 app.use(`${apiVersion}/empresas`, companyRoutes);
+app.use(`${apiVersion}/companies`, companyRoutes);
 app.use(`${apiVersion}/plans`, planRoutes);
 app.use(`${apiVersion}/storage`, storageRoutes);
 app.use(`${apiVersion}/platform`, platformRoutes);

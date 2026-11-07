@@ -133,17 +133,7 @@ export async function listVerifiedCompanies(
 }
 
 export async function searchCompanies(req: Request, res: Response): Promise<Response> {
-  const { q } = req.query;
-
-  if (!q || typeof q !== 'string' || q.trim() === '') {
-    throw new AppError({
-      status: 400,
-      code: ErrorCode.VALIDATION_ERROR,
-      message: 'Termo de busca é obrigatório',
-    });
-  }
-
-  const result = await companyService.searchCompanies(q);
+  const result = await companyService.searchPublicCompanies(req.query);
 
   return res
     .status(200)

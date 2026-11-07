@@ -2,7 +2,11 @@ import { logger } from '../shared/logging/log.context.js';
 import { USE_MOCK_DATA } from '../shared/config/data.js';
 import type { Company } from '../entities/company.entity.js';
 import { randomUUID } from 'node:crypto';
-import { companyCreateSchema } from '../dtos/company.create.dto.js';
+import {
+  companyCreateSchema,
+  publicCompanySearchQuerySchema,
+  type PublicCompanySearchFilters,
+} from '../dtos/company.create.dto.js';
 import { companyRepository } from '../persistence/company.repository.js';
 import { AppError } from '../shared/errors/app.error.js';
 import { ErrorCode } from '../shared/errors/error.code.js';
@@ -160,10 +164,13 @@ export async function createCompanyWithInitialSale(input: unknown, actorId: User
   const fingerprint = createHash('sha256')
     .update(JSON.stringify({ ...fields, planId }))
     .digest('hex');
+  const now = new Date().toISOString();
   const company: Company = {
     ...fields,
     id: randomUUID(),
-    data_cadastro: new Date().toISOString(),
+    data_cadastro: now,
+    createdAt: now,
+    updatedAt: now,
     status: 'ativo',
     verificado: false,
   };
@@ -222,10 +229,13 @@ export async function createCompany(input: unknown): Promise<Company> {
     });
   }
 
+  const now = new Date().toISOString();
   const company: Company = {
     ...parsed.data,
     id: randomUUID(),
-    data_cadastro: new Date().toISOString(),
+    data_cadastro: now,
+    createdAt: now,
+    updatedAt: now,
     status: 'ativo',
     verificado: false,
   };
@@ -343,7 +353,65 @@ export async function getCompaniesBySize(
 }
 
 export async function searchCompanies(name: string): Promise<Company[]> {
-  const companies = (await companyRepository.searchByName(name)).filter(
+  return searchPublicCompanies({ q: name });
+}
+
+export async function searchPublicCompanies(input: unknown): Promise<Company[]> {
+  const raw =
+    typeof input === 'object' && input !== null
+      ? (input as Record<string, unknown>)
+      : {};
+  const normalized: Record<string, unknown> = {};
+
+  for (const key of ['q', 'uf', 'priceRange'] as const) {
+    const value = raw[key];
+    if (value === undefined) {
+      continue;
+    }
+    if (typeof value !== 'string') {
+      throw new AppError({
+        status: 400,
+        code: ErrorCode.VALIDATION_ERROR,
+        message:
+          key === 'q'
+            ? 'Termo de busca é obrigatório'
+            : 'Parâmetros de busca inválidos.',
+      });
+    }
+    if (value.trim() !== '') {
+      normalized[key] = value;
+    }
+  }
+
+  for (const key of Object.keys(raw)) {
+    if (!['q', 'uf', 'priceRange'].includes(key)) {
+      if (key.startsWith('q[')) {
+        throw new AppError({
+          status: 400,
+          code: ErrorCode.VALIDATION_ERROR,
+          message: 'Termo de busca é obrigatório',
+        });
+      }
+      throw new AppError({
+        status: 400,
+        code: ErrorCode.VALIDATION_ERROR,
+        message: 'Parâmetros de busca inválidos.',
+      });
+    }
+  }
+
+  const parsed = publicCompanySearchQuerySchema.safeParse(normalized);
+  if (!parsed.success) {
+    const firstIssue = parsed.error.issues[0];
+    throw new AppError({
+      status: 400,
+      code: ErrorCode.VALIDATION_ERROR,
+      message: firstIssue?.message ?? 'Parâmetros de busca inválidos.',
+    });
+  }
+
+  const filters: PublicCompanySearchFilters = parsed.data;
+  const companies = (await companyRepository.searchPublicCompanies(filters)).filter(
     (company) => company.status !== 'inativo' && !company.deleted_at,
   );
 
