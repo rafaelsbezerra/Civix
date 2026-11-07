@@ -23,6 +23,7 @@ import {
 } from '../ui/select';
 import { Textarea } from '../ui/textarea';
 import type { CompanyRegistrationInput, Plan, PlatformCompany } from '../../lib/api';
+import { COMPANY_PRICE_RANGES } from '../../lib/brazil-states';
 import { CompanyImageInput } from './CompanyImageInput';
 
 const companyFormSchema = z.object({
@@ -32,6 +33,7 @@ const companyFormSchema = z.object({
   tamanho: z.enum(['pequena', 'media', 'grande'], {
     message: 'Selecione o porte da empresa.',
   }),
+  faixa_preco: z.enum(['', '0-100', '100-300', '300-500', '500-plus']),
   descricao: z.string().trim().min(1, 'Informe o resumo da empresa.'),
   descricao_detalhada: z.string().trim().min(1, 'Informe a descrição detalhada.'),
   cidade: z.string().trim().min(1, 'Informe a cidade.'),
@@ -65,6 +67,10 @@ const sizeOptions = [
   { value: 'pequena', label: 'Pequena' },
   { value: 'media', label: 'Média' },
   { value: 'grande', label: 'Grande' },
+];
+const priceRangeOptions = [
+  { value: '', label: 'Não informada' },
+  ...COMPANY_PRICE_RANGES,
 ];
 const currency = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 const themeVariables = {
@@ -111,6 +117,16 @@ export function CompanyForm({
       cidade: company?.cidade ?? '',
       estado: company?.estado ?? '',
       tamanho: company?.tamanho ?? 'pequena',
+      faixa_preco:
+        company?.faixa_preco === '[0,100]' || company?.faixa_preco === '0-100'
+          ? '0-100'
+          : company?.faixa_preco === '[100,300]' || company?.faixa_preco === '100-300'
+            ? '100-300'
+            : company?.faixa_preco === '[300,500]' || company?.faixa_preco === '300-500'
+              ? '300-500'
+              : company?.faixa_preco === '[500,)' || company?.faixa_preco === '500-plus'
+                ? '500-plus'
+                : '',
       email: company?.email ?? '',
       telefone: company?.telefone ?? '',
       endereco: company?.endereco ?? '',
@@ -142,6 +158,11 @@ export function CompanyForm({
         estado: values.estado,
         tamanho: values.tamanho,
         planId: values.planId,
+        ...(values.faixa_preco
+          ? { faixa_preco: values.faixa_preco }
+          : company?.faixa_preco !== undefined
+            ? { faixa_preco: null }
+            : {}),
         ...(values.email || company ? { email: values.email || null } : {}),
         ...(values.telefone || company ? { telefone: values.telefone || null } : {}),
         ...(values.endereco || company ? { endereco: values.endereco || null } : {}),
@@ -230,6 +251,40 @@ export function CompanyForm({
                         </SelectTrigger>
                         <SelectContent container={portal} alignItemWithTrigger={false}>
                           {sizeOptions.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FieldError errors={[fieldState.error]} />
+                    </Field>
+                  )}
+                />
+                <Controller
+                  control={control}
+                  name="faixa_preco"
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid || undefined}>
+                      <FieldLabel htmlFor={id + '-faixa-preco'}>
+                        Faixa de preço (opcional)
+                      </FieldLabel>
+                      <Select
+                        name={field.name}
+                        value={field.value}
+                        onValueChange={(value) => field.onChange(value ?? '')}
+                        items={priceRangeOptions}
+                        disabled={busy}
+                      >
+                        <SelectTrigger
+                          id={id + '-faixa-preco'}
+                          aria-invalid={fieldState.invalid}
+                          className={selectTriggerClass}
+                        >
+                          <SelectValue placeholder="Não informada" />
+                        </SelectTrigger>
+                        <SelectContent container={portal} alignItemWithTrigger={false}>
+                          {priceRangeOptions.map((option) => (
                             <SelectItem key={option.value} value={option.value}>
                               {option.label}
                             </SelectItem>

@@ -1,9 +1,31 @@
 import decorativeShape from '@/assets/civix/decorative-shape.svg';
 import heroArtwork from '@/assets/civix/hero-artwork.svg';
 import { ActionButton } from '@/components/ui/ActionButton';
-import { SearchForm } from './SearchForm';
+import { SearchForm, type SearchFormValues } from './SearchForm';
 
 export function HeroSection() {
+  const handleSearchSubmit = (values: SearchFormValues) => {
+    const params = new URLSearchParams();
+    const query = values.query.trim();
+    const uf = values.region.trim().toUpperCase();
+    const priceRange = values.priceRange.trim();
+
+    if (query) {
+      params.set('q', query);
+    }
+    if (uf) {
+      params.set('uf', uf);
+    }
+    if (priceRange) {
+      params.set('priceRange', priceRange);
+    }
+
+    const searchString = params.toString();
+    const targetPath = searchString ? `/catalogo?${searchString}` : '/catalogo';
+    window.history.pushState({}, '', targetPath);
+    window.dispatchEvent(new PopStateEvent('popstate'));
+  };
+
   return (
     <section
       aria-labelledby="hero-title"
@@ -69,7 +91,7 @@ export function HeroSection() {
           className="relative z-20 mx-4 -mt-8 rounded-[var(--radius-search)] bg-[var(--color-civix-ivory)] p-6 shadow-[0_34px_26px_rgba(13,10,44,0.25),0_12px_34px_rgba(13,10,44,0.25),0_4px_4px_rgba(0,0,0,0.25)] sm:mx-8 sm:p-8 lg:absolute lg:left-[17.875%] lg:top-[811px] lg:mx-0 lg:mt-0 lg:min-h-[142px] lg:w-[69%] lg:px-10 lg:py-[45px]"
           data-testid="hero-search-card"
         >
-          <SearchForm />
+          <SearchForm onSubmit={handleSearchSubmit} />
         </div>
       </div>
     </section>

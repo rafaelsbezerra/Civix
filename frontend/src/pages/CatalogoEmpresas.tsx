@@ -1,8 +1,8 @@
 import { useEffect, useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   fetchEmpresas,
-  searchEmpresas,
+  searchCompaniesByFilters,
   fetchEmpresasByCategoria,
   fetchEmpresasByEstado,
 } from '@/lib/api';
@@ -10,7 +10,7 @@ import type { Empresa } from '@/lib/api';
 import { SiteHeader } from '@/components/layout/SiteHeader';
 import Footer from '@/components/layout/SiteFooter';
 import { MapPin, SearchX } from 'lucide-react';
-import { SearchForm } from '@/components/home/SearchForm';
+import { SearchForm, type SearchFormValues } from '@/components/home/SearchForm';
 import decorativeShape from '@/assets/civix/decorative-shape.svg';
 import heroArtwork from '@/assets/civix/hero-artwork.svg';
 
@@ -46,7 +46,13 @@ export default function CatalogoEmpresas() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isFiltered, setIsFiltered] = useState(false);
+  const [searchFormResetKey, setSearchFormResetKey] = useState(0);
+  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
+
+  const initialQuery = searchParams.get('q') ?? '';
+  const initialUf = searchParams.get('uf') ?? '';
+  const initialPriceRange = searchParams.get('priceRange') ?? '';
 
   // Função para carregar todas as empresas (usada ao recarregar/limpar filtros)
   const loadEmpresas = useCallback(async () => {
@@ -68,16 +74,51 @@ export default function CatalogoEmpresas() {
     }
   }, []);
 
-  // Efeito de busca inicial na montagem do componente
+  // Efeito de busca inicial ou quando parâmetros de busca na URL mudam
   useEffect(() => {
     let active = true;
+    const q = (searchParams.get('q') ?? '').trim();
+    const uf = (searchParams.get('uf') ?? '').trim().toUpperCase();
+    const priceRange = (searchParams.get('priceRange') ?? '').trim();
 
-    async function loadInitialData() {
+    async function loadData() {
       try {
-        const data = await fetchEmpresas();
+        setLoading(true);
+        setError(null);
+
+        const hasNameFilter = q.length > 0;
+        const hasUfFilter = uf.length > 0;
+        const hasPriceFilter = priceRange.length > 0;
+
+        if (!hasNameFilter && !hasUfFilter && !hasPriceFilter) {
+          setIsFiltered(false);
+          const data = await fetchEmpresas();
+          if (active) {
+            setEmpresas(data);
+          }
+          return;
+        }
+
+        setIsFiltered(true);
+
+        if (!hasNameFilter && hasUfFilter !== hasPriceFilter) {
+          if (active) {
+            setEmpresas([]);
+            setError(
+              'Para buscar por região e preço, selecione tanto a Região / UF quanto a Faixa de preço, ou informe o nome da empresa.',
+            );
+          }
+          return;
+        }
+
+        const data = await searchCompaniesByFilters({
+          q: hasNameFilter ? q : undefined,
+          uf: hasUfFilter && hasPriceFilter ? uf : undefined,
+          priceRange: hasUfFilter && hasPriceFilter ? priceRange : undefined,
+        });
+
         if (active) {
           setEmpresas(data);
-          setError(null);
         }
       } catch (err) {
         console.error('Erro ao carregar empresas:', err);
@@ -95,14 +136,45 @@ export default function CatalogoEmpresas() {
       }
     }
 
-    loadInitialData();
+    void loadData();
 
     return () => {
       active = false;
     };
-  }, []);
+  }, [searchParams]);
 
-  // Callback executado quando o usuário submete o formulário de busca
+  // Callback executado quando o usuário submete o card de busca por nome e UF + faixa de preço
+  const handleSearchFormSubmit = (values: SearchFormValues) => {
+    const q = values.query.trim();
+    const uf = values.region.trim().toUpperCase();
+    const priceRange = values.priceRange.trim();
+
+    if (!q && !uf && !priceRange) {
+      setSearchParams({});
+      return;
+    }
+
+    if (!q && Boolean(uf) !== Boolean(priceRange)) {
+      setIsFiltered(true);
+      setEmpresas([]);
+      setError(
+        'Para buscar por região e preço, selecione tanto a Região / UF quanto a Faixa de preço, ou informe o nome da empresa.',
+      );
+      return;
+    }
+
+    const nextParams = new URLSearchParams();
+    if (q) {
+      nextParams.set('q', q);
+    }
+    if (uf && priceRange) {
+      nextParams.set('uf', uf);
+      nextParams.set('priceRange', priceRange);
+    }
+    setSearchParams(nextParams);
+  };
+
+  // Callback legado de busca por categoria/estado
   const handleSearch = async (filters: {
     termo?: string;
     categoria?: string;
@@ -116,13 +188,12 @@ export default function CatalogoEmpresas() {
       let result: Empresa[] = [];
 
       if (filters.termo && filters.termo.trim() !== '') {
-        result = await searchEmpresas(filters.termo);
+        result = await searchCompaniesByFilters({ q: filters.termo.trim() });
       } else if (filters.categoria && filters.categoria !== 'todas') {
         result = await fetchEmpresasByCategoria(filters.categoria);
       } else if (filters.estado && filters.estado !== 'todos') {
         result = await fetchEmpresasByEstado(filters.estado);
       } else {
-        // Se nenhum filtro significativo foi preenchido, recarrega a lista completa
         await loadEmpresas();
         return;
       }
@@ -142,7 +213,12 @@ export default function CatalogoEmpresas() {
 
   // Reseta todos os filtros e recarrega a lista original
   const handleClearFilters = () => {
-    loadEmpresas();
+    setSearchFormResetKey((prev) => prev + 1);
+    if (searchParams.toString()) {
+      setSearchParams({});
+    } else {
+      void loadEmpresas();
+    }
   };
 
   const handleEmpresaClick = (empresaId: string, startedAt: number) => {
@@ -211,7 +287,16 @@ export default function CatalogoEmpresas() {
               className="relative z-20 mx-4 -mt-8 rounded-[var(--radius-search)] bg-[var(--color-civix-ivory)] p-6 shadow-[0_34px_26px_rgba(13,10,44,0.25),0_12px_34px_rgba(13,10,44,0.25),0_4px_4px_rgba(0,0,0,0.25)] sm:mx-8 sm:p-8 lg:absolute lg:left-[17.875%] lg:top-[525px] lg:mx-0 lg:mt-0 lg:min-h-[142px] lg:w-[69%] lg:px-10 lg:py-[45px]"
               data-testid="hero-search-card"
             >
-              <SearchForm onSearch={handleSearch} />
+              <SearchForm
+                key={`${searchFormResetKey}-${initialQuery}-${initialUf}-${initialPriceRange}`}
+                initialValues={{
+                  query: initialQuery,
+                  region: initialUf,
+                  priceRange: initialPriceRange,
+                }}
+                onSubmit={handleSearchFormSubmit}
+                onSearch={handleSearch}
+              />
             </div>
           </div>
         </section>
