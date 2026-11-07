@@ -1,40 +1,43 @@
-# Seed de staging a partir dos dados locais
+# Seed e Reset do banco de dados a partir dos dados locais
 
-Importa companies, plans e users de backend/.local-data/data.json (ou do
-diretório MOCK_DATA_DIR). Preserva UUIDs de empresas/usuários, papéis atuais,
-vínculos e hashes bcrypt. Não importa tokens de convite/reset, outbox nem
-objetos/imagens R2. Não versionar o JSON local ou credenciais.
+Importa `companies`, `plans` e `users` de `backend/.local-data/data.json` (ou do
+diretório `MOCK_DATA_DIR`). Preserva UUIDs de empresas/usuários, papéis atuais,
+vínculos, faixas de preço (`price_range`), timestamps (`created_at`, `updated_at`),
+enums de status em UPPER CASE (`user_status` e `company_status`) e hashes bcrypt.
+Não importa tokens de convite/reset, outbox nem objetos/imagens R2. Não versionar
+o JSON local ou credenciais.
 
-Decisões confirmadas em 2026-11-02: staging vazio; IDs numéricos de planos
-gerados pelo banco, usando slug para reconhecer o plano e traduzir o plan_id
-local; planos já inseridos pelas migrations só são reutilizados quando seus
-dados comerciais coincidirem integralmente. Divergência interrompe o seed.
-Empresas/usuários preexistentes também interrompem, sem sobrescrever.
+O script de **reset** (`backend/scripts/reset.database.ts`) executa a limpeza das
+tabelas de negócio (`TRUNCATE TABLE sales, company_registration_operations, images, users, companies, plans RESTART IDENTITY CASCADE`)
+dentro de uma transação, preservando o schema e a tabela `_prisma_migrations`.
 
 ## Preparação
 
-Aplicar as migrations é uma ação separada, não executada pelo seed.
-A [migration incremental user_company_scope](../backend/prisma/migrations/20261102000100_user_company_scope/migration.sql) acrescenta users.company_id, FK
-e regras de vínculo: admin_empresa/atendente exigem empresa; super_admin/
-cliente não possuem vínculo. Não edita migrations anteriores. Dados antigos
-incompatíveis fazem a migration falhar, sem associação inferida.
+Aplicar as migrations é uma ação separada, não executada pelo seed nem pelo reset.
+Toda vez que uma nova migration alterar o schema (colunas, constraints, tabelas ou enums),
+os scripts `backend/scripts/lib/staging.seed.ts` e `backend/scripts/lib/database.reset.ts`
+devem ser atualizados em conjunto.
 
-O script usa pg já instalado e STAGING_DATABASE_URL explicitamente; não usa
-DATABASE_URL como fallback. Confirme externamente que a URL pertence a
-staging. Seu nome não comprova o ambiente remoto. Não incluir URL em comandos
-versionados ou exemplos com credenciais.
+Os scripts usam `pg` já instalado e leem as variáveis de banco configuradas no `.env`
+(`DATABASE_URL` ou `STAGING_DATABASE_URL`).
 
 ## Uso no diretório backend
 
 ```powershell
-# Prévia local: valida e mostra apenas contagens, sem conectar ao banco
-npm run seed:staging
+# Prévia local do seed: valida e mostra apenas contagens, sem conectar ao banco
+npm run seed
 
 # Arquivo de origem explícito
-npm run seed:staging -- --source caminho/para/data.json
+npm run seed -- --source caminho/para/data.json
 
-# Após preparar as migrations e configurar STAGING_DATABASE_URL no ambiente
-npm run seed:staging -- --apply
+# Aplicar seed no banco configurado no .env (DATABASE_URL / STAGING_DATABASE_URL)
+npm run seed -- --apply
+
+# Prévia do reset: lista as tabelas que serão limpas, sem conectar ao banco
+npm run reset:db
+
+# Executar o reset das tabelas de negócio no banco configurado no .env
+npm run reset:db -- --apply
 ```
 
 --apply grava dados; criar o script não significa que essa execução foi

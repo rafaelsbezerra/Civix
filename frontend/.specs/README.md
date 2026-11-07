@@ -1,5 +1,66 @@
 # Specs do frontend
 
+## Estrutura obrigatória de todas as specs
+
+Toda especificação de funcionalidade (`.specs/features/<nome-da-feature>/`) **deve** conter obrigatoriamente **3 arquivos**:
+
+1. `feature.md` — visão de negócio, escopo funcional na interface, decisões confirmadas/pendentes e critérios de aceite.
+2. `sdd.md` — desenho técnico (Software Design Document), componentes, estados, contratos de API consumidos e fluxos de navegação.
+3. `tasks.md` — plano de execução passo a passo seguindo estritamente o template abaixo.
+
+### Padrão obrigatório para o arquivo `tasks.md`
+
+```markdown
+# <Título>
+
+## Objetivo
+<Descrição clara do objetivo da entrega>
+
+## Restrições globais
+- <Restrição 1>
+- <Restrição 2>
+
+## Pontos de atenção
+- <Ponto de atenção, se houver>
+
+---
+
+## Task 1: <Título da Task>
+
+**Arquivos:**
+- Modificar:
+  - `caminho/do/arquivo.tsx`
+- Criar:
+  - `caminho/do/novo-arquivo.tsx`
+
+**Passos:**
+- [ ] Passo 1
+- [ ] Passo 2
+
+**Pronto quando:**
+- <Critério objetivo de conclusão e verificação>
+
+**Commit sugerido:**
+`feat(escopo): mensagem em ingles no padrao conventional commits`
+```
+
+### Regra obrigatória para migrations em specs integradas (`_prisma_migrations` + UP e DOWN)
+
+Sempre que uma spec envolver criação de migrations no backend (`backend/prisma/migrations/<nome_da_migration>/`), toda migration deve conter:
+1. **UP (`migration.sql`):** o SQL da alteração acompanhado de um `INSERT` idempotente na tabela `_prisma_migrations` (pois as migrations podem ser executadas via query SQL direta no banco, sem passar pelo CLI do Prisma).
+2. **DOWN (`down.sql` na mesma pasta + bloco comentado no `migration.sql`):** o SQL de reversão das alterações e o `DELETE FROM "_prisma_migrations" WHERE "migration_name" = '<nome_da_migration>'`.
+3. **Atualização obrigatória do Seed e do Reset:** toda alteração que possua migration exige a atualização conjunta dos scripts de **seed** (`backend/scripts/seed.staging.ts` / `backend/scripts/lib/staging.seed.ts`) e de **reset** (`backend/scripts/reset.database.ts` / `backend/scripts/lib/database.reset.ts`), que utilizam as variáveis de banco do `.env`.
+
+---
+
+## Busca pública de empresas e evolução de schema — 2026-11-07
+
+- [Feature](features/company-search-and-schema/feature.md)
+- [SDD](features/company-search-and-schema/sdd.md)
+- [Tasks](features/company-search-and-schema/tasks.md)
+
+---
+
 ## Entrega do superadmin — 2026-11-02
 
 [Telas e integração](features/super-admin-dashboard/spec.md) e
