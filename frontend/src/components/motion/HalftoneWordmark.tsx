@@ -57,18 +57,13 @@ export function HalftoneWordmark({ wordmark }: HalftoneWordmarkProps) {
 
     function layout() {
       const bounds = rootElement.getBoundingClientRect();
+      const nextWidth = Math.max(1, Math.round(bounds.width));
 
-      width = Math.max(1, Math.round(bounds.width));
-      height = Math.max(1, Math.round(bounds.height));
+      width = nextWidth;
       pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
-      canvasElement.width = Math.round(width * pixelRatio);
-      canvasElement.height = Math.round(height * pixelRatio);
 
       const mask = document.createElement('canvas');
       const maskContext = mask.getContext('2d', { willReadFrequently: true });
-
-      mask.width = width;
-      mask.height = height;
 
       if (!maskContext) {
         return;
@@ -79,8 +74,12 @@ export function HalftoneWordmark({ wordmark }: HalftoneWordmarkProps) {
 
       maskContext.font = baseFont;
 
+      const baseMetrics = maskContext.measureText(wordmark);
+      const baseGlyphWidth =
+        (baseMetrics.actualBoundingBoxLeft ?? 0) +
+        (baseMetrics.actualBoundingBoxRight ?? baseMetrics.width);
       const fittedSize = getFittedFontSize(
-        maskContext.measureText(wordmark).width,
+        baseGlyphWidth || baseMetrics.width,
         width * 0.98,
       );
 
@@ -89,13 +88,33 @@ export function HalftoneWordmark({ wordmark }: HalftoneWordmarkProps) {
       maskContext.textBaseline = 'alphabetic';
 
       const metrics = maskContext.measureText(wordmark);
-      const capHeight = metrics.actualBoundingBoxAscent || fittedSize * 0.72;
+      const ascent = metrics.actualBoundingBoxAscent || fittedSize * 0.72;
+      const topPadding = Math.max(12, DOT_GAP * 2);
+      const bottomCrop = Math.round(ascent * 0.14);
+      const requiredHeight = Math.ceil(ascent + topPadding - bottomCrop);
 
-      maskContext.fillText(
-        wordmark,
-        (width - metrics.width) / 2,
-        height + capHeight * 0.18,
-      );
+      height = Math.max(150, requiredHeight);
+
+      if (Math.round(bounds.height) !== height) {
+        rootElement.style.height = `${height}px`;
+      }
+
+      canvasElement.width = Math.round(width * pixelRatio);
+      canvasElement.height = Math.round(height * pixelRatio);
+      mask.width = width;
+      mask.height = height;
+
+      maskContext.font = `800 ${fittedSize}px ${fontFamily}`;
+      maskContext.fillStyle = '#000';
+      maskContext.textBaseline = 'alphabetic';
+
+      const leftOverflow = metrics.actualBoundingBoxLeft ?? 0;
+      const rightOverflow = metrics.actualBoundingBoxRight ?? metrics.width;
+      const glyphWidth = leftOverflow + rightOverflow || metrics.width;
+      const textX = (width - glyphWidth) / 2 + leftOverflow;
+      const baselineY = Math.round(height + bottomCrop);
+
+      maskContext.fillText(wordmark, textX, baselineY);
 
       const pixels = maskContext.getImageData(0, 0, width, height).data;
       const gap = width < 640 ? DOT_GAP + 1 : DOT_GAP;
