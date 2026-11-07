@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 
 import arrowRight from '@/assets/civix/arrow-right.svg';
 import selectChevron from '@/assets/civix/select-chevron.svg';
+import { BRAZIL_STATES, COMPANY_PRICE_RANGES } from '@/lib/brazil-states';
 
 export interface SearchFormValues {
   priceRange: string;
@@ -22,6 +23,13 @@ const emptyValues: SearchFormValues = {
 
 const fieldClasses =
   'h-[52px] w-full border-0 border-b border-[var(--color-civix-navy)] bg-transparent px-5 pb-5 pt-2 font-[family-name:var(--font-display)] text-base font-medium text-[var(--color-civix-navy)] outline-none placeholder:text-[var(--color-civix-navy)] focus:border-[var(--color-civix-gold)]';
+
+const selectBackgroundStyle = {
+  backgroundImage: `url(${selectChevron})`,
+  backgroundPosition: 'right center',
+  backgroundRepeat: 'no-repeat',
+  backgroundSize: '46px 44px',
+} as const;
 
 export function SearchForm({ initialValues, onSubmit }: SearchFormProps) {
   const [values, setValues] = useState<SearchFormValues>({
@@ -58,17 +66,22 @@ export function SearchForm({ initialValues, onSubmit }: SearchFormProps) {
 
       <label className="block">
         <span className="sr-only">Região</span>
-        <input
-          className={fieldClasses}
-          maxLength={100}
+        <select
+          className={`${fieldClasses} appearance-none pr-12`}
           name="region"
           onChange={(event) =>
             setValues((current) => ({ ...current, region: event.target.value }))
           }
-          placeholder="Região"
-          type="text"
+          style={selectBackgroundStyle}
           value={values.region}
-        />
+        >
+          <option value="">Região / UF</option>
+          {BRAZIL_STATES.map((state) => (
+            <option key={state.uf} value={state.uf}>
+              {state.uf} - {state.name}
+            </option>
+          ))}
+        </select>
       </label>
 
       <label className="block">
@@ -79,19 +92,15 @@ export function SearchForm({ initialValues, onSubmit }: SearchFormProps) {
           onChange={(event) =>
             setValues((current) => ({ ...current, priceRange: event.target.value }))
           }
-          style={{
-            backgroundImage: `url(${selectChevron})`,
-            backgroundPosition: 'right center',
-            backgroundRepeat: 'no-repeat',
-            backgroundSize: '46px 44px',
-          }}
+          style={selectBackgroundStyle}
           value={values.priceRange}
         >
           <option value="">Faixa de preço</option>
-          <option value="0-100">Até R$ 100</option>
-          <option value="100-300">R$ 100 a R$ 300</option>
-          <option value="300-500">R$ 300 a R$ 500</option>
-          <option value="500-plus">Acima de R$ 500</option>
+          {COMPANY_PRICE_RANGES.map((range) => (
+            <option key={range.value} value={range.value}>
+              {range.label}
+            </option>
+          ))}
         </select>
       </label>
 

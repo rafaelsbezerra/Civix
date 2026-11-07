@@ -2,11 +2,13 @@ import { useState, type FormEvent } from 'react';
 
 import arrowRight from '@/assets/civix/arrow-right.svg';
 import selectChevron from '@/assets/civix/select-chevron.svg';
+import { BRAZIL_STATES, COMPANY_PRICE_RANGES } from '@/lib/brazil-states';
 
 export interface SearchFormFilters {
   termo?: string;
   categoria?: string;
   estado?: string;
+  faixaPreco?: string;
 }
 
 export interface SearchFormValues {
@@ -30,11 +32,32 @@ const emptyValues: SearchFormValues = {
 const fieldClasses =
   'h-[52px] w-full border-0 border-b border-[var(--color-civix-navy)] bg-transparent px-5 pb-5 pt-2 font-[family-name:var(--font-display)] text-base font-medium text-[var(--color-civix-navy)] outline-none placeholder:text-[var(--color-civix-navy)] focus:border-[var(--color-civix-gold)]';
 
+const selectBackgroundStyle = {
+  backgroundImage: `url(${selectChevron})`,
+  backgroundPosition: 'right center',
+  backgroundRepeat: 'no-repeat',
+  backgroundSize: '46px 44px',
+} as const;
+
 export function SearchForm({ initialValues, onSubmit, onSearch }: SearchFormProps) {
+  const [prevInitialValues, setPrevInitialValues] = useState(initialValues);
   const [values, setValues] = useState<SearchFormValues>({
     ...emptyValues,
     ...initialValues,
   });
+
+  if (
+    initialValues &&
+    (initialValues.query !== prevInitialValues?.query ||
+      initialValues.region !== prevInitialValues?.region ||
+      initialValues.priceRange !== prevInitialValues?.priceRange)
+  ) {
+    setPrevInitialValues(initialValues);
+    setValues({
+      ...emptyValues,
+      ...initialValues,
+    });
+  }
 
   const submitSearch = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -42,11 +65,12 @@ export function SearchForm({ initialValues, onSubmit, onSearch }: SearchFormProp
     // Dispara a callback legada, se existir
     onSubmit?.(values);
 
-    // Dispara a nova callback tratada para filtros de busca da API
+    // Dispara a callback tratada para filtros de busca da API
     onSearch?.({
       termo: values.query,
       estado: values.region,
-      categoria: values.priceRange, // Ou campo referente à categoria se alterar o select
+      categoria: values.priceRange,
+      faixaPreco: values.priceRange,
     });
   };
 
@@ -77,17 +101,22 @@ export function SearchForm({ initialValues, onSubmit, onSearch }: SearchFormProp
 
       <label className="block">
         <span className="sr-only">Região</span>
-        <input
-          className={fieldClasses}
-          maxLength={100}
+        <select
+          className={`${fieldClasses} appearance-none pr-12`}
           name="region"
           onChange={(event) =>
             setValues((current) => ({ ...current, region: event.target.value }))
           }
-          placeholder="Região / UF"
-          type="text"
+          style={selectBackgroundStyle}
           value={values.region}
-        />
+        >
+          <option value="">Região / UF</option>
+          {BRAZIL_STATES.map((state) => (
+            <option key={state.uf} value={state.uf}>
+              {state.uf} - {state.name}
+            </option>
+          ))}
+        </select>
       </label>
 
       <label className="block">
@@ -98,19 +127,15 @@ export function SearchForm({ initialValues, onSubmit, onSearch }: SearchFormProp
           onChange={(event) =>
             setValues((current) => ({ ...current, priceRange: event.target.value }))
           }
-          style={{
-            backgroundImage: `url(${selectChevron})`,
-            backgroundPosition: 'right center',
-            backgroundRepeat: 'no-repeat',
-            backgroundSize: '46px 44px',
-          }}
+          style={selectBackgroundStyle}
           value={values.priceRange}
         >
           <option value="">Faixa de preço</option>
-          <option value="0-100">Até R$ 100</option>
-          <option value="100-300">R$ 100 a R$ 300</option>
-          <option value="300-500">R$ 300 a R$ 500</option>
-          <option value="500-plus">Acima de R$ 500</option>
+          {COMPANY_PRICE_RANGES.map((range) => (
+            <option key={range.value} value={range.value}>
+              {range.label}
+            </option>
+          ))}
         </select>
       </label>
 

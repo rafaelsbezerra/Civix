@@ -1,3 +1,5 @@
+import type { CompanyPriceRangeValue } from './brazil-states';
+
 /**
  * Consumidores HTTP do frontend para os contratos atuais do backend.
  */
@@ -19,8 +21,11 @@ export interface Empresa {
   whatsapp?: string | null;
   status: 'ativo' | 'inativo' | 'verificado';
   data_cadastro?: string;
+  createdAt?: string;
+  updatedAt?: string;
   verificado: boolean;
   tamanho: 'pequena' | 'media' | 'grande';
+  faixa_preco?: CompanyPriceRangeValue | null;
   descritivo?: string | null;
   tone?: string | null;
 }
@@ -72,7 +77,12 @@ export type CompanyRegistrationInput = Pick<
   | 'estado'
   | 'tamanho'
 > &
-  Partial<Pick<Empresa, 'email' | 'telefone' | 'endereco' | 'website' | 'whatsapp'>> & {
+  Partial<
+    Pick<
+      Empresa,
+      'email' | 'telefone' | 'endereco' | 'website' | 'whatsapp' | 'faixa_preco'
+    >
+  > & {
     planId: string;
     operationId: string;
   };
@@ -352,6 +362,32 @@ export const searchEmpresas = async (termo: string): Promise<Empresa[]> => {
 
   const response = await fetchApi<Empresa[]>(
     `/api/v1/empresas/buscar?${params.toString()}`,
+  );
+  return response.data;
+};
+
+export interface CompanySearchFilterParams {
+  q?: string;
+  uf?: string;
+  priceRange?: string;
+}
+
+export const searchCompaniesByFilters = async (
+  filters: CompanySearchFilterParams,
+): Promise<Empresa[]> => {
+  const params = new URLSearchParams();
+  if (filters.q && filters.q.trim() !== '') {
+    params.set('q', filters.q.trim());
+  }
+  if (filters.uf && filters.uf.trim() !== '') {
+    params.set('uf', filters.uf.trim().toUpperCase());
+  }
+  if (filters.priceRange && filters.priceRange.trim() !== '') {
+    params.set('priceRange', filters.priceRange.trim());
+  }
+
+  const response = await fetchApi<Empresa[]>(
+    `/api/v1/companies/search?${params.toString()}`,
   );
   return response.data;
 };
