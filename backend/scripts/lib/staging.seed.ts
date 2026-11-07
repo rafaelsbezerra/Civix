@@ -3,12 +3,45 @@ import {
   localDataSchema,
   type LocalData,
 } from '../../src/persistence/json/local.data.js';
+import {
+  PRICE_RANGE_TO_NUMRANGE,
+  type CompanyPriceRange,
+} from '../../src/entities/company.entity.js';
+
+function toDatabaseNumrange(faixaPreco?: CompanyPriceRange | null): string | null {
+  if (!faixaPreco) {
+    return null;
+  }
+  return PRICE_RANGE_TO_NUMRANGE[faixaPreco] ?? null;
+}
 
 export interface SeedConnection {
   query(text: string, values?: unknown[]): Promise<{ rows: Record<string, unknown>[] }>;
 }
 
 export class SeedError extends Error {}
+
+function normalizeCompanyStatus(status: string): 'ATIVO' | 'INATIVO' | 'VERIFICADO' {
+  const upper = status.trim().toUpperCase();
+  if (upper === 'INATIVO') {
+    return 'INATIVO';
+  }
+  if (upper === 'VERIFICADO') {
+    return 'VERIFICADO';
+  }
+  return 'ATIVO';
+}
+
+function normalizeUserStatus(status?: string | null): 'ACTIVE' | 'PENDING' | 'BLOCKED' {
+  const upper = (status ?? 'ACTIVE').trim().toUpperCase();
+  if (upper === 'PENDING') {
+    return 'PENDING';
+  }
+  if (upper === 'BLOCKED') {
+    return 'BLOCKED';
+  }
+  return 'ACTIVE';
+}
 
 function requireSeed(condition: unknown, message: string): asserts condition {
   if (!condition) {
@@ -229,10 +262,15 @@ export async function applyStagingSeed(
       planIds.set(String(plan.id), String(row.id));
     }
     for (const company of data.companies) {
+      const createdAt =
+        company.createdAt ?? company.data_cadastro ?? new Date().toISOString();
+      const updatedAt = company.updatedAt ?? createdAt;
+      const priceRange = toDatabaseNumrange(company.faixa_preco);
+
       await connection.query(
-        `INSERT INTO companies (id, name, tax_id, description, detailed_description, category, city, state,
-          status, is_verified, size, created_at, logo, address, phone, email, website, whatsapp, additional_description, tone)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20)`,
+        `INSERT INTO companies (id, name, cnpj, description, detailed_description, category, city, state,
+          status, is_verified, size, price_range, created_at, updated_at, logo, address, phone, email, website, whatsapp, additional_description, tone)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9::company_status,$10,$11,$12::numrange,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22)`,
         [
           company.id,
           company.nome,
@@ -242,10 +280,12 @@ export async function applyStagingSeed(
           company.categoria,
           company.cidade,
           company.estado,
-          company.status,
+          normalizeCompanyStatus(company.status),
           company.verificado,
           company.tamanho,
-          company.data_cadastro ?? null,
+          priceRange,
+          createdAt,
+          updatedAt,
           company.logo ?? null,
           company.endereco ?? null,
           company.telefone ?? null,
@@ -260,15 +300,15 @@ export async function applyStagingSeed(
     for (const user of data.users) {
       await connection.query(
         `INSERT INTO users (id, name, email, role, password_hash, status, company_id, plan_id,
-          invite_token, reset_password_token, reset_password_expires)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,NULL,NULL,NULL)`,
+          invite_token, reset_password_token, reset_password_expires, created_at, updated_at)
+         VALUES ($1,$2,$3,$4,$5,$6::user_status,$7,$8,NULL,NULL,NULL,NOW(),NOW())`,
         [
           user.id,
           user.name ?? null,
           user.email,
           user.role,
           user.password_hash ?? null,
-          user.status ?? null,
+          normalizeUserStatus(user.status),
           user.company_id,
           user.plan_id == null ? null : planIds.get(String(user.plan_id)),
         ],

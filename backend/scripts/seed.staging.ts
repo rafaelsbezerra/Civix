@@ -50,16 +50,18 @@ async function main(): Promise<void> {
     );
     return;
   }
-  const connectionString = process.env.STAGING_DATABASE_URL;
+  const connectionString = process.env.STAGING_DATABASE_URL || process.env.DATABASE_URL;
   if (!connectionString) {
-    throw new SeedError('Defina STAGING_DATABASE_URL explicitamente para aplicar.');
+    throw new SeedError(
+      'Defina DATABASE_URL (ou STAGING_DATABASE_URL) no .env para aplicar.',
+    );
   }
   const client = new Client({ connectionString, connectionTimeoutMillis: 10000 });
   try {
     await client.connect();
     await applyStagingSeed(client, data);
     console.log(
-      'Seed de staging confirmado. Tokens e mensagens da outbox não foram importados.',
+      'Seed confirmado no banco configurado no .env. Tokens e mensagens da outbox não foram importados.',
     );
   } finally {
     await client.end();

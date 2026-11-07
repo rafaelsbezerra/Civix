@@ -13,16 +13,16 @@ datasource db {
 model companies {
   id                                    String                            @id @db.Uuid
   name                                  String
-  tax_id                                String                            @unique
+  cnpj                                  String                            @unique
   description                           String
   detailed_description                  String
   category                              String
   city                                  String
   state                                 String
-  status                                String
+  status                                company_status                    @default(ATIVO)
   is_verified                           Boolean
   size                                  String
-  created_at                            DateTime?                         @db.Timestamptz(6)
+  createdAt                             DateTime                          @default(now()) @map("created_at") @db.Timestamptz(6)
   logo                                  String?
   cover_key                             String?
   logo_key                              String?
@@ -38,6 +38,8 @@ model companies {
   deactivation_reason                   String?
   deactivated_at                        DateTime?                         @db.Timestamptz(6)
   deactivated_by                        String?                           @db.Uuid
+  price_range                           Unsupported("numrange")?
+  updatedAt                             DateTime                          @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
   images_companies_cover_keyToimages    images?                           @relation("companies_cover_keyToimages", fields: [cover_key], references: [object_key], onDelete: NoAction, onUpdate: NoAction)
   users_companies_deactivated_byTousers users?                            @relation("companies_deactivated_byTousers", fields: [deactivated_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
   images_companies_logo_keyToimages     images?                           @relation("companies_logo_keyToimages", fields: [logo_key], references: [object_key], onDelete: NoAction, onUpdate: NoAction)
@@ -47,6 +49,7 @@ model companies {
   users                                 users[]
 
   @@index([plan_id])
+  @@index([price_range], map: "companies_price_range_gist_idx", type: Gist)
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
@@ -98,7 +101,7 @@ model users {
   email                                     String
   role                                      String
   password_hash                             String?
-  status                                    String?
+  status                                    user_status                       @default(ACTIVE)
   invite_token                              String?
   reset_password_token                      String?
   reset_password_expires                    DateTime?                         @db.Timestamptz(6)
@@ -107,6 +110,8 @@ model users {
   deleted_at                                DateTime?                         @db.Timestamptz(6)
   deactivation_reason                       String?
   tokens_revoked_at                         DateTime?                         @db.Timestamptz(6)
+  createdAt                                 DateTime                          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                                 DateTime                          @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
   companies_companies_deactivated_byTousers companies[]                       @relation("companies_deactivated_byTousers")
   company_registration_operations           company_registration_operations[]
   images                                    images[]
@@ -141,9 +146,9 @@ model sales {
   origin                          String
   pricing_mode                    String
   plan_name                       String?
-  plan_price                      Decimal?                          @db.Decimal(12, 2)
+  plan_price                      Decimal?                          @db.Decimal(10, 2)
   plan_billing_period             String?
-  amount                          Decimal                           @db.Decimal(12, 2)
+  amount                          Decimal                           @db.Decimal(10, 2)
   currency                        String                            @default("BRL")
   description                     String?
   sold_at                         DateTime                          @db.Timestamptz(6)
@@ -158,4 +163,16 @@ model sales {
 
   @@unique([created_by, operation_id], map: "sales_manual_operation_key", where: raw("(operation_id IS NOT NULL)"))
   @@index([company_id])
+}
+
+enum user_status {
+  ACTIVE
+  PENDING
+  BLOCKED
+}
+
+enum company_status {
+  ATIVO
+  INATIVO
+  VERIFICADO
 }

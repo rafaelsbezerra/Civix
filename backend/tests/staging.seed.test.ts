@@ -6,6 +6,11 @@ import {
   prepareStagingSeed,
   type SeedConnection,
 } from '../scripts/lib/staging.seed.js';
+import {
+  applyDatabaseReset,
+  RESET_TARGET_TABLES,
+  type ResetConnection,
+} from '../scripts/lib/database.reset.js';
 
 const companyId = '11111111-1111-4111-8111-111111111111';
 const userId = '22222222-2222-4222-8222-222222222222';
@@ -132,17 +137,21 @@ test('importa em transação, mapeia plano local para BIGINT e preserva hash/ví
   const company = calls.find((call) => call.text.startsWith('INSERT INTO companies'))!;
   const user = calls.find((call) => call.text.startsWith('INSERT INTO users'))!;
   assert.equal(company.values?.[0], companyId);
+  assert.match(company.text, /INSERT INTO companies \(id, name, cnpj,/);
+  assert.match(company.text, /\$9::company_status,\$10,\$11,\$12::numrange/);
+  assert.equal(company.values?.[8], 'ATIVO');
   assert.deepEqual(user.values, [
     userId,
     'Usuário teste',
     'admin@example.test',
     'admin_empresa',
     hash,
-    'active',
+    'ACTIVE',
     companyId,
     databasePlanId,
   ]);
-  assert.match(user.text, /NULL,NULL,NULL/);
+  assert.match(user.text, /\$6::user_status/);
+  assert.match(user.text, /NULL,NULL,NULL,NOW\(\),NOW\(\)/);
   assert.ok(!JSON.stringify(calls).includes('token-local-descartado'));
   assert.ok(!calls.some((call) => /INSERT INTO (images|outbox)/.test(call.text)));
 });
@@ -415,4 +424,51 @@ test('falha intermediária executa rollback e preserva erro original mesmo se ro
   );
   assert.equal(calls.at(-1)?.text, 'ROLLBACK');
   assert.ok(!calls.some((call) => call.text === 'COMMIT'));
+});
+
+test('reset limpa tabelas de negócio em transação preservando _prisma_migrations', async () => {
+  const calls: { text: string; values?: unknown[] }[] = [];
+  const connection: ResetConnection = {
+    async query(text, values) {
+      calls.push({ text, values });
+      if (text.includes('information_schema.tables')) {
+        return {
+          rows: RESET_TARGET_TABLES.map((table_name) => ({ table_name })),
+        };
+      }
+      return { rows: [] };
+    },
+  };
+
+  await applyDatabaseReset(connection);
+
+  assert.equal(calls[0].text, 'BEGIN');
+  assert.equal(calls[1].text, 'SET LOCAL search_path TO public');
+  assert.ok(
+    calls.some(
+      (call) =>
+        call.text ===
+        'TRUNCATE TABLE sales, company_registration_operations, images, users, companies, plans RESTART IDENTITY CASCADE',
+    ),
+  );
+  assert.equal(calls.at(-1)?.text, 'COMMIT');
+});
+
+test('reset interrompe com rollback caso alguma tabela das migrations esteja ausente', async () => {
+  const calls: { text: string; values?: unknown[] }[] = [];
+  const connection: ResetConnection = {
+    async query(text, values) {
+      calls.push({ text, values });
+      if (text.includes('information_schema.tables')) {
+        return {
+          rows: [{ table_name: 'plans' }],
+        };
+      }
+      return { rows: [] };
+    },
+  };
+
+  await assert.rejects(applyDatabaseReset(connection), /Tabelas ausentes no banco/);
+  assert.equal(calls.at(-1)?.text, 'ROLLBACK');
+  assert.ok(!calls.some((call) => call.text.startsWith('TRUNCATE TABLE')));
 });
