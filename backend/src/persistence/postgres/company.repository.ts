@@ -90,7 +90,7 @@ export const companyPostgresRepository: CompanyRepository = {
         ).rows[0];
         if (
           !actor ||
-          actor.role !== 'super_admin' ||
+          actor.role.toLowerCase() !== 'super_admin' ||
           actor.deleted_at ||
           (actor.status != null && actor.status.toLowerCase() !== 'active')
         ) {
@@ -308,7 +308,7 @@ export const companyPostgresRepository: CompanyRepository = {
         ).rows[0];
         if (
           !actor ||
-          actor.role !== 'super_admin' ||
+          actor.role.toLowerCase() !== 'super_admin' ||
           (actor.status != null && actor.status.toLowerCase() !== 'active')
         ) {
           throw new AppError({

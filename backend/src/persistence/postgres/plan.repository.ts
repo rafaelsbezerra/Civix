@@ -37,7 +37,7 @@ async function writePlan(
       ).rows[0];
       if (
         !actor ||
-        actor.role !== 'super_admin' ||
+        actor.role.toLowerCase() !== 'super_admin' ||
         actor.company_id !== null ||
         !actor.password_hash ||
         actor.deleted_at ||

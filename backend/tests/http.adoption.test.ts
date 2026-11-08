@@ -185,7 +185,7 @@ test('Convite valida propósito, empresa, estado e token antes da ativação bcr
       });
       const lookup = calls.find((call) => call.text.includes('FROM users'))!;
       assert.match(lookup.text, /LOWER\(email\) = LOWER\(\$1\) AND role = \$2/);
-      assert.deepEqual(lookup.values, [account.email, account.role]);
+      assert.deepEqual(lookup.values, [account.email, account.role.toUpperCase()]);
       for (const [next, status] of [
         ['active', 400],
         ['used', 401],

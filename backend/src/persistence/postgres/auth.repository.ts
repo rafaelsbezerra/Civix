@@ -1,11 +1,11 @@
-import type { User } from '../../entities/user.entity.js';
+import type { User, UserRole } from '../../entities/user.entity.js';
 import type { UserRow } from '../../interfaces/auth.user.row.js';
 import type { AuthRepository } from '../../repositories/auth.repository.js';
 import { db } from '../../shared/config/data.js';
 import { AppError } from '../../shared/errors/app.error.js';
 import { ErrorCode } from '../../shared/errors/error.code.js';
 
-function normalizeAuthRow<T extends { status?: string }>(
+function normalizeAuthRow<T extends { status?: string; role?: UserRole }>(
   row: T | undefined,
 ): T | undefined {
   if (!row) {
@@ -14,6 +14,7 @@ function normalizeAuthRow<T extends { status?: string }>(
 
   return {
     ...row,
+    role: row.role == null ? row.role : (row.role.toLowerCase() as UserRole),
     status: row.status == null ? row.status : row.status.toLowerCase(),
   };
 }
@@ -24,7 +25,7 @@ export const authPostgresRepository: AuthRepository = {
       role === undefined
         ? 'SELECT * FROM users WHERE LOWER(email) = LOWER($1)'
         : 'SELECT * FROM users WHERE LOWER(email) = LOWER($1) AND role = $2';
-    const values = role === undefined ? [email] : [email, role];
+    const values = role === undefined ? [email] : [email, role.toUpperCase()];
     const { rows } = await db.query<UserRow>(query, values);
     const normalizedRows = rows.map((row) => normalizeAuthRow(row)!);
 
@@ -49,8 +50,8 @@ export const authPostgresRepository: AuthRepository = {
         `UPDATE users
        SET password_hash = $1, status = $2, invite_token = $3
        WHERE id = $4 AND invite_token = $5 AND UPPER(status::text) = 'PENDING' AND deleted_at IS NULL
-       AND ((role = 'super_admin' AND company_id IS NULL) OR
-         (role IN ('admin_empresa','atendente') AND EXISTS
+       AND ((role = 'SUPER_ADMIN' AND company_id IS NULL) OR
+         (role IN ('ADMIN_EMPRESA','ATENDENTE') AND EXISTS
            (SELECT 1 FROM companies WHERE companies.id = users.company_id AND UPPER(companies.status::text) <> 'INATIVO' AND companies.deleted_at IS NULL)))
        RETURNING id`,
         [passwordHash, 'ACTIVE', null, id, token],
@@ -99,6 +100,7 @@ export const authPostgresRepository: AuthRepository = {
           message: 'Empresa indisponível para convite.',
         });
       }
+      const upperRole = role.toUpperCase();
       if (existingId !== undefined) {
         const result = await client.query(
           `UPDATE users
@@ -106,7 +108,7 @@ export const authPostgresRepository: AuthRepository = {
          WHERE id = $4 AND UPPER(status::text) = 'PENDING' AND company_id = $5 AND role = $1 AND deleted_at IS NULL
          AND (tokens_revoked_at IS NULL OR tokens_revoked_at < $6::timestamptz)
          RETURNING id`,
-          [role, 'PENDING', token, existingId, companyId, issuedAt ?? null],
+          [upperRole, 'PENDING', token, existingId, companyId, issuedAt ?? null],
         );
 
         if (result.rowCount !== 1) {
@@ -124,7 +126,7 @@ export const authPostgresRepository: AuthRepository = {
       await client.query(
         `INSERT INTO users (email, role, status, invite_token, company_id)
        VALUES ($1, $2, $3, $4, $5)`,
-        [email, role, 'PENDING', token, companyId],
+        [email, upperRole, 'PENDING', token, companyId],
       );
     });
   },

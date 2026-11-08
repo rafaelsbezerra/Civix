@@ -52,7 +52,7 @@ export const salePostgresRepository: SaleRepository = {
       ).rows[0];
       if (
         !actor ||
-        actor.role !== 'super_admin' ||
+        actor.role.toLowerCase() !== 'super_admin' ||
         actor.deleted_at ||
         (actor.status != null && actor.status.toLowerCase() !== 'active')
       ) {
@@ -145,7 +145,7 @@ export const salePostgresRepository: SaleRepository = {
       ).rows[0];
       if (
         !actor ||
-        actor.role !== 'super_admin' ||
+        actor.role.toLowerCase() !== 'super_admin' ||
         actor.deleted_at ||
         (actor.status != null && actor.status.toLowerCase() !== 'active')
       ) {

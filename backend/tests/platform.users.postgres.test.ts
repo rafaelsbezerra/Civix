@@ -120,7 +120,7 @@ test('adapter PostgreSQL de usuários usa SQL e transações simulados', async (
       assert.match(statement, /deleted_at IS NULL/);
       assert.match(
         statement,
-        /company_id=\$1 AND role IN \('admin_empresa','atendente'\)/,
+        /company_id=\$1 AND role IN \('ADMIN_EMPRESA','ATENDENTE'\)/,
       );
       assert.match(statement, /email ILIKE \$2 OR COALESCE\(name,''\) ILIKE \$2/);
       assert.match(statement, /role=\$3/);
@@ -129,7 +129,7 @@ test('adapter PostgreSQL de usuários usa SQL e transações simulados', async (
       assert.deepEqual(values, [
         companyId,
         '%ana\\%\\_%',
-        'atendente',
+        'ATENDENTE',
         'BLOCKED',
         5,
         10,
@@ -141,7 +141,7 @@ test('adapter PostgreSQL de usuários usa SQL e transações simulados', async (
         offset: 0,
       });
       assert.match(statement, /deleted_at IS NULL/);
-      assert.match(statement, /role='super_admin' AND company_id IS NULL/);
+      assert.match(statement, /role='SUPER_ADMIN' AND company_id IS NULL/);
       assert.doesNotMatch(statement, /company_id=\$1/);
       assert.deepEqual(values, [20, 0]);
       assert.equal(global.total, 9);
@@ -164,7 +164,7 @@ test('adapter PostgreSQL de usuários usa SQL e transações simulados', async (
           if (text.includes('FROM users WHERE id=$1 FOR UPDATE')) {
             return { rows: [values?.[0] === actorId ? superAdmin(actorId) : target] };
           }
-          if (text.includes("role='super_admin'")) {
+          if (text.includes("role='SUPER_ADMIN'")) {
             return { rows: activeAdmins };
           }
           if (text.includes('FROM users WHERE id=$1')) {
@@ -196,7 +196,7 @@ test('adapter PostgreSQL de usuários usa SQL e transações simulados', async (
       assert.deepEqual(queries[1].values, [actorId]);
       assert.match(queries[2].text, /FROM users WHERE id=\$1 FOR UPDATE/);
       assert.deepEqual(queries[2].values, [targetId]);
-      assert.match(queries[3].text, /role='super_admin'.*FOR UPDATE/);
+      assert.match(queries[3].text, /role='SUPER_ADMIN'.*FOR UPDATE/);
       const update = queries.at(-1)!;
       assert.match(
         update.text,
@@ -246,7 +246,7 @@ test('adapter PostgreSQL de usuários usa SQL e transações simulados', async (
                   ],
                 };
               }
-              if (text.includes("role='super_admin'")) {
+              if (text.includes("role='SUPER_ADMIN'")) {
                 return { rows: [superAdmin(actorId)] };
               }
               if (text.includes('FROM users WHERE id=$1')) {
@@ -275,13 +275,13 @@ test('adapter PostgreSQL de usuários usa SQL e transações simulados', async (
           assert.match(queries[1]!, /FOR UPDATE/);
           if (scenario === 'last-active') {
             const activeCheck = queries.find((query) =>
-              query.includes("role='super_admin'"),
+              query.includes("role='SUPER_ADMIN'"),
             )!;
             assert.match(activeCheck, /deleted_at IS NULL/);
             assert.match(activeCheck, /FOR UPDATE/);
           } else {
             assert.equal(
-              queries.some((query) => query.includes("role='super_admin'")),
+              queries.some((query) => query.includes("role='SUPER_ADMIN'")),
               false,
             );
           }
@@ -529,7 +529,7 @@ test('adapter PostgreSQL de usuários usa SQL e transações simulados', async (
       assert.deepEqual(insert.values?.slice(1), [
         'novo-super@example.test',
         'Novo Super',
-        'super_admin',
+        'SUPER_ADMIN',
         null,
         'token-sintetico',
       ]);

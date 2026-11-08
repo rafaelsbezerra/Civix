@@ -1,4 +1,4 @@
-import type { User } from '../../entities/user.entity.js';
+import type { User, UserRole } from '../../entities/user.entity.js';
 import type { UserRepository } from '../../repositories/user.repository.js';
 import { db } from '../../shared/config/data.js';
 import { AppError } from '../../shared/errors/app.error.js';
@@ -13,7 +13,7 @@ function normalizeUserStatus(status?: string | null): string | undefined {
   return status.toLowerCase();
 }
 
-function normalizeUser<T extends { status?: string }>(
+function normalizeUser<T extends { status?: string; role?: UserRole }>(
   user: T | undefined,
 ): T | undefined {
   if (!user) {
@@ -22,6 +22,7 @@ function normalizeUser<T extends { status?: string }>(
 
   return {
     ...user,
+    role: user.role == null ? user.role : (user.role.toLowerCase() as UserRole),
     status: normalizeUserStatus(user.status),
   };
 }
@@ -31,10 +32,10 @@ export const userPostgresRepository: UserRepository = {
     const values: unknown[] = [];
     const where = ['deleted_at IS NULL'];
     if (companyId === null) {
-      where.push("role='super_admin' AND company_id IS NULL");
+      where.push("role='SUPER_ADMIN' AND company_id IS NULL");
     } else {
       values.push(companyId);
-      where.push("company_id=$1 AND role IN ('admin_empresa','atendente')");
+      where.push("company_id=$1 AND role IN ('ADMIN_EMPRESA','ATENDENTE')");
     }
     if (filters.q) {
       values.push('%' + filters.q.replace(/[\\%_]/g, '\\$&') + '%');
@@ -47,7 +48,7 @@ export const userPostgresRepository: UserRepository = {
       );
     }
     if (filters.role) {
-      values.push(filters.role);
+      values.push(filters.role.toUpperCase());
       where.push('role=$' + values.length);
     }
     if (filters.status) {
@@ -180,7 +181,7 @@ export const userPostgresRepository: UserRepository = {
                   randomUUID(),
                   input.email,
                   input.name ?? null,
-                  input.role,
+                  input.role!.toUpperCase(),
                   input.companyId,
                   input.token,
                 ],
@@ -235,8 +236,8 @@ export const userPostgresRepository: UserRepository = {
           }
           updates.email = input.email;
           updates.name = input.name;
-          if (input.companyId !== null) {
-            updates.role = input.role;
+          if (input.companyId !== null && input.role) {
+            updates.role = input.role.toUpperCase();
           }
         } else if (input.action === 'reactivate') {
           if (String(user.id) === String(actor.id)) {
@@ -272,7 +273,7 @@ export const userPostgresRepository: UserRepository = {
               });
             }
             const active = await client.query(
-              "SELECT id FROM users WHERE role='super_admin' AND company_id IS NULL AND deleted_at IS NULL AND password_hash IS NOT NULL AND UPPER(COALESCE(status::text,'ACTIVE'))='ACTIVE' FOR UPDATE",
+              "SELECT id FROM users WHERE role='SUPER_ADMIN' AND company_id IS NULL AND deleted_at IS NULL AND password_hash IS NOT NULL AND UPPER(COALESCE(status::text,'ACTIVE'))='ACTIVE' FOR UPDATE",
             );
             if (
               !!user.password_hash &&
@@ -373,7 +374,7 @@ export const userPostgresRepository: UserRepository = {
             user.id,
             user.email,
             user.name ?? null,
-            user.role,
+            user.role.toUpperCase(),
             user.company_id ?? null,
             (user.status ?? 'active').toUpperCase(),
             user.password_hash ?? null,
@@ -411,7 +412,7 @@ export const userPostgresRepository: UserRepository = {
       (
         await db.query<User>(
           'SELECT * FROM users WHERE LOWER(email) = LOWER($1) AND role = $2',
-          [email, role],
+          [email, role.toUpperCase()],
         )
       ).rows[0],
     );
