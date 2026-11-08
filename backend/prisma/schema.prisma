@@ -99,7 +99,7 @@ model users {
   id                                        String                            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name                                      String?
   email                                     String
-  role                                      String
+  role                                      user_role
   password_hash                             String?
   status                                    user_status                       @default(ACTIVE)
   invite_token                              String?
@@ -163,6 +163,13 @@ model sales {
 
   @@unique([created_by, operation_id], map: "sales_manual_operation_key", where: raw("(operation_id IS NOT NULL)"))
   @@index([company_id])
+}
+
+enum user_role {
+  ADMIN_EMPRESA
+  SUPER_ADMIN
+  CLIENTE
+  ATENDENTE
 }
 
 enum user_status {

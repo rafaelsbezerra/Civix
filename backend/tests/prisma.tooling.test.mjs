@@ -168,3 +168,29 @@ test('CLI, client e adapter PostgreSQL usam a mesma versão exata aprovada', () 
     assert.equal(installed.version, version);
   }
 });
+
+test('schema.prisma do projeto e migration de user_role permanecem válidos', () => {
+  const projectSchema = readFileSync(join(backendRoot, 'prisma/schema.prisma'), 'utf8');
+  assert.match(projectSchema, /enum user_role \{/);
+  assert.match(projectSchema, /ADMIN_EMPRESA/);
+  assert.match(projectSchema, /SUPER_ADMIN/);
+  assert.match(projectSchema, /CLIENTE/);
+  assert.match(projectSchema, /ATENDENTE/);
+  assert.match(projectSchema, /role\s+user_role/);
+
+  const upMigration = readFileSync(
+    join(
+      backendRoot,
+      'prisma/migrations/20261108000100_add_user_role_enum/migration.sql',
+    ),
+    'utf8',
+  );
+  const downMigration = readFileSync(
+    join(backendRoot, 'prisma/migrations/20261108000100_add_user_role_enum/down.sql'),
+    'utf8',
+  );
+  assert.match(upMigration, /CREATE TYPE user_role AS ENUM/);
+  assert.match(upMigration, /INSERT INTO "_prisma_migrations"/);
+  assert.match(downMigration, /DROP TYPE IF EXISTS user_role/);
+  assert.match(downMigration, /DELETE FROM "_prisma_migrations"/);
+});

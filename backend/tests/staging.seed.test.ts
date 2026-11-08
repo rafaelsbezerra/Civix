@@ -144,12 +144,13 @@ test('importa em transação, mapeia plano local para BIGINT e preserva hash/ví
     userId,
     'Usuário teste',
     'admin@example.test',
-    'admin_empresa',
+    'ADMIN_EMPRESA',
     hash,
     'ACTIVE',
     companyId,
     databasePlanId,
   ]);
+  assert.match(user.text, /\$4::user_role/);
   assert.match(user.text, /\$6::user_status/);
   assert.match(user.text, /NULL,NULL,NULL,NOW\(\),NOW\(\)/);
   assert.ok(!JSON.stringify(calls).includes('token-local-descartado'));

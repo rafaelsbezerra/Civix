@@ -43,6 +43,22 @@ function normalizeUserStatus(status?: string | null): 'ACTIVE' | 'PENDING' | 'BL
   return 'ACTIVE';
 }
 
+function normalizeUserRole(
+  role: string,
+): 'ADMIN_EMPRESA' | 'SUPER_ADMIN' | 'CLIENTE' | 'ATENDENTE' {
+  const upper = role.trim().toUpperCase();
+  if (upper === 'ADMIN_EMPRESA') {
+    return 'ADMIN_EMPRESA';
+  }
+  if (upper === 'SUPER_ADMIN') {
+    return 'SUPER_ADMIN';
+  }
+  if (upper === 'ATENDENTE') {
+    return 'ATENDENTE';
+  }
+  return 'CLIENTE';
+}
+
 function requireSeed(condition: unknown, message: string): asserts condition {
   if (!condition) {
     throw new SeedError(message);
@@ -301,12 +317,12 @@ export async function applyStagingSeed(
       await connection.query(
         `INSERT INTO users (id, name, email, role, password_hash, status, company_id, plan_id,
           invite_token, reset_password_token, reset_password_expires, created_at, updated_at)
-         VALUES ($1,$2,$3,$4,$5,$6::user_status,$7,$8,NULL,NULL,NULL,NOW(),NOW())`,
+         VALUES ($1,$2,$3,$4::user_role,$5,$6::user_status,$7,$8,NULL,NULL,NULL,NOW(),NOW())`,
         [
           user.id,
           user.name ?? null,
           user.email,
-          user.role,
+          normalizeUserRole(user.role),
           user.password_hash ?? null,
           normalizeUserStatus(user.status),
           user.company_id,
