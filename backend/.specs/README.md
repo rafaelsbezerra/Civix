@@ -91,6 +91,14 @@ WHERE to_regclass('public._prisma_migrations') IS NOT NULL
 
 ---
 
+## Padronização de `users.role` para ENUM em UPPER CASE (`user_role`) — 2026-11-08
+
+- [Feature](features/user-role-enum/feature.md)
+- [SDD](features/user-role-enum/sdd.md)
+- [Tasks](features/user-role-enum/tasks.md)
+
+---
+
 ## Busca pública de empresas e evolução de schema — 2026-11-07
 
 - [Feature](features/company-search-and-schema/feature.md)
