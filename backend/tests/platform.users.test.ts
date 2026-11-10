@@ -1154,6 +1154,43 @@ test('gestão de usuários da plataforma em HTTP com persistência JSON sintéti
         );
       },
     );
+
+    await t.test(
+      'GET /api/v1/platform/users/metrics retorna contagem por perfil e status',
+      async () => {
+        await reset();
+        const response = await request('/api/v1/platform/users/metrics');
+        assert.equal(response.status, 200);
+        assert.ok(response.body && response.body.data);
+        const data = response.body.data;
+        assert.equal(typeof data.total, 'number');
+        assert.equal(typeof data.active, 'number');
+        assert.equal(typeof data.pending, 'number');
+        assert.equal(typeof data.blocked, 'number');
+        assert.ok(Array.isArray(data.byRole));
+        assert.equal(data.byRole.length, 3);
+        const superAdminRole = data.byRole.find(
+          (item: { role: string }) => item.role === 'super_admin',
+        );
+        assert.ok(superAdminRole);
+        assert.ok(superAdminRole.total >= 1);
+      },
+    );
+
+    await t.test(
+      'GET /api/v1/platform/users/metrics rejeita perfis não autorizados',
+      async () => {
+        await reset();
+        const forbidden = await request('/api/v1/platform/users/metrics', {
+          accessToken: token('companyA'),
+        });
+        assert.equal(forbidden.status, 403);
+        const unauthenticated = await request('/api/v1/platform/users/metrics', {
+          accessToken: null,
+        });
+        assert.equal(unauthenticated.status, 401);
+      },
+    );
   } finally {
     server.closeAllConnections();
     await new Promise<void>((resolve, reject) =>

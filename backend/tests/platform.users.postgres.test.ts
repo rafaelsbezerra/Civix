@@ -643,4 +643,39 @@ test('adapter PostgreSQL de usuários usa SQL e transações simulados', async (
       }
     },
   );
+
+  await t.test(
+    'getManagedUsersMetrics agrupa por role e status e normaliza para lowercase',
+    async (sub) => {
+      let executedQuery = '';
+      sub.mock.method(db, 'query', async (text: string) => {
+        executedQuery = text;
+        return {
+          rows: [
+            { role: 'SUPER_ADMIN', status: 'ACTIVE', count: 2 },
+            { role: 'ADMIN_EMPRESA', status: 'ACTIVE', count: 4 },
+            { role: 'ADMIN_EMPRESA', status: 'PENDING', count: 1 },
+            { role: 'ATENDENTE', status: 'BLOCKED', count: 1 },
+          ],
+        };
+      });
+
+      const metrics = await userPostgresRepository.getManagedUsersMetrics();
+      assert.match(executedQuery, /GROUP BY role, COALESCE\(status::text, 'ACTIVE'\)/);
+      assert.match(
+        executedQuery,
+        /role IN \('SUPER_ADMIN'::user_role, 'ADMIN_EMPRESA'::user_role, 'ATENDENTE'::user_role\)/,
+      );
+      assert.match(executedQuery, /deleted_at IS NULL/);
+      assert.equal(metrics.total, 8);
+      assert.equal(metrics.active, 6);
+      assert.equal(metrics.pending, 1);
+      assert.equal(metrics.blocked, 1);
+      assert.equal(metrics.byRole.length, 3);
+      assert.deepEqual(
+        metrics.byRole.find((item) => item.role === 'admin_empresa'),
+        { role: 'admin_empresa', total: 5, active: 4, pending: 1, blocked: 0 },
+      );
+    },
+  );
 });

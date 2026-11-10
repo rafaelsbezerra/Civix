@@ -1,5 +1,6 @@
 import type { User, UserId, UserRole } from '../entities/user.entity.js';
 import type {
+  ManagedUsersMetrics,
   UserAdministrationChange,
   UserAdministrationFilters,
 } from '../dtos/user.auth.dto.js';
@@ -10,6 +11,7 @@ export interface UserRepository {
     companyId: string | null,
     filters: UserAdministrationFilters,
   ): Promise<{ items: User[]; total: number }>;
+  getManagedUsersMetrics(): Promise<ManagedUsersMetrics>;
   changeUserAdministration(input: UserAdministrationChange): Promise<User>;
   updateOwnProfile(
     id: UserId,

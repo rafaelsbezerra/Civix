@@ -72,3 +72,19 @@ export interface UserAdministrationChange {
   reason?: string;
   changedAt: string;
 }
+
+export interface RoleUsersBreakdown {
+  role: 'super_admin' | 'admin_empresa' | 'atendente';
+  total: number;
+  active: number;
+  pending: number;
+  blocked: number;
+}
+
+export interface ManagedUsersMetrics {
+  total: number;
+  active: number;
+  pending: number;
+  blocked: number;
+  byRole: RoleUsersBreakdown[];
+}

@@ -1,4 +1,5 @@
 import type { UserRepository } from '../../repositories/user.repository.js';
+import type { RoleUsersBreakdown } from '../../dtos/user.auth.dto.js';
 import { readLocalData, updateLocalData } from './local.store.js';
 import { AppError } from '../../shared/errors/app.error.js';
 import { ErrorCode } from '../../shared/errors/error.code.js';
@@ -28,6 +29,68 @@ export const userJsonRepository: UserRepository = {
     return {
       items: rows.slice(filters.offset, filters.offset + filters.pageSize),
       total: rows.length,
+    };
+  },
+  async getManagedUsersMetrics() {
+    const data = await readLocalData();
+    const roles: Array<'super_admin' | 'admin_empresa' | 'atendente'> = [
+      'super_admin',
+      'admin_empresa',
+      'atendente',
+    ];
+
+    const byRoleMap = new Map<
+      'super_admin' | 'admin_empresa' | 'atendente',
+      RoleUsersBreakdown
+    >();
+    for (const role of roles) {
+      byRoleMap.set(role, {
+        role,
+        total: 0,
+        active: 0,
+        pending: 0,
+        blocked: 0,
+      });
+    }
+
+    let total = 0;
+    let active = 0;
+    let pending = 0;
+    let blocked = 0;
+
+    for (const user of data.users) {
+      if (user.deleted_at) {
+        continue;
+      }
+      const role = user.role.toLowerCase() as
+        'super_admin' | 'admin_empresa' | 'atendente';
+      const breakdown = byRoleMap.get(role);
+      if (!breakdown) {
+        continue;
+      }
+      const status = (user.status || 'active').toLowerCase();
+
+      breakdown.total += 1;
+      total += 1;
+
+      if (status === 'pending') {
+        breakdown.pending += 1;
+        pending += 1;
+      } else if (status === 'blocked') {
+        breakdown.blocked += 1;
+        blocked += 1;
+      } else {
+        breakdown.active += 1;
+        active += 1;
+      }
+    }
+
+    return {
+      total,
+      active,
+      pending,
+      blocked,
+      byRole: roles.map((role) => byRoleMap.get(role)!),
     };
   },
   async changeUserAdministration(input) {

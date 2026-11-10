@@ -125,6 +125,10 @@ export async function getUsersByCompanyId(
 export async function getSuperAdmins(actorId: UserId, input: unknown) {
   return listManagedUsers(actorId, null, input);
 }
+export async function getManagedUsersMetrics(actorId: UserId) {
+  await requireSuperAdminActor(actorId);
+  return userRepository.getManagedUsersMetrics();
+}
 
 async function inviteManagedUser(
   actorId: UserId,

@@ -34,6 +34,7 @@ router.post(
   '/administrators/:userId/reactivation',
   userController.reactivateSuperAdmin,
 );
+router.get('/users/metrics', userController.getManagedUsersMetrics);
 router.get('/sales', saleController.listPlatformSales);
 router.get('/sales/:saleId', saleController.getPlatformSale);
 router.post('/sales', saleController.createManualSale);

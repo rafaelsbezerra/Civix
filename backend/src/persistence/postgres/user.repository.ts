@@ -1,5 +1,6 @@
 import type { User, UserRole } from '../../entities/user.entity.js';
 import type { UserRepository } from '../../repositories/user.repository.js';
+import type { RoleUsersBreakdown } from '../../dtos/user.auth.dto.js';
 import { db } from '../../shared/config/data.js';
 import { AppError } from '../../shared/errors/app.error.js';
 import { ErrorCode } from '../../shared/errors/error.code.js';
@@ -71,6 +72,74 @@ export const userPostgresRepository: UserRepository = {
     return {
       total: result.total,
       items: result.items.map((item) => normalizeUser(item)!),
+    };
+  },
+  async getManagedUsersMetrics() {
+    const query =
+      "SELECT LOWER(role::text) AS role, LOWER(COALESCE(status::text, 'ACTIVE')) AS status, COUNT(*)::int AS count " +
+      'FROM users WHERE deleted_at IS NULL ' +
+      "AND role IN ('SUPER_ADMIN'::user_role, 'ADMIN_EMPRESA'::user_role, 'ATENDENTE'::user_role) " +
+      "GROUP BY role, COALESCE(status::text, 'ACTIVE')";
+    const result = await db.query<{ role: string; status: string; count: number }>(
+      query,
+    );
+
+    const roles: Array<'super_admin' | 'admin_empresa' | 'atendente'> = [
+      'super_admin',
+      'admin_empresa',
+      'atendente',
+    ];
+
+    const byRoleMap = new Map<
+      'super_admin' | 'admin_empresa' | 'atendente',
+      RoleUsersBreakdown
+    >();
+    for (const role of roles) {
+      byRoleMap.set(role, {
+        role,
+        total: 0,
+        active: 0,
+        pending: 0,
+        blocked: 0,
+      });
+    }
+
+    let total = 0;
+    let active = 0;
+    let pending = 0;
+    let blocked = 0;
+
+    for (const row of result.rows) {
+      const role = row.role.toLowerCase() as
+        'super_admin' | 'admin_empresa' | 'atendente';
+      const breakdown = byRoleMap.get(role);
+      if (!breakdown) {
+        continue;
+      }
+      const count = Number(row.count) || 0;
+      const status = row.status.toLowerCase();
+
+      breakdown.total += count;
+      total += count;
+
+      if (status === 'pending') {
+        breakdown.pending += count;
+        pending += count;
+      } else if (status === 'blocked') {
+        breakdown.blocked += count;
+        blocked += count;
+      } else {
+        breakdown.active += count;
+        active += count;
+      }
+    }
+
+    return {
+      total,
+      active,
+      pending,
+      blocked,
+      byRole: roles.map((role) => byRoleMap.get(role)!),
     };
   },
   async changeUserAdministration(input) {

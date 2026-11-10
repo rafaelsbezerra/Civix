@@ -78,6 +78,13 @@ export async function getSuperAdmins(req: Request, res: Response) {
     await userService.getSuperAdmins(req.authenticatedUser!.id, req.query),
   );
 }
+export async function getManagedUsersMetrics(req: Request, res: Response) {
+  return res.json(
+    createSuccessResponse(
+      await userService.getManagedUsersMetrics(req.authenticatedUser!.id),
+    ),
+  );
+}
 export async function inviteSuperAdmin(req: Request, res: Response) {
   return res
     .status(201)
