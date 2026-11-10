@@ -243,8 +243,8 @@ export function OverviewHealthAndUsersCharts({
                   <ChartTooltipContent
                     formatter={(value, name) => (
                       <div className="flex items-center gap-1.5 font-medium tabular-nums">
-                        <span>{name}:</span>
-                        <span className="font-semibold">{value}</span>
+                        <span>{String(name)}:</span>
+                        <span className="font-semibold">{String(value)}</span>
                       </div>
                     )}
                   />

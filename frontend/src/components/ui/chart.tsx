@@ -100,9 +100,9 @@ ${colorConfig
 };
 
 export interface ChartPayloadItem {
-  name?: string | number;
+  name?: React.ReactNode;
   dataKey?: string | number;
-  value?: unknown;
+  value?: React.ReactNode;
   color?: string;
   fill?: string;
   payload?: {
@@ -138,8 +138,8 @@ function ChartTooltipContent({
   ) => React.ReactNode;
   labelClassName?: string;
   formatter?: (
-    value: unknown,
-    name: unknown,
+    value: React.ReactNode,
+    name: React.ReactNode,
     item: ChartPayloadItem,
     index: number,
     payload: unknown,
