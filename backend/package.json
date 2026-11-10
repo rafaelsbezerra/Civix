@@ -6,6 +6,8 @@
   "scripts": {
     "start": "tsx src/server.ts",
     "dev": "tsx src/server.ts",
+    "build": "tsc --noEmit",
+    "typecheck": "tsc -p tsconfig.foundation.json",
     "lint": "eslint src tests scripts",
     "lint:fix": "eslint src tests scripts --fix",
     "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.{ts,mjs}\" \"scripts/**/*.{ts,mjs}\" eslint.config.js package.json",

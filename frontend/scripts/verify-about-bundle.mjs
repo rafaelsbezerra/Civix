@@ -4,9 +4,8 @@ import { fileURLToPath } from 'node:url';
 
 const expectedAssets = [
   'background-shape.svg',
-  'dashboard.png',
   'emphasis-scribble.svg',
-  'macbook-silver.png',
+  'macbook.png',
   'value-divider.svg',
   'vision-divider.svg',
 ];
@@ -42,4 +41,4 @@ while (pending.length > 0) {
   }
 }
 
-console.log('Verified six local About assets and no remote Figma/MCP URLs.');
+console.log('Verified five local About assets and no remote Figma/MCP URLs.');
