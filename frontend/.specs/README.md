@@ -53,6 +53,14 @@ Sempre que uma spec envolver criação de migrations no backend (`backend/prisma
 
 ---
 
+## SEO, Metadados e Descoberta por IA (Landing Page) — 2026-11-10
+
+- [Feature](features/landing-page-seo/feature.md)
+- [SDD](features/landing-page-seo/sdd.md)
+- [Tasks](features/landing-page-seo/tasks.md)
+
+---
+
 ## Busca pública de empresas e evolução de schema — 2026-11-07
 
 - [Feature](features/company-search-and-schema/feature.md)
