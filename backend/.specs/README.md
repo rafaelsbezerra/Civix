@@ -91,6 +91,14 @@ WHERE to_regclass('public._prisma_migrations') IS NOT NULL
 
 ---
 
+## Visão Geral Executiva do Super Admin (Métricas, Gráficos e Atividade Recente) — 2026-11-08
+
+- [Feature](features/super-admin-overview-metrics/feature.md)
+- [SDD](features/super-admin-overview-metrics/sdd.md)
+- [Tasks](features/super-admin-overview-metrics/tasks.md)
+
+---
+
 ## Padronização de `users.role` para ENUM em UPPER CASE (`user_role`) — 2026-11-08
 
 - [Feature](features/user-role-enum/feature.md)
