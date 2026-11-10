@@ -883,3 +883,145 @@ export async function changeManagedUserState(
   );
   return action === 'delete' ? undefined : requireManagedUser(response.data);
 }
+
+export interface RoleUsersBreakdown {
+  role: 'super_admin' | 'admin_empresa' | 'atendente';
+  total: number;
+  active: number;
+  pending: number;
+  blocked: number;
+}
+
+export interface ManagedUsersMetrics {
+  total: number;
+  active: number;
+  pending: number;
+  blocked: number;
+  byRole: RoleUsersBreakdown[];
+}
+
+export async function getPlatformUsersMetrics(): Promise<ManagedUsersMetrics> {
+  const response = await fetchApi<ManagedUsersMetrics>(
+    '/api/v1/platform/users/metrics',
+    authenticatedOptions(),
+  );
+  if (
+    !response.data ||
+    typeof response.data.total !== 'number' ||
+    !Array.isArray(response.data.byRole)
+  ) {
+    throw new ApiError('A API retornou métricas de usuários inválidas.');
+  }
+  return response.data;
+}
+
+export interface OverviewSalesMetrics {
+  totalRevenue: number;
+  totalSalesCount: number;
+  currentMonthRevenue: number;
+  currentMonthCount: number;
+  previousMonthRevenue: number;
+  previousMonthCount: number;
+  monthOverMonthPercent: number | null;
+  recentSales: PlatformSale[];
+}
+
+export interface OverviewCompaniesMetrics {
+  total: number;
+  active: number;
+  inactive: number;
+  archived: number;
+  recentCompanies: PlatformCompany[];
+}
+
+export async function getPlatformOverviewSales(): Promise<OverviewSalesMetrics> {
+  const firstPage = await getPlatformSales({ page: 1, limit: 100 });
+  const allSales = [...firstPage.data];
+  for (let page = 2; page <= firstPage.meta.totalPages; page += 1) {
+    allSales.push(...(await getPlatformSales({ page, limit: 100 })).data);
+  }
+
+  const now = new Date();
+  const currentYear = now.getUTCFullYear();
+  const currentMonth = now.getUTCMonth();
+
+  const prevDate = new Date(Date.UTC(currentYear, currentMonth - 1, 1));
+  const prevYear = prevDate.getUTCFullYear();
+  const prevMonth = prevDate.getUTCMonth();
+
+  let totalRevenue = 0;
+  let currentMonthRevenue = 0;
+  let currentMonthCount = 0;
+  let previousMonthRevenue = 0;
+  let previousMonthCount = 0;
+
+  for (const sale of allSales) {
+    const amount = Number(sale.amount || 0);
+    totalRevenue += amount;
+    const sold = new Date(sale.soldAt);
+    const sYear = sold.getUTCFullYear();
+    const sMonth = sold.getUTCMonth();
+
+    if (sYear === currentYear && sMonth === currentMonth) {
+      currentMonthRevenue += amount;
+      currentMonthCount += 1;
+    } else if (sYear === prevYear && sMonth === prevMonth) {
+      previousMonthRevenue += amount;
+      previousMonthCount += 1;
+    }
+  }
+
+  const monthOverMonthPercent: number | null =
+    previousMonthRevenue > 0
+      ? Math.round(
+          ((currentMonthRevenue - previousMonthRevenue) / previousMonthRevenue) * 100,
+        )
+      : currentMonthRevenue > 0
+        ? null
+        : 0;
+
+  const sortedSales = [...allSales].sort(
+    (a, b) => Date.parse(b.soldAt) - Date.parse(a.soldAt) || b.id.localeCompare(a.id),
+  );
+
+  return {
+    totalRevenue,
+    totalSalesCount: allSales.length,
+    currentMonthRevenue,
+    currentMonthCount,
+    previousMonthRevenue,
+    previousMonthCount,
+    monthOverMonthPercent,
+    recentSales: sortedSales.slice(0, 5),
+  };
+}
+
+export async function getPlatformOverviewCompanies(): Promise<OverviewCompaniesMetrics> {
+  const firstPage = await getPlatformCompanies({ page: 1, limit: 100 });
+  const allCompanies = [...firstPage.data];
+  for (let page = 2; page <= firstPage.meta.totalPages; page += 1) {
+    allCompanies.push(...(await getPlatformCompanies({ page, limit: 100 })).data);
+  }
+
+  const archived = allCompanies.filter((company) => company.deleted_at != null).length;
+  const active = allCompanies.filter(
+    (company) => company.deleted_at == null && company.status !== 'inativo',
+  ).length;
+  const inactive = allCompanies.filter(
+    (company) => company.deleted_at == null && company.status === 'inativo',
+  ).length;
+
+  const sortedCompanies = [...allCompanies].sort((a, b) => {
+    const timeA = Date.parse(a.createdAt || a.data_cadastro || '1970-01-01');
+    const timeB = Date.parse(b.createdAt || b.data_cadastro || '1970-01-01');
+    return timeB - timeA || b.id.localeCompare(a.id);
+  });
+
+  return {
+    total: allCompanies.length,
+    active,
+    inactive,
+    archived,
+    recentCompanies: sortedCompanies.slice(0, 5),
+  };
+}

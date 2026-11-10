@@ -118,13 +118,17 @@ export function CompanyForm({
       estado: company?.estado ?? '',
       tamanho: company?.tamanho ?? 'pequena',
       faixa_preco:
-        company?.faixa_preco === '[0,100]' || company?.faixa_preco === '0-100'
+        company?.faixa_preco === '0-100' ||
+        (company?.faixa_preco as unknown) === '[0,100]'
           ? '0-100'
-          : company?.faixa_preco === '[100,300]' || company?.faixa_preco === '100-300'
+          : company?.faixa_preco === '100-300' ||
+              (company?.faixa_preco as unknown) === '[100,300]'
             ? '100-300'
-            : company?.faixa_preco === '[300,500]' || company?.faixa_preco === '300-500'
+            : company?.faixa_preco === '300-500' ||
+                (company?.faixa_preco as unknown) === '[300,500]'
               ? '300-500'
-              : company?.faixa_preco === '[500,)' || company?.faixa_preco === '500-plus'
+              : company?.faixa_preco === '500-plus' ||
+                  (company?.faixa_preco as unknown) === '[500,)'
                 ? '500-plus'
                 : '',
       email: company?.email ?? '',
