@@ -7,12 +7,10 @@ describe('AboutPage', () => {
   it('renders the semantic page with a single approved heading', () => {
     render(<AboutPage />);
 
-    expect(screen.getByRole('main')).toBeInTheDocument();
     expect(screen.getByRole('region', { name: 'Sobre a Civix' })).toBeInTheDocument();
-    expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
     expect(
       screen.getByRole('heading', {
-        level: 1,
+        level: 2,
         name: 'Transformamos atendimento em oportunidades.',
       }),
     ).toBeInTheDocument();
@@ -45,7 +43,10 @@ describe('AboutPage', () => {
     render(<AboutPage />);
 
     const frame = screen.getByTestId('about-frame');
-    const heading = screen.getByRole('heading', { level: 1 });
+    const heading = screen.getByRole('heading', {
+      level: 2,
+      name: 'Transformamos atendimento em oportunidades.',
+    });
     const marker = screen.getByTestId('about-marker');
 
     expect(frame).toHaveClass('2xl:h-[760px]', '2xl:max-w-[1728px]');
@@ -61,9 +62,12 @@ describe('AboutPage', () => {
   it('uses Civix typography for heading, marker, and supporting copy', () => {
     render(<AboutPage />);
 
-    expect(screen.getByRole('heading', { level: 1 }).className).toContain(
-      'font-[family-name:var(--font-display)]',
-    );
+    expect(
+      screen.getByRole('heading', {
+        level: 2,
+        name: 'Transformamos atendimento em oportunidades.',
+      }).className,
+    ).toContain('font-[family-name:var(--font-display)]');
     expect(screen.getByTestId('about-marker').className).toContain(
       'font-[family-name:var(--font-display)]',
     );

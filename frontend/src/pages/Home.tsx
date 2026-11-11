@@ -19,8 +19,8 @@ export default function HomePage() {
         <CardEmpresas />
         <PlansSection />
         <FAQ />
-        <Footer />
       </main>
+      <Footer />
     </div>
   );
 }

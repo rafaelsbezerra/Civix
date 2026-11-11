@@ -41,6 +41,7 @@ export function HeroSection() {
             aria-hidden="true"
             alt=""
             className="absolute inset-0 h-full w-full object-cover object-center"
+            fetchPriority="high"
             src={heroArtwork}
           />
           <img
