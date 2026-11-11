@@ -2,10 +2,16 @@ import React from 'react';
 import { FileText, UserCheck, Scale, AlertTriangle, Lock } from 'lucide-react';
 
 import { SiteHeader } from '@/components/layout/SiteHeader';
+import { PageHead } from '@/components/seo/PageHead';
 
 export const TermsOfService: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#faf9f7] text-[#071b2b] flex flex-col justify-between font-sans">
+      <PageHead
+        title="Termos de Uso"
+        description="Termos e condições gerais de uso da plataforma Civix para construtoras, prestadores e clientes."
+        canonicalPath="/termos-de-uso"
+      />
       <SiteHeader />
 
       {/* Conteúdo Principal */}

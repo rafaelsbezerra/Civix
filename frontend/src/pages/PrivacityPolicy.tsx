@@ -2,10 +2,16 @@ import React from 'react';
 import { Eye, Server, Lock, UserCheck, Mail } from 'lucide-react';
 
 import { SiteHeader } from '@/components/layout/SiteHeader';
+import { PageHead } from '@/components/seo/PageHead';
 
 export const PrivacyPolicy: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#faf9f7] text-[#071b2b] flex flex-col justify-between font-sans">
+      <PageHead
+        title="Política de Privacidade"
+        description="Diretrizes de proteção e privacidade de dados pessoais em conformidade com a LGPD na plataforma Civix."
+        canonicalPath="/politica-de-privacidade"
+      />
       <SiteHeader />
 
       {/* Conteúdo Principal */}

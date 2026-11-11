@@ -9,6 +9,7 @@ import {
 import type { Empresa } from '@/lib/api';
 import { SiteHeader } from '@/components/layout/SiteHeader';
 import Footer from '@/components/layout/SiteFooter';
+import { PageHead } from '@/components/seo/PageHead';
 import { MapPin, SearchX } from 'lucide-react';
 import { SearchForm, type SearchFormValues } from '@/components/home/SearchForm';
 import decorativeShape from '@/assets/civix/decorative-shape.svg';
@@ -227,6 +228,11 @@ export default function CatalogoEmpresas() {
 
   return (
     <div className="min-h-screen bg-[var(--color-civix-ivory)] flex flex-col font-[family-name:var(--font-body)]">
+      <PageHead
+        title="Catálogo de Empresas e Serviços"
+        description="Encontre construtoras, empreiteiras, engenheiros, arquitetos e prestadores de serviços qualificados da construção civil na Civix."
+        canonicalPath="/catalogo"
+      />
       <SiteHeader />
 
       <main className="flex-1">

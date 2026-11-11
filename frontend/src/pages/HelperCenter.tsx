@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 
 import { SiteHeader } from '@/components/layout/SiteHeader';
+import { PageHead } from '@/components/seo/PageHead';
 import decorativeShape from '@/assets/civix/decorative-shape.svg';
 import heroArtwork from '@/assets/civix/hero-artwork.svg';
 
@@ -93,6 +94,11 @@ export default function HelpCenter() {
 
   return (
     <div className="min-h-screen text-slate-800 font-sans">
+      <PageHead
+        title="Central de Ajuda"
+        description="Tire dúvidas sobre a plataforma Civix, cadastro de empresas, gestão de planos e suporte técnico."
+        canonicalPath="/central-de-ajuda"
+      />
       <SiteHeader />
       {/* Header / Hero Section */}
       <section className=" text-white px-4 sm:px-6 lg:px-8 relative overflow-hidden">
