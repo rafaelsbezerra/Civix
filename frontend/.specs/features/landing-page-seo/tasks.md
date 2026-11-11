@@ -28,10 +28,10 @@ Implementar infraestrutura completa de SEO técnico, SEO on-page, descoberta por
   - `frontend/public/llms-full.txt`
 
 **Passos:**
-- [ ] Criar `frontend/public/robots.txt` definindo permissões para rotas públicas, bloqueando `/dashboard/`, `/api/`, `/login`, e apontando `Sitemap: https://civix.com.br/sitemap.xml`.
-- [ ] Criar `frontend/public/sitemap.xml` no formato padrão XML com as URLs públicas canônicas, frequências e prioridades.
-- [ ] Criar `frontend/public/llms.txt` seguindo a especificação llmstxt.org com resumo conciso da plataforma Civix, diferenciais e links canônicos para IAs (Perplexity, ChatGPT, Claude).
-- [ ] Criar `frontend/public/llms-full.txt` com documentação textual detalhada dos planos, catálogo de serviços e canais de contato.
+- [x] Criar `frontend/public/robots.txt` definindo permissões para rotas públicas, bloqueando `/dashboard/`, `/api/`, `/login`, e apontando `Sitemap: https://civix.com.br/sitemap.xml`.
+- [x] Criar `frontend/public/sitemap.xml` no formato padrão XML com as URLs públicas canônicas, frequências e prioridades.
+- [x] Criar `frontend/public/llms.txt` seguindo a especificação llmstxt.org com resumo conciso da plataforma Civix, diferenciais e links canônicos para IAs (Perplexity, ChatGPT, Claude).
+- [x] Criar `frontend/public/llms-full.txt` com documentação textual detalhada dos planos, catálogo de serviços e canais de contato.
 
 **Pronto quando:**
 - Os quatro arquivos existirem em `frontend/public/` e forem emitidos para `dist/` após `npm run build`.
@@ -51,9 +51,9 @@ Implementar infraestrutura completa de SEO técnico, SEO on-page, descoberta por
   - `frontend/public/og-image.png`
 
 **Passos:**
-- [ ] Criar `frontend/public/site.webmanifest` com nome da aplicação ("Civix"), `theme_color: "#071b2b"`, `background_color: "#fbfaf8"` e referências aos ícones.
-- [ ] Gerar `frontend/public/apple-touch-icon.png` (180x180) e `frontend/public/favicon.ico` para navegadores legados e dispositivos móveis Apple.
-- [ ] Gerar `frontend/public/og-image.png` em alta definição (1200x630 pixels) contendo logotipo Civix, proposta de valor e fundo navy institucional.
+- [x] Criar `frontend/public/site.webmanifest` com nome da aplicação ("Civix"), `theme_color: "#071b2b"`, `background_color: "#fbfaf8"` e referências aos ícones.
+- [x] Gerar `frontend/public/apple-touch-icon.png` (180x180) e `frontend/public/favicon.ico` para navegadores legados e dispositivos móveis Apple.
+- [x] Gerar `frontend/public/og-image.png` em alta definição (1200x630 pixels) contendo logotipo Civix, proposta de valor e fundo navy institucional.
 
 **Pronto quando:**
 - Todos os assets estiverem presentes em `frontend/public/` e acessíveis via rota estática.
@@ -70,12 +70,12 @@ Implementar infraestrutura completa de SEO técnico, SEO on-page, descoberta por
   - `frontend/index.html`
 
 **Passos:**
-- [ ] Atualizar `<title>` para `Civix | Plataforma de Conexão e Gestão Comercial para a Construção Civil` e refinar `<meta name="description">` (150-160 caracteres).
-- [ ] Inserir `<link rel="canonical" href="https://civix.com.br/" />` e `<meta name="theme-color" content="#071b2b" />`.
-- [ ] Vincular `favicon.ico`, `apple-touch-icon.png` e `site.webmanifest` no `<head>`.
-- [ ] Inserir tags completas de Open Graph (`og:type`, `og:url`, `og:title`, `og:description`, `og:image`, `og:site_name`, `og:locale`).
-- [ ] Inserir tags completas de Twitter Card (`twitter:card="summary_large_image"`, `twitter:url`, `twitter:title`, `twitter:description`, `twitter:image`).
-- [ ] Inserir `<script type="application/ld+json">` com schemas Schema.org `@graph` para `Organization`, `WebSite` (com `SearchAction`) e `FAQPage` (com as 8 perguntas e respostas da landing page).
+- [x] Atualizar `<title>` para `Civix | Plataforma de Conexão e Gestão Comercial para a Construção Civil` e refinar `<meta name="description">` (150-160 caracteres).
+- [x] Inserir `<link rel="canonical" href="https://civix.com.br/" />` e `<meta name="theme-color" content="#071b2b" />`.
+- [x] Vincular `favicon.ico`, `apple-touch-icon.png` e `site.webmanifest` no `<head>`.
+- [x] Inserir tags completas de Open Graph (`og:type`, `og:url`, `og:title`, `og:description`, `og:image`, `og:site_name`, `og:locale`).
+- [x] Inserir tags completas de Twitter Card (`twitter:card="summary_large_image"`, `twitter:url`, `twitter:title`, `twitter:description`, `twitter:image`).
+- [x] Inserir `<script type="application/ld+json">` com schemas Schema.org `@graph` para `Organization`, `WebSite` (com `SearchAction`) e `FAQPage` (com as 8 perguntas e respostas da landing page).
 
 **Pronto quando:**
 - `frontend/index.html` contiver todas as meta tags canônicas e bloco JSON-LD sintaticamente válido.
@@ -94,10 +94,10 @@ Implementar infraestrutura completa de SEO técnico, SEO on-page, descoberta por
   - `frontend/src/components/home/HeroSection.tsx`
 
 **Passos:**
-- [ ] Em `frontend/src/pages/About.tsx`, alterar o elemento raiz de `<main>` para `<section id="sobre" aria-label="Sobre a Civix">` para eliminar o erro de `<main>` aninhado.
-- [ ] Em `frontend/src/pages/About.tsx`, alterar a tag do título "Transformamos atendimento em oportunidades" de `<h1>` para `<h2>`, garantindo que o `<h1>` de `HeroSection.tsx` seja o único da landing page.
-- [ ] Em `frontend/src/pages/Home.tsx`, reposicionar o `<Footer />` para fora da tag `<main>`, mantendo a semântica de landmarks da W3C.
-- [ ] Em `frontend/src/components/home/HeroSection.tsx`, adicionar `fetchpriority="high"` na imagem principal de fundo (`heroArtwork`) para otimizar o Largest Contentful Paint (LCP).
+- [x] Em `frontend/src/pages/About.tsx`, alterar o elemento raiz de `<main>` para `<section id="sobre" aria-label="Sobre a Civix">` para eliminar o erro de `<main>` aninhado.
+- [x] Em `frontend/src/pages/About.tsx`, alterar a tag do título "Transformamos atendimento em oportunidades" de `<h1>` para `<h2>`, garantindo que o `<h1>` de `HeroSection.tsx` seja o único da landing page.
+- [x] Em `frontend/src/pages/Home.tsx`, reposicionar o `<Footer />` para fora da tag `<main>`, mantendo a semântica de landmarks da W3C.
+- [x] Em `frontend/src/components/home/HeroSection.tsx`, adicionar `fetchpriority="high"` na imagem principal de fundo (`heroArtwork`) para otimizar o Largest Contentful Paint (LCP).
 
 **Pronto quando:**
 - A árvore renderizada da Home contiver exatamente um único elemento `<h1>` e uma única tag `<main>`, sem tags aninhadas.
@@ -120,10 +120,10 @@ Implementar infraestrutura completa de SEO técnico, SEO on-page, descoberta por
   - `frontend/src/pages/HelperCenter.tsx`
 
 **Passos:**
-- [ ] Criar `PageHead.tsx` recebendo `title`, `description` e `canonicalPath`, atualizando `document.title` e as tags `meta[name="description"]` e `link[rel="canonical"]` via `useEffect`.
-- [ ] Criar testes unitários em `PageHead.test.tsx` validando que a montagem do componente altera o título e a descrição no DOM e restaura adequadamente.
-- [ ] Integrar `PageHead` com títulos e descrições personalizadas em `CatalogoEmpresas.tsx`, `TermsOfServices.tsx`, `PrivacityPolicy.tsx` e `HelperCenter.tsx`.
-- [ ] Executar validações completas: testes unitários (`npm test`), compilação (`npm run build`), lint (`npm run lint`) e formatação (`npm run format:check`).
+- [x] Criar `PageHead.tsx` recebendo `title`, `description` e `canonicalPath`, atualizando `document.title` e as tags `meta[name="description"]` e `link[rel="canonical"]` via `useEffect`.
+- [x] Criar testes unitários em `PageHead.test.tsx` validando que a montagem do componente altera o título e a descrição no DOM e restaura adequadamente.
+- [x] Integrar `PageHead` com títulos e descrições personalizadas em `CatalogoEmpresas.tsx`, `TermsOfServices.tsx`, `PrivacityPolicy.tsx` e `HelperCenter.tsx`.
+- [x] Executar validações completas: testes unitários (`npm test`), compilação (`npm run build`), lint (`npm run lint`) e formatação (`npm run format:check`).
 
 **Pronto quando:**
 - Testes de `PageHead.test.tsx` e `Overview.test.tsx` passarem com sucesso e o build compilar com código 0.
