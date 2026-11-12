@@ -25,5 +25,5 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src", "../backend/src/config/cookies.ts"]
+  "include": ["src"]
 }

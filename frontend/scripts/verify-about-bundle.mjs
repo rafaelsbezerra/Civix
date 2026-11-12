@@ -4,12 +4,12 @@ import { fileURLToPath } from 'node:url'
 
 const expectedAssets = [
   'background-shape.svg',
-  'dashboard.png',
   'emphasis-scribble.svg',
-  'macbook-silver.png',
+  'macbook.png',
   'value-divider.svg',
   'vision-divider.svg',
 ]
+
 const distRoot = new URL('../dist/', import.meta.url)
 const manifestPath = new URL('.vite/manifest.json', distRoot)
 const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'))
