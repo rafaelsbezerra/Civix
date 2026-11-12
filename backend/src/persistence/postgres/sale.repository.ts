@@ -1,73 +1,101 @@
 import type { SaleRepository } from '../../repositories/sale.repository.js';
-import type { SaleRow } from '../../interfaces/sale.row.js';
-import { db } from '../../shared/config/data.js';
-import { toSale } from '../sale.mapper.js';
+import type { ManualSaleOperation, SaleListFilters } from '../../dtos/sale.dto.js';
+import type { Sale } from '../../entities/sale.entity.js';
+import type { UserId } from '../../entities/user.entity.js';
+import type { Prisma, sales } from '../../generated/prisma/client.js';
 import type { PlanRow } from '../../interfaces/plan.row.js';
-import { buildManualSale } from '../../services/sale.service.js';
+import type { SaleRow } from '../../interfaces/sale.row.js';
+import { getPrisma } from '../../shared/config/prisma.js';
 import { AppError } from '../../shared/errors/app.error.js';
 import { ErrorCode } from '../../shared/errors/error.code.js';
+import { toSale } from '../sale.mapper.js';
+
+function mapSale(row: sales, companyName?: string): Sale {
+  return toSale({
+    ...row,
+    company_name: companyName,
+    plan_id: row.plan_id?.toString() ?? null,
+    origin: row.origin as SaleRow['origin'],
+    pricing_mode: row.pricing_mode as SaleRow['pricing_mode'],
+    plan_price: row.plan_price?.toFixed(2) ?? null,
+    plan_billing_period: row.plan_billing_period as SaleRow['plan_billing_period'],
+    amount: row.amount.toFixed(2),
+    currency: row.currency as SaleRow['currency'],
+  });
+}
+
+async function lockAdministrativeActor(
+  tx: Prisma.TransactionClient,
+  actorId: UserId,
+): Promise<void> {
+  await tx.$executeRaw`
+    SELECT pg_advisory_xact_lock(hashtextextended('civix:platform-administration', 0))
+  `;
+  const [lockedActor] = await tx.$queryRaw<{ id: string }[]>`
+    SELECT id
+    FROM users
+    WHERE id = ${String(actorId)}::uuid
+    FOR UPDATE
+  `;
+  const actor = lockedActor
+    ? await tx.users.findUnique({
+        where: { id: lockedActor.id },
+        select: { role: true, status: true, deleted_at: true },
+      })
+    : null;
+  if (
+    !actor ||
+    actor.role.toLowerCase() !== 'super_admin' ||
+    actor.deleted_at ||
+    (actor.status != null && actor.status.toLowerCase() !== 'active')
+  ) {
+    throw new AppError({
+      status: 403,
+      code: ErrorCode.FORBIDDEN,
+      message: 'Acesso administrativo alterado.',
+    });
+  }
+}
+
 export const salePostgresRepository: SaleRepository = {
   async listPlatformSales(filters) {
-    const values: unknown[] = [];
-    const conditions: string[] = [];
-    for (const [column, value, operator] of [
-      ['s.company_id', filters.companyId, '='],
-      ['s.plan_id', filters.planId, '='],
-      ['s.origin', filters.origin, '='],
-      ['s.sold_at', filters.from, '>='],
-      ['s.sold_at', filters.to, '<='],
-    ] as const) {
-      if (value !== undefined) {
-        values.push(value);
-        conditions.push(column + operator + '$' + values.length);
-      }
-    }
-    values.push(filters.pageSize, filters.offset);
-    const query =
-      'WITH filtered AS (SELECT s.id,s.company_id,c.name AS company_name,s.plan_id::text AS plan_id,s.origin,s.pricing_mode,s.plan_name,s.plan_price::text AS plan_price,s.plan_billing_period,s.amount::text AS amount,s.currency,s.description,s.sold_at,s.created_at,s.created_by FROM sales s JOIN companies c ON c.id=s.company_id' +
-      (conditions.length ? ' WHERE ' + conditions.join(' AND ') : '') +
-      ') SELECT (SELECT COUNT(*)::int FROM filtered) AS total, ' +
-      'COALESCE((SELECT json_agg(page_rows) FROM (SELECT * FROM filtered ORDER BY sold_at DESC,id LIMIT $' +
-      (values.length - 1) +
-      ' OFFSET $' +
-      values.length +
-      ") page_rows),'[]'::json) AS items";
-    const row = (await db.query<{ items: SaleRow[]; total: number }>(query, values))
-      .rows[0];
-    return { items: row.items.map(toSale), total: row.total };
+    const prisma = getPrisma();
+    const where: Prisma.salesWhereInput = {
+      company_id: filters.companyId,
+      plan_id: filters.planId === undefined ? undefined : BigInt(filters.planId),
+      origin: filters.origin,
+      sold_at: {
+        gte: filters.from === undefined ? undefined : new Date(filters.from),
+        lte: filters.to === undefined ? undefined : new Date(filters.to),
+      },
+    };
+    const [total, rows] = await prisma.$transaction(
+      [
+        prisma.sales.count({ where }),
+        prisma.sales.findMany({
+          where,
+          include: { companies: { select: { name: true } } },
+          orderBy: [{ sold_at: 'desc' }, { id: 'asc' }],
+          skip: filters.offset,
+          take: filters.pageSize,
+        }),
+      ],
+      { isolationLevel: 'RepeatableRead' },
+    );
+    return { items: rows.map((row) => mapSale(row, row.companies.name)), total };
   },
+
   async createManualSale(operation) {
-    return db.transaction(async (client) => {
-      await client.query(
-        "SELECT pg_advisory_xact_lock(hashtextextended('civix:platform-administration', 0))",
-      );
-      const actor = (
-        await client.query<{
-          role: string;
-          status: string | null;
-          deleted_at: string | null;
-        }>('SELECT role,status,deleted_at FROM users WHERE id=$1 FOR UPDATE', [
-          operation.actorId,
-        ])
-      ).rows[0];
-      if (
-        !actor ||
-        actor.role.toLowerCase() !== 'super_admin' ||
-        actor.deleted_at ||
-        (actor.status != null && actor.status.toLowerCase() !== 'active')
-      ) {
-        throw new AppError({
-          status: 403,
-          code: ErrorCode.FORBIDDEN,
-          message: 'Acesso administrativo alterado.',
-        });
-      }
-      const previous = (
-        await client.query<SaleRow>(
-          'SELECT * FROM sales WHERE created_by=$1 AND operation_id=$2',
-          [operation.actorId, operation.input.operationId],
-        )
-      ).rows[0];
+    const { buildManualSale } = await import('../../services/sale.service.js');
+    return getPrisma().$transaction(async (tx) => {
+      await lockAdministrativeActor(tx, operation.actorId);
+
+      const previous = await tx.sales.findFirst({
+        where: {
+          created_by: String(operation.actorId),
+          operation_id: operation.input.operationId,
+        },
+      });
       if (previous) {
         if (previous.fingerprint !== operation.fingerprint) {
           throw new AppError({
@@ -76,17 +104,21 @@ export const salePostgresRepository: SaleRepository = {
             message: 'A operação já foi usada com outros dados.',
           });
         }
-        return { sale: toSale(previous), replayed: true };
+        return { sale: mapSale(previous), replayed: true };
       }
-      const company = (
-        await client.query<{
-          plan_id: string | null;
-          status: string;
-          deleted_at: string | null;
-        }>('SELECT plan_id,status,deleted_at FROM companies WHERE id=$1 FOR SHARE', [
-          operation.input.companyId,
-        ])
-      ).rows[0];
+
+      const [lockedCompany] = await tx.$queryRaw<{ id: string }[]>`
+        SELECT id
+        FROM companies
+        WHERE id = ${operation.input.companyId}::uuid
+        FOR SHARE
+      `;
+      const company = lockedCompany
+        ? await tx.companies.findUnique({
+            where: { id: lockedCompany.id },
+            select: { plan_id: true, status: true, deleted_at: true },
+          })
+        : null;
       if (
         !company ||
         company.deleted_at ||
@@ -98,72 +130,63 @@ export const salePostgresRepository: SaleRepository = {
           message: 'Empresa indisponível para nova venda.',
         });
       }
-      const plan =
-        operation.input.pricingMode === 'company_plan' && company.plan_id
-          ? (
-              await client.query<PlanRow>('SELECT * FROM plans WHERE id=$1 FOR SHARE', [
-                company.plan_id,
-              ])
-            ).rows[0]
-          : undefined;
+
+      let plan: PlanRow | undefined;
+      if (operation.input.pricingMode === 'company_plan' && company.plan_id !== null) {
+        const [lockedPlan] = await tx.$queryRaw<{ id: bigint }[]>`
+          SELECT id
+          FROM plans
+          WHERE id = ${company.plan_id}
+          FOR SHARE
+        `;
+        const row = lockedPlan
+          ? await tx.plans.findUnique({ where: { id: lockedPlan.id } })
+          : null;
+        if (row) {
+          plan = {
+            ...row,
+            id: row.id.toString(),
+            price: row.price.toFixed(2),
+            billing_period: row.billing_period as PlanRow['billing_period'],
+          };
+        }
+      }
+
       const sale = buildManualSale(operation, plan);
-      await client.query(
-        'INSERT INTO sales (id,company_id,plan_id,origin,pricing_mode,plan_name,plan_price,plan_billing_period,amount,currency,description,sold_at,created_at,created_by,operation_id,fingerprint) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)',
-        [
-          sale.id,
-          sale.companyId,
-          sale.planId,
-          sale.origin,
-          sale.pricingMode,
-          sale.planName,
-          sale.planPrice,
-          sale.planBillingPeriod,
-          sale.amount,
-          sale.currency,
-          sale.description,
-          sale.soldAt,
-          sale.createdAt,
-          sale.createdBy,
-          sale.operationId,
-          sale.fingerprint,
-        ],
-      );
+      await tx.sales.create({
+        data: {
+          id: sale.id,
+          company_id: sale.companyId,
+          plan_id: sale.planId === null ? null : BigInt(sale.planId),
+          origin: sale.origin,
+          pricing_mode: sale.pricingMode,
+          plan_name: sale.planName,
+          plan_price: sale.planPrice,
+          plan_billing_period: sale.planBillingPeriod,
+          amount: sale.amount,
+          currency: sale.currency,
+          description: sale.description,
+          sold_at: sale.soldAt,
+          created_at: sale.createdAt,
+          created_by: sale.createdBy,
+          operation_id: sale.operationId,
+          fingerprint: sale.fingerprint,
+        },
+      });
       return { sale, replayed: false };
     });
   },
+
   async deleteSaleById(id, actorId) {
-    return db.transaction(async (client) => {
-      await client.query(
-        "SELECT pg_advisory_xact_lock(hashtextextended('civix:platform-administration', 0))",
-      );
-      const actor = (
-        await client.query<{
-          role: string;
-          status: string | null;
-          deleted_at: string | null;
-        }>('SELECT role,status,deleted_at FROM users WHERE id=$1 FOR UPDATE', [actorId])
-      ).rows[0];
-      if (
-        !actor ||
-        actor.role.toLowerCase() !== 'super_admin' ||
-        actor.deleted_at ||
-        (actor.status != null && actor.status.toLowerCase() !== 'active')
-      ) {
-        throw new AppError({
-          status: 403,
-          code: ErrorCode.FORBIDDEN,
-          message: 'Acesso administrativo alterado.',
-        });
-      }
-      return (
-        (await client.query('DELETE FROM sales WHERE id=$1 RETURNING id', [id])).rows
-          .length === 1
-      );
+    return getPrisma().$transaction(async (tx) => {
+      await lockAdministrativeActor(tx, actorId);
+      const { count } = await tx.sales.deleteMany({ where: { id } });
+      return count === 1;
     });
   },
+
   async getById(id) {
-    const row = (await db.query<SaleRow>('SELECT * FROM sales WHERE id = $1', [id]))
-      .rows[0];
-    return row ? toSale(row) : undefined;
+    const row = await getPrisma().sales.findUnique({ where: { id } });
+    return row ? mapSale(row) : undefined;
   },
 };
