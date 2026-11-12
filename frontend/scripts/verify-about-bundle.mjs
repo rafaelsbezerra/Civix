@@ -4,9 +4,8 @@ import { fileURLToPath } from 'node:url'
 
 const expectedAssets = [
   'background-shape.svg',
-  'dashboard.png',
   'emphasis-scribble.svg',
-  'macbook-silver.png',
+  'macbook.png',
   'value-divider.svg',
   'vision-divider.svg',
 ]
