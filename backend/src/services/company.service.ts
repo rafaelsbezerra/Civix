@@ -274,25 +274,6 @@ export async function getCompanies(): Promise<Company[]> {
   return companies;
 }
 
-export async function getVerifiedCompanies(): Promise<Company[]> {
-  const companies = (await companyRepository.getVerified()).filter(
-    (company) => company.status !== 'inativo' && !company.deleted_at,
-  );
-
-  logger().debug({
-    event: 'company.queried',
-    module: 'companies',
-    message: 'Consulta de empresas concluída',
-    context: {
-      operation: 'verified',
-      count: companies.length,
-      persistenceMode: USE_MOCK_DATA ? 'json' : 'postgres',
-    },
-  });
-
-  return companies;
-}
-
 export async function getCompaniesByCategory(category: string): Promise<Company[]> {
   const companies = (await companyRepository.getByCategory(category)).filter(
     (company) => company.status !== 'inativo' && !company.deleted_at,

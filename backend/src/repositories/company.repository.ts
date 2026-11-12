@@ -22,7 +22,6 @@ export interface CompanyRepository {
   create(company: Company): Promise<Company>;
   getAll(): Promise<Company[]>;
   getById(id: string): Promise<Company | undefined>;
-  getVerified(): Promise<Company[]>;
   getByCategory(category: string): Promise<Company[]>;
   getByState(state: string): Promise<Company[]>;
   getBySize(size: Company['tamanho']): Promise<Company[]>;

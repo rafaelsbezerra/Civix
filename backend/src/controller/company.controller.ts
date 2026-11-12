@@ -115,23 +115,6 @@ export async function listCompanies(req: Request, res: Response): Promise<Respon
     );
 }
 
-export async function listVerifiedCompanies(
-  req: Request,
-  res: Response,
-): Promise<Response> {
-  const result = await companyService.getVerifiedCompanies();
-
-  return res
-    .status(200)
-    .json(
-      createSuccessResponse(
-        Array.isArray(result)
-          ? await Promise.all(result.map(companyService.presentCompany))
-          : await companyService.presentCompany(result),
-      ),
-    );
-}
-
 export async function searchCompanies(req: Request, res: Response): Promise<Response> {
   const result = await companyService.searchPublicCompanies(req.query);
 

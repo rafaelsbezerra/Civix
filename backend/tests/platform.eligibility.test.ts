@@ -148,10 +148,6 @@ test('elegibilidade pública exclui empresas suspensas/arquivadas sem apagar his
     const publicListPaths = [
       { path: '/api/v1/empresas', expectedIds: publicCompanyIds },
       {
-        path: '/api/v1/empresas/verificadas/todas',
-        expectedIds: new Set([legacyCompanyId]),
-      },
-      {
         path: '/api/v1/empresas/buscar?q=Elegibilidade',
         expectedIds: publicCompanyIds,
       },

@@ -285,8 +285,8 @@ export async function applyStagingSeed(
 
       await connection.query(
         `INSERT INTO companies (id, name, cnpj, description, detailed_description, category, city, state,
-          status, is_verified, size, price_range, created_at, updated_at, logo, address, phone, email, website, whatsapp, additional_description, tone)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9::company_status,$10,$11,$12::numrange,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22)`,
+          status, size, price_range, created_at, updated_at, logo, address, phone, email, website, whatsapp, additional_description, tone)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9::company_status,$10,$11::numrange,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21)`,
         [
           company.id,
           company.nome,
@@ -297,7 +297,6 @@ export async function applyStagingSeed(
           company.cidade,
           company.estado,
           normalizeCompanyStatus(company.status),
-          company.verificado,
           company.tamanho,
           priceRange,
           createdAt,

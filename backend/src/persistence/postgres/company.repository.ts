@@ -537,9 +537,6 @@ export const companyPostgresRepository: CompanyRepository = {
       { isolationLevel: 'RepeatableRead' },
     );
   },
-  async getVerified() {
-    return readCompanies();
-  },
   async getByCategory(category) {
     return readCompanies({
       category: { equals: escapePattern(category), mode: 'insensitive' },

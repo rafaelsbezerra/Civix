@@ -206,7 +206,6 @@ test('Consultas de empresas registram operação e contagem sem termos de busca 
     verificado: false,
   };
   t.mock.method(companyRepository, 'getAll', async () => [company]);
-  t.mock.method(companyRepository, 'getVerified', async () => []);
   t.mock.method(companyRepository, 'getByCategory', async () => [company]);
   t.mock.method(companyRepository, 'getByState', async () => [company]);
   t.mock.method(companyRepository, 'getBySize', async () => [company]);
@@ -215,7 +214,6 @@ test('Consultas de empresas registram operação e contagem sem termos de busca 
 
   await capture.run(async () => {
     await companyService.getCompanies();
-    await companyService.getVerifiedCompanies();
     await companyService.getCompaniesByCategory('categoria-busca-privada');
     await companyService.getCompaniesByState('estado-busca-privado');
     await companyService.getCompaniesBySize('pequena');
@@ -225,7 +223,7 @@ test('Consultas de empresas registram operação e contagem sem termos de busca 
 
   assert.deepEqual(
     capture.records().map((record) => record.context?.operation),
-    ['all', 'verified', 'category', 'state', 'size', 'search', 'get-by-id'],
+    ['all', 'category', 'state', 'size', 'search', 'get-by-id'],
   );
   assert.ok(
     capture
@@ -234,7 +232,6 @@ test('Consultas de empresas registram operação e contagem sem termos de busca 
         (record) => record.level === 'debug' && record.event === 'company.queried',
       ),
   );
-  assert.equal(capture.records()[1].context?.count, 0);
   assertPrivateDataAbsent(capture.destination.text, [
     'categoria-busca-privada',
     'estado-busca-privado',

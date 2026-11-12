@@ -69,7 +69,7 @@ export interface Company {
   data_cadastro?: string;
   createdAt?: string;
   updatedAt?: string;
-  verificado: boolean;
+  verificado?: boolean;
   tamanho: 'pequena' | 'media' | 'grande';
   faixa_preco?: CompanyPriceRange | null;
   descritivo?: string | null;
@@ -96,7 +96,7 @@ export const companyDataSchema = z.object({
   cidade: z.string().min(1),
   estado: z.string().min(1),
   status: z.enum(['ativo', 'inativo', 'verificado']),
-  verificado: z.boolean(),
+  verificado: z.boolean().optional(),
   tamanho: z.enum(['pequena', 'media', 'grande']),
   faixa_preco: z.enum(COMPANY_PRICE_RANGES).nullable().optional(),
   data_cadastro: z.string().optional(),
