@@ -1,88 +1,109 @@
-import type { User, UserRole } from '../../entities/user.entity.js';
 import type { UserRepository } from '../../repositories/user.repository.js';
-import type { RoleUsersBreakdown } from '../../dtos/user.auth.dto.js';
-import { db } from '../../shared/config/data.js';
+import type { User, UserId, UserRole } from '../../entities/user.entity.js';
+import type {
+  Prisma,
+  users,
+  user_role,
+  user_status,
+} from '../../generated/prisma/client.js';
+import { getPrisma } from '../../shared/config/prisma.js';
 import { AppError } from '../../shared/errors/app.error.js';
 import { ErrorCode } from '../../shared/errors/error.code.js';
 import { randomUUID } from 'node:crypto';
+import type {
+  ManagedUsersMetrics,
+  RoleUsersBreakdown,
+  UserAdministrationChange,
+  UserAdministrationFilters,
+} from '../../dtos/user.auth.dto.js';
 
-function normalizeUserStatus(status?: string | null): string | undefined {
-  if (status == null) {
-    return undefined;
-  }
-
-  return status.toLowerCase();
+function mapUser(row: users): User {
+  return {
+    id: row.id,
+    email: row.email,
+    name: row.name ?? undefined,
+    role: row.role.toLowerCase() as UserRole,
+    password_hash: row.password_hash ?? undefined,
+    status: row.status.toLowerCase(),
+    company_id: row.company_id,
+    invite_token: row.invite_token,
+    deleted_at: row.deleted_at?.toISOString() ?? null,
+    deactivation_reason: row.deactivation_reason,
+    tokens_revoked_at: row.tokens_revoked_at,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  };
 }
 
-function normalizeUser<T extends { status?: string; role?: UserRole }>(
-  user: T | undefined,
-): T | undefined {
-  if (!user) {
-    return undefined;
+function escapeLike(value: string): string {
+  return value.replace(/[\\%_]/g, '\\$&');
+}
+
+function rethrowEmailConflict(error: unknown): never {
+  const prismaError = error as { code?: string; meta?: { code?: string } };
+  if (
+    prismaError?.code === 'P2002' ||
+    (prismaError?.code === 'P2010' && prismaError.meta?.code === '23505')
+  ) {
+    throw new AppError({
+      status: 409,
+      code: ErrorCode.CONFLICT,
+      message: 'E-mail já cadastrado.',
+    });
   }
 
-  return {
-    ...user,
-    role: user.role == null ? user.role : (user.role.toLowerCase() as UserRole),
-    status: normalizeUserStatus(user.status),
-  };
+  throw error;
 }
 
 export const userPostgresRepository: UserRepository = {
   async getUsersForAdministration(companyId, filters) {
-    const values: unknown[] = [];
-    const where = ['deleted_at IS NULL'];
-    if (companyId === null) {
-      where.push("role='SUPER_ADMIN' AND company_id IS NULL");
-    } else {
-      values.push(companyId);
-      where.push("company_id=$1 AND role IN ('ADMIN_EMPRESA','ATENDENTE')");
-    }
-    if (filters.q) {
-      values.push('%' + filters.q.replace(/[\\%_]/g, '\\$&') + '%');
-      where.push(
-        '(email ILIKE $' +
-          values.length +
-          " OR COALESCE(name,'') ILIKE $" +
-          values.length +
-          ')',
-      );
-    }
-    if (filters.role) {
-      values.push(filters.role.toUpperCase());
-      where.push('role=$' + values.length);
-    }
-    if (filters.status) {
-      values.push(filters.status.toUpperCase());
-      where.push("COALESCE(status::text,'ACTIVE')=UPPER($" + values.length + ')');
-    }
-    values.push(filters.pageSize, filters.offset);
-    const query =
-      'WITH filtered AS (SELECT * FROM users WHERE ' +
-      where.join(' AND ') +
-      ') SELECT (SELECT COUNT(*)::int FROM filtered) AS total, ' +
-      'COALESCE((SELECT json_agg(page_rows) FROM (SELECT * FROM filtered ORDER BY email,id LIMIT $' +
-      (values.length - 1) +
-      ' OFFSET $' +
-      values.length +
-      ") page_rows),'[]'::json) AS items";
-    const result = (await db.query<{ items: User[]; total: number }>(query, values))
-      .rows[0];
-
-    return {
-      total: result.total,
-      items: result.items.map((item) => normalizeUser(item)!),
+    const prisma = getPrisma();
+    const search = filters.q ? escapeLike(filters.q) : undefined;
+    const scopedRoles: user_role[] =
+      companyId === null ? ['SUPER_ADMIN'] : ['ADMIN_EMPRESA', 'ATENDENTE'];
+    const where: Prisma.usersWhereInput = {
+      company_id: companyId,
+      deleted_at: null,
+      role: { in: scopedRoles },
+      ...(filters.role
+        ? { AND: { role: filters.role.toUpperCase() as user_role } }
+        : {}),
+      ...(filters.status
+        ? { status: filters.status.toUpperCase() as user_status }
+        : {}),
+      ...(search
+        ? {
+            OR: [
+              { email: { contains: search, mode: 'insensitive' } },
+              { name: { contains: search, mode: 'insensitive' } },
+            ],
+          }
+        : {}),
     };
+    const [rows, total] = await prisma.$transaction(
+      [
+        prisma.users.findMany({
+          where,
+          orderBy: [{ email: 'asc' }, { id: 'asc' }],
+          take: filters.pageSize,
+          skip: filters.offset,
+        }),
+        prisma.users.count({ where }),
+      ],
+      { isolationLevel: 'RepeatableRead' },
+    );
+
+    return { items: rows.map(mapUser), total };
   },
   async getManagedUsersMetrics() {
-    const query =
-      "SELECT LOWER(role::text) AS role, LOWER(COALESCE(status::text, 'ACTIVE')) AS status, COUNT(*)::int AS count " +
-      'FROM users WHERE deleted_at IS NULL ' +
-      "AND role IN ('SUPER_ADMIN'::user_role, 'ADMIN_EMPRESA'::user_role, 'ATENDENTE'::user_role) " +
-      "GROUP BY role, COALESCE(status::text, 'ACTIVE')";
-    const result = await db.query<{ role: string; status: string; count: number }>(
-      query,
-    );
+    const rows = await getPrisma().users.groupBy({
+      by: ['role', 'status'],
+      where: {
+        deleted_at: null,
+        role: { in: ['SUPER_ADMIN', 'ADMIN_EMPRESA', 'ATENDENTE'] },
+      },
+      _count: { _all: true },
+    });
 
     const roles: Array<'super_admin' | 'admin_empresa' | 'atendente'> = [
       'super_admin',
@@ -109,14 +130,14 @@ export const userPostgresRepository: UserRepository = {
     let pending = 0;
     let blocked = 0;
 
-    for (const row of result.rows) {
+    for (const row of rows) {
       const role = row.role.toLowerCase() as
         'super_admin' | 'admin_empresa' | 'atendente';
       const breakdown = byRoleMap.get(role);
       if (!breakdown) {
         continue;
       }
-      const count = Number(row.count) || 0;
+      const count = row._count._all;
       const status = row.status.toLowerCase();
 
       breakdown.total += count;
@@ -144,17 +165,16 @@ export const userPostgresRepository: UserRepository = {
   },
   async changeUserAdministration(input) {
     try {
-      return await db.transaction(async (client) => {
-        await client.query(
-          "SELECT pg_advisory_xact_lock(hashtextextended('civix:platform-administration',0))",
-        );
-        const actor = normalizeUser(
-          (
-            await client.query<User>('SELECT * FROM users WHERE id=$1 FOR UPDATE', [
-              input.actorId,
-            ])
-          ).rows[0],
-        );
+      return await getPrisma().$transaction(async (tx) => {
+        await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended('civix:platform-administration', 0))`;
+        const [lockedActor] = await tx.$queryRaw<{ id: string }[]>`
+          SELECT id
+          FROM users WHERE id = ${String(input.actorId)}::uuid FOR UPDATE
+        `;
+        const actorRow = lockedActor
+          ? await tx.users.findUnique({ where: { id: lockedActor.id } })
+          : null;
+        const actor = actorRow ? mapUser(actorRow) : undefined;
         if (
           !actor ||
           actor.role !== 'super_admin' ||
@@ -170,12 +190,15 @@ export const userPostgresRepository: UserRepository = {
           });
         }
         if (input.companyId !== null) {
-          const company = (
-            await client.query<{ status: string; deleted_at: string | null }>(
-              'SELECT status,deleted_at FROM companies WHERE id=$1 FOR SHARE',
-              [input.companyId],
-            )
-          ).rows[0];
+          const [lockedCompany] = await tx.$queryRaw<{ id: string }[]>`
+            SELECT id FROM companies WHERE id = ${input.companyId}::uuid FOR SHARE
+          `;
+          const company = lockedCompany
+            ? await tx.companies.findUnique({
+                where: { id: lockedCompany.id },
+                select: { status: true, deleted_at: true },
+              })
+            : null;
           if (!company) {
             throw new AppError({
               status: 404,
@@ -191,20 +214,20 @@ export const userPostgresRepository: UserRepository = {
             });
           }
         }
-        const user = normalizeUser(
+        const [lockedUser] =
           input.action === 'invite'
-            ? (
-                await client.query<User>(
-                  'SELECT * FROM users WHERE LOWER(email)=LOWER($1) FOR UPDATE',
-                  [input.email],
-                )
-              ).rows[0]
-            : (
-                await client.query<User>('SELECT * FROM users WHERE id=$1 FOR UPDATE', [
-                  input.userId,
-                ])
-              ).rows[0],
-        );
+            ? await tx.$queryRaw<{ id: string }[]>`
+                SELECT id
+                FROM users WHERE LOWER(email) = LOWER(${input.email ?? null}) FOR UPDATE
+              `
+            : await tx.$queryRaw<{ id: string }[]>`
+                SELECT id
+                FROM users WHERE id = ${input.userId == null ? null : String(input.userId)}::uuid FOR UPDATE
+              `;
+        const userRow = lockedUser
+          ? await tx.users.findUnique({ where: { id: lockedUser.id } })
+          : null;
+        const user = userRow ? mapUser(userRow) : undefined;
         if (input.action === 'invite') {
           if (
             user &&
@@ -233,30 +256,26 @@ export const userPostgresRepository: UserRepository = {
             });
           }
           if (user) {
-            return normalizeUser(
-              (
-                await client.query<User>(
-                  'UPDATE users SET invite_token=$1,name=COALESCE($2,name) WHERE id=$3 RETURNING *',
-                  [input.token, input.name ?? null, user.id],
-                )
-              ).rows[0],
-            )!;
+            return mapUser(
+              await tx.users.update({
+                where: { id: String(user.id) },
+                data: { invite_token: input.token, name: input.name ?? undefined },
+              }),
+            );
           }
-          return normalizeUser(
-            (
-              await client.query<User>(
-                "INSERT INTO users (id,email,name,role,company_id,status,invite_token) VALUES ($1,$2,$3,$4,$5,'PENDING',$6) RETURNING *",
-                [
-                  randomUUID(),
-                  input.email,
-                  input.name ?? null,
-                  input.role!.toUpperCase(),
-                  input.companyId,
-                  input.token,
-                ],
-              )
-            ).rows[0],
-          )!;
+          return mapUser(
+            await tx.users.create({
+              data: {
+                id: randomUUID(),
+                email: input.email!,
+                name: input.name ?? null,
+                role: input.role!.toUpperCase() as user_role,
+                company_id: input.companyId,
+                status: 'PENDING',
+                invite_token: input.token,
+              },
+            }),
+          );
         }
         if (
           !user ||
@@ -272,16 +291,10 @@ export const userPostgresRepository: UserRepository = {
             message: 'Usuário não encontrado neste contexto.',
           });
         }
-        const updates: Record<string, unknown> = {};
+        const updates: Prisma.usersUncheckedUpdateInput = {};
+        let revokeTokens = false;
         const revoke = () => {
-          updates.tokens_revoked_at = new Date(
-            Math.max(
-              Date.now(),
-              user.tokens_revoked_at
-                ? new Date(user.tokens_revoked_at).getTime() + 2
-                : 0,
-            ),
-          ).toISOString();
+          revokeTokens = true;
           updates.invite_token = null;
           updates.reset_password_token = null;
           updates.reset_password_expires = null;
@@ -304,9 +317,9 @@ export const userPostgresRepository: UserRepository = {
             revoke();
           }
           updates.email = input.email;
-          updates.name = input.name;
+          updates.name = input.name ?? null;
           if (input.companyId !== null && input.role) {
-            updates.role = input.role.toUpperCase();
+            updates.role = input.role.toUpperCase() as user_role;
           }
         } else if (input.action === 'reactivate') {
           if (String(user.id) === String(actor.id)) {
@@ -341,13 +354,16 @@ export const userPostgresRepository: UserRepository = {
                 message: 'Não é permitido desativar a própria conta.',
               });
             }
-            const active = await client.query(
-              "SELECT id FROM users WHERE role='SUPER_ADMIN' AND company_id IS NULL AND deleted_at IS NULL AND password_hash IS NOT NULL AND UPPER(COALESCE(status::text,'ACTIVE'))='ACTIVE' FOR UPDATE",
-            );
+            const active = await tx.$queryRaw<{ id: string }[]>`
+              SELECT id FROM users
+              WHERE role = 'SUPER_ADMIN' AND company_id IS NULL AND deleted_at IS NULL
+                AND password_hash IS NOT NULL AND status = 'ACTIVE'
+              FOR UPDATE
+            `;
             if (
               !!user.password_hash &&
               (user.status == null || user.status.toLowerCase() === 'active') &&
-              active.rows.length <= 1
+              active.length <= 1
             ) {
               throw new AppError({
                 status: 409,
@@ -367,168 +383,121 @@ export const userPostgresRepository: UserRepository = {
           updates.deactivation_reason = input.reason;
           revoke();
           if (input.action === 'delete') {
-            updates.deleted_at = new Date().toISOString();
+            updates.deleted_at = new Date();
           }
         }
-        const entries = Object.entries(updates);
-        const values = entries.map(([, value]) => value);
-        values.push(user.id);
-        const assignments = entries.map(([key], index) => {
-          const parameter = '$' + (index + 1);
-          return (
-            key +
-            (key === 'tokens_revoked_at'
-              ? '=GREATEST(' +
-                parameter +
-                "::timestamptz,date_trunc('milliseconds',clock_timestamp()),COALESCE(tokens_revoked_at,'epoch'::timestamptz)+INTERVAL '2 milliseconds')"
-              : '=' + parameter)
-          );
-        });
-        return normalizeUser(
-          (
-            await client.query<User>(
-              'UPDATE users SET ' +
-                assignments.join(',') +
-                ' WHERE id=$' +
-                values.length +
-                ' RETURNING *',
-              values,
+        const id = String(user.id);
+        if (revokeTokens) {
+          await tx.$executeRaw`
+            UPDATE users
+            SET tokens_revoked_at = GREATEST(
+              ${new Date()}::timestamptz,
+              date_trunc('milliseconds', clock_timestamp()),
+              COALESCE(tokens_revoked_at, 'epoch'::timestamptz) + INTERVAL '2 milliseconds'
             )
-          ).rows[0],
-        )!;
+            WHERE id = ${id}::uuid
+          `;
+        }
+        return mapUser(await tx.users.update({ where: { id }, data: updates }));
       });
     } catch (error) {
-      if ((error as { code?: string }).code === '23505') {
-        throw new AppError({
-          status: 409,
-          code: ErrorCode.CONFLICT,
-          message: 'E-mail já cadastrado.',
-        });
-      }
-      throw error;
+      rethrowEmailConflict(error);
     }
   },
   async updateOwnProfile(id, input) {
     try {
-      return normalizeUser(
-        (
-          await db.query<User>(
-            `UPDATE users SET name=$1,email=$2,
-        tokens_revoked_at=CASE WHEN LOWER(email)<>LOWER($2) THEN GREATEST($4::timestamptz,date_trunc('milliseconds',clock_timestamp()),COALESCE(tokens_revoked_at,'epoch'::timestamptz)+INTERVAL '2 milliseconds') ELSE tokens_revoked_at END,
-        invite_token=CASE WHEN LOWER(email)<>LOWER($2) THEN NULL ELSE invite_token END,
-        reset_password_token=CASE WHEN LOWER(email)<>LOWER($2) THEN NULL ELSE reset_password_token END,
-        reset_password_expires=CASE WHEN LOWER(email)<>LOWER($2) THEN NULL ELSE reset_password_expires END
-        WHERE id=$3 AND deleted_at IS NULL AND UPPER(COALESCE(status::text,'ACTIVE'))='ACTIVE' RETURNING *`,
-            [input.name, input.email, id, new Date().toISOString()],
-          )
-        ).rows[0],
-      );
+      const [row] = await getPrisma().$queryRaw<users[]>`
+        UPDATE users SET
+          name = ${input.name},
+          email = ${input.email},
+          tokens_revoked_at = CASE WHEN LOWER(email) <> LOWER(${input.email})
+            THEN GREATEST(
+              ${new Date()}::timestamptz,
+              date_trunc('milliseconds', clock_timestamp()),
+              COALESCE(tokens_revoked_at, 'epoch'::timestamptz) + INTERVAL '2 milliseconds'
+            )
+            ELSE tokens_revoked_at
+          END,
+          invite_token = CASE WHEN LOWER(email) <> LOWER(${input.email}) THEN NULL ELSE invite_token END,
+          reset_password_token = CASE WHEN LOWER(email) <> LOWER(${input.email}) THEN NULL ELSE reset_password_token END,
+          reset_password_expires = CASE WHEN LOWER(email) <> LOWER(${input.email}) THEN NULL ELSE reset_password_expires END,
+          updated_at = NOW()
+        WHERE id = ${String(id)}::uuid AND deleted_at IS NULL AND status = 'ACTIVE'
+        RETURNING *, created_at AS "createdAt", updated_at AS "updatedAt"
+      `;
+      return row ? mapUser(row) : undefined;
     } catch (error) {
-      if ((error as { code?: string }).code === '23505') {
-        throw new AppError({
-          status: 409,
-          code: ErrorCode.CONFLICT,
-          message: 'E-mail já cadastrado.',
-        });
-      }
-      throw error;
+      rethrowEmailConflict(error);
     }
   },
   async create(user) {
-    return normalizeUser(
-      (
-        await db.query<User>(
-          'INSERT INTO users (id, email, name, role, company_id, status, password_hash) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *',
-          [
-            user.id,
-            user.email,
-            user.name ?? null,
-            user.role.toUpperCase(),
-            user.company_id ?? null,
-            (user.status ?? 'active').toUpperCase(),
-            user.password_hash ?? null,
-          ],
-        )
-      ).rows[0],
-    )!;
+    const row = await getPrisma().users.create({
+      data: {
+        id: String(user.id),
+        email: user.email,
+        name: user.name ?? null,
+        role: user.role.toUpperCase() as user_role,
+        company_id: user.company_id ?? null,
+        status: (user.status ?? 'active').toUpperCase() as user_status,
+        password_hash: user.password_hash ?? null,
+      },
+    });
+    return mapUser(row);
   },
   async getById(id) {
-    return normalizeUser(
-      (await db.query<User>('SELECT * FROM users WHERE id = $1', [id])).rows[0],
-    );
+    const row = await getPrisma().users.findUnique({ where: { id: String(id) } });
+    return row ? mapUser(row) : undefined;
   },
-
   async getByEmail(email) {
-    return (
-      await db.query<Pick<User, 'id' | 'name' | 'email'>>(
-        'SELECT id, name, email FROM users WHERE LOWER(email) = LOWER($1)',
-        [email],
-      )
-    ).rows[0];
+    const row = await getPrisma().users.findFirst({
+      where: { email: { equals: escapeLike(email), mode: 'insensitive' } },
+      select: { id: true, name: true, email: true },
+    });
+    return row ? { ...row, name: row.name ?? undefined } : undefined;
   },
-
   async getForLogin(email) {
-    return normalizeUser(
-      (
-        await db.query<User>('SELECT * FROM users WHERE LOWER(email) = LOWER($1)', [
-          email,
-        ])
-      ).rows[0],
-    );
+    const row = await getPrisma().users.findFirst({
+      where: { email: { equals: escapeLike(email), mode: 'insensitive' } },
+    });
+    return row ? mapUser(row) : undefined;
   },
   async getByEmailAndRole(email, role) {
-    return normalizeUser(
-      (
-        await db.query<User>(
-          'SELECT * FROM users WHERE LOWER(email) = LOWER($1) AND role = $2',
-          [email, role.toUpperCase()],
-        )
-      ).rows[0],
-    );
+    const row = await getPrisma().users.findFirst({
+      where: {
+        email: { equals: escapeLike(email), mode: 'insensitive' },
+        role: role.toUpperCase() as user_role,
+      },
+    });
+    return row ? mapUser(row) : undefined;
   },
-
   async getByValidResetTokenHash(tokenHash) {
-    return (
-      await db.query<Pick<User, 'id'>>(
-        `
-      SELECT id
-      FROM users
-      WHERE reset_password_token = $1
-      AND reset_password_expires > NOW()
-    `,
-        [tokenHash],
-      )
-    ).rows[0];
+    const [row] = await getPrisma().$queryRaw<Pick<User, 'id'>[]>`
+      SELECT id FROM users
+      WHERE reset_password_token = ${tokenHash} AND reset_password_expires > NOW()
+    `;
+    return row;
   },
-
   async savePasswordResetToken(id, tokenHash, expiresAt) {
-    await db.query(
-      `
-      UPDATE users
-      SET reset_password_token = $1, reset_password_expires = $2
-      WHERE id = $3
-    `,
-      [tokenHash, expiresAt, id],
-    );
+    await getPrisma().users.updateMany({
+      where: { id: String(id) },
+      data: { reset_password_token: tokenHash, reset_password_expires: expiresAt },
+    });
   },
-
   async updatePasswordAndClearResetToken(id, passwordHash) {
-    await db.query(
-      `
-      UPDATE users
-      SET password_hash = $1, reset_password_token = NULL, reset_password_expires = NULL
-      WHERE id = $2
-    `,
-      [passwordHash, id],
-    );
+    await getPrisma().users.updateMany({
+      where: { id: String(id) },
+      data: {
+        password_hash: passwordHash,
+        reset_password_token: null,
+        reset_password_expires: null,
+      },
+    });
   },
-
   async assignPlan(id, planId) {
-    const result = await db.query(
-      'UPDATE users SET plan_id = $1 WHERE id = $2 RETURNING id',
-      [planId, id],
-    );
-
-    return result.rowCount === 1;
+    const { count } = await getPrisma().users.updateMany({
+      where: { id: String(id) },
+      data: { plan_id: BigInt(planId) },
+    });
+    return count === 1;
   },
 };

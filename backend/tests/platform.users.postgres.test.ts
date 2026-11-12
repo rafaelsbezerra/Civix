@@ -1,55 +1,50 @@
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import test, { type TestContext } from 'node:test';
-import type { User } from '../src/entities/user.entity.js';
+import type { Prisma, users } from '../src/generated/prisma/client.js';
 import type { UserAdministrationChange } from '../src/dtos/user.auth.dto.js';
 
-Object.assign(process.env, { USE_MOCK_DATA: 'true', LOG_LEVEL: 'fatal' });
-const { db } = await import('../src/shared/config/data.js');
+Object.assign(process.env, {
+  USE_MOCK_DATA: 'false',
+  DATABASE_URL: 'postgresql://localhost:1/civix_test',
+  LOG_LEVEL: 'fatal',
+});
+const { getPrisma } = await import('../src/shared/config/prisma.js');
 const { userPostgresRepository } =
   await import('../src/persistence/postgres/user.repository.js');
 const { authPostgresRepository } =
   await import('../src/persistence/postgres/auth.repository.js');
+const prisma = getPrisma();
 
 const actorId = randomUUID();
 const targetId = randomUUID();
 const companyId = randomUUID();
-const anotherUserId = randomUUID();
 const changedAt = '2026-11-02T12:00:00.000Z';
 
-type UserWithResetFields = User & {
-  reset_password_token?: string | null;
-  reset_password_expires?: string | null;
-};
-
-function makeUser(overrides: Partial<UserWithResetFields> = {}): UserWithResetFields {
+function makeUser(overrides: Partial<users> = {}): users {
   return {
     id: targetId,
     email: 'target@example.test',
     name: 'Pessoa Alvo',
-    role: 'admin_empresa',
+    role: 'ADMIN_EMPRESA',
     company_id: companyId,
     password_hash: 'hash-sintetico',
-    status: 'active',
+    status: 'ACTIVE',
     deleted_at: null,
     deactivation_reason: null,
-    tokens_revoked_at: '2026-11-01T12:00:00.000Z',
+    tokens_revoked_at: new Date(changedAt),
     invite_token: 'convite-antigo',
     reset_password_token: 'reset-antigo',
-    reset_password_expires: '2026-11-03T12:00:00.000Z',
+    reset_password_expires: new Date(changedAt),
+    plan_id: null,
+    createdAt: new Date(changedAt),
+    updatedAt: new Date(changedAt),
     ...overrides,
   };
 }
 
-function superAdmin(id = actorId): User {
-  return makeUser({
-    id,
-    email: `super-${id}@example.test`,
-    name: 'Superadmin',
-    role: 'super_admin',
-    company_id: null,
-  });
-}
+const actor = makeUser({ id: actorId, role: 'SUPER_ADMIN', company_id: null });
+const company = { status: 'ATIVO', deleted_at: null };
 
 function change(
   overrides: Partial<UserAdministrationChange> = {},
@@ -65,25 +60,93 @@ function change(
   };
 }
 
-function mockTransaction(
-  context: TestContext,
-  client: { query: (text: string, values?: unknown[]) => Promise<{ rows: unknown[] }> },
-  events: string[] = [],
-) {
-  context.mock.method(db, 'query', () => {
-    throw new Error('Consulta fora da transação não permitida.');
+function mockPrismaMethod<
+  Target,
+  Key extends keyof Target,
+  Args extends unknown[],
+  Result,
+>(t: TestContext, target: Target, key: Key, implementation: (...args: Args) => Result) {
+  const original = target[key];
+  const mock = t.mock.fn(implementation);
+  target[key] = mock as Target[Key];
+  t.after(() => {
+    target[key] = original;
   });
-  context.mock.method(
-    db,
-    'transaction',
-    async (
-      run: (
-        client: Parameters<Parameters<typeof db.transaction>[0]>[0],
-      ) => Promise<unknown>,
-    ) => {
+  return mock;
+}
+
+function mockTransaction(
+  t: TestContext,
+  options: {
+    actor?: users;
+    target?: users;
+    companyStatus?: string;
+    activeAdminCount?: number;
+  } = {},
+) {
+  const events: string[] = [];
+  const target = options.target ?? makeUser();
+  const tx = {
+    $executeRaw: t.mock.fn(
+      async (query: TemplateStringsArray, ..._values: unknown[]) => {
+        events.push(
+          query.join('?').includes('pg_advisory_xact_lock') ? 'LOCK' : 'REVOKE',
+        );
+        return 1;
+      },
+    ),
+    $queryRaw: t.mock.fn(async (query: TemplateStringsArray, ...values: unknown[]) => {
+      const sql = query.join('?');
+      if (sql.includes('FROM companies')) {
+        events.push('COMPANY');
+        return [{ id: companyId }];
+      }
+      if (sql.includes('LOWER(email)')) {
+        events.push('EMAIL');
+        return options.target ? [{ id: options.target.id }] : [];
+      }
+      if (sql.includes("role = 'SUPER_ADMIN'")) {
+        events.push('ACTIVE_ADMINS');
+        return [actor, target].slice(0, options.activeAdminCount ?? 2);
+      }
+      if (values[0] === actorId) {
+        events.push('ACTOR');
+        return [{ id: actorId }];
+      }
+      events.push('TARGET');
+      return [{ id: targetId }];
+    }),
+    companies: {
+      findUnique: async () => ({
+        ...company,
+        status: options.companyStatus ?? company.status,
+      }),
+    },
+    users: {
+      findUnique: async ({ where }: { where: { id: string } }) =>
+        where.id === actorId ? (options.actor ?? actor) : target,
+      update: t.mock.fn(async ({ data }: { data: Partial<users> }) => {
+        events.push('UPDATE');
+        return { ...target, ...data };
+      }),
+      create: t.mock.fn(async ({ data }: { data: Partial<users> }) => {
+        events.push('CREATE');
+        return makeUser(data);
+      }),
+      updateMany: t.mock.fn(async (_args: Prisma.usersUpdateManyArgs) => {
+        events.push('UPDATE_MANY');
+        return { count: options.companyStatus === 'INATIVO' ? 0 : 1 };
+      }),
+    },
+  };
+  mockPrismaMethod(
+    t,
+    prisma,
+    '$transaction',
+    async (run: (client: typeof tx) => Promise<unknown>) => {
       events.push('BEGIN');
       try {
-        const result = await run(client as never);
+        const result = await run(tx);
         events.push('COMMIT');
         return result;
       } catch (error) {
@@ -92,590 +155,368 @@ function mockTransaction(
       }
     },
   );
+  return { events, tx };
 }
 
-test('adapter PostgreSQL de usuários usa SQL e transações simulados', async (t) => {
-  await t.test(
-    'listas parametrizam escopo, busca, status e paginação; histórico da empresa não depende do estado',
-    async (sub) => {
-      let statement = '';
-      let values: unknown[] | undefined;
-      const row = makeUser({ role: 'atendente', status: 'blocked' });
-      sub.mock.method(db, 'query', async (text: string, parameters?: unknown[]) => {
-        statement = text;
-        values = parameters;
-        return { rows: [{ items: [row], total: 9 }] } as never;
-      });
-
-      const companyResult = await userPostgresRepository.getUsersForAdministration(
-        companyId,
-        {
-          q: 'ana%_',
-          role: 'atendente',
-          status: 'blocked',
-          pageSize: 5,
-          offset: 10,
-        },
-      );
-      assert.match(statement, /deleted_at IS NULL/);
-      assert.match(
-        statement,
-        /company_id=\$1 AND role IN \('ADMIN_EMPRESA','ATENDENTE'\)/,
-      );
-      assert.match(statement, /email ILIKE \$2 OR COALESCE\(name,''\) ILIKE \$2/);
-      assert.match(statement, /role=\$3/);
-      assert.match(statement, /COALESCE\(status::text,'ACTIVE'\)=UPPER\(\$4\)/);
-      assert.match(statement, /ORDER BY email,id LIMIT \$5 OFFSET \$6/);
-      assert.deepEqual(values, [
-        companyId,
-        '%ana\\%\\_%',
-        'ATENDENTE',
-        'BLOCKED',
-        5,
-        10,
-      ]);
-      assert.equal(companyResult.total, 9);
-
-      const global = await userPostgresRepository.getUsersForAdministration(null, {
-        pageSize: 20,
-        offset: 0,
-      });
-      assert.match(statement, /deleted_at IS NULL/);
-      assert.match(statement, /role='SUPER_ADMIN' AND company_id IS NULL/);
-      assert.doesNotMatch(statement, /company_id=\$1/);
-      assert.deepEqual(values, [20, 0]);
-      assert.equal(global.total, 9);
-    },
+test('lista usuários no escopo, com busca literal e paginação consistente', async (t) => {
+  const find = mockPrismaMethod(
+    t,
+    prisma.users,
+    'findMany',
+    async (_args: Prisma.usersFindManyArgs) => [
+      makeUser({ role: 'ATENDENTE', status: 'BLOCKED' }),
+    ],
+  );
+  const count = mockPrismaMethod(
+    t,
+    prisma.users,
+    'count',
+    async (_args: Prisma.usersCountArgs) => 9,
+  );
+  const transaction = mockPrismaMethod(
+    t,
+    prisma,
+    '$transaction',
+    (operations: Promise<unknown>[], _options: { isolationLevel: string }) =>
+      Promise.all(operations),
   );
 
-  await t.test(
-    'revalida ator e alvo sob lock, suspende e preserva histórico de token',
-    async (sub) => {
-      const queries: { text: string; values?: unknown[] }[] = [];
-      const events: string[] = [];
-      const target = makeUser({ role: 'super_admin', company_id: null });
-      const activeAdmins = [superAdmin(actorId), target];
-      const client = {
-        async query(text: string, values?: unknown[]) {
-          queries.push({ text, values });
-          if (text.includes('pg_advisory_xact_lock')) {
-            return { rows: [] };
-          }
-          if (text.includes('FROM users WHERE id=$1 FOR UPDATE')) {
-            return { rows: [values?.[0] === actorId ? superAdmin(actorId) : target] };
-          }
-          if (text.includes("role='SUPER_ADMIN'")) {
-            return { rows: activeAdmins };
-          }
-          if (text.includes('FROM users WHERE id=$1')) {
-            return { rows: [target] };
-          }
-          if (text.startsWith('UPDATE users SET')) {
-            return {
-              rows: [
-                makeUser({
-                  ...target,
-                  status: 'blocked',
-                  deactivation_reason: 'Motivo sintético',
-                }),
-              ],
-            };
-          }
-          return { rows: [] };
-        },
-      };
-      mockTransaction(sub, client, events);
+  const result = await userPostgresRepository.getUsersForAdministration(companyId, {
+    q: 'ana%_',
+    role: 'atendente',
+    status: 'blocked',
+    pageSize: 5,
+    offset: 10,
+  });
+  const where = {
+    company_id: companyId,
+    deleted_at: null,
+    role: { in: ['ADMIN_EMPRESA', 'ATENDENTE'] },
+    AND: { role: 'ATENDENTE' },
+    status: 'BLOCKED',
+    OR: [
+      { email: { contains: 'ana\\%\\_', mode: 'insensitive' } },
+      { name: { contains: 'ana\\%\\_', mode: 'insensitive' } },
+    ],
+  };
+  assert.deepEqual(find.mock.calls[0].arguments[0], {
+    where,
+    orderBy: [{ email: 'asc' }, { id: 'asc' }],
+    take: 5,
+    skip: 10,
+  });
+  assert.deepEqual(count.mock.calls[0].arguments[0], { where });
+  assert.deepEqual(transaction.mock.calls[0].arguments[1], {
+    isolationLevel: 'RepeatableRead',
+  });
+  assert.equal(result.total, 9);
+  assert.equal(result.items[0].role, 'atendente');
+  assert.equal(result.items[0].status, 'blocked');
 
-      const result = await userPostgresRepository.changeUserAdministration(
-        change({ companyId: null, action: 'suspend', userId: targetId }),
-      );
-      assert.equal(result.status, 'blocked');
-      assert.deepEqual(events, ['BEGIN', 'COMMIT']);
-      assert.match(queries[0].text, /pg_advisory_xact_lock/);
-      assert.match(queries[1].text, /FROM users WHERE id=\$1 FOR UPDATE/);
-      assert.deepEqual(queries[1].values, [actorId]);
-      assert.match(queries[2].text, /FROM users WHERE id=\$1 FOR UPDATE/);
-      assert.deepEqual(queries[2].values, [targetId]);
-      assert.match(queries[3].text, /role='SUPER_ADMIN'.*FOR UPDATE/);
-      const update = queries.at(-1)!;
-      assert.match(
-        update.text,
-        /^UPDATE users SET status=\$1,deactivation_reason=\$2,tokens_revoked_at=GREATEST\(\$3::timestamptz,date_trunc\('milliseconds',clock_timestamp\(\)\),COALESCE\(tokens_revoked_at,'epoch'::timestamptz\)\+INTERVAL '2 milliseconds'\),invite_token=\$4,reset_password_token=\$5,reset_password_expires=\$6 WHERE id=\$7 RETURNING \*$/,
-      );
-      assert.deepEqual(update.values?.slice(0, 2), ['BLOCKED', 'Motivo sintético']);
-      assert.ok(Number.isFinite(Date.parse(String(update.values?.[2]))));
-      assert.ok(
-        Date.parse(String(update.values?.[2])) >
-          Date.parse(String(target.tokens_revoked_at)),
-      );
-      assert.deepEqual(update.values?.slice(3), [null, null, null, targetId]);
-      assert.equal(
-        queries.some((query) => query.text.startsWith('DELETE FROM users')),
-        false,
-      );
-      assert.equal(activeAdmins.length, 2);
-    },
+  await userPostgresRepository.getUsersForAdministration(null, {
+    pageSize: 20,
+    offset: 0,
+  });
+  assert.deepEqual(find.mock.calls[1].arguments[0].where, {
+    company_id: null,
+    deleted_at: null,
+    role: { in: ['SUPER_ADMIN'] },
+  });
+});
+
+test('suspende superadmin e revoga tokens na transação que bloqueia ator e alvo', async (t) => {
+  const target = makeUser({ role: 'SUPER_ADMIN', company_id: null });
+  const { tx, events } = mockTransaction(t, { target });
+  const result = await userPostgresRepository.changeUserAdministration(
+    change({ companyId: null }),
   );
-
-  await t.test(
-    'protege o último superadmin ativo e recusa o ator desatualizado',
-    async (sub) => {
-      for (const scenario of ['last-active', 'stale-actor'] as const) {
-        await sub.test(scenario, async (nested) => {
-          const queries: string[] = [];
-          const events: string[] = [];
-          const client = {
-            async query(text: string, values?: unknown[]) {
-              queries.push(text);
-              if (text.includes('pg_advisory_xact_lock')) {
-                return { rows: [] };
-              }
-              if (text.includes('FROM users WHERE id=$1 FOR UPDATE')) {
-                return {
-                  rows: [
-                    values?.[0] === actorId
-                      ? scenario === 'stale-actor'
-                        ? makeUser({
-                            id: actorId,
-                            email: 'changed@example.test',
-                            role: 'admin_empresa',
-                            company_id: companyId,
-                          })
-                        : superAdmin(actorId)
-                      : superAdmin(targetId),
-                  ],
-                };
-              }
-              if (text.includes("role='SUPER_ADMIN'")) {
-                return { rows: [superAdmin(actorId)] };
-              }
-              if (text.includes('FROM users WHERE id=$1')) {
-                return { rows: [superAdmin(targetId)] };
-              }
-              return { rows: [] };
-            },
-          };
-          mockTransaction(nested, client, events);
-          const target = scenario === 'last-active' ? targetId : actorId;
-          await assert.rejects(
-            userPostgresRepository.changeUserAdministration(
-              change({
-                companyId: null,
-                userId: target,
-                action: 'suspend',
-                reason: 'Motivo sintético',
-              }),
-            ),
-            (error) =>
-              (error as { status: number }).status ===
-              (scenario === 'last-active' ? 409 : 403),
-          );
-          assert.deepEqual(events, ['BEGIN', 'ROLLBACK']);
-          assert.match(queries[0]!, /pg_advisory_xact_lock/);
-          assert.match(queries[1]!, /FOR UPDATE/);
-          if (scenario === 'last-active') {
-            const activeCheck = queries.find((query) =>
-              query.includes("role='SUPER_ADMIN'"),
-            )!;
-            assert.match(activeCheck, /deleted_at IS NULL/);
-            assert.match(activeCheck, /FOR UPDATE/);
-          } else {
-            assert.equal(
-              queries.some((query) => query.includes("role='SUPER_ADMIN'")),
-              false,
-            );
-          }
-          assert.equal(
-            queries.some((query) => query.startsWith('UPDATE users SET')),
-            false,
-          );
-        });
-      }
-    },
+  assert.equal(result.status, 'blocked');
+  assert.deepEqual(events, [
+    'BEGIN',
+    'LOCK',
+    'ACTOR',
+    'TARGET',
+    'ACTIVE_ADMINS',
+    'REVOKE',
+    'UPDATE',
+    'COMMIT',
+  ]);
+  const [lock] = tx.$executeRaw.mock.calls[0].arguments;
+  assert.match(lock.join('?'), /pg_advisory_xact_lock.*civix:platform-administration/);
+  for (const [call, id] of [
+    [0, actorId],
+    [1, targetId],
+  ] as const) {
+    const [query, parameter] = tx.$queryRaw.mock.calls[call].arguments;
+    assert.match(query.join('?'), /WHERE id = \?::uuid FOR UPDATE/);
+    assert.equal(parameter, id);
+  }
+  assert.match(
+    tx.$queryRaw.mock.calls[2].arguments[0].join('?'),
+    /status = 'ACTIVE'\s+FOR UPDATE/,
   );
+  const [revoke, now, id] = tx.$executeRaw.mock.calls[1].arguments;
+  assert.match(
+    revoke.join('?'),
+    /GREATEST\([\s\S]*clock_timestamp\(\)[\s\S]*INTERVAL '2 milliseconds'/,
+  );
+  assert.ok(now instanceof Date);
+  assert.equal(id, targetId);
+  assert.deepEqual(tx.users.update.mock.calls[0].arguments[0], {
+    where: { id: targetId },
+    data: {
+      status: 'BLOCKED',
+      deactivation_reason: 'Motivo sintético',
+      invite_token: null,
+      reset_password_token: null,
+      reset_password_expires: null,
+    },
+  });
+});
 
-  await t.test(
-    'exclui atendente com soft delete mantendo vínculo e motivo',
-    async (sub) => {
-      const queries: { text: string; values?: unknown[] }[] = [];
-      const events: string[] = [];
-      const attendant = makeUser({ role: 'atendente', company_id: companyId });
-      const client = {
-        async query(text: string, values?: unknown[]) {
-          queries.push({ text, values });
-          if (text.includes('pg_advisory_xact_lock')) {
-            return { rows: [] };
-          }
-          if (text.includes('FROM users WHERE id=$1 FOR UPDATE')) {
-            return {
-              rows: [values?.[0] === actorId ? superAdmin(actorId) : attendant],
-            };
-          }
-          if (text.includes('FROM companies')) {
-            return { rows: [{ status: 'ativo', deleted_at: null }] };
-          }
-          if (text.includes('FROM users WHERE id=$1')) {
-            return { rows: [attendant] };
-          }
-          if (text.startsWith('UPDATE users SET')) {
-            return {
-              rows: [
-                makeUser({
-                  ...attendant,
-                  status: 'blocked',
-                  deleted_at: String(values?.[6]),
-                  deactivation_reason: 'Desligamento',
-                }),
-              ],
-            };
-          }
-          return { rows: [] };
-        },
-      };
-      mockTransaction(sub, client, events);
+test('revalida ator, último superadmin e empresa antes de gravar', async (t) => {
+  await t.test('último superadmin', async (sub) => {
+    const target = makeUser({ role: 'SUPER_ADMIN', company_id: null });
+    const { events } = mockTransaction(sub, { target, activeAdminCount: 1 });
+    await assert.rejects(
+      userPostgresRepository.changeUserAdministration(change({ companyId: null })),
+      { status: 409 },
+    );
+    assert.deepEqual(events, [
+      'BEGIN',
+      'LOCK',
+      'ACTOR',
+      'TARGET',
+      'ACTIVE_ADMINS',
+      'ROLLBACK',
+    ]);
+  });
+  await t.test('ator fora do escopo', async (sub) => {
+    const { events } = mockTransaction(sub, { actor: makeUser({ id: actorId }) });
+    await assert.rejects(userPostgresRepository.changeUserAdministration(change()), {
+      status: 403,
+    });
+    assert.deepEqual(events, ['BEGIN', 'LOCK', 'ACTOR', 'ROLLBACK']);
+  });
+  await t.test('empresa inativa', async (sub) => {
+    const { tx, events } = mockTransaction(sub, { companyStatus: 'INATIVO' });
+    await assert.rejects(userPostgresRepository.changeUserAdministration(change()), {
+      status: 409,
+    });
+    assert.deepEqual(events, ['BEGIN', 'LOCK', 'ACTOR', 'COMPANY', 'ROLLBACK']);
+    const [query, parameter] = tx.$queryRaw.mock.calls[1].arguments;
+    assert.match(query.join('?'), /FROM companies WHERE id = \?::uuid FOR SHARE/);
+    assert.equal(parameter, companyId);
+  });
+});
 
-      const result = await userPostgresRepository.changeUserAdministration(
+test('exclui atendente logicamente e mantém vínculo e motivo', async (t) => {
+  const target = makeUser({ role: 'ATENDENTE' });
+  const { tx, events } = mockTransaction(t, { target });
+  const result = await userPostgresRepository.changeUserAdministration(
+    change({ action: 'delete' }),
+  );
+  const { data } = tx.users.update.mock.calls[0].arguments[0];
+  assert.equal(result.status, 'blocked');
+  assert.equal(result.company_id, companyId);
+  assert.equal(result.deactivation_reason, 'Motivo sintético');
+  assert.equal(result.deleted_at, data.deleted_at?.toISOString());
+  assert.ok(Math.abs(Date.parse(result.deleted_at!) - Date.now()) < 5000);
+  assert.deepEqual(events, [
+    'BEGIN',
+    'LOCK',
+    'ACTOR',
+    'COMPANY',
+    'TARGET',
+    'REVOKE',
+    'UPDATE',
+    'COMMIT',
+  ]);
+});
+
+test('reativa conta sem senha como pendente e limpa o convite', async (t) => {
+  const target = makeUser({
+    role: 'ATENDENTE',
+    status: 'BLOCKED',
+    password_hash: null,
+  });
+  const { tx, events } = mockTransaction(t, { target });
+  const result = await userPostgresRepository.changeUserAdministration(
+    change({ action: 'reactivate' }),
+  );
+  assert.equal(result.status, 'pending');
+  assert.deepEqual(tx.users.update.mock.calls[0].arguments[0], {
+    where: { id: targetId },
+    data: { status: 'PENDING', invite_token: null },
+  });
+  assert.deepEqual(events, [
+    'BEGIN',
+    'LOCK',
+    'ACTOR',
+    'COMPANY',
+    'TARGET',
+    'UPDATE',
+    'COMMIT',
+  ]);
+});
+
+test('convida superadmin sem vínculo e recusa reconvite anterior à revogação', async (t) => {
+  await t.test('convite global', async (sub) => {
+    const { tx, events } = mockTransaction(sub);
+    const result = await userPostgresRepository.changeUserAdministration(
+      change({
+        companyId: null,
+        action: 'invite',
+        email: 'novo-super@example.test',
+        name: 'Novo Super',
+        role: 'super_admin',
+        token: 'token-sintetico',
+      }),
+    );
+    assert.equal(result.role, 'super_admin');
+    assert.equal(result.company_id, null);
+    const [query, email] = tx.$queryRaw.mock.calls[1].arguments;
+    assert.match(query.join('?'), /LOWER\(email\) = LOWER\(\?\) FOR UPDATE/);
+    assert.equal(email, 'novo-super@example.test');
+    const { data } = tx.users.create.mock.calls[0].arguments[0];
+    assert.deepEqual(data, {
+      id: result.id,
+      email: 'novo-super@example.test',
+      name: 'Novo Super',
+      role: 'SUPER_ADMIN',
+      company_id: null,
+      status: 'PENDING',
+      invite_token: 'token-sintetico',
+    });
+    assert.deepEqual(events, ['BEGIN', 'LOCK', 'ACTOR', 'EMAIL', 'CREATE', 'COMMIT']);
+  });
+
+  await t.test('reconvite obsoleto', async (sub) => {
+    const target = makeUser({ role: 'ATENDENTE', status: 'PENDING' });
+    const { events } = mockTransaction(sub, { target });
+    await assert.rejects(
+      userPostgresRepository.changeUserAdministration(
         change({
-          action: 'delete',
-          userId: targetId,
-          reason: 'Desligamento',
-          companyId,
-        }),
-      );
-      assert.equal(result.status, 'blocked');
-      assert.equal(result.deleted_at, queries.at(-1)!.values?.[6]);
-      assert.ok(Math.abs(Date.parse(result.deleted_at!) - Date.now()) < 5000);
-      assert.equal(result.company_id, companyId);
-      assert.deepEqual(events, ['BEGIN', 'COMMIT']);
-      assert.match(queries[2].text, /FROM companies WHERE id=\$1 FOR SHARE/);
-      const update = queries.at(-1)!;
-      assert.match(
-        update.text,
-        /status=\$1,deactivation_reason=\$2,tokens_revoked_at=GREATEST\(\$3::timestamptz/,
-      );
-      assert.match(
-        update.text,
-        /invite_token=\$4,reset_password_token=\$5,reset_password_expires=\$6,deleted_at=\$7 WHERE id=\$8/,
-      );
-      assert.deepEqual(update.values?.slice(0, 2), ['BLOCKED', 'Desligamento']);
-      assert.deepEqual(update.values?.slice(3, 6), [null, null, null]);
-      assert.ok(Math.abs(Date.parse(String(update.values?.[2])) - Date.now()) < 5000);
-      assert.ok(Number.isFinite(Date.parse(String(update.values?.[6]))));
-      assert.equal(update.values?.[7], targetId);
-      assert.equal(
-        queries.some((query) => query.text.startsWith('DELETE FROM users')),
-        false,
-      );
-    },
-  );
-
-  await t.test(
-    'bloqueia alterações no tenant suspenso antes de consultar ou alterar usuário',
-    async (sub) => {
-      const queries: string[] = [];
-      const events: string[] = [];
-      const client = {
-        async query(text: string) {
-          queries.push(text);
-          if (text.includes('pg_advisory_xact_lock')) {
-            return { rows: [] };
-          }
-          if (text.includes('FROM users WHERE id=$1 FOR UPDATE')) {
-            return { rows: [superAdmin(actorId)] };
-          }
-          if (text.includes('FROM companies')) {
-            return { rows: [{ status: 'inativo', deleted_at: null }] };
-          }
-          return { rows: [] };
-        },
-      };
-      mockTransaction(sub, client, events);
-
-      await assert.rejects(
-        userPostgresRepository.changeUserAdministration(change({ action: 'suspend' })),
-        (error) => (error as { status: number }).status === 409,
-      );
-      assert.deepEqual(events, ['BEGIN', 'ROLLBACK']);
-      assert.match(queries[2]!, /FROM companies WHERE id=\$1 FOR SHARE/);
-      assert.equal(
-        queries.filter((query) => query.includes('FROM users WHERE id=$1 FOR UPDATE'))
-          .length,
-        1,
-      );
-      assert.equal(
-        queries.some((query) => query.startsWith('UPDATE users SET')),
-        false,
-      );
-    },
-  );
-
-  await t.test(
-    'reativação de conta sem senha vira pending e invalida token antigo',
-    async (sub) => {
-      const queries: { text: string; values?: unknown[] }[] = [];
-      const events: string[] = [];
-      const pending = makeUser({
-        role: 'atendente',
-        company_id: companyId,
-        status: 'blocked',
-        password_hash: undefined,
-        invite_token: null,
-      });
-      const client = {
-        async query(text: string, values?: unknown[]) {
-          queries.push({ text, values });
-          if (text.includes('pg_advisory_xact_lock')) {
-            return { rows: [] };
-          }
-          if (text.includes('FROM users WHERE id=$1 FOR UPDATE')) {
-            return {
-              rows: [
-                values?.[0] === actorId
-                  ? superAdmin(actorId)
-                  : makeUser({ ...pending, invite_token: 'token-antigo' }),
-              ],
-            };
-          }
-          if (text.includes('FROM companies')) {
-            return { rows: [{ status: 'ativo', deleted_at: null }] };
-          }
-          if (text.startsWith('UPDATE users SET')) {
-            return {
-              rows: [makeUser({ ...pending, status: 'pending', invite_token: null })],
-            };
-          }
-          return { rows: [] };
-        },
-      };
-      mockTransaction(sub, client, events);
-
-      const result = await userPostgresRepository.changeUserAdministration(
-        change({ action: 'reactivate', reason: undefined }),
-      );
-      assert.equal(result.status, 'pending');
-      assert.deepEqual(events, ['BEGIN', 'COMMIT']);
-      const update = queries.at(-1)!;
-      assert.match(
-        update.text,
-        /^UPDATE users SET status=\$1,invite_token=\$2 WHERE id=\$3 RETURNING \*$/,
-      );
-      assert.deepEqual(update.values, ['PENDING', null, targetId]);
-      assert.equal(update.text.includes('tokens_revoked_at = NULL'), false);
-    },
-  );
-
-  await t.test(
-    'convite global parametriza superadmin sem vínculo e conflito de e-mail devolve 409',
-    async (sub) => {
-      const queries: { text: string; values?: unknown[] }[] = [];
-      const events: string[] = [];
-      const client = {
-        async query(text: string, values?: unknown[]) {
-          queries.push({ text, values });
-          if (text.includes('pg_advisory_xact_lock')) {
-            return { rows: [] };
-          }
-          if (text.includes('FROM users WHERE id=$1 FOR UPDATE')) {
-            return { rows: [superAdmin(actorId)] };
-          }
-          if (text.includes('LOWER(email)')) {
-            return { rows: [] };
-          }
-          if (text.startsWith('INSERT INTO users')) {
-            return {
-              rows: [
-                makeUser({
-                  id: anotherUserId,
-                  email: 'novo-super@example.test',
-                  role: 'super_admin',
-                  company_id: null,
-                  status: 'pending',
-                  password_hash: undefined,
-                  invite_token: 'token-sintetico',
-                }),
-              ],
-            };
-          }
-          return { rows: [] };
-        },
-      };
-      mockTransaction(sub, client, events);
-      const result = await userPostgresRepository.changeUserAdministration(
-        change({
-          companyId: null,
-          userId: undefined,
           action: 'invite',
-          email: 'novo-super@example.test',
-          name: 'Novo Super',
-          role: 'super_admin',
-          token: 'token-sintetico',
-          reason: undefined,
+          email: target.email,
+          role: 'atendente',
+          token: 'token-antigo',
+          tokenIssuedAt: changedAt,
         }),
-      );
-      assert.equal(result.role, 'super_admin');
-      assert.equal(result.company_id, null);
-      assert.deepEqual(events, ['BEGIN', 'COMMIT']);
-      assert.match(queries[2].text, /LOWER\(email\)=LOWER\(\$1\) FOR UPDATE/);
-      assert.deepEqual(queries[2].values, ['novo-super@example.test']);
-      assert.equal(
-        queries.some((query) => query.text.includes('FROM companies')),
-        false,
-      );
-      const insert = queries.at(-1)!;
-      assert.match(
-        insert.text,
-        /INSERT INTO users \(id,email,name,role,company_id,status,invite_token\)/,
-      );
-      assert.deepEqual(insert.values?.slice(1), [
-        'novo-super@example.test',
-        'Novo Super',
-        'SUPER_ADMIN',
-        null,
-        'token-sintetico',
-      ]);
-    },
-  );
+      ),
+      { status: 409 },
+    );
+    assert.deepEqual(events, [
+      'BEGIN',
+      'LOCK',
+      'ACTOR',
+      'COMPANY',
+      'EMAIL',
+      'ROLLBACK',
+    ]);
+  });
+});
 
-  await t.test(
-    'reconvite preparado antes da revogação retorna conflito sem sobrescrever o token novo',
-    async (sub) => {
-      const queries: { text: string; values?: unknown[] }[] = [];
-      const events: string[] = [];
-      const pending = makeUser({
-        role: 'atendente',
-        status: 'pending',
-        tokens_revoked_at: '2026-11-02T12:00:00.010Z',
-      });
-      const client = {
-        async query(text: string, values?: unknown[]) {
-          queries.push({ text, values });
-          if (text.includes('pg_advisory_xact_lock')) {
-            return { rows: [] };
-          }
-          if (text.includes('FROM users WHERE id=$1 FOR UPDATE')) {
-            return { rows: [values?.[0] === actorId ? superAdmin(actorId) : pending] };
-          }
-          if (text.includes('FROM companies')) {
-            return { rows: [{ status: 'ativo', deleted_at: null }] };
-          }
-          if (text.includes('LOWER(email)')) {
-            return { rows: [pending] };
-          }
-          return { rows: [] };
-        },
-      };
-      mockTransaction(sub, client, events);
-
-      await assert.rejects(
-        userPostgresRepository.changeUserAdministration(
-          change({
-            action: 'invite',
-            userId: undefined,
-            email: pending.email,
-            role: 'atendente',
-            token: 'token-antigo-preparado',
-            tokenIssuedAt: '2026-11-02T12:00:00.000Z',
-            companyId,
-          }),
-        ),
-        (error) => (error as { status: number }).status === 409,
+test('ativa primeiro acesso sob lock com guardas de estado e empresa', async (t) => {
+  for (const companyStatus of ['ATIVO', 'INATIVO']) {
+    await t.test(companyStatus, async (sub) => {
+      const { tx, events } = mockTransaction(sub, { companyStatus });
+      const result = await authPostgresRepository.activateUser(
+        targetId,
+        'hash-de-senha',
+        'token-atual',
       );
-      assert.deepEqual(events, ['BEGIN', 'ROLLBACK']);
-      assert.match(queries[0].text, /pg_advisory_xact_lock/);
-      assert.match(queries[1].text, /FROM users WHERE id=\$1 FOR UPDATE/);
-      assert.match(queries[2].text, /FROM companies WHERE id=\$1 FOR SHARE/);
-      assert.match(queries[3].text, /LOWER\(email\)=LOWER\(\$1\) FOR UPDATE/);
-      assert.equal(
-        queries.some((query) =>
-          query.text.startsWith('UPDATE users SET invite_token='),
-        ),
-        false,
-      );
-    },
-  );
-
-  await t.test(
-    'primeiro acesso atualiza senha e convite em uma instrução com guardas de exclusão e empresa',
-    async (sub) => {
-      for (const scenario of ['eligible', 'company-unavailable'] as const) {
-        await sub.test(scenario, async (nested) => {
-          const queries: { text: string; values?: unknown[] }[] = [];
-          const events: string[] = [];
-          const client = {
-            async query(text: string, values?: unknown[]) {
-              queries.push({ text, values });
-              if (text.includes('pg_advisory_xact_lock')) {
-                return { rows: [] };
-              }
-              if (text.startsWith('UPDATE users')) {
-                return { rows: [], rowCount: scenario === 'eligible' ? 1 : 0 };
-              }
-              return { rows: [] };
+      assert.equal(result, companyStatus === 'ATIVO');
+      assert.deepEqual(events, ['BEGIN', 'LOCK', 'UPDATE_MANY', 'COMMIT']);
+      assert.deepEqual(tx.users.updateMany.mock.calls[0].arguments[0], {
+        where: {
+          id: targetId,
+          invite_token: 'token-atual',
+          status: 'PENDING',
+          deleted_at: null,
+          OR: [
+            { role: 'SUPER_ADMIN', company_id: null },
+            {
+              role: { in: ['ADMIN_EMPRESA', 'ATENDENTE'] },
+              companies: { is: { status: { not: 'INATIVO' }, deleted_at: null } },
             },
-          };
-          mockTransaction(nested, client, events);
-
-          const activated = await authPostgresRepository.activateUser(
-            targetId,
-            'hash-de-senha',
-            'token-atual',
-          );
-          assert.equal(activated, scenario === 'eligible');
-          assert.deepEqual(events, ['BEGIN', 'COMMIT']);
-          assert.match(queries[0]!.text, /pg_advisory_xact_lock/);
-          assert.equal(queries.length, 2);
-          assert.match(queries[1]!.text, /invite_token\s*=\s*\$3/);
-          assert.match(queries[1]!.text, /UPPER\(status::text\) = 'PENDING'/);
-          assert.match(queries[1]!.text, /deleted_at IS NULL/);
-          assert.match(
-            queries[1]!.text,
-            /UPPER\(companies\.status::text\) <> 'INATIVO'/,
-          );
-          assert.match(queries[1]!.text, /companies\.deleted_at IS NULL/);
-          assert.deepEqual(queries[1]!.values, [
-            'hash-de-senha',
-            'ACTIVE',
-            null,
-            targetId,
-            'token-atual',
-          ]);
-        });
-      }
-    },
-  );
-
-  await t.test(
-    'getManagedUsersMetrics agrupa por role e status e normaliza para lowercase',
-    async (sub) => {
-      let executedQuery = '';
-      sub.mock.method(db, 'query', async (text: string) => {
-        executedQuery = text;
-        return {
-          rows: [
-            { role: 'SUPER_ADMIN', status: 'ACTIVE', count: 2 },
-            { role: 'ADMIN_EMPRESA', status: 'ACTIVE', count: 4 },
-            { role: 'ADMIN_EMPRESA', status: 'PENDING', count: 1 },
-            { role: 'ATENDENTE', status: 'BLOCKED', count: 1 },
           ],
-        };
+        },
+        data: { password_hash: 'hash-de-senha', status: 'ACTIVE', invite_token: null },
       });
+    });
+  }
+});
 
-      const metrics = await userPostgresRepository.getManagedUsersMetrics();
-      assert.match(executedQuery, /GROUP BY role, COALESCE\(status::text, 'ACTIVE'\)/);
-      assert.match(
-        executedQuery,
-        /role IN \('SUPER_ADMIN'::user_role, 'ADMIN_EMPRESA'::user_role, 'ATENDENTE'::user_role\)/,
-      );
-      assert.match(executedQuery, /deleted_at IS NULL/);
-      assert.equal(metrics.total, 8);
-      assert.equal(metrics.active, 6);
-      assert.equal(metrics.pending, 1);
-      assert.equal(metrics.blocked, 1);
-      assert.equal(metrics.byRole.length, 3);
-      assert.deepEqual(
-        metrics.byRole.find((item) => item.role === 'admin_empresa'),
-        { role: 'admin_empresa', total: 5, active: 4, pending: 1, blocked: 0 },
-      );
-    },
+test('agrupa métricas por perfil e estado e devolve perfis em minúsculas', async (t) => {
+  const group = mockPrismaMethod(
+    t,
+    prisma.users,
+    'groupBy',
+    async (_args: Prisma.usersGroupByArgs) => [
+      { role: 'SUPER_ADMIN', status: 'ACTIVE', _count: { _all: 2 } },
+      { role: 'ADMIN_EMPRESA', status: 'ACTIVE', _count: { _all: 4 } },
+      { role: 'ADMIN_EMPRESA', status: 'PENDING', _count: { _all: 1 } },
+      { role: 'ATENDENTE', status: 'BLOCKED', _count: { _all: 1 } },
+    ],
   );
+  const metrics = await userPostgresRepository.getManagedUsersMetrics();
+  assert.deepEqual(group.mock.calls[0].arguments[0], {
+    by: ['role', 'status'],
+    where: {
+      deleted_at: null,
+      role: { in: ['SUPER_ADMIN', 'ADMIN_EMPRESA', 'ATENDENTE'] },
+    },
+    _count: { _all: true },
+  });
+  assert.deepEqual(metrics, {
+    total: 8,
+    active: 6,
+    pending: 1,
+    blocked: 1,
+    byRole: [
+      { role: 'super_admin', total: 2, active: 2, pending: 0, blocked: 0 },
+      { role: 'admin_empresa', total: 5, active: 4, pending: 1, blocked: 0 },
+      { role: 'atendente', total: 1, active: 0, pending: 0, blocked: 1 },
+    ],
+  });
+});
+
+test('mapeia violações de unicidade do Prisma e do SQL parametrizado para conflito', async (t) => {
+  await t.test('P2002 na alteração administrativa', async (sub) => {
+    const { tx, events } = mockTransaction(sub);
+    tx.users.update.mock.mockImplementation(async () => {
+      throw Object.assign(new Error('E-mail duplicado'), { code: 'P2002' });
+    });
+    await assert.rejects(userPostgresRepository.changeUserAdministration(change()), {
+      status: 409,
+      message: 'E-mail já cadastrado.',
+    });
+    assert.equal(events.at(-1), 'ROLLBACK');
+  });
+
+  await t.test('23505 na alteração do próprio perfil', async (sub) => {
+    const raw = mockPrismaMethod(
+      sub,
+      prisma,
+      '$queryRaw',
+      async (_query: TemplateStringsArray, ..._values: unknown[]) => {
+        throw Object.assign(new Error('E-mail duplicado'), {
+          code: 'P2010',
+          meta: { code: '23505' },
+        });
+      },
+    );
+    await assert.rejects(
+      userPostgresRepository.updateOwnProfile(targetId, {
+        name: 'Nome atualizado',
+        email: 'usado@example.test',
+      }),
+      { status: 409, message: 'E-mail já cadastrado.' },
+    );
+    const [query, ...values] = raw.mock.calls[0].arguments;
+    assert.match(query.join('?'), /tokens_revoked_at = CASE WHEN LOWER\(email\)/);
+    assert.match(query.join('?'), /deleted_at IS NULL AND status = 'ACTIVE'/);
+    assert.equal(values.at(-1), targetId);
+  });
 });
