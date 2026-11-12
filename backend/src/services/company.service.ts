@@ -7,11 +7,11 @@ import {
   publicCompanySearchQuerySchema,
   type PublicCompanySearchFilters,
 } from '../dtos/company.create.dto.js';
-import { companyRepository } from '../persistence/company.repository.js';
+import { companyRepository } from '../persistence/index.js';
 import { AppError } from '../shared/errors/app.error.js';
 import { ErrorCode } from '../shared/errors/error.code.js';
 import { getPresignedImageUrl } from './storage.service.js';
-import { storageRepository } from '../persistence/storage.repository.js';
+import { storageRepository } from '../persistence/index.js';
 import { z } from 'zod';
 import { createHash } from 'node:crypto';
 import type { UserId } from '../entities/user.entity.js';
@@ -172,7 +172,7 @@ export async function createCompanyWithInitialSale(input: unknown, actorId: User
     createdAt: now,
     updatedAt: now,
     status: 'ativo',
-    verificado: false,
+    verificado: true,
   };
   const result = await companyRepository.createCompanyWithInitialSale({
     company,
@@ -237,7 +237,7 @@ export async function createCompany(input: unknown): Promise<Company> {
     createdAt: now,
     updatedAt: now,
     status: 'ativo',
-    verificado: false,
+    verificado: true,
   };
 
   const created = await companyRepository.create(company);

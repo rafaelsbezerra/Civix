@@ -1,10 +1,16 @@
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import test from 'node:test';
-Object.assign(process.env, { USE_MOCK_DATA: 'true', LOG_LEVEL: 'fatal' });
-const { db } = await import('../src/shared/config/data.js');
+import { Prisma } from '../src/generated/prisma/client.js';
+Object.assign(process.env, {
+  USE_MOCK_DATA: 'false',
+  DATABASE_URL: 'postgresql://localhost:1/civix_test',
+  LOG_LEVEL: 'fatal',
+});
+const { getPrisma } = await import('../src/shared/config/prisma.js');
 const { companyPostgresRepository } =
   await import('../src/persistence/postgres/company.repository.js');
+const prisma = getPrisma();
 const company = {
   id: randomUUID(),
   nome: 'Empresa sintética',
@@ -26,17 +32,14 @@ const input = {
   fingerprint: 'a'.repeat(64),
 };
 const plan = {
-  id: input.planId,
+  id: BigInt(input.planId),
   name: 'Plano sintético',
-  price: '39.90',
+  price: new Prisma.Decimal('39.90'),
   billing_period: 'monthly',
   is_active: true,
 };
 
-test('adapter PostgreSQL de cadastro usa somente conexão transacional simulada', async (t) => {
-  t.mock.method(db, 'query', () => {
-    throw new Error('Query fora da transação não permitida.');
-  });
+test('cadastro PostgreSQL usa delegates e locks na mesma transação simulada', async (t) => {
   for (const scenario of [
     'new',
     'replay',
@@ -48,107 +51,158 @@ test('adapter PostgreSQL de cadastro usa somente conexão transacional simulada'
     'unique-failure',
   ] as const) {
     await t.test(scenario, async (sub) => {
-      const queries: { text: string; values?: unknown[] }[] = [];
       const events: string[] = [];
       const failure = new Error('Falha sintética na venda');
       const saleId = randomUUID();
+      const timestamp = new Date('2026-11-11T12:00:00.000Z');
       const fake = {
-        async query(text: string, values?: unknown[]) {
-          queries.push({ text, values });
-          if (text.includes('FROM company_registration_operations')) {
+        async $executeRaw(sql: TemplateStringsArray, ...values: unknown[]) {
+          const statement = sql.join('?');
+          if (statement.includes('pg_advisory_xact_lock')) {
+            events.push('lockOperation');
+            assert.deepEqual(values, [input.actorId + ':' + input.operationId]);
+          } else {
+            events.push('writeRange');
+            assert.match(statement, /price_range = \?::numrange/);
+            assert.deepEqual(values, [null, company.id]);
+          }
+        },
+        async $queryRaw(sql: TemplateStringsArray, value: unknown) {
+          const statement = sql.join('?');
+          if (statement.includes('FROM users')) {
+            events.push('lockActor');
+            assert.match(statement, /SELECT id .*FOR SHARE/);
+            assert.equal(value, input.actorId);
+            return [{ id: input.actorId }];
+          }
+          if (statement.includes('FROM plans')) {
+            events.push('lockPlan');
+            assert.match(statement, /SELECT id .*FOR SHARE/);
+            assert.equal(value, plan.id);
+            return [{ id: plan.id }];
+          }
+          events.push('readRange');
+          assert.match(statement, /AS price_range/);
+          return [{ id: company.id, price_range: null }];
+        },
+        company_registration_operations: {
+          async findUnique(args: Prisma.company_registration_operationsFindUniqueArgs) {
+            events.push('findOperation');
+            assert.deepEqual(args.where, {
+              actor_id_operation_id: {
+                actor_id: input.actorId,
+                operation_id: input.operationId,
+              },
+            });
+            if (['replay', 'conflict', 'missing-sale'].includes(scenario)) {
+              return {
+                fingerprint:
+                  scenario === 'conflict' ? 'b'.repeat(64) : input.fingerprint,
+                company_id: company.id,
+                sale_id: saleId,
+              };
+            }
+            return null;
+          },
+          create: sub.mock.fn(
+            async (_args: Prisma.company_registration_operationsCreateArgs) => {
+              events.push('createOperation');
+            },
+          ),
+        },
+        users: {
+          async findUnique(args: Prisma.usersFindUniqueArgs) {
+            events.push('readActor');
+            assert.deepEqual(args.where, { id: input.actorId });
             return {
-              rows: ['replay', 'conflict', 'missing-sale'].includes(scenario)
-                ? [
-                    {
-                      fingerprint:
-                        scenario === 'conflict' ? 'b'.repeat(64) : input.fingerprint,
-                      company_id: company.id,
-                      sale_id: saleId,
-                    },
-                  ]
-                : [],
+              role: scenario === 'revoked' ? 'ADMIN_EMPRESA' : 'SUPER_ADMIN',
+              status: 'ACTIVE',
             };
-          }
-          if (text.includes('FROM users')) {
+          },
+        },
+        plans: {
+          async findUnique(args: Prisma.plansFindUniqueArgs) {
+            events.push('readPlan');
+            assert.deepEqual(args.where, { id: plan.id });
+            return { ...plan, is_active: scenario !== 'inactive' };
+          },
+        },
+        companies: {
+          async findUnique(args: Prisma.companiesFindUniqueArgs) {
+            events.push('readCompany');
+            assert.deepEqual(args.where, { id: company.id });
             return {
-              rows: [
-                {
-                  role: scenario === 'revoked' ? 'admin_empresa' : 'super_admin',
-                  status: 'active',
-                },
-              ],
+              id: company.id,
+              status: 'ATIVO',
+              createdAt: timestamp,
+              updatedAt: timestamp,
+              plan_id: plan.id,
             };
-          }
-          if (text.includes('FROM plans')) {
-            return { rows: [{ ...plan, is_active: scenario !== 'inactive' }] };
-          }
-          if (text.includes('FROM companies')) {
-            return { rows: [company] };
-          }
-          if (text.includes('FROM sales')) {
+          },
+          create: sub.mock.fn(async (_args: Prisma.companiesCreateArgs) => {
+            events.push('createCompany');
+            if (scenario === 'unique-failure') {
+              throw Object.assign(new Error('Duplicidade sintética'), {
+                code: 'P2002',
+              });
+            }
+          }),
+        },
+        sales: {
+          async findUnique(args: Prisma.salesFindUniqueArgs) {
+            events.push('readSale');
+            assert.deepEqual(args.where, { id: saleId });
+            if (scenario === 'missing-sale') {
+              return null;
+            }
             return {
-              rows:
-                scenario === 'missing-sale'
-                  ? []
-                  : [
-                      {
-                        id: saleId,
-                        company_id: company.id,
-                        plan_id: plan.id,
-                        origin: 'company_creation',
-                        pricing_mode: 'company_plan',
-                        plan_name: plan.name,
-                        plan_price: '39.90',
-                        plan_billing_period: 'monthly',
-                        amount: '39.90',
-                        currency: 'BRL',
-                        description: null,
-                        sold_at: new Date().toISOString(),
-                        created_at: new Date().toISOString(),
-                        created_by: input.actorId,
-                      },
-                    ],
+              id: saleId,
+              company_id: company.id,
+              plan_id: plan.id,
+              origin: 'company_creation',
+              pricing_mode: 'company_plan',
+              plan_name: plan.name,
+              plan_price: plan.price,
+              plan_billing_period: 'monthly',
+              amount: plan.price,
+              currency: 'BRL',
+              description: null,
+              sold_at: timestamp,
+              created_at: timestamp,
+              created_by: input.actorId,
             };
-          }
-          if (
-            text.startsWith('INSERT INTO companies') &&
-            scenario === 'unique-failure'
-          ) {
-            throw Object.assign(new Error('Duplicidade sintética'), { code: '23505' });
-          }
-          if (text.startsWith('INSERT INTO sales') && scenario === 'insert-failure') {
-            throw failure;
-          }
-          return { rows: [] };
+          },
+          create: sub.mock.fn(async (_args: Prisma.salesCreateArgs) => {
+            events.push('createSale');
+            if (scenario === 'insert-failure') {
+              throw failure;
+            }
+          }),
         },
       };
-      // A fronteira transacional é simulada; este teste não comprova o driver PostgreSQL.
-      sub.mock.method(
-        db,
-        'transaction',
-        async (
-          run: (
-            client: Parameters<Parameters<typeof db.transaction>[0]>[0],
-          ) => Promise<unknown>,
-        ) => {
-          events.push('BEGIN');
-          try {
-            const result = await run(fake as never);
-            events.push('COMMIT');
-            return result;
-          } catch (error) {
-            events.push('ROLLBACK');
-            throw error;
-          }
-        },
-      );
+      const originalTransaction = prisma.$transaction;
+      const transaction = async (run: (client: typeof fake) => Promise<unknown>) => {
+        events.push('BEGIN');
+        try {
+          const result = await run(fake);
+          events.push('COMMIT');
+          return result;
+        } catch (error) {
+          events.push('ROLLBACK');
+          throw error;
+        }
+      };
+      prisma.$transaction = transaction as unknown as typeof prisma.$transaction;
+      sub.after(() => {
+        prisma.$transaction = originalTransaction;
+      });
+
       if (scenario === 'new' || scenario === 'replay') {
         const result =
           await companyPostgresRepository.createCompanyWithInitialSale(input);
         assert.equal(result.replayed, scenario === 'replay');
-        assert.equal(result.sale!.amount, '39.90');
-        assert.equal(result.sale!.planId, input.planId);
-        assert.deepEqual(events, ['BEGIN', 'COMMIT']);
+        assert.equal(result.sale.amount, '39.90');
+        assert.equal(result.sale.planId, input.planId);
       } else {
         await assert.rejects(
           companyPostgresRepository.createCompanyWithInitialSale(input),
@@ -158,34 +212,51 @@ test('adapter PostgreSQL de cadastro usa somente conexão transacional simulada'
               : (error as { status: number }).status ===
                 (scenario === 'inactive' ? 400 : scenario === 'revoked' ? 403 : 409),
         );
-        assert.deepEqual(events, ['BEGIN', 'ROLLBACK']);
       }
-      assert.match(queries[0].text, /pg_advisory_xact_lock/);
-      assert.deepEqual(queries[0].values, [input.actorId + ':' + input.operationId]);
-      assert.match(queries[1].text, /FROM company_registration_operations/);
-      const inserts = queries.filter((query) => query.text.startsWith('INSERT'));
+
+      const actorChecks = ['lockActor', 'readActor'];
+      const planChecks = ['lockPlan', 'readPlan'];
+      const reads = ['readCompany', 'readSale'];
+      const expectedEvents = {
+        new: [
+          ...actorChecks,
+          ...planChecks,
+          'createCompany',
+          'writeRange',
+          'createSale',
+          'createOperation',
+          'COMMIT',
+        ],
+        replay: [...reads, 'readRange', 'COMMIT'],
+        conflict: ['ROLLBACK'],
+        'missing-sale': [...reads, 'ROLLBACK'],
+        inactive: [...actorChecks, ...planChecks, 'ROLLBACK'],
+        revoked: [...actorChecks, 'ROLLBACK'],
+        'insert-failure': [
+          ...actorChecks,
+          ...planChecks,
+          'createCompany',
+          'writeRange',
+          'createSale',
+          'ROLLBACK',
+        ],
+        'unique-failure': [...actorChecks, ...planChecks, 'createCompany', 'ROLLBACK'],
+      };
+      assert.deepEqual(events, [
+        'BEGIN',
+        'lockOperation',
+        'findOperation',
+        ...expectedEvents[scenario],
+      ]);
+
       if (scenario === 'new') {
-        assert.deepEqual(
-          inserts.map((query) => query.text.match(/^INSERT INTO (\w+)/)![1]),
-          ['companies', 'sales', 'company_registration_operations'],
-        );
-        assert.equal(inserts[0].values?.[20], input.planId);
-        assert.equal(inserts[1].values?.[8], '39.90');
-        assert.equal(inserts[2].values?.[4], inserts[1].values?.[0]);
-        assert.ok(
-          queries
-            .filter((query) => /FROM (users|plans)/.test(query.text))
-            .every((query) => /FOR SHARE/.test(query.text)),
-        );
-      } else if (!['insert-failure', 'unique-failure'].includes(scenario)) {
-        assert.equal(inserts.length, 0);
-      }
-      if (scenario === 'insert-failure') {
-        assert.ok(
-          !queries.some((query) =>
-            query.text.startsWith('INSERT INTO company_registration_operations'),
-          ),
-        );
+        const companyData = fake.companies.create.mock.calls[0].arguments[0].data;
+        const saleData = fake.sales.create.mock.calls[0].arguments[0].data;
+        const operationData =
+          fake.company_registration_operations.create.mock.calls[0].arguments[0].data;
+        assert.equal('plan_id' in companyData && companyData.plan_id, plan.id);
+        assert.equal(saleData.amount, '39.90');
+        assert.equal('sale_id' in operationData && operationData.sale_id, saleData.id);
       }
     });
   }
