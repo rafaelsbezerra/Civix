@@ -20,7 +20,6 @@ model companies {
   city                                  String
   state                                 String
   status                                company_status                    @default(ATIVO)
-  is_verified                           Boolean
   size                                  String
   createdAt                             DateTime                          @default(now()) @map("created_at") @db.Timestamptz(6)
   logo                                  String?

@@ -91,6 +91,14 @@ WHERE to_regclass('public._prisma_migrations') IS NOT NULL
 
 ---
 
+## Adoção do Prisma ORM e Entrada Única de Persistência — 2026-11-11
+
+- [Feature](features/prisma-orm-repositories/feature.md)
+- [SDD](features/prisma-orm-repositories/sdd.md)
+- [Tasks](features/prisma-orm-repositories/tasks.md)
+
+---
+
 ## Visão Geral Executiva do Super Admin (Métricas, Gráficos e Atividade Recente) — 2026-11-08
 
 - [Feature](features/super-admin-overview-metrics/feature.md)
