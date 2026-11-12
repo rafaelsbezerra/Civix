@@ -5,7 +5,13 @@ import bcrypt from 'bcrypt';
 import express, { type Express } from 'express';
 import jwt from 'jsonwebtoken';
 import { Resend } from 'resend';
-import { db } from '../src/shared/config/data.js';
+import { PrismaPg } from '@prisma/adapter-pg';
+import type { Company } from '../src/entities/company.entity.js';
+import type { UserRole } from '../src/entities/user.entity.js';
+import { authRepository } from '../src/persistence/index.js';
+import { companyRepository } from '../src/persistence/index.js';
+import { planRepository } from '../src/persistence/index.js';
+import { userRepository } from '../src/persistence/index.js';
 import { AppError } from '../src/shared/errors/app.error.js';
 import { ErrorCode } from '../src/shared/errors/error.code.js';
 import {
@@ -24,17 +30,13 @@ const environment = {
   MAIL_FROM: 'Civix <noreply@example.test>',
   FRONTEND_URL: 'http://frontend.example.test',
 };
-type Query = (
-  text: string,
-  values?: unknown[],
-) => Promise<{ rows: Record<string, unknown>[]; rowCount?: number }>;
 const planRow = {
   id: 1,
   name: 'Plano Inicial',
   slug: 'inicial',
   description: 'Plano de teste',
-  price: 19.9,
-  billing_period: 'monthly',
+  price: '19.90',
+  billing_period: 'monthly' as const,
   features: ['Catálogo', 4],
   limits: { members: 3, discarded: null },
   is_featured: false,
@@ -46,7 +48,7 @@ const plan = {
   name: 'Plano Inicial',
   slug: 'inicial',
   description: 'Plano de teste',
-  price: '19.9',
+  price: '19.90',
   billingPeriod: 'monthly',
   features: ['Catálogo'],
   limits: { members: 3 },
@@ -72,7 +74,6 @@ async function withServer(app: Express, run: (url: string) => Promise<void>) {
 
 async function withRoutes(
   t: TestContext,
-  query: Query,
   run: (url: string) => Promise<void>,
   mail?: (path: string, payload: Record<string, unknown>) => Promise<unknown>,
 ) {
@@ -80,11 +81,7 @@ async function withRoutes(
     Object.keys(environment).map((key) => [key, process.env[key]]),
   );
   Object.assign(process.env, environment);
-  t.mock.method(db, 'query', query);
-  // A fronteira transacional usa o mesmo substituto SQL, sem conexão externa.
-  t.mock.method(db, 'transaction', async (run: Parameters<typeof db.transaction>[0]) =>
-    run({ query: db.query } as never),
-  );
+  t.mock.method(PrismaPg.prototype, 'connect', unreachableQuery);
   t.mock.method(
     Resend.prototype,
     'post',
@@ -126,7 +123,7 @@ async function request(url: string, path: string, body?: unknown, role?: string)
   return { status: response.status, body: await response.json() };
 }
 
-async function unreachableQuery(): Promise<{ rows: Record<string, unknown>[] }> {
+function unreachableQuery(): never {
   throw new Error('Consulta de persistência não esperada');
 }
 
@@ -134,11 +131,13 @@ const companyId = '10000000-0000-4000-8000-000000000001';
 const account = {
   id: 'user-id',
   email: 'pessoa@example.test',
-  role: 'admin_empresa',
+  role: 'admin_empresa' as const,
   company_id: companyId,
   status: 'active',
   password_hash: 'hash-apenas-contexto',
 };
+const activeCompany = { id: companyId, status: 'ativo' } as Company;
+
 function invite() {
   return jwt.sign(
     { email: account.email, role: account.role, companyId, purpose: 'invite' },
@@ -149,80 +148,84 @@ function invite() {
 test('Convite valida propósito, empresa, estado e token antes da ativação bcrypt', async (t) => {
   const token = invite();
   let scenario = 'valid';
-  const calls: { text: string; values?: unknown[] }[] = [];
-  await withRoutes(
-    t,
-    async (text, values) => {
-      calls.push({ text, values });
+  const lookups: Parameters<typeof authRepository.getInviteUserByEmail>[] = [];
+  const activations: Parameters<typeof authRepository.activateUser>[] = [];
+  t.mock.method(companyRepository, 'getById', async () => activeCompany);
+  t.mock.method(
+    authRepository,
+    'getInviteUserByEmail',
+    async (...args: Parameters<typeof authRepository.getInviteUserByEmail>) => {
+      lookups.push(args);
       if (scenario === 'database') {
-        throw new Error('Falha SQL confidencial');
+        throw new Error('Falha de persistência confidencial');
       }
-      if (text.includes('UPDATE')) {
-        return { rows: [], rowCount: scenario === 'race' ? 0 : 1 };
-      }
-      if (text.includes('FROM companies')) {
-        return { rows: [{ id: companyId, status: 'ativo' }] };
+      if (scenario === 'missing') {
+        return undefined;
       }
       return {
-        rows:
-          scenario === 'missing'
-            ? []
-            : [
-                {
-                  ...account,
-                  status: scenario === 'active' ? 'active' : 'pending',
-                  invite_token: scenario === 'used' ? 'outro' : token,
-                },
-              ],
+        ...account,
+        status: scenario === 'active' ? 'active' : 'pending',
+        invite_token: scenario === 'used' ? 'outro' : token,
       };
     },
-    async (url) => {
-      assert.equal((await request(url, '/api/v1/auth/validate-token')).status, 400);
-      const path = '/api/v1/auth/validate-token?token=' + encodeURIComponent(token);
-      assert.deepEqual(await request(url, path), {
-        status: 200,
-        body: { data: { email: account.email } },
-      });
-      const lookup = calls.find((call) => call.text.includes('FROM users'))!;
-      assert.match(lookup.text, /LOWER\(email\) = LOWER\(\$1\) AND role = \$2/);
-      assert.deepEqual(lookup.values, [account.email, account.role.toUpperCase()]);
-      for (const [next, status] of [
-        ['active', 400],
-        ['used', 401],
-        ['missing', 404],
-        ['database', 500],
-      ] as const) {
-        scenario = next;
-        assert.equal((await request(url, path)).status, status);
-      }
-      scenario = 'valid';
-      const activated = await request(url, '/api/v1/auth/first-access', {
-        token,
-        password: 'senha-local',
-      });
-      assert.equal(activated.status, 200);
-      assert.ok(activated.body.data.message);
-      const update = calls.find((call) => call.text.includes('UPDATE'))!;
-      assert.match(update.text, /status = 'pending'/);
-      const hash = update.values![0] as string;
-      assert.equal(bcrypt.getRounds(hash), 10);
-      assert.equal(await bcrypt.compare('senha-local', hash), true);
-      scenario = 'race';
-      assert.equal(
-        (
-          await request(url, '/api/v1/auth/first-access', {
-            token,
-            password: 'senha-local',
-          })
-        ).status,
-        401,
-      );
+  );
+  t.mock.method(
+    authRepository,
+    'activateUser',
+    async (...args: Parameters<typeof authRepository.activateUser>) => {
+      activations.push(args);
+      return scenario !== 'race';
     },
   );
+  await withRoutes(t, async (url) => {
+    assert.equal((await request(url, '/api/v1/auth/validate-token')).status, 400);
+    const path = '/api/v1/auth/validate-token?token=' + encodeURIComponent(token);
+    assert.deepEqual(await request(url, path), {
+      status: 200,
+      body: { data: { email: account.email } },
+    });
+    assert.deepEqual(lookups, [[account.email, account.role]]);
+    for (const [next, status] of [
+      ['active', 400],
+      ['used', 401],
+      ['missing', 404],
+      ['database', 500],
+    ] as const) {
+      scenario = next;
+      assert.equal((await request(url, path)).status, status);
+    }
+    scenario = 'valid';
+    const activated = await request(url, '/api/v1/auth/first-access', {
+      token,
+      password: 'senha-local',
+    });
+    assert.equal(activated.status, 200);
+    assert.ok(activated.body.data.message);
+    const [id, hash, inviteToken] = activations[0]!;
+    assert.equal(id, account.id);
+    assert.equal(inviteToken, token);
+    assert.equal(bcrypt.getRounds(hash), 10);
+    assert.equal(await bcrypt.compare('senha-local', hash), true);
+    scenario = 'race';
+    assert.equal(
+      (
+        await request(url, '/api/v1/auth/first-access', {
+          token,
+          password: 'senha-local',
+        })
+      ).status,
+      401,
+    );
+  });
 });
 
 test('Convites inválidos, expirados, legados ou sem propósito não consultam persistência', async (t) => {
-  await withRoutes(t, unreachableQuery, async (url) => {
+  const lookup = t.mock.method(
+    authRepository,
+    'getInviteUserByEmail',
+    unreachableQuery,
+  );
+  await withRoutes(t, async (url) => {
     const tokens = [
       'invalido',
       jwt.sign(
@@ -260,32 +263,47 @@ test('Convites inválidos, expirados, legados ou sem propósito não consultam p
       ).status,
       400,
     );
+    assert.equal(lookup.mock.callCount(), 0);
   });
 });
 
 test('Reconvite preserva perfil e vínculo e detecta atualização concorrente', async (t) => {
   let status = 'pending';
-  let rowCount = 1;
+  let concurrentChange = false;
   let mailCalls = 0;
-  const calls: { text: string; values?: unknown[] }[] = [];
+  const invitations: Parameters<typeof authRepository.saveInvite>[] = [];
+  t.mock.method(companyRepository, 'getById', async () => activeCompany);
+  t.mock.method(authRepository, 'getInviteUserByEmail', async () => ({
+    ...account,
+    status,
+    invite_token: 'anterior',
+  }));
+  t.mock.method(
+    authRepository,
+    'saveInvite',
+    async (...args: Parameters<typeof authRepository.saveInvite>) => {
+      invitations.push(args);
+      if (concurrentChange) {
+        throw new AppError({
+          status: 409,
+          code: ErrorCode.CONFLICT,
+          message: 'Alteração concorrente',
+        });
+      }
+    },
+  );
   await withRoutes(
     t,
-    async (text, values) => {
-      calls.push({ text, values });
-      if (text.includes('FROM companies')) {
-        return { rows: [{ id: companyId, status: 'ativo' }] };
-      }
-      return text.includes('UPDATE')
-        ? { rows: [], rowCount }
-        : { rows: [{ ...account, status, invite_token: 'anterior' }] };
-    },
     async () => {
       await adminService.inviteUser(account.email, 'admin_empresa', companyId);
       assert.equal(mailCalls, 1);
-      const update = calls.find((call) => call.text.includes('UPDATE'))!;
-      assert.match(update.text, /company_id = \$5 AND role = \$1/);
-      assert.equal(update.values![4], companyId);
-      rowCount = 0;
+      const [email, role, token, id, linkedCompany] = invitations[0]!;
+      assert.equal(email, account.email);
+      assert.equal(role, account.role);
+      assert.ok(token);
+      assert.equal(id, account.id);
+      assert.equal(linkedCompany, companyId);
+      concurrentChange = true;
       await assert.rejects(
         adminService.inviteUser(account.email, 'admin_empresa', companyId),
         { status: 409 },
@@ -309,83 +327,76 @@ test('Reconvite preserva perfil e vínculo e detecta atualização concorrente',
 });
 
 test('Planos preservam envelope, autorização e parâmetros do usuário vigente', async (t) => {
-  let role = 'admin_empresa';
+  let role: UserRole = 'admin_empresa';
   let failure = false;
   let missing = false;
-  const calls: { text: string; values?: unknown[] }[] = [];
-  await withRoutes(
-    t,
-    async (text, values) => {
-      calls.push({ text, values });
-      if (text.includes('FROM users')) {
-        return { rows: [{ ...account, role }] };
-      }
-      if (text.includes('FROM companies')) {
-        return { rows: [{ id: companyId, status: 'ativo' }] };
-      }
-      if (failure) {
-        throw new Error('Falha SQL confidencial');
-      }
-      if (text.includes('UPDATE')) {
-        return { rows: [{ id: account.id }], rowCount: 1 };
-      }
-      return { rows: missing ? [] : [planRow] };
-    },
-    async (url) => {
-      assert.deepEqual(await request(url, '/api/v1/plans'), {
-        status: 200,
-        body: { data: [plan] },
-      });
-      assert.deepEqual(
-        await request(url, '/api/v1/plans/selection', { planId: '1' }, role),
-        { status: 200, body: { data: plan } },
-      );
-      assert.deepEqual(calls.find((call) => call.text.includes('UPDATE'))!.values, [
-        1,
-        account.id,
-      ]);
-      assert.equal(
-        (await request(url, '/api/v1/plans/selection', {}, role)).status,
-        400,
-      );
-      role = 'atendente';
-      assert.equal(
-        (await request(url, '/api/v1/plans/selection', { planId: '1' }, role)).status,
-        403,
-      );
-      role = 'admin_empresa';
-      missing = true;
-      assert.equal(
-        (await request(url, '/api/v1/plans/selection', { planId: '1' }, role)).status,
-        400,
-      );
-      failure = true;
-      assert.equal((await request(url, '/api/v1/plans')).status, 500);
+  const assignments: Parameters<typeof userRepository.assignPlan>[] = [];
+  t.mock.method(userRepository, 'getById', async () => ({ ...account, role }));
+  t.mock.method(companyRepository, 'getById', async () => activeCompany);
+  t.mock.method(planRepository, 'getActive', async () => {
+    if (failure) {
+      throw new Error('Falha de persistência confidencial');
+    }
+    return [planRow];
+  });
+  t.mock.method(planRepository, 'getActiveById', async (id: string) =>
+    missing || id !== String(planRow.id) ? undefined : planRow,
+  );
+  t.mock.method(
+    userRepository,
+    'assignPlan',
+    async (...args: Parameters<typeof userRepository.assignPlan>) => {
+      assignments.push(args);
+      return true;
     },
   );
+  await withRoutes(t, async (url) => {
+    assert.deepEqual(await request(url, '/api/v1/plans'), {
+      status: 200,
+      body: { data: [plan] },
+    });
+    assert.deepEqual(
+      await request(url, '/api/v1/plans/selection', { planId: '1' }, role),
+      { status: 200, body: { data: plan } },
+    );
+    assert.deepEqual(assignments, [[account.id, planRow.id]]);
+    assert.equal((await request(url, '/api/v1/plans/selection', {}, role)).status, 400);
+    role = 'atendente';
+    assert.equal(
+      (await request(url, '/api/v1/plans/selection', { planId: '1' }, role)).status,
+      403,
+    );
+    role = 'admin_empresa';
+    missing = true;
+    assert.equal(
+      (await request(url, '/api/v1/plans/selection', { planId: '1' }, role)).status,
+      400,
+    );
+    failure = true;
+    assert.equal((await request(url, '/api/v1/plans')).status, 500);
+  });
 });
 
 test('Reenvio de convite mantém resposta antienumeração, token persistido e envio isolado', async (t) => {
-  const calls: { text: string; values?: unknown[] }[] = [];
+  const invitations: Parameters<typeof authRepository.saveInvite>[] = [];
   let found = false;
   let mailCalls = 0;
   const message =
     'Se o e-mail estiver cadastrado, um link de redefinição será enviado.';
+  const lookup = async () =>
+    found ? { ...account, status: 'pending', invite_token: 'anterior' } : undefined;
+  t.mock.method(companyRepository, 'getById', async () => activeCompany);
+  t.mock.method(authRepository, 'getResetUserByEmail', lookup);
+  t.mock.method(authRepository, 'getInviteUserByEmail', lookup);
+  t.mock.method(
+    authRepository,
+    'saveInvite',
+    async (...args: Parameters<typeof authRepository.saveInvite>) => {
+      invitations.push(args);
+    },
+  );
   await withRoutes(
     t,
-    async (text, values) => {
-      calls.push({ text, values });
-      if (text.includes('FROM companies')) {
-        return { rows: [{ id: companyId, status: 'ativo' }] };
-      }
-      return {
-        rows:
-          text.includes('SELECT') && found
-            ? [{ ...account, status: 'pending', invite_token: 'anterior' }]
-            : [],
-        rowCount: 1,
-      };
-    },
     async (url) => {
       assert.deepEqual(await request(url, '/api/v1/auth/resend-invite-email', {}), {
         status: 400,
@@ -401,10 +412,9 @@ test('Reenvio de convite mantém resposta antienumeração, token persistido e e
         );
       }
       assert.equal(mailCalls, 1);
-      const update = calls.at(-1)!;
-      assert.match(update.text, /UPDATE users/);
+      assert.equal(invitations.length, 1);
       const payload = jwt.verify(
-        update.values?.[2] as string,
+        invitations[0]![2],
         environment.JWT_INVITE_SECRET,
       ) as jwt.JwtPayload;
       assert.equal(payload.role, 'admin_empresa');
@@ -415,7 +425,7 @@ test('Reenvio de convite mantém resposta antienumeração, token persistido e e
     async (path, payload) => {
       mailCalls++;
       assert.equal(path, '/emails');
-      assert.match(calls.at(-1)!.text, /UPDATE/);
+      assert.equal(invitations.length, 1);
       assert.deepEqual(payload.to, ['pessoa@example.test']);
       return { data: { id: 'mail-local' }, error: null };
     },
@@ -457,7 +467,7 @@ test('Handler de staging preserva causa e pilha sanitizadas sem expor senhas, to
 });
 
 test('Bootstrap real aplica contratos ao root, JSON inválido, corpo excessivo e 404 global', async (t) => {
-  t.mock.method(db, 'query', unreachableQuery);
+  t.mock.method(PrismaPg.prototype, 'connect', unreachableQuery);
   const previous = process.env.NODE_ENV;
   process.env.NODE_ENV = 'production';
   try {

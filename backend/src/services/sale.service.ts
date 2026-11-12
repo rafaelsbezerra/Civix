@@ -8,7 +8,7 @@ import { createHash } from 'node:crypto';
 import { z } from 'zod';
 import { manualSaleSchema, type ManualSaleOperation } from '../dtos/sale.dto.js';
 import { requireSuperAdminActor } from './user.service.js';
-import { saleRepository } from '../persistence/sale.repository.js';
+import { saleRepository } from '../persistence/index.js';
 import { AppError } from '../shared/errors/app.error.js';
 import { ErrorCode } from '../shared/errors/error.code.js';
 import {

@@ -8,6 +8,7 @@ import test from 'node:test';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { Resend } from 'resend';
+import { PrismaPg } from '@prisma/adapter-pg';
 
 const temporaryRoot = await mkdtemp(join(tmpdir(), 'civix-local-persistence-'));
 
@@ -29,9 +30,8 @@ const userService = await import('../src/services/user.service.js');
 const adminService = await import('../src/services/admin.service.js');
 const authService = await import('../src/services/auth.service.js');
 const planService = await import('../src/services/plan.service.js');
-const { authRepository } = await import('../src/persistence/auth.repository.js');
+const { authRepository } = await import('../src/persistence/index.js');
 const mailService = await import('../src/services/mail.service.js');
-const { db } = await import('../src/shared/config/data.js');
 const { app } = await import('../src/app.js');
 
 async function resetData() {
@@ -86,7 +86,7 @@ async function prepareCompany() {
 }
 
 test('Persistência local preserva acesso, convites, recuperação e integridade sem serviços externos', async (t) => {
-  const query = t.mock.method(db, 'query', () => {
+  const query = t.mock.method(PrismaPg.prototype, 'connect', async () => {
     throw new Error('PostgreSQL não permitido neste teste.');
   });
   const sendMail = t.mock.method(Resend.prototype, 'post', async () => {
@@ -462,7 +462,7 @@ test('Persistência local preserva acesso, convites, recuperação e integridade
         const result = runChild(
           `
         import assert from 'node:assert/strict';
-        const { userRepository } = await import('./src/persistence/user.repository.ts');
+        const { userRepository } = await import('./src/persistence/index.ts');
         const { userPostgresRepository } = await import('./src/persistence/postgres/user.repository.ts');
         const { createMockUser } = await import('./src/services/mock.user.service.ts');
         const { readLocalData } = await import('./src/persistence/json/local.store.ts');

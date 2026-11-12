@@ -134,10 +134,8 @@ test('Storage integra HTTP, autorização e metadados com R2 simulado', async (t
   const { signToken } = await import('../src/services/auth.service.js');
   const { imageObjectStore } =
     await import('../src/shared/integrations/cloudflare/storage.provider.js');
-  const { storageRepository } =
-    await import('../src/persistence/storage.repository.js');
-  const { companyRepository } =
-    await import('../src/persistence/company.repository.js');
+  const { storageRepository } = await import('../src/persistence/index.js');
+  const { companyRepository } = await import('../src/persistence/index.js');
   const uploaded: string[] = [];
   const deleted: string[] = [];
   const signed: Array<{ key: string; seconds: number }> = [];

@@ -184,7 +184,7 @@ test('gestão de usuários da plataforma em HTTP com persistência JSON sintéti
   const { app } = await import('../src/app.js');
   const { signToken } = await import('../src/services/auth.service.js');
   const { readLocalData } = await import('../src/persistence/json/local.store.js');
-  const { userRepository } = await import('../src/persistence/user.repository.js');
+  const { userRepository } = await import('../src/persistence/index.js');
   const server = app.listen(0, '127.0.0.1');
   const identities = {
     superA: {
@@ -257,6 +257,7 @@ test('gestão de usuários da plataforma em HTTP com persistência JSON sintéti
       const responseText = await response.text();
       return {
         status: response.status,
+        sessionToken: response.headers.get('set-cookie')?.match(/^sessao=([^;]+)/)?.[1],
         body: responseText ? (JSON.parse(responseText) as any) : undefined,
       };
     }
@@ -561,10 +562,11 @@ test('gestão de usuários da plataforma em HTTP com persistência JSON sintéti
           body: { email: 'admin-alpha@example.test', password },
         });
         assert.equal(login.status, 200);
+        assert.ok(login.sessionToken);
         assert.equal(
           (
             await request('/api/v1/users/profile', {
-              accessToken: login.body.data.token,
+              accessToken: login.sessionToken,
             })
           ).status,
           200,
@@ -652,10 +654,23 @@ test('gestão de usuários da plataforma em HTTP com persistência JSON sintéti
         }
         const completedLogin = await loginPromise;
         assert.equal(completedLogin.status, 200);
+        assert.ok(completedLogin.sessionToken);
+        const claims = jwt.verify(
+          completedLogin.sessionToken,
+          jwtSecret,
+        ) as jwt.JwtPayload;
+        const persisted = (await readLocalData()).users.find(
+          (user) => user.id === companyAdminAId,
+        );
+        assert.ok(persisted?.tokens_revoked_at);
+        assert.ok(
+          Date.parse(claims.issuedAt) <= Date.parse(persisted.tokens_revoked_at),
+          `Emissão: ${claims.issuedAt}; revogação: ${persisted.tokens_revoked_at}`,
+        );
         assert.equal(
           (
             await request('/api/v1/users/profile', {
-              accessToken: completedLogin.body.data.token,
+              accessToken: completedLogin.sessionToken,
             })
           ).status,
           401,
@@ -779,7 +794,7 @@ test('gestão de usuários da plataforma em HTTP com persistência JSON sintéti
         const first = await outboxToken(0);
         const firstClaims = jwt.verify(first, inviteSecret) as jwt.JwtPayload;
         assert.equal(firstClaims.exp! - firstClaims.iat!, 86400);
-        const resend = await request('/api/auth/resend-invite-email', {
+        const resend = await request('/api/v1/auth/auth/resend-invite-email', {
           method: 'POST',
           accessToken: null,
           body: { email: 'nova-pessoa@example.test' },
@@ -792,7 +807,7 @@ test('gestão de usuários da plataforma em HTTP com persistência JSON sintéti
         assert.equal(
           (
             await request(
-              `/api/auth/validate-token?token=${encodeURIComponent(first)}`,
+              `/api/v1/auth/auth/validate-token?token=${encodeURIComponent(first)}`,
               { accessToken: null },
             )
           ).status,
@@ -801,14 +816,14 @@ test('gestão de usuários da plataforma em HTTP com persistência JSON sintéti
         assert.equal(
           (
             await request(
-              `/api/auth/validate-token?token=${encodeURIComponent(second)}`,
+              `/api/v1/auth/auth/validate-token?token=${encodeURIComponent(second)}`,
               { accessToken: null },
             )
           ).status,
           200,
         );
 
-        const firstAccess = await request('/api/auth/first-access', {
+        const firstAccess = await request('/api/v1/auth/auth/first-access', {
           method: 'POST',
           accessToken: null,
           body: { token: second, password: 'senha-nova-pessoa' },
@@ -816,7 +831,7 @@ test('gestão de usuários da plataforma em HTTP com persistência JSON sintéti
         assert.equal(firstAccess.status, 200);
         assert.equal(
           (
-            await request('/api/auth/first-access', {
+            await request('/api/v1/auth/auth/first-access', {
               method: 'POST',
               accessToken: null,
               body: { token: second, password: 'outra-senha-nova' },
@@ -915,7 +930,7 @@ test('gestão de usuários da plataforma em HTTP com persistência JSON sintéti
         assert.equal(
           (
             await request(
-              `/api/auth/validate-token?token=${encodeURIComponent(oldInvite)}`,
+              `/api/v1/auth/auth/validate-token?token=${encodeURIComponent(oldInvite)}`,
               { accessToken: null },
             )
           ).status,
@@ -981,7 +996,7 @@ test('gestão de usuários da plataforma em HTTP com persistência JSON sintéti
         assert.equal(claims.exp! - claims.iat!, 86400);
         assert.equal(
           (
-            await request('/api/auth/first-access', {
+            await request('/api/v1/auth/auth/first-access', {
               method: 'POST',
               accessToken: null,
               body: { token: invite, password: 'senha-superadmin-novo' },
@@ -995,7 +1010,8 @@ test('gestão de usuários da plataforma em HTTP com persistência JSON sintéti
           body: { email: 'novo-super@example.test', password: 'senha-superadmin-novo' },
         });
         assert.equal(login.status, 200);
-        const session = jwt.verify(login.body.data.token, jwtSecret) as jwt.JwtPayload;
+        assert.ok(login.sessionToken);
+        const session = jwt.verify(login.sessionToken, jwtSecret) as jwt.JwtPayload;
         assert.equal(session.role, 'super_admin');
         assert.equal(session.companyId, null);
       },
@@ -1023,7 +1039,7 @@ test('gestão de usuários da plataforma em HTTP com persistência JSON sintéti
         deleted.deleted_at = '2026-11-02T10:00:00.000Z';
         deleted.status = 'blocked';
         await writeFile(dataFile, JSON.stringify(dataWithDeleted), 'utf8');
-        const deniedDeleted = await request('/api/auth/first-access', {
+        const deniedDeleted = await request('/api/v1/auth/auth/first-access', {
           method: 'POST',
           accessToken: null,
           body: { token: deletedToken, password: 'senha-nova-conta' },
@@ -1053,7 +1069,7 @@ test('gestão de usuários da plataforma em HTTP com persistência JSON sintéti
           (company) => company.id === companyAId,
         )!.status = 'inativo';
         await writeFile(dataFile, JSON.stringify(dataWithInactive), 'utf8');
-        const deniedInactive = await request('/api/auth/first-access', {
+        const deniedInactive = await request('/api/v1/auth/auth/first-access', {
           method: 'POST',
           accessToken: null,
           body: { token: inactiveToken, password: 'senha-nova-conta' },

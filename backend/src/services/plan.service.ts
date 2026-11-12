@@ -1,8 +1,8 @@
 import { logger } from '../shared/logging/log.context.js';
 import { USE_MOCK_DATA } from '../shared/config/data.js';
 import type { Plan } from '../entities/plan.entity.js';
-import { planRepository } from '../persistence/plan.repository.js';
-import { userRepository } from '../persistence/user.repository.js';
+import { planRepository } from '../persistence/index.js';
+import { userRepository } from '../persistence/index.js';
 import { toPlan } from '../persistence/plan.mapper.js';
 import { z } from 'zod';
 import { AppError } from '../shared/errors/app.error.js';

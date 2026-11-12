@@ -9,8 +9,8 @@ import type {
   UploadImageResult,
   PresignedImageUrlResult,
 } from '../dtos/storage.image.dto.js';
-import { companyRepository } from '../persistence/company.repository.js';
-import { storageRepository } from '../persistence/storage.repository.js';
+import { companyRepository } from '../persistence/index.js';
+import { storageRepository } from '../persistence/index.js';
 import * as companyService from './company.service.js';
 import { AppError } from '../shared/errors/app.error.js';
 import { ErrorCode } from '../shared/errors/error.code.js';

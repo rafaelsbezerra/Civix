@@ -3,7 +3,7 @@ import { USE_MOCK_DATA } from '../shared/config/data.js';
 import { AppError } from '../shared/errors/app.error.js';
 import { ErrorCode } from '../shared/errors/error.code.js';
 import crypto from 'node:crypto';
-import { userRepository } from '../persistence/user.repository.js';
+import { userRepository } from '../persistence/index.js';
 import * as mailService from './mail.service.js';
 import * as authService from './auth.service.js';
 import type {
@@ -16,7 +16,7 @@ import {
   type UserId,
   isAuthenticatedRole,
 } from '../entities/user.entity.js';
-import { companyRepository } from '../persistence/company.repository.js';
+import { companyRepository } from '../persistence/index.js';
 import {
   ownProfileSchema,
   companyUserInvitationSchema,

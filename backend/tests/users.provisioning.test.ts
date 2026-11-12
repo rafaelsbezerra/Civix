@@ -16,7 +16,7 @@ const { createMockUser } = await import('../src/services/mock.user.service.js');
 const { login } = await import('../src/services/user.service.js');
 const { readLocalData } = await import('../src/persistence/json/local.store.js');
 const { emptyLocalData } = await import('../src/persistence/json/local.data.js');
-const { db } = await import('../src/shared/config/data.js');
+const { PrismaPg } = await import('@prisma/adapter-pg');
 const companyId = '10000000-0000-4000-8000-000000000001';
 const password = 'senha-sintetica-provisionamento';
 const file = join(directory, 'data.json');
@@ -38,7 +38,7 @@ function fixture() {
   return data;
 }
 test('provisionamento local usa serviço existente sem sobrescrever contas', async (t) => {
-  t.mock.method(db, 'query', () => {
+  t.mock.method(PrismaPg.prototype, 'connect', () => {
     throw new Error('PostgreSQL não permitido no teste.');
   });
   try {

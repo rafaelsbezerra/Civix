@@ -2,12 +2,12 @@ import { logger } from '../shared/logging/log.context.js';
 import { USE_MOCK_DATA } from '../shared/config/data.js';
 import jwt, { type SignOptions } from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
-import { authRepository } from '../persistence/auth.repository.js';
+import { authRepository } from '../persistence/index.js';
 import { AppError } from '../shared/errors/app.error.js';
 import { ErrorCode } from '../shared/errors/error.code.js';
 import { sendForgotPasswordEmail } from './mail.service.js';
 import { isAuthenticatedRole } from '../entities/user.entity.js';
-import { companyRepository } from '../persistence/company.repository.js';
+import { companyRepository } from '../persistence/index.js';
 import type { JwtInvitePayload } from '../dtos/auth.invite.dto.js';
 import type { UserRow } from '../interfaces/auth.user.row.js';
 

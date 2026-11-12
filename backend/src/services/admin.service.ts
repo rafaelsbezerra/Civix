@@ -1,8 +1,8 @@
 import { logger } from '../shared/logging/log.context.js';
 import jwt from 'jsonwebtoken';
 import { isAuthenticatedRole, type UserRole } from '../entities/user.entity.js';
-import { authRepository } from '../persistence/auth.repository.js';
-import { companyRepository } from '../persistence/company.repository.js';
+import { authRepository } from '../persistence/index.js';
+import { companyRepository } from '../persistence/index.js';
 import { AppError } from '../shared/errors/app.error.js';
 import { ErrorCode } from '../shared/errors/error.code.js';
 import { sendInviteEmail } from './mail.service.js';

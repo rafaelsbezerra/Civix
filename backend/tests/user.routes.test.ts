@@ -6,24 +6,20 @@ import bcrypt from 'bcrypt';
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import { Resend } from 'resend';
-import { db } from '../src/shared/config/data.js';
+import { userRepository } from '../src/persistence/index.js';
+import type { UserRepository } from '../src/repositories/user.repository.js';
 import userRoutes from '../src/routes/user.routes.js';
 import {
   createErrorHandler,
   createNotFoundHandler,
 } from '../src/middlewares/error.handler.js';
 
-type QueryCall = { text: string; values?: unknown[] };
-type Query = (
-  text: string,
-  values?: unknown[],
-) => Promise<{ rows: Record<string, unknown>[] }>;
 type Mail = (path: string, payload: Record<string, unknown>) => Promise<unknown>;
 const user = {
   id: 'user-id',
   name: 'Pessoa',
   email: 'pessoa@example.test',
-  role: 'super_admin',
+  role: 'super_admin' as const,
   company_id: null,
   status: 'active',
   password_hash: await bcrypt.hash('senha-local', 4),
@@ -38,7 +34,7 @@ const environment = {
 
 async function withUsers(
   t: TestContext,
-  query: Query,
+  repository: Partial<UserRepository>,
   run: (url: string) => Promise<void>,
   mail?: Mail,
 ) {
@@ -47,7 +43,9 @@ async function withUsers(
   );
   Object.assign(process.env, environment);
   t.mock.method(console, 'error', () => {});
-  t.mock.method(db, 'query', query);
+  for (const method of Object.keys(userRepository) as (keyof UserRepository)[]) {
+    t.mock.method(userRepository, method, repository[method] ?? unreachableQuery);
+  }
   t.mock.method(
     Resend.prototype,
     'post',
@@ -88,18 +86,19 @@ async function post(url: string, path: string, body: unknown) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   });
-  return { status: response.status, body: await response.json() };
+  const result = { status: response.status, body: await response.json() };
+  const cookie = response.headers.get('set-cookie');
+  return cookie ? { ...result, cookie } : result;
 }
 
-function unreachableQuery(): Promise<{ rows: Record<string, unknown>[] }> {
+function unreachableQuery(): never {
   throw new Error('Consulta de persistência não esperada neste teste');
 }
 
 test('Login exige senha para perfis operacionais e não autentica cliente', async (t) => {
-  let account = { ...user };
   await withUsers(
     t,
-    async () => ({ rows: [account] }),
+    { getForLogin: async () => user, getById: async () => user },
     async (url) => {
       const success = await post(url, '/login', {
         email: user.email.toUpperCase(),
@@ -109,10 +108,12 @@ test('Login exige senha para perfis operacionais e não autentica cliente', asyn
       assert.equal(success.body.data.user.role, 'super_admin');
       assert.equal(success.body.data.user.companyId, null);
       assert.equal(success.body.data.user.password_hash, undefined);
-      const claims = jwt.verify(
-        success.body.data.token,
-        environment.JWT_SECRET,
-      ) as jwt.JwtPayload;
+      assert.ok('cookie' in success);
+      assert.match(success.cookie, /; HttpOnly(?:;|$)/i);
+      const token = success.cookie.match(/^sessao=([^;]+)/)?.[1];
+      assert.ok(token);
+      assert.equal(success.body.data.token, undefined);
+      const claims = jwt.verify(token, environment.JWT_SECRET) as jwt.JwtPayload;
       assert.equal(claims.tokenVersion, 2);
       assert.equal(claims.exp! - claims.iat!, 3600);
       assert.equal(
@@ -139,7 +140,7 @@ test('Login exige senha para perfis operacionais e não autentica cliente', asyn
 });
 
 test('Login valida entradas antes da persistência e preserva falha interna', async (t) => {
-  await withUsers(t, unreachableQuery, async (url) => {
+  await withUsers(t, {}, async (url) => {
     for (const body of [
       {},
       { email: user.email },
@@ -156,12 +157,14 @@ test('Login valida entradas antes da persistência e preserva falha interna', as
 });
 
 test('Aliases de recuperação preservam validação e resposta que evita enumeração de e-mails', async (t) => {
-  const calls: QueryCall[] = [];
+  const calls: unknown[][] = [];
   await withUsers(
     t,
-    async (text, values) => {
-      calls.push({ text, values });
-      return { rows: [] };
+    {
+      async getByEmail(email) {
+        calls.push([email]);
+        return undefined;
+      },
     },
     async (url) => {
       for (const path of ['/forgot-password', '/esqueci-senha']) {
@@ -174,51 +177,42 @@ test('Aliases de recuperação preservam validação e resposta que evita enumer
           body: { data: { message: recoveryMessage } },
         });
       }
-      assert.equal(calls.length, 2);
-      for (const call of calls) {
-        assert.match(
-          call.text,
-          /SELECT id, name, email FROM users WHERE LOWER\(email\) = LOWER\(\$1\)/,
-        );
-        assert.deepEqual(call.values, [user.email]);
-      }
+      assert.deepEqual(calls, [[user.email], [user.email]]);
     },
   );
 });
 
 test('Recuperação persiste somente hash SHA256 com expiração de uma hora antes de enviar o e-mail', async (t) => {
-  const calls: QueryCall[] = [];
+  const calls: unknown[][] = [];
   const start = Date.now();
   let sentToken = '';
   await withUsers(
     t,
-    async (text, values) => {
-      calls.push({ text, values });
-      return { rows: text.includes('SELECT') ? [user] : [] };
+    {
+      async getByEmail(email) {
+        calls.push([email]);
+        return user;
+      },
+      async savePasswordResetToken(...args) {
+        calls.push(args);
+      },
     },
     async (url) => {
       assert.deepEqual(await post(url, '/forgot-password', { email: user.email }), {
         status: 200,
         body: { data: { message: recoveryMessage } },
       });
-      const update = calls[1]!;
-      assert.match(
-        update.text,
-        /SET reset_password_token = \$1, reset_password_expires = \$2/,
-      );
+      const [id, tokenHash, expiration] = calls[1]!;
       assert.match(sentToken, /^[a-f0-9]{64}$/);
-      assert.equal(
-        update.values?.[0],
-        createHash('sha256').update(sentToken).digest('hex'),
-      );
-      assert.notEqual(update.values?.[0], sentToken);
-      const expiresAt = update.values?.[1] as Date;
+      assert.equal(tokenHash, createHash('sha256').update(sentToken).digest('hex'));
+      assert.notEqual(tokenHash, sentToken);
+      const expiresAt = expiration;
       assert.ok(expiresAt instanceof Date);
       assert.ok(
         expiresAt.getTime() >= start + 3600000 &&
           expiresAt.getTime() <= Date.now() + 3600000,
       );
-      assert.equal(update.values?.[2], user.id);
+      assert.equal(id, user.id);
     },
     async (path, payload) => {
       assert.equal(path, '/emails');
@@ -239,11 +233,18 @@ test('Recuperação mantém falhas de busca, atualização e envio sem conectar 
   let mailCalls = 0;
   await withUsers(
     t,
-    async (text) => {
-      if (scenario === 'lookup' || (scenario === 'update' && text.includes('UPDATE'))) {
-        throw new Error('Falha simulada na persistência');
-      }
-      return { rows: text.includes('SELECT') ? [user] : [] };
+    {
+      async getByEmail() {
+        if (scenario === 'lookup') {
+          throw new Error('Falha simulada na busca');
+        }
+        return user;
+      },
+      async savePasswordResetToken() {
+        if (scenario === 'update') {
+          throw new Error('Falha simulada na persistência');
+        }
+      },
     },
     async (url) => {
       for (const nextScenario of ['lookup', 'update', 'mail']) {
@@ -263,12 +264,17 @@ test('Recuperação mantém falhas de busca, atualização e envio sem conectar 
 });
 
 test('Aliases de redefinição verificam hash do token, usam bcrypt10 e limpam os campos de recuperação', async (t) => {
-  const calls: QueryCall[] = [];
+  const calls: unknown[][] = [];
   await withUsers(
     t,
-    async (text, values) => {
-      calls.push({ text, values });
-      return { rows: text.includes('SELECT') ? [{ id: user.id }] : [] };
+    {
+      async getByValidResetTokenHash(...args) {
+        calls.push(args);
+        return { id: user.id };
+      },
+      async updatePasswordAndClearResetToken(...args) {
+        calls.push(args);
+      },
     },
     async (url) => {
       for (const path of ['/reset-password', '/redefinir-senha']) {
@@ -277,18 +283,12 @@ test('Aliases de redefinição verificam hash do token, usam bcrypt10 e limpam o
           await post(url, path, { token: 'token-local', password: 'nova-senha-local' }),
           { status: 200, body: { data: { message: 'Senha redefinida com sucesso.' } } },
         );
-        const lookup = calls[start]!;
-        assert.match(lookup.text, /reset_password_expires > NOW\(\)/);
-        assert.deepEqual(lookup.values, [
+        assert.deepEqual(calls[start], [
           createHash('sha256').update('token-local').digest('hex'),
         ]);
-        const update = calls[start + 1]!;
-        assert.match(
-          update.text,
-          /SET password_hash = \$1, reset_password_token = NULL, reset_password_expires = NULL/,
-        );
-        assert.equal(update.values?.[1], user.id);
-        const hash = update.values?.[0] as string;
+        const [id, passwordHash] = calls[start + 1]!;
+        assert.equal(id, user.id);
+        const hash = passwordHash as string;
         assert.equal(bcrypt.getRounds(hash), 10);
         assert.equal(await bcrypt.compare('nova-senha-local', hash), true);
       }
@@ -301,12 +301,20 @@ test('Redefinição mantém entradas obrigatórias, senha mínima, token inváli
   let queries = 0;
   await withUsers(
     t,
-    async (text) => {
-      queries++;
-      if (scenario === 'lookup' || (scenario === 'update' && text.includes('UPDATE'))) {
-        throw new Error('Falha simulada na persistência');
-      }
-      return { rows: scenario === 'invalid' ? [] : [{ id: user.id }] };
+    {
+      async getByValidResetTokenHash() {
+        queries++;
+        if (scenario === 'lookup') {
+          throw new Error('Falha simulada na busca');
+        }
+        return scenario === 'invalid' ? undefined : { id: user.id };
+      },
+      async updatePasswordAndClearResetToken() {
+        queries++;
+        if (scenario === 'update') {
+          throw new Error('Falha simulada na persistência');
+        }
+      },
     },
     async (url) => {
       for (const path of ['/reset-password', '/redefinir-senha']) {
@@ -342,50 +350,46 @@ test('Redefinição mantém entradas obrigatórias, senha mínima, token inváli
 });
 
 test('Perfil e home exigem sessão vigente e retornam identidade e permissões', async (t) => {
-  await withUsers(
-    t,
-    async () => ({ rows: [user] }),
-    async (url) => {
-      const token = jwt.sign(
-        {
-          id: user.id,
-          email: user.email,
-          role: user.role,
-          companyId: null,
-          tokenVersion: 2,
-        },
-        environment.JWT_SECRET,
-        { expiresIn: '1h' },
+  await withUsers(t, { getById: async () => user }, async (url) => {
+    const token = jwt.sign(
+      {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        companyId: null,
+        tokenVersion: 2,
+      },
+      environment.JWT_SECRET,
+      { expiresIn: '1h' },
+    );
+    for (const [path, method] of [
+      ['/profile', 'GET'],
+      ['/home', 'POST'],
+    ]) {
+      assert.equal((await fetch(url + path, { method })).status, 401);
+      assert.equal(
+        (
+          await fetch(url + path, {
+            method,
+            headers: { Authorization: 'Bearer invalido' },
+          })
+        ).status,
+        401,
       );
-      for (const [path, method] of [
-        ['/profile', 'GET'],
-        ['/home', 'POST'],
-      ]) {
-        assert.equal((await fetch(url + path, { method })).status, 401);
-        assert.equal(
-          (
-            await fetch(url + path, {
-              method,
-              headers: { Authorization: 'Bearer invalido' },
-            })
-          ).status,
-          401,
-        );
-        const success = await fetch(url + path, {
-          method,
-          headers: { Authorization: 'Bearer ' + token },
-        });
-        assert.equal(success.status, 200);
-        const body = await success.json();
-        if (path === '/profile') {
-          assert.equal(body.data.user.id, user.id);
-          assert.equal(body.data.user.role, user.role);
-          assert.ok(body.data.permissions);
-        } else {
-          assert.equal(body.data.userId, user.id);
-          assert.equal(body.data.userRole, user.role);
-        }
+      const success = await fetch(url + path, {
+        method,
+        headers: { Authorization: 'Bearer ' + token },
+      });
+      assert.equal(success.status, 200);
+      const body = await success.json();
+      if (path === '/profile') {
+        assert.equal(body.data.user.id, user.id);
+        assert.equal(body.data.user.role, user.role);
+        assert.ok(body.data.permissions);
+      } else {
+        assert.equal(body.data.userId, user.id);
+        assert.equal(body.data.userRole, user.role);
       }
-    },
-  );
+    }
+  });
 });

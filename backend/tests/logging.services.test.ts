@@ -9,6 +9,7 @@ import test, { type TestContext } from 'node:test';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { Resend } from 'resend';
+import { PrismaPg } from '@prisma/adapter-pg';
 import { createLogger, createRequestLogger } from '../src/shared/logging/log.logger.js';
 import { runWithLogContext } from '../src/shared/logging/log.context.js';
 import type { Company } from '../src/entities/company.entity.js';
@@ -32,11 +33,10 @@ const userService = await import('../src/services/user.service.js');
 const authService = await import('../src/services/auth.service.js');
 const adminService = await import('../src/services/admin.service.js');
 const mailService = await import('../src/services/mail.service.js');
-const { companyRepository } = await import('../src/persistence/company.repository.js');
-const { planRepository } = await import('../src/persistence/plan.repository.js');
-const { userRepository } = await import('../src/persistence/user.repository.js');
-const { authRepository } = await import('../src/persistence/auth.repository.js');
-const { db } = await import('../src/shared/config/data.js');
+const { companyRepository } = await import('../src/persistence/index.js');
+const { planRepository } = await import('../src/persistence/index.js');
+const { userRepository } = await import('../src/persistence/index.js');
+const { authRepository } = await import('../src/persistence/index.js');
 
 const privateEmail = 'pessoa-confidencial@example.test';
 const privatePassword = 'senha-exclusiva-do-teste';
@@ -143,7 +143,7 @@ function assertPrivateDataAbsent(output: string, extra: string[] = []) {
 
 test.beforeEach((t) => {
   const context = t as TestContext;
-  context.mock.method(db, 'query', async () => {
+  context.mock.method(PrismaPg.prototype, 'connect', async () => {
     throw new Error('Consulta externa não autorizada no teste.');
   });
   context.mock.method(Resend.prototype, 'post', async () => {
