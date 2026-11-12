@@ -91,6 +91,14 @@ WHERE to_regclass('public._prisma_migrations') IS NOT NULL
 
 ---
 
+## Remoção da Rota de Empresas Verificadas e Descontinuação de `is_verified` — 2026-11-12
+
+- [Feature](features/remove-company-verification/feature.md)
+- [SDD](features/remove-company-verification/sdd.md)
+- [Tasks](features/remove-company-verification/tasks.md)
+
+---
+
 ## Adoção do Prisma ORM e Entrada Única de Persistência — 2026-11-11
 
 - [Feature](features/prisma-orm-repositories/feature.md)
