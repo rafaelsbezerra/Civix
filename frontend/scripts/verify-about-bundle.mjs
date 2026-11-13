@@ -6,8 +6,6 @@ const expectedAssets = [
   'background-shape.svg',
   'emphasis-scribble.svg',
   'macbook.png',
-  'value-divider.svg',
-  'vision-divider.svg',
 ];
 const distRoot = new URL('../dist/', import.meta.url);
 const manifestPath = new URL('.vite/manifest.json', distRoot);
@@ -41,4 +39,4 @@ while (pending.length > 0) {
   }
 }
 
-console.log('Verified five local About assets and no remote Figma/MCP URLs.');
+console.log('Verified three local About assets and no remote Figma/MCP URLs.');
