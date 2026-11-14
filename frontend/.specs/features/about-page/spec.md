@@ -1,6 +1,7 @@
 # Tela Sobre Civix — Especificação
 
 > **Auditoria de estado — 2026-10-10:** este documento preserva decisões, checkboxes e resultados históricos. A vigência dos requisitos antigos está **Aguardando resposta**. Não restaurar layout, reabrir escopo ou declarar gates atuais aprovados sem confirmação e evidência.
+> **Atualização visual — 2026-11-13:** por solicitação do usuário, Valor, Visão e Missão passam a ser exibidos em cards compactos abaixo do texto institucional. Conteúdo e ordem permanecem iguais; a nova composição substitui apenas a disposição anterior desse bloco.
 > AppRoute não registra /sobre; About aparece dentro da Home. dashboard.png e macbook-silver.png do manifest histórico não existem no checkout; AboutVisual usa macbook.png e não renderiza dashboard. Não foi decidido restaurar a composição original ou aceitar essas divergências.
 > Revisão consolidada: [pendências das specs](../../reviews/revisao-pendencias-specs.md).
 

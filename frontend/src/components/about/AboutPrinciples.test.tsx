@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { AboutPrinciples } from './AboutPrinciples';
 
 describe('AboutPrinciples', () => {
-  it('renders the three institutional principles in the Figma order', () => {
+  it('renders the three institutional principles in the approved order', () => {
     render(<AboutPrinciples />);
 
     const section = screen.getByRole('region', { name: 'Princípios da Civix' });
@@ -31,32 +31,25 @@ describe('AboutPrinciples', () => {
     ).toBeInTheDocument();
   });
 
-  it('renders a decorative divider below every principle', () => {
+  it('presents each principle in a compact responsive card', () => {
     render(<AboutPrinciples />);
 
     const section = screen.getByRole('region', { name: 'Princípios da Civix' });
-    const dividers = section.querySelectorAll('img');
+    const cards = within(section).getAllByRole('article');
 
-    expect(dividers).toHaveLength(3);
-    for (const divider of dividers) {
-      expect(divider).toHaveAttribute('alt', '');
-      expect(divider).toHaveAttribute('aria-hidden', 'true');
+    expect(cards).toHaveLength(3);
+    for (const card of cards) {
+      expect(card).toHaveClass('rounded-xl', 'border', 'bg-white/80', 'sm:p-5');
     }
-    expect(Array.from(dividers, (divider) => divider.getAttribute('src'))).toEqual(
-      expect.arrayContaining([
-        expect.stringContaining('value-divider.svg'),
-        expect.stringContaining('vision-divider.svg'),
-      ]),
-    );
   });
 
-  it('keeps the reference typography and desktop list geometry', () => {
+  it('keeps the reference typography and places the cards closer to the introduction', () => {
     render(<AboutPrinciples />);
 
     const section = screen.getByRole('region', { name: 'Princípios da Civix' });
     expect(section).toHaveClass(
-      '2xl:left-[calc(58.333%_-_19px)]',
-      '2xl:top-[446px]',
+      '2xl:left-[calc(41.667%_+_93px)]',
+      '2xl:top-[374px]',
       '2xl:w-[611px]',
     );
     expect(screen.getByRole('heading', { name: 'Valor' }).className).toContain(
