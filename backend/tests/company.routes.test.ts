@@ -138,7 +138,6 @@ test('Endpoints do catálogo preservam respostas, ordem das rotas e filtros do P
   await withCatalog(async (url, baseUrl) => {
     const cases = [
       { path: '', where: {} },
-      { path: '/verificadas/todas', where: {} },
       {
         path: '/buscar?q=Obra%27',
         where: { name: { contains: "Obra'", mode: insensitive } },
@@ -256,7 +255,6 @@ test('Falhas de persistência em todos os endpoints do catálogo retornam 500 se
     for (const path of [
       '',
       '/catalog-id',
-      '/verificadas/todas',
       '/buscar?q=Obras',
       '/search?uf=CE&priceRange=100-300',
       '/categoria/Obras',

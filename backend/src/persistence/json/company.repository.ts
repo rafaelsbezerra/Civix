@@ -319,10 +319,6 @@ export const companyJsonRepository: CompanyRepository = {
     return (await readLocalData()).companies.find((company) => company.id === id);
   },
 
-  async getVerified() {
-    return (await readLocalData()).companies.filter((company) => company.verificado);
-  },
-
   async getByCategory(category) {
     return (await readLocalData()).companies.filter(
       (company) => company.categoria.toLowerCase() === category.toLowerCase(),

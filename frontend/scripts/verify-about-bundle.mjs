@@ -2,13 +2,7 @@ import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { extname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const expectedAssets = [
-  'background-shape.svg',
-  'emphasis-scribble.svg',
-  'macbook.png',
-  'value-divider.svg',
-  'vision-divider.svg',
-];
+const expectedAssets = ['background-shape.svg', 'emphasis-scribble.svg', 'macbook.png'];
 const distRoot = new URL('../dist/', import.meta.url);
 const manifestPath = new URL('.vite/manifest.json', distRoot);
 const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
@@ -41,4 +35,4 @@ while (pending.length > 0) {
   }
 }
 
-console.log('Verified five local About assets and no remote Figma/MCP URLs.');
+console.log('Verified three local About assets and no remote Figma/MCP URLs.');

@@ -338,11 +338,6 @@ export const fetchEmpresasByCategoria = async (
   return response.data;
 };
 
-export const fetchEmpresasVerificadas = async (): Promise<Empresa[]> => {
-  const response = await fetchApi<Empresa[]>('/api/v1/empresas/verificadas/todas');
-  return response.data;
-};
-
 export const fetchEmpresasByEstado = async (estado: string): Promise<Empresa[]> => {
   const response = await fetchApi<Empresa[]>(
     `/api/v1/empresas/estado/${encodeURIComponent(estado)}`,

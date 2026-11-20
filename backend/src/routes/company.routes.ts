@@ -6,7 +6,6 @@ const router = Router();
 
 router.post('/', authMiddleware, companyController.createCompany);
 router.get('/', companyController.listCompanies);
-router.get('/verificadas/todas', companyController.listVerifiedCompanies);
 router.get('/buscar', companyController.searchCompanies);
 router.get('/search', companyController.searchCompanies);
 router.get('/categoria/:categoria', companyController.listCompaniesByCategory);

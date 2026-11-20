@@ -102,7 +102,6 @@ describe('Contratos dos consumidores de API', () => {
     await api.fetchEmpresasByCategoria('Saúde/Serviços');
     await api.fetchEmpresasByEstado('CE');
     await api.fetchEmpresasByTamanho('pequena');
-    await api.fetchEmpresasVerificadas();
 
     const searched = new URL(String(fetchMock.mock.calls[0][0]));
 
@@ -117,9 +116,6 @@ describe('Contratos dos consumidores de API', () => {
     );
     expect(fetchMock.mock.calls[3][0]).toBe(
       'https://backend.example.test/api/v1/empresas/tamanho/pequena',
-    );
-    expect(fetchMock.mock.calls[4][0]).toBe(
-      'https://backend.example.test/api/v1/empresas/verificadas/todas',
     );
   });
 
