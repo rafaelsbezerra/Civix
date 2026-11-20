@@ -129,9 +129,12 @@ function renderDashboard(path: string, session: SessionProfile) {
 }
 
 describe('CompanyDashboardLayout', () => {
-  it('mostra os indicadores e mantém navegação lateral sem o aviso de demonstração', () => {
+  it('mostra os indicadores e navegação horizontal sem o aviso de demonstração', () => {
     renderDashboard('/dashboard-empresa', createSession('admin_empresa'));
 
+    const navigation = screen.getByRole('navigation', { name: 'Navegação principal' });
+    expect(navigation.closest('header')?.tagName).toBe('HEADER');
+    expect(navigation.querySelector('ul')).toHaveClass('flex', 'items-center');
     expect(screen.getByRole('link', { name: 'Civix — início' })).toContainElement(
       screen.getByRole('img', { name: 'Civix' }),
     );

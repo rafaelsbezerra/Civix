@@ -35,6 +35,22 @@ describe('AppRoutes', () => {
     ).toBeInTheDocument();
   });
 
+  it('opens the attendance demo without requiring an authenticated profile', () => {
+    render(
+      <MemoryRouter initialEntries={['/demo/atendimento']}>
+        <AppRoutes />
+      </MemoryRouter>,
+    );
+
+    expect(
+      screen.getByRole('heading', { name: 'Central de atendimento' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/clientes e as mensagens são fictícios/i),
+    ).toBeInTheDocument();
+    expect(profileMock).not.toHaveBeenCalled();
+  });
+
   it('opens the company dashboard with the verified owner profile', async () => {
     profileMock.mockResolvedValue({
       user: {

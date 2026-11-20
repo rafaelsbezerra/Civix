@@ -12,14 +12,7 @@ import {
   X,
 } from 'lucide-react';
 import { useState } from 'react';
-import {
-  Link,
-  Navigate,
-  NavLink,
-  Outlet,
-  useLocation,
-  useOutletContext,
-} from 'react-router-dom';
+import { Link, Navigate, NavLink, Outlet, useOutletContext } from 'react-router-dom';
 
 import logoCivix from '@/assets/civix/logo-civix-white.png';
 import type { SessionProfile } from '@/lib/api';
@@ -62,24 +55,17 @@ const attendantNavigationItems: DashboardNavigationItem[] = [
 
 export function CompanyDashboardLayout() {
   const session = useOutletContext<SessionProfile>();
-  const { pathname } = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const isOwner = session.user.role === 'admin_empresa';
   const navigationItems = isOwner ? ownerNavigationItems : attendantNavigationItems;
   const visibleItems = navigationItems.filter((item) => !item.ownerOnly || isOwner);
   const displayName = session.user.name?.trim() || session.user.email;
-  const activeItem = navigationItems.find((item) => item.to === pathname);
-  const sectionTitle =
-    activeItem?.label ?? (isOwner ? 'Visão geral' : 'Painel do atendente');
-  const sectionSubtitle = isOwner
-    ? 'Acompanhe a operação da empresa'
-    : 'Atendimentos da sua empresa';
 
   function renderNavigation(mobile = false) {
     return (
       <nav aria-label={mobile ? 'Navegação do painel' : 'Navegação principal'}>
-        <ul className="space-y-1">
+        <ul className={mobile ? 'space-y-1' : 'flex items-center gap-1'}>
           {visibleItems.map(({ to, label, icon: Icon }) => (
             <li key={to}>
               <NavLink
@@ -116,98 +102,86 @@ export function CompanyDashboardLayout() {
       className="company-dashboard-shell min-h-screen bg-[var(--dashboard-bg)] text-[var(--dashboard-text)]"
       data-theme={theme}
     >
-      <aside className="fixed inset-y-0 left-0 hidden w-72 border-r border-[var(--dashboard-border)] bg-[var(--dashboard-sidebar)] p-6 lg:block">
-        <Link
-          aria-label="Civix — início"
-          className="inline-flex flex-col items-start gap-2"
-          to="/"
-        >
-          <img
-            alt="Civix"
-            className="h-8 w-[99px] object-contain"
-            height="32"
-            src={logoCivix}
-            width="99"
-          />
-          <span className="mt-1 block text-xs font-medium uppercase tracking-[0.16em] text-[var(--dashboard-sidebar-muted)]">
-            Painel da empresa
-          </span>
-        </Link>
-        <div className="mt-10">{renderNavigation()}</div>
-      </aside>
-
-      <div className="lg:pl-72">
-        <header className="sticky top-0 z-30 border-b border-[var(--dashboard-border)] bg-[var(--dashboard-bg)]/95 px-4 py-3 backdrop-blur sm:px-8 lg:px-10">
-          <div className="flex min-h-11 items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <button
-                aria-controls="company-dashboard-mobile-navigation"
-                aria-expanded={isMobileMenuOpen}
-                aria-label={isMobileMenuOpen ? 'Fechar navegação' : 'Abrir navegação'}
-                className="grid size-11 place-items-center rounded-lg border border-[var(--dashboard-border)] text-[var(--dashboard-text)] lg:hidden"
-                onClick={() => setIsMobileMenuOpen((open) => !open)}
-                type="button"
-              >
-                {isMobileMenuOpen ? (
-                  <X aria-hidden="true" className="size-5" />
-                ) : (
-                  <Menu aria-hidden="true" className="size-5" />
-                )}
-              </button>
-              <div>
-                <p className="font-[family-name:var(--font-display)] font-semibold text-[var(--dashboard-text)]">
-                  {sectionTitle}
-                </p>
-                <p className="hidden text-xs text-[var(--dashboard-subtle)] sm:block">
-                  {sectionSubtitle}
-                </p>
-              </div>
-            </div>
-            <div className="flex min-w-0 items-center gap-2 sm:gap-3">
-              <button
-                aria-label={`Ativar tema ${theme === 'dark' ? 'claro' : 'escuro'}`}
-                className="grid size-11 shrink-0 place-items-center rounded-lg border border-[var(--dashboard-border)] text-[var(--dashboard-accent)] transition-colors hover:bg-[var(--dashboard-accent-soft)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--dashboard-accent)]"
-                onClick={() =>
-                  setTheme((currentTheme) =>
-                    currentTheme === 'dark' ? 'light' : 'dark',
-                  )
-                }
-                type="button"
-              >
-                {theme === 'dark' ? (
-                  <Sun aria-hidden="true" className="size-5" />
-                ) : (
-                  <Moon aria-hidden="true" className="size-5" />
-                )}
-              </button>
-              <div className="flex min-w-0 items-center gap-2 rounded-full border border-[var(--dashboard-border)] bg-[var(--dashboard-surface)] py-1 pl-1 pr-3">
-                <span
-                  aria-hidden="true"
-                  className="grid size-8 shrink-0 place-items-center rounded-full bg-[var(--dashboard-accent-soft)] text-xs font-bold text-[var(--dashboard-accent-text)]"
-                >
-                  {initials}
-                </span>
-                <p className="truncate text-sm text-[var(--dashboard-text)]">
-                  {displayName}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div
-            className={`pt-4 ${isMobileMenuOpen ? '' : 'hidden'}`}
-            id="company-dashboard-mobile-navigation"
+      <header className="sticky top-0 z-30 border-b border-[var(--dashboard-border)] bg-[var(--dashboard-bg)]/95 px-4 py-3 backdrop-blur sm:px-6 lg:px-8">
+        <div className="mx-auto flex min-h-11 max-w-[1920px] items-center gap-4">
+          <Link
+            aria-label="Civix — início"
+            className="inline-flex shrink-0 items-center"
+            to="/"
           >
-            <div className="rounded-xl bg-[var(--dashboard-sidebar)] p-3">
-              {renderNavigation(true)}
+            <img
+              alt="Civix"
+              className="h-8 w-[99px] object-contain"
+              height="32"
+              src={logoCivix}
+              width="99"
+            />
+          </Link>
+
+          <div className="hidden min-w-0 flex-1 lg:block">
+            <div className="overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {renderNavigation()}
             </div>
           </div>
-        </header>
 
-        <main className="min-h-[calc(100vh-4rem)] px-4 py-6 sm:px-8 lg:px-10 lg:py-8">
-          <Outlet context={session} />
-        </main>
-      </div>
+          <div className="ml-auto flex min-w-0 items-center gap-2 sm:gap-3">
+            <div className="flex min-w-0 items-center gap-2 rounded-full border border-[var(--dashboard-border)] bg-[var(--dashboard-surface)] py-1 pl-1 pr-3">
+              <span
+                aria-hidden="true"
+                className="grid size-8 shrink-0 place-items-center rounded-full bg-[var(--dashboard-accent-soft)] text-xs font-bold text-[var(--dashboard-accent-text)]"
+              >
+                {initials}
+              </span>
+              <p className="max-w-36 truncate text-sm text-[var(--dashboard-text)]">
+                {displayName}
+              </p>
+            </div>
+
+            <button
+              aria-label={`Ativar tema ${theme === 'dark' ? 'claro' : 'escuro'}`}
+              className="grid size-10 shrink-0 place-items-center rounded-lg border border-[var(--dashboard-border)] text-[var(--dashboard-accent)] transition-colors hover:bg-[var(--dashboard-accent-soft)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--dashboard-accent)]"
+              onClick={() =>
+                setTheme((currentTheme) => (currentTheme === 'dark' ? 'light' : 'dark'))
+              }
+              type="button"
+            >
+              {theme === 'dark' ? (
+                <Sun aria-hidden="true" className="size-5" />
+              ) : (
+                <Moon aria-hidden="true" className="size-5" />
+              )}
+            </button>
+
+            <button
+              aria-controls="company-dashboard-mobile-navigation"
+              aria-expanded={isMobileMenuOpen}
+              aria-label={isMobileMenuOpen ? 'Fechar navegação' : 'Abrir navegação'}
+              className="grid size-10 shrink-0 place-items-center rounded-lg border border-[var(--dashboard-border)] text-[var(--dashboard-text)] lg:hidden"
+              onClick={() => setIsMobileMenuOpen((open) => !open)}
+              type="button"
+            >
+              {isMobileMenuOpen ? (
+                <X aria-hidden="true" className="size-5" />
+              ) : (
+                <Menu aria-hidden="true" className="size-5" />
+              )}
+            </button>
+          </div>
+        </div>
+
+        <div
+          className={`mx-auto max-w-[1920px] pt-3 lg:hidden ${isMobileMenuOpen ? '' : 'hidden'}`}
+          id="company-dashboard-mobile-navigation"
+        >
+          <div className="rounded-xl bg-[var(--dashboard-sidebar)] p-3">
+            {renderNavigation(true)}
+          </div>
+        </div>
+      </header>
+
+      <main className="mx-auto min-h-[calc(100vh-4rem)] max-w-[1920px] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+        <Outlet context={session} />
+      </main>
     </div>
   );
 }
