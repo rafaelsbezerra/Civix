@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -57,6 +58,35 @@ describe('AppRoutes', () => {
 
     expect(screen.queryByTestId('attendance-workspace')).not.toBeInTheDocument();
     expect(profileMock).not.toHaveBeenCalled();
+  });
+
+  it('shows the local attendance preview without authentication or API calls', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <MemoryRouter initialEntries={['/preview/conversas']}>
+        <AppRoutes />
+      </MemoryRouter>,
+    );
+
+    expect(
+      await screen.findAllByRole('heading', { name: 'Conversas' }),
+    ).not.toHaveLength(0);
+    expect(screen.getByRole('note', { name: 'Prévia local' })).toHaveTextContent(
+      'dados fictícios',
+    );
+    expect(
+      await screen.findByRole('heading', { name: 'Mariana Costa' }),
+    ).toBeInTheDocument();
+    expect(profileMock).not.toHaveBeenCalled();
+    expect(conversationsMock).not.toHaveBeenCalled();
+
+    const composer = screen.getByRole('textbox', { name: 'Digite uma mensagem' });
+    await user.type(composer, 'Resposta de prévia');
+    await user.click(screen.getByRole('button', { name: 'Enviar mensagem' }));
+
+    expect(await screen.findByText('Resposta de prévia')).toBeInTheDocument();
+    expect(conversationsMock).not.toHaveBeenCalled();
   });
 
   it('opens the company dashboard with the verified owner profile', async () => {

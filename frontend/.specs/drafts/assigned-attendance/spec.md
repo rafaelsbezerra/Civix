@@ -80,7 +80,8 @@ Os tipos de frontend esperados são:
   `sender` (`customer | bot | agent | system`), `text` e `createdAt` ISO-8601.
 
 As respostas seguem `{ data, meta? }`; os erros exibidos ao usuário usam apenas
-status e message. A interface não usa dados locais de exemplo, não confirma
+status e message. A rota operacional
+`/dashboard-atendente/conversas` não usa dados locais de exemplo, não confirma
 entrega de mensagem sem resposta de sucesso e apresenta falhas de rede/API
 explicitamente. A autorização e o escopo por empresa/atendente permanecem
 exclusivamente sob responsabilidade do backend.
@@ -132,6 +133,13 @@ cliente HTTP de conversas e 3 testes direcionados de rotas passaram. Build de
 produção, TypeScript, lint direcionado e formatação dos arquivos alterados
 passaram. Não foi possível validar comunicação ou autorização real porque o
 backend ainda não implementa os endpoints.
+
+Atualização de 2026-11-23: foi autorizada uma rota de prévia local em
+`/preview/conversas`, disponível somente em desenvolvimento. Ela reutiliza os
+componentes da tela com dados fictícios identificados na própria interface;
+filtros e ações são somente locais, sem autenticação, persistência ou chamadas
+à API. A rota não substitui nem altera a tela autenticada
+`/dashboard-atendente/conversas` e não comprova integração real.
 
 ## Aceite
 

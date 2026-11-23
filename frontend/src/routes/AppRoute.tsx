@@ -30,6 +30,9 @@ import HelperCenter from '@/pages/HelperCenter';
 import CookieBanner from '@/components/Cookie/CookieBanner';
 import SuperAdminLogin from '@/pages/SuperAdminLogin';
 import ConversationsPage from '@/features/attendance/ConversationsPage';
+import AttendancePreviewPage, {
+  AttendancePreviewSession,
+} from '@/features/attendance/AttendancePreviewPage';
 import {
   CompanyDashboardLayout,
   OwnerDashboardRoute,
@@ -79,6 +82,14 @@ export const AppRoutes: React.FC = () => (
       <Route path="/politica-de-privacidade" element={<PrivacyPolicy />} />
       <Route path="/central-de-ajuda" element={<HelperCenter />} />
       <Route path="/dashboard/super-admin/login" element={<SuperAdminLogin />} />
+
+      {import.meta.env.DEV && (
+        <Route element={<AttendancePreviewSession />}>
+          <Route path="/preview/conversas" element={<CompanyDashboardLayout />}>
+            <Route index element={<AttendancePreviewPage />} />
+          </Route>
+        </Route>
+      )}
 
       <Route element={<ProtectedRoute allowedRoles={['admin_empresa']} />}>
         <Route path="/dashboard-empresa" element={<CompanyDashboardLayout />}>
