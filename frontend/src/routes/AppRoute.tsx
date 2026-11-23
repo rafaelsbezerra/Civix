@@ -29,7 +29,7 @@ import { PrivacyPolicy } from '@/pages/PrivacityPolicy';
 import HelperCenter from '@/pages/HelperCenter';
 import CookieBanner from '@/components/Cookie/CookieBanner';
 import SuperAdminLogin from '@/pages/SuperAdminLogin';
-import AttendanceDemoPage from '@/features/attendance-demo/AttendanceDemoPage';
+import ConversationsPage from '@/features/attendance/ConversationsPage';
 import {
   CompanyDashboardLayout,
   OwnerDashboardRoute,
@@ -65,7 +65,6 @@ export const AppRoutes: React.FC = () => (
         </Route>
       </Route>
       <Route path="/" element={<HomePage />} />
-      <Route path="/demo/atendimento" element={<AttendanceDemoPage />} />
       <Route path="/login" element={<AccessChoice />} />
       <Route path="/login/empresa" element={<Login />} />
       <Route path="/login/atendente" element={<Login access="atendente" />} />
@@ -146,17 +145,7 @@ export const AppRoutes: React.FC = () => (
               />
             }
           />
-          <Route
-            path="conversas"
-            element={
-              <DashboardSectionUnavailable
-                title="Conversas"
-                description="Consulte e responda somente atendimentos atribuídos a você."
-                reason="A API de atendimentos e mensagens ainda não está disponível. O painel não exibe conversas de outros atendentes."
-                icon="conversations"
-              />
-            }
-          />
+          <Route path="conversas" element={<ConversationsPage />} />
           <Route
             path="historico"
             element={

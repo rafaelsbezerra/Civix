@@ -2,19 +2,32 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { getSessionProfile } from '@/lib/api';
+import { getSessionProfile, listConversations } from '@/lib/api';
 import { AppRoutes } from './AppRoute';
 
 vi.mock('@/lib/api', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@/lib/api')>()),
   getSessionProfile: vi.fn(),
+  listConversations: vi.fn(),
 }));
 
 const profileMock = vi.mocked(getSessionProfile);
+const conversationsMock = vi.mocked(listConversations);
 
 describe('AppRoutes', () => {
   beforeEach(() => {
     profileMock.mockReset();
+    conversationsMock.mockReset();
+    conversationsMock.mockResolvedValue({
+      conversations: [],
+      total: 0,
+      statusCounts: {
+        all: 0,
+        pending: 0,
+        in_progress: 0,
+        completed: 0,
+      },
+    });
   });
 
   it('renders the Home page with the About section at /', () => {
@@ -35,19 +48,14 @@ describe('AppRoutes', () => {
     ).toBeInTheDocument();
   });
 
-  it('opens the attendance demo without requiring an authenticated profile', () => {
+  it('does not expose the retired attendance demo as a public route', () => {
     render(
       <MemoryRouter initialEntries={['/demo/atendimento']}>
         <AppRoutes />
       </MemoryRouter>,
     );
 
-    expect(
-      screen.getByRole('heading', { name: 'Central de atendimento' }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(/clientes e as mensagens são fictícios/i),
-    ).toBeInTheDocument();
+    expect(screen.queryByTestId('attendance-workspace')).not.toBeInTheDocument();
     expect(profileMock).not.toHaveBeenCalled();
   });
 
@@ -217,8 +225,8 @@ describe('AppRoutes', () => {
     );
 
     expect(
-      await screen.findByRole('heading', { name: 'Conversas' }),
-    ).toBeInTheDocument();
+      (await screen.findAllByRole('heading', { name: 'Conversas' })).length,
+    ).toBeGreaterThan(0);
     expect(screen.getByRole('button', { name: 'Abrir navegação' })).toHaveAttribute(
       'aria-controls',
       'company-dashboard-mobile-navigation',

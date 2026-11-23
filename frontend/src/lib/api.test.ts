@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { Empresa, Plan } from './api';
+import type { ConversationMessage, ConversationSummary, Empresa, Plan } from './api';
 
 const company: Empresa = {
   id: 'empresa-1',
@@ -29,6 +29,27 @@ const plan: Plan = {
   isFeatured: false,
   isActive: true,
   displayOrder: 1,
+};
+const conversationMessage: ConversationMessage = {
+  id: 'message-1',
+  sender: 'customer',
+  text: 'Preciso de ajuda.',
+  createdAt: '2026-11-23T12:00:00.000Z',
+};
+const conversation: ConversationSummary = {
+  id: 'conversation-1',
+  customer: {
+    name: 'João Pedroso',
+    phone: '(11) 99999-0000',
+    location: 'São Paulo, SP',
+  },
+  company: { name: 'Lume Interiores' },
+  status: 'pending',
+  assignee: { type: 'bot' },
+  attention: false,
+  unreadCount: 1,
+  updatedAt: '2026-11-23T12:00:00.000Z',
+  lastMessage: conversationMessage,
 };
 const fetchMock = vi.fn<typeof fetch>();
 
@@ -264,5 +285,93 @@ describe('Contratos dos consumidores de API', () => {
     await expect(login(input)).rejects.toThrow('resposta inválida');
     fetchMock.mockRejectedValueOnce(new TypeError('Falha de rede'));
     await expect(login(input)).rejects.toThrow('Não foi possível conectar');
+  });
+
+  it('Lista conversas autorizadas com filtros e contagens do contrato proposto', async () => {
+    respond({
+      data: [conversation],
+      meta: {
+        total: 1,
+        statusCounts: {
+          all: 4,
+          pending: 1,
+          in_progress: 2,
+          completed: 1,
+        },
+      },
+    });
+    const api = await import('./api');
+
+    const result = await api.listConversations({
+      status: 'pending',
+      query: 'João & Cia',
+    });
+    const requestUrl = new URL(String(fetchMock.mock.calls[0][0]));
+
+    expect(requestUrl.pathname).toBe('/api/v1/company/conversations');
+    expect(requestUrl.searchParams.get('status')).toBe('pending');
+    expect(requestUrl.searchParams.get('q')).toBe('João & Cia');
+    expect(result).toEqual({
+      conversations: [conversation],
+      total: 1,
+      statusCounts: {
+        all: 4,
+        pending: 1,
+        in_progress: 2,
+        completed: 1,
+      },
+    });
+  });
+
+  it('Lê detalhes e mensagens e envia ações pelos métodos acordados para o frontend', async () => {
+    const api = await import('./api');
+    respond({ data: conversation });
+    respond({ data: [conversationMessage] });
+    respond({ data: conversationMessage });
+    respond({ data: conversation });
+    respond({ data: { ...conversation, status: 'completed' } });
+
+    await api.getConversation(conversation.id);
+    await api.getConversationMessages(conversation.id);
+    await api.sendConversationMessage(conversation.id, 'Vou ajudar você.');
+    await api.updateConversationAssignment(conversation.id, 'assume');
+    await api.updateConversationStatus(conversation.id, 'completed');
+
+    expect(fetchMock.mock.calls[0][0]).toBe(
+      'https://backend.example.test/api/v1/company/conversations/conversation-1',
+    );
+    expect(fetchMock.mock.calls[1][0]).toBe(
+      'https://backend.example.test/api/v1/company/conversations/conversation-1/messages',
+    );
+    expect(fetchMock.mock.calls[2][1]?.method).toBe('POST');
+    expect(JSON.parse(String(fetchMock.mock.calls[2][1]?.body))).toEqual({
+      text: 'Vou ajudar você.',
+    });
+    expect(fetchMock.mock.calls[3][1]?.method).toBe('POST');
+    expect(JSON.parse(String(fetchMock.mock.calls[3][1]?.body))).toEqual({
+      action: 'assume',
+    });
+    expect(fetchMock.mock.calls[4][1]?.method).toBe('PATCH');
+    expect(JSON.parse(String(fetchMock.mock.calls[4][1]?.body))).toEqual({
+      status: 'completed',
+    });
+  });
+
+  it('Rejeita DTO de conversa inválido em vez de renderizar dados incompletos', async () => {
+    respond({
+      data: [{ ...conversation, status: 'unknown' }],
+      meta: {
+        total: 1,
+        statusCounts: {
+          all: 1,
+          pending: 0,
+          in_progress: 0,
+          completed: 0,
+        },
+      },
+    });
+    const { listConversations } = await import('./api');
+
+    await expect(listConversations()).rejects.toThrow('conversa inválida');
   });
 });

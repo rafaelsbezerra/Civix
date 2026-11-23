@@ -991,6 +991,274 @@ export async function getPlatformOverviewSales(): Promise<OverviewSalesMetrics> 
   };
 }
 
+export type ConversationStatus = 'pending' | 'in_progress' | 'completed';
+export type ConversationMessageSender = 'customer' | 'bot' | 'agent' | 'system';
+export type ConversationAssignmentAction = 'assume' | 'return_to_bot';
+
+export interface ConversationAssignee {
+  type: 'bot' | 'none' | 'agent';
+  id?: string;
+  name?: string;
+}
+
+export interface ConversationMessage {
+  id: string;
+  sender: ConversationMessageSender;
+  text: string;
+  createdAt: string;
+}
+
+export interface ConversationSummary {
+  id: string;
+  customer: {
+    name: string;
+    phone: string | null;
+    location: string | null;
+  };
+  company: {
+    name: string;
+  };
+  status: ConversationStatus;
+  assignee: ConversationAssignee;
+  attention: boolean;
+  unreadCount: number;
+  updatedAt: string;
+  lastMessage: ConversationMessage | null;
+}
+
+export interface ConversationDetail extends ConversationSummary {
+  messages: ConversationMessage[];
+}
+
+export interface ConversationStatusCounts {
+  all: number;
+  pending: number;
+  in_progress: number;
+  completed: number;
+}
+
+export interface ConversationListResult {
+  conversations: ConversationSummary[];
+  total: number;
+  statusCounts: ConversationStatusCounts;
+}
+
+export interface ConversationListFilters {
+  status?: ConversationStatus | 'all';
+  query?: string;
+  signal?: AbortSignal;
+}
+
+function isConversationStatus(value: unknown): value is ConversationStatus {
+  return value === 'pending' || value === 'in_progress' || value === 'completed';
+}
+
+function isConversationMessageSender(
+  value: unknown,
+): value is ConversationMessageSender {
+  return (
+    value === 'customer' || value === 'bot' || value === 'agent' || value === 'system'
+  );
+}
+
+function isConversationAssigneeType(
+  value: unknown,
+): value is ConversationAssignee['type'] {
+  return value === 'bot' || value === 'none' || value === 'agent';
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function isNonNegativeInteger(value: unknown): value is number {
+  return typeof value === 'number' && Number.isInteger(value) && value >= 0;
+}
+
+function requireStatusCount(
+  statusCounts: Record<string, unknown>,
+  status: keyof ConversationStatusCounts,
+): number {
+  const count = statusCounts[status];
+  if (!isNonNegativeInteger(count)) {
+    throw new ApiError('A API retornou contagens de conversas inválidas.');
+  }
+  return count;
+}
+
+function requireConversationMessage(value: unknown): ConversationMessage {
+  if (
+    !isRecord(value) ||
+    typeof value.id !== 'string' ||
+    typeof value.text !== 'string' ||
+    typeof value.createdAt !== 'string' ||
+    !Number.isFinite(Date.parse(value.createdAt)) ||
+    !isConversationMessageSender(value.sender)
+  ) {
+    throw new ApiError('A API retornou uma mensagem inválida.');
+  }
+
+  return {
+    id: value.id,
+    sender: value.sender,
+    text: value.text,
+    createdAt: value.createdAt,
+  };
+}
+
+function requireConversationSummary(value: unknown): ConversationSummary {
+  if (
+    !isRecord(value) ||
+    typeof value.id !== 'string' ||
+    !isRecord(value.customer) ||
+    typeof value.customer.name !== 'string' ||
+    (value.customer.phone !== null && typeof value.customer.phone !== 'string') ||
+    (value.customer.location !== null && typeof value.customer.location !== 'string') ||
+    !isRecord(value.company) ||
+    typeof value.company.name !== 'string' ||
+    !isConversationStatus(value.status) ||
+    !isRecord(value.assignee) ||
+    !isConversationAssigneeType(value.assignee.type) ||
+    (value.assignee.type === 'agent' &&
+      (typeof value.assignee.id !== 'string' ||
+        typeof value.assignee.name !== 'string')) ||
+    typeof value.attention !== 'boolean' ||
+    typeof value.unreadCount !== 'number' ||
+    !Number.isInteger(value.unreadCount) ||
+    value.unreadCount < 0 ||
+    typeof value.updatedAt !== 'string' ||
+    !Number.isFinite(Date.parse(value.updatedAt)) ||
+    (value.lastMessage !== null && !isRecord(value.lastMessage))
+  ) {
+    throw new ApiError('A API retornou uma conversa inválida.');
+  }
+
+  return {
+    id: value.id,
+    customer: {
+      name: value.customer.name,
+      phone: value.customer.phone,
+      location: value.customer.location,
+    },
+    company: {
+      name: value.company.name,
+    },
+    status: value.status,
+    assignee: {
+      type: value.assignee.type,
+      ...(typeof value.assignee.id === 'string' ? { id: value.assignee.id } : {}),
+      ...(typeof value.assignee.name === 'string' ? { name: value.assignee.name } : {}),
+    },
+    attention: value.attention,
+    unreadCount: value.unreadCount,
+    updatedAt: value.updatedAt,
+    lastMessage:
+      value.lastMessage === null ? null : requireConversationMessage(value.lastMessage),
+  };
+}
+
+export async function listConversations({
+  status,
+  query,
+  signal,
+}: ConversationListFilters = {}): Promise<ConversationListResult> {
+  const params = new URLSearchParams();
+  if (status && status !== 'all') {
+    params.set('status', status);
+  }
+  if (query?.trim()) {
+    params.set('q', query.trim());
+  }
+
+  const suffix = params.size > 0 ? `?${params.toString()}` : '';
+  const response = await fetchApi<unknown>(`/api/v1/company/conversations${suffix}`, {
+    ...authenticatedOptions(),
+    signal,
+  });
+  const statusCounts = response.meta?.statusCounts;
+
+  if (
+    !Array.isArray(response.data) ||
+    !isRecord(response.meta) ||
+    !isNonNegativeInteger(response.meta.total) ||
+    !isRecord(statusCounts) ||
+    !['all', 'pending', 'in_progress', 'completed'].every((key) =>
+      isNonNegativeInteger(statusCounts[key]),
+    )
+  ) {
+    throw new ApiError('A API retornou uma lista de conversas inválida.');
+  }
+
+  return {
+    conversations: response.data.map(requireConversationSummary),
+    total: response.meta.total,
+    statusCounts: {
+      all: requireStatusCount(statusCounts, 'all'),
+      pending: requireStatusCount(statusCounts, 'pending'),
+      in_progress: requireStatusCount(statusCounts, 'in_progress'),
+      completed: requireStatusCount(statusCounts, 'completed'),
+    },
+  };
+}
+
+export async function getConversation(
+  conversationId: string,
+  signal?: AbortSignal,
+): Promise<ConversationSummary> {
+  const response = await fetchApi<unknown>(
+    `/api/v1/company/conversations/${encodeURIComponent(conversationId)}`,
+    { ...authenticatedOptions(), signal },
+  );
+  return requireConversationSummary(response.data);
+}
+
+export async function getConversationMessages(
+  conversationId: string,
+  signal?: AbortSignal,
+): Promise<ConversationMessage[]> {
+  const response = await fetchApi<unknown>(
+    `/api/v1/company/conversations/${encodeURIComponent(conversationId)}/messages`,
+    { ...authenticatedOptions(), signal },
+  );
+  if (!Array.isArray(response.data)) {
+    throw new ApiError('A API retornou um histórico de mensagens inválido.');
+  }
+  return response.data.map(requireConversationMessage);
+}
+
+export async function sendConversationMessage(
+  conversationId: string,
+  text: string,
+): Promise<ConversationMessage> {
+  const response = await fetchApi<unknown>(
+    `/api/v1/company/conversations/${encodeURIComponent(conversationId)}/messages`,
+    authenticatedOptions('POST', { text }),
+  );
+  return requireConversationMessage(response.data);
+}
+
+export async function updateConversationAssignment(
+  conversationId: string,
+  action: ConversationAssignmentAction,
+): Promise<ConversationSummary> {
+  const response = await fetchApi<unknown>(
+    `/api/v1/company/conversations/${encodeURIComponent(conversationId)}/assignment`,
+    authenticatedOptions('POST', { action }),
+  );
+  return requireConversationSummary(response.data);
+}
+
+export async function updateConversationStatus(
+  conversationId: string,
+  status: Extract<ConversationStatus, 'pending' | 'completed'>,
+): Promise<ConversationSummary> {
+  const response = await fetchApi<unknown>(
+    `/api/v1/company/conversations/${encodeURIComponent(conversationId)}`,
+    authenticatedOptions('PATCH', { status }),
+  );
+  return requireConversationSummary(response.data);
+}
+
 export async function getPlatformOverviewCompanies(): Promise<OverviewCompaniesMetrics> {
   const firstPage = await getPlatformCompanies({ page: 1, limit: 100 });
   const allCompanies = [...firstPage.data];

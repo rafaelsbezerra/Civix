@@ -1,8 +1,8 @@
 # Atendimentos atribuídos e mensagens
 
-**Estado:** shell visual e entrada de login separados implementados; a tela de
-conversas está em implementação frontend. Backend, histórico e perfil continuam
-não implementados.
+**Estado:** shell visual, entrada de login e interface/cliente HTTP de conversas
+implementados no frontend conforme contrato esperado abaixo. Backend, histórico
+e perfil continuam não implementados; a integração E2E depende do backend.
 **Ordem:** 07. Tarefas novas permanecem abertas.
 
 ## Baseline observada
@@ -28,7 +28,8 @@ Fontes: [rotas](../../../src/routes/AppRoute.tsx), [API](../../../src/lib/api.ts
 - Atendente vê somente conversas atribuídas a ele em sua única empresa.
 - Dono/atendente têm vínculo único; a API continua sendo autoridade.
 - Superadmin nunca acessa conversas, detalhes ou mensagens.
-- Não inventar canal, realtime, estados ou regra de envio/transferência.
+- Não introduzir canal ou realtime nesta tela. Estados e ações usados pelo
+  frontend derivam da demo e continuam provisórios até o alinhamento do backend.
 - Não planejar chat/impersonação de atendimento para superadmin.
 
 ## Contrato frontend/backend
@@ -53,7 +54,9 @@ contrato já implantado. A base de rotas é a proposta acima:
 
 - `GET /api/v1/company/conversations?status=&q=` lista apenas conversas
   autorizadas para a sessão e retorna `data: ConversationSummary[]` e
-  `meta: { total, statusCounts }`.
+  `meta: { total, statusCounts }`. `total` conta os resultados dos filtros
+  atuais; `statusCounts` conta os status para a mesma busca, sem restringir o
+  status selecionado.
 - `GET /api/v1/company/conversations/:id` retorna os dados da conversa.
 - `GET /api/v1/company/conversations/:id/messages` retorna as mensagens
   persistidas em ordem cronológica.
@@ -100,10 +103,21 @@ Não acessar produção; dados/e-mails de teste são isolados.
 
 - [x] FE-07-00: Criar entrada de login e shell protegido do atendente, com
   estados explícitos para telas sem contrato ou integração.
-- [ ] FE-07-01: Implementar lista/detalhe/mensagens conforme autorização backend.
-- [ ] FE-07-02: Implementar loading/erro/atualização sem conteúdo fictício.
-- [ ] FE-07-03: Implementar ações após aprovação de atribuição/transferência.
+- [x] FE-07-01: Implementar lista/detalhe/mensagens na rota autenticada
+  `/dashboard-atendente/conversas`, sem dados fictícios e conforme contrato
+  esperado pelo frontend; validar autorização ainda depende do backend.
+- [x] FE-07-02: Implementar loading/erro/atualização sem conteúdo fictício.
+- [x] FE-07-03: Integrar no frontend assumir, devolver ao bot, finalizar e
+  reabrir conforme contrato esperado; a autorização final depende do backend.
 - [ ] FE-07-04: Testar E2E entre empresas/atendentes, negando conversas ao superadmin.
+
+Atualização de 2026-11-23: a rota pública `/demo/atendimento` e seus dados
+fictícios foram removidos. A nova tela usa o shell protegido do atendente e
+consome o contrato de frontend descrito acima. O contrato permanece pendente de
+implementação/alinhamento pelo backend; esta entrega não comprova persistência,
+integração real com o bot, autorização por tenant ou envio de mensagens. Não foi
+adotado polling nem WebSocket; atualização em tempo real continua **Aguardando
+resposta**.
 
 Verificação do shell e entrada local: login com perfil `atendente` abriu
 `/dashboard-atendente` após confirmação de `/api/v1/users/profile`; a
@@ -112,6 +126,12 @@ login/layout e rotas, ESLint e TypeScript passaram. O usuário local de
 demonstração fica em `backend/.local-data/data.json` (ignorado pelo Git);
 isso valida somente o shell, não os fluxos E2E de conversas ou persistência
 de atendimentos.
+
+Verificação frontend em 2026-11-23: 7 testes da tela de conversas, 3 testes do
+cliente HTTP de conversas e 3 testes direcionados de rotas passaram. Build de
+produção, TypeScript, lint direcionado e formatação dos arquivos alterados
+passaram. Não foi possível validar comunicação ou autorização real porque o
+backend ainda não implementa os endpoints.
 
 ## Aceite
 
@@ -130,4 +150,5 @@ assumidos para atendente ativo da mesma empresa; dono lê/responde conversas
 da própria empresa; super_admin não acessa conversas. Ver DASH-D13/D14 em
 [decisions.md](../../../../backend/.specs/roadmaps/dashboards/decisions.md).
 
-Não houve implementação ou execução de teste ao criar esta spec.
+Registro de origem: a criação inicial desta spec não implementou código nem
+executou testes.
