@@ -1,45 +1,118 @@
-//Interceptadores (Autenticação, validação, logs)
+import type { Request, Response, NextFunction } from 'express';
+import jwt from 'jsonwebtoken';
+import type { AuthenticatedUser, AuthenticatedRole } from '../entities/user.entity.js';
+import { AppError } from '../shared/errors/app.error.js';
+import { ErrorCode } from '../shared/errors/error.code.js';
+import { getAuthenticatedUser } from '../services/user.service.js';
+import { SESSION_COOKIE, sessionCookieOptions } from '../config/cookies.js';
 
-import { Request, Response, NextFunction } from 'express';
-import jwt, { JwtPayload } from 'jsonwebtoken';
-
-// Interface para estender o Request do Express permitindo a propriedade userId
-interface AuthenticatedRequest extends Request {
-  userId?: string | number;
+declare global {
+  namespace Express {
+    interface Request {
+      userId?: string | number;
+      userRole?: AuthenticatedRole;
+      userCompanyId?: string | null;
+      authenticatedUser?: AuthenticatedUser;
+    }
+  }
 }
 
-const authMiddleware = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-
-  //Busca o token no cabeçalho da requisição
-  const token = req.headers['authorization'];
-
-  if (!token) {
-    return res.status(401).json({ error: 'Token não fornecido' });
+function extractToken(req: Request): string | undefined {
+  const fromCookie = req.cookies?.[SESSION_COOKIE];
+  if (typeof fromCookie === 'string' && fromCookie) {
+    return fromCookie;
   }
 
-  //Verifica se o token está no formato correto (Bearer <token>)
-  const tokenParts = token.split(' ');
-  if (tokenParts.length !== 2 || tokenParts[0] !== 'Bearer') {
-    return res.status(401).json({ error: 'Token inválido' });
+  const parts = req.headers.authorization?.split(' ');
+  if (parts && parts.length === 2 && /^Bearer$/i.test(parts[0]) && parts[1]) {
+    return parts[1];
   }
 
-  const [scheme, tokenValue] = tokenParts;
+  return undefined;
+}
 
-  //Verifica se o esquema é "Bearer"
-  if (!/^Bearer$/i.test(scheme)) {
-    return res.status(401).json({ error: 'Token mal formatado' });
-  }
-
+export default async function authMiddleware(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
   try {
+    const token = extractToken(req);
+    if (!token) {
+      throw new AppError({
+        status: 401,
+        code: ErrorCode.UNAUTHORIZED,
+        message: 'Token ausente ou mal formatado.',
+      });
+    }
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+      throw new AppError({
+        status: 500,
+        code: ErrorCode.INTERNAL_ERROR,
+        message: 'Erro interno do servidor',
+      });
+    }
+    let decoded;
+    try {
+      decoded = jwt.verify(token, secret);
+      if (
+        typeof decoded !== 'object' ||
+        decoded.tokenVersion !== 2 ||
+        (typeof decoded.id !== 'string' && typeof decoded.id !== 'number') ||
+        typeof decoded.email !== 'string' ||
+        typeof decoded.role !== 'string' ||
+        !Object.hasOwn(decoded, 'companyId')
+      ) {
+        throw new Error('Claims de acesso inválidos ou legados.');
+      }
+    } catch (cause) {
+      // console.log('AUTH DEBUG', {
+      //   cookie: req.cookies?.[SESSION_COOKIE]?.slice(0, 25),
+      //   header: req.headers.authorization?.slice(0, 40),
+      //   usado: token.slice(0, 25),
+      //   partes: token.split('.').length,
+      // });
 
-    //Verifica se o token é válido e decodifica o payload
-    const decoded = jwt.verify(tokenValue, process.env.JWT_SECRET as string) as JwtPayload;
-    req.userId = decoded.id;
+      const { maxAge: _maxAge, ...clearOptions } = sessionCookieOptions;
+      res.clearCookie(SESSION_COOKIE, clearOptions);
+      throw new AppError({
+        status: 401,
+        code: ErrorCode.UNAUTHORIZED,
+        message: 'Token inválido ou expirado. Faça login novamente.',
+        cause,
+      });
+    }
+    const user = await getAuthenticatedUser(decoded.id);
+    if (
+      user.tokens_revoked_at &&
+      (typeof decoded.issuedAt !== 'string' ||
+        !Number.isFinite(Date.parse(decoded.issuedAt)) ||
+        Date.parse(decoded.issuedAt) <= new Date(user.tokens_revoked_at).getTime())
+    ) {
+      throw new AppError({
+        status: 401,
+        code: ErrorCode.UNAUTHORIZED,
+        message: 'Sessão revogada. Faça login novamente.',
+      });
+    }
+    if (
+      user.role !== decoded.role ||
+      user.company_id !== decoded.companyId ||
+      user.email.toLowerCase() !== decoded.email.toLowerCase()
+    ) {
+      throw new AppError({
+        status: 401,
+        code: ErrorCode.UNAUTHORIZED,
+        message: 'Acesso alterado. Faça login novamente.',
+      });
+    }
+    req.userId = user.id;
+    req.userRole = user.role;
+    req.userCompanyId = user.company_id;
+    req.authenticatedUser = user;
     next();
-
-  } catch {
-    return res.status(401).json({ error: 'Token inválido ou expirado.' });
+  } catch (error) {
+    next(error);
   }
-};
-
-export default authMiddleware;
+}

@@ -1,0 +1,4494 @@
+{
+  "info": {
+    "_postman_id": "7bb505dd-c38a-4a8e-a92e-8bbba8f6e34e",
+    "name": "Civix API",
+    "description": "Todos os endpoints efetivamente montados no backend Civix, com fluxos e validações reutilizáveis.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string",
+      "description": "Origem do backend, sem barra final."
+    },
+    {
+      "key": "confirmedWriteBaseUrl",
+      "value": "",
+      "type": "string",
+      "description": "Repita exatamente baseUrl para confirmar mutações neste ambiente."
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string",
+      "description": "JWT opcional. O fluxo padrão usa o cookie sessao."
+    },
+    {
+      "key": "allowWrites",
+      "value": "false",
+      "type": "string",
+      "description": "Defina true para permitir operações que criam ou alteram dados."
+    },
+    {
+      "key": "allowDestructive",
+      "value": "false",
+      "type": "string",
+      "description": "Defina true, junto de allowWrites, para suspender, arquivar ou excluir."
+    },
+    {
+      "key": "allowAdministrativeWrites",
+      "value": "false",
+      "type": "string",
+      "description": "Permite alterações administrativas depois da confirmação do ambiente."
+    },
+    {
+      "key": "allowEmails",
+      "value": "false",
+      "type": "string",
+      "description": "Permite fluxos que podem enviar e-mails."
+    },
+    {
+      "key": "allowIdentityWrites",
+      "value": "false",
+      "type": "string",
+      "description": "Permite redefinição e definição de senha."
+    },
+    {
+      "key": "allowStorage",
+      "value": "false",
+      "type": "string",
+      "description": "Permite gravar arquivos no storage configurado."
+    },
+    {
+      "key": "allowProfileUpdate",
+      "value": "false",
+      "type": "string",
+      "description": "Permite alterar o próprio perfil e invalidar a sessão."
+    },
+    {
+      "key": "allowRoleSwitch",
+      "value": "false",
+      "type": "string",
+      "description": "Permite substituir a sessão ativa por outro papel."
+    },
+    {
+      "key": "superAdminEmail",
+      "value": "",
+      "type": "string",
+      "description": "E-mail do superadmin usado no login."
+    },
+    {
+      "key": "superAdminPassword",
+      "value": "",
+      "type": "string",
+      "description": "Senha do superadmin usado no login."
+    },
+    {
+      "key": "companyAdminEmail",
+      "value": "",
+      "type": "string",
+      "description": "E-mail de um admin_empresa."
+    },
+    {
+      "key": "companyAdminPassword",
+      "value": "",
+      "type": "string",
+      "description": "Senha de um admin_empresa."
+    },
+    {
+      "key": "attendantEmail",
+      "value": "",
+      "type": "string",
+      "description": "E-mail de um atendente."
+    },
+    {
+      "key": "attendantPassword",
+      "value": "",
+      "type": "string",
+      "description": "Senha de um atendente."
+    },
+    {
+      "key": "newPassword",
+      "value": "",
+      "type": "string",
+      "description": "Nova senha com no mínimo 8 caracteres."
+    },
+    {
+      "key": "resetToken",
+      "value": "",
+      "type": "string",
+      "description": "Token recebido pelo fluxo de recuperação."
+    },
+    {
+      "key": "inviteToken",
+      "value": "",
+      "type": "string",
+      "description": "Token recebido pelo convite."
+    },
+    {
+      "key": "inviteEmail",
+      "value": "",
+      "type": "string",
+      "description": "E-mail usado no reenvio de convite."
+    },
+    {
+      "key": "passwordRecoveryEmail",
+      "value": "",
+      "type": "string",
+      "description": "E-mail usado na recuperação de senha."
+    },
+    {
+      "key": "profileName",
+      "value": "",
+      "type": "string",
+      "description": "Nome usado na edição do próprio perfil."
+    },
+    {
+      "key": "profileEmail",
+      "value": "",
+      "type": "string",
+      "description": "E-mail usado na edição do próprio perfil."
+    },
+    {
+      "key": "companyId",
+      "value": "",
+      "type": "string",
+      "description": "UUID capturado das respostas de empresa."
+    },
+    {
+      "key": "companyUserId",
+      "value": "",
+      "type": "string",
+      "description": "ID capturado do usuário empresarial."
+    },
+    {
+      "key": "administratorId",
+      "value": "",
+      "type": "string",
+      "description": "ID capturado de outro superadmin."
+    },
+    {
+      "key": "planId",
+      "value": "",
+      "type": "string",
+      "description": "ID capturado de um plano."
+    },
+    {
+      "key": "saleId",
+      "value": "",
+      "type": "string",
+      "description": "UUID capturado de uma venda manual."
+    },
+    {
+      "key": "initialSaleId",
+      "value": "",
+      "type": "string",
+      "description": "UUID capturado da venda de criação da empresa."
+    },
+    {
+      "key": "imageId",
+      "value": "",
+      "type": "string",
+      "description": "UUID capturado após upload de capa."
+    },
+    {
+      "key": "companyOperationId",
+      "value": "",
+      "type": "string",
+      "description": "UUID de idempotência do cadastro da empresa."
+    },
+    {
+      "key": "salePlanOperationId",
+      "value": "",
+      "type": "string",
+      "description": "UUID de idempotência da venda manual vinculada ao plano."
+    },
+    {
+      "key": "saleAmountOperationId",
+      "value": "",
+      "type": "string",
+      "description": "UUID de idempotência da venda manual com valor informado."
+    },
+    {
+      "key": "imageFilePath",
+      "value": "postman/fixtures/company-cover.png",
+      "type": "string",
+      "description": "Caminho de PNG, JPG ou WEBP de até 10 MB, relativo à raiz do repositório."
+    },
+    {
+      "key": "searchTerm",
+      "value": "Civix",
+      "type": "string",
+      "description": "Termo da busca pública."
+    },
+    {
+      "key": "category",
+      "value": "Serviços",
+      "type": "string",
+      "description": "Categoria usada nos filtros e cadastros."
+    },
+    {
+      "key": "state",
+      "value": "CE",
+      "type": "string",
+      "description": "Estado usado nos filtros e cadastros."
+    },
+    {
+      "key": "companySize",
+      "value": "pequena",
+      "type": "string",
+      "description": "pequena, media ou grande."
+    },
+    {
+      "key": "page",
+      "value": "1",
+      "type": "string",
+      "description": "Página administrativa."
+    },
+    {
+      "key": "limit",
+      "value": "20",
+      "type": "string",
+      "description": "Itens por página, máximo 100."
+    },
+    {
+      "key": "companyName",
+      "value": "",
+      "type": "string",
+      "description": "Gerado antes do cadastro quando vazio."
+    },
+    {
+      "key": "companyCnpj",
+      "value": "",
+      "type": "string",
+      "description": "Gerado antes do cadastro quando vazio."
+    },
+    {
+      "key": "companyEmail",
+      "value": "",
+      "type": "string",
+      "description": "Gerado antes do cadastro quando vazio."
+    },
+    {
+      "key": "planName",
+      "value": "",
+      "type": "string",
+      "description": "Gerado antes da criação quando vazio."
+    },
+    {
+      "key": "planSlug",
+      "value": "",
+      "type": "string",
+      "description": "Gerado antes da criação quando vazio."
+    },
+    {
+      "key": "managedUserName",
+      "value": "Atendente Postman",
+      "type": "string",
+      "description": "Nome usado no convite empresarial."
+    },
+    {
+      "key": "managedUserEmail",
+      "value": "",
+      "type": "string",
+      "description": "Gerado antes do convite quando vazio."
+    },
+    {
+      "key": "administratorName",
+      "value": "Superadmin Postman",
+      "type": "string",
+      "description": "Nome usado no convite de superadmin."
+    },
+    {
+      "key": "administratorEmail",
+      "value": "",
+      "type": "string",
+      "description": "Gerado antes do convite quando vazio."
+    },
+    {
+      "key": "deactivationReason",
+      "value": "Validação administrativa via Postman.",
+      "type": "string",
+      "description": "Motivo obrigatório das desativações e exclusões."
+    },
+    {
+      "key": "soldAt",
+      "value": "",
+      "type": "string",
+      "description": "Data UTC da venda; gerada quando vazia."
+    }
+  ],
+  "item": [
+    {
+      "name": "00 - Sistema",
+      "description": "Disponibilidade básica da API.",
+      "item": [
+        {
+          "name": "Health check",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "let body;",
+                  "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                  "pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": []
+            },
+            "description": "Confirma que o processo HTTP da API está respondendo.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        }
+      ],
+      "auth": {
+        "type": "noauth"
+      }
+    },
+    {
+      "name": "10 - Autenticação",
+      "description": "Sessão, recuperação de senha, convite e primeiro acesso.",
+      "item": [
+        {
+          "name": "session",
+          "description": "",
+          "item": [
+            {
+              "name": "Login superadmin",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const requiredFlags = [];",
+                      "const requiredVariables = [\"superAdminEmail\",\"superAdminPassword\"];",
+                      "const missingFlags = requiredFlags.filter((flag) => pm.environment.get(flag) !== 'true');",
+                      "const missingVariables = requiredVariables.filter((variable) => !String(pm.environment.get(variable) || '').trim());",
+                      "const environmentNotConfirmed = false;",
+                      "if (missingFlags.length || missingVariables.length || environmentNotConfirmed) {",
+                      "  const reasons = [];",
+                      "  if (missingFlags.length) reasons.push(`flags ausentes: ${missingFlags.join(', ')}`);",
+                      "  if (missingVariables.length) reasons.push(`variáveis ausentes: ${missingVariables.join(', ')}`);",
+                      "  if (environmentNotConfirmed) reasons.push('confirmedWriteBaseUrl deve ser igual a baseUrl');",
+                      "  console.warn(`Request ignorada: ${reasons.join('; ')}.`);",
+                      "  pm.execution.skipRequest();",
+                      "}",
+                      "pm.environment.unset('accessToken');"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "let body;",
+                      "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                      "pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));",
+                      "const sessionHeader = pm.response.headers.get('Set-Cookie') || '';",
+                      "pm.test('Cookie de sessão emitido', () => pm.expect(sessionHeader).to.include('sessao='));",
+                      "const token = body?.data?.token;",
+                      "if (typeof token === 'string' && token) pm.environment.set('accessToken', token);"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/users/login",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "users",
+                    "login"
+                  ]
+                },
+                "description": "Cria a sessão no cookie HttpOnly sessao. O JSON atual não devolve o JWT.",
+                "auth": {
+                  "type": "noauth"
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"{{superAdminEmail}}\",\n  \"password\": \"{{superAdminPassword}}\",\n  \"role\": \"super_admin\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "password",
+          "description": "",
+          "item": [
+            {
+              "name": "Solicitar recuperação de senha",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const requiredFlags = [\"allowWrites\",\"allowEmails\"];",
+                      "const requiredVariables = [\"passwordRecoveryEmail\"];",
+                      "const missingFlags = requiredFlags.filter((flag) => pm.environment.get(flag) !== 'true');",
+                      "const missingVariables = requiredVariables.filter((variable) => !String(pm.environment.get(variable) || '').trim());",
+                      "const baseUrl = (pm.environment.get('baseUrl') || '').replace(/[/]$/, '');",
+                      "const confirmedWriteBaseUrl = (pm.environment.get('confirmedWriteBaseUrl') || '').replace(/[/]$/, '');",
+                      "const environmentNotConfirmed = !baseUrl || confirmedWriteBaseUrl !== baseUrl;",
+                      "if (missingFlags.length || missingVariables.length || environmentNotConfirmed) {",
+                      "  const reasons = [];",
+                      "  if (missingFlags.length) reasons.push(`flags ausentes: ${missingFlags.join(', ')}`);",
+                      "  if (missingVariables.length) reasons.push(`variáveis ausentes: ${missingVariables.join(', ')}`);",
+                      "  if (environmentNotConfirmed) reasons.push('confirmedWriteBaseUrl deve ser igual a baseUrl');",
+                      "  console.warn(`Request ignorada: ${reasons.join('; ')}.`);",
+                      "  pm.execution.skipRequest();",
+                      "}"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "let body;",
+                      "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                      "pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/users/forgot-password",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "users",
+                    "forgot-password"
+                  ]
+                },
+                "description": "Resposta neutra; pode disparar e-mail se o usuário existir.",
+                "auth": {
+                  "type": "noauth"
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"{{passwordRecoveryEmail}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Solicitar recuperação de senha - alias PT-BR",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const requiredFlags = [\"allowWrites\",\"allowEmails\"];",
+                      "const requiredVariables = [\"passwordRecoveryEmail\"];",
+                      "const missingFlags = requiredFlags.filter((flag) => pm.environment.get(flag) !== 'true');",
+                      "const missingVariables = requiredVariables.filter((variable) => !String(pm.environment.get(variable) || '').trim());",
+                      "const baseUrl = (pm.environment.get('baseUrl') || '').replace(/[/]$/, '');",
+                      "const confirmedWriteBaseUrl = (pm.environment.get('confirmedWriteBaseUrl') || '').replace(/[/]$/, '');",
+                      "const environmentNotConfirmed = !baseUrl || confirmedWriteBaseUrl !== baseUrl;",
+                      "if (missingFlags.length || missingVariables.length || environmentNotConfirmed) {",
+                      "  const reasons = [];",
+                      "  if (missingFlags.length) reasons.push(`flags ausentes: ${missingFlags.join(', ')}`);",
+                      "  if (missingVariables.length) reasons.push(`variáveis ausentes: ${missingVariables.join(', ')}`);",
+                      "  if (environmentNotConfirmed) reasons.push('confirmedWriteBaseUrl deve ser igual a baseUrl');",
+                      "  console.warn(`Request ignorada: ${reasons.join('; ')}.`);",
+                      "  pm.execution.skipRequest();",
+                      "}"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "let body;",
+                      "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                      "pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/users/esqueci-senha",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "users",
+                    "esqueci-senha"
+                  ]
+                },
+                "description": "Alias em português da recuperação de senha.",
+                "auth": {
+                  "type": "noauth"
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"{{passwordRecoveryEmail}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Redefinir senha",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const requiredFlags = [\"allowWrites\",\"allowIdentityWrites\"];",
+                      "const requiredVariables = [\"resetToken\",\"newPassword\"];",
+                      "const missingFlags = requiredFlags.filter((flag) => pm.environment.get(flag) !== 'true');",
+                      "const missingVariables = requiredVariables.filter((variable) => !String(pm.environment.get(variable) || '').trim());",
+                      "const baseUrl = (pm.environment.get('baseUrl') || '').replace(/[/]$/, '');",
+                      "const confirmedWriteBaseUrl = (pm.environment.get('confirmedWriteBaseUrl') || '').replace(/[/]$/, '');",
+                      "const environmentNotConfirmed = !baseUrl || confirmedWriteBaseUrl !== baseUrl;",
+                      "if (missingFlags.length || missingVariables.length || environmentNotConfirmed) {",
+                      "  const reasons = [];",
+                      "  if (missingFlags.length) reasons.push(`flags ausentes: ${missingFlags.join(', ')}`);",
+                      "  if (missingVariables.length) reasons.push(`variáveis ausentes: ${missingVariables.join(', ')}`);",
+                      "  if (environmentNotConfirmed) reasons.push('confirmedWriteBaseUrl deve ser igual a baseUrl');",
+                      "  console.warn(`Request ignorada: ${reasons.join('; ')}.`);",
+                      "  pm.execution.skipRequest();",
+                      "}"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "let body;",
+                      "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                      "pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/users/reset-password",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "users",
+                    "reset-password"
+                  ]
+                },
+                "description": "Consome o token recebido pelo canal de e-mail e invalida o token após o uso.",
+                "auth": {
+                  "type": "noauth"
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"token\": \"{{resetToken}}\",\n  \"password\": \"{{newPassword}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Redefinir senha - alias PT-BR",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const requiredFlags = [\"allowWrites\",\"allowIdentityWrites\"];",
+                      "const requiredVariables = [\"resetToken\",\"newPassword\"];",
+                      "const missingFlags = requiredFlags.filter((flag) => pm.environment.get(flag) !== 'true');",
+                      "const missingVariables = requiredVariables.filter((variable) => !String(pm.environment.get(variable) || '').trim());",
+                      "const baseUrl = (pm.environment.get('baseUrl') || '').replace(/[/]$/, '');",
+                      "const confirmedWriteBaseUrl = (pm.environment.get('confirmedWriteBaseUrl') || '').replace(/[/]$/, '');",
+                      "const environmentNotConfirmed = !baseUrl || confirmedWriteBaseUrl !== baseUrl;",
+                      "if (missingFlags.length || missingVariables.length || environmentNotConfirmed) {",
+                      "  const reasons = [];",
+                      "  if (missingFlags.length) reasons.push(`flags ausentes: ${missingFlags.join(', ')}`);",
+                      "  if (missingVariables.length) reasons.push(`variáveis ausentes: ${missingVariables.join(', ')}`);",
+                      "  if (environmentNotConfirmed) reasons.push('confirmedWriteBaseUrl deve ser igual a baseUrl');",
+                      "  console.warn(`Request ignorada: ${reasons.join('; ')}.`);",
+                      "  pm.execution.skipRequest();",
+                      "}"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "let body;",
+                      "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                      "pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/users/redefinir-senha",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "users",
+                    "redefinir-senha"
+                  ]
+                },
+                "description": "Alias em português da redefinição de senha.",
+                "auth": {
+                  "type": "noauth"
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"token\": \"{{resetToken}}\",\n  \"password\": \"{{newPassword}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "first access",
+          "description": "",
+          "item": [
+            {
+              "name": "Validar token de convite",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const requiredFlags = [];",
+                      "const requiredVariables = [\"inviteToken\"];",
+                      "const missingFlags = requiredFlags.filter((flag) => pm.environment.get(flag) !== 'true');",
+                      "const missingVariables = requiredVariables.filter((variable) => !String(pm.environment.get(variable) || '').trim());",
+                      "const environmentNotConfirmed = false;",
+                      "if (missingFlags.length || missingVariables.length || environmentNotConfirmed) {",
+                      "  const reasons = [];",
+                      "  if (missingFlags.length) reasons.push(`flags ausentes: ${missingFlags.join(', ')}`);",
+                      "  if (missingVariables.length) reasons.push(`variáveis ausentes: ${missingVariables.join(', ')}`);",
+                      "  if (environmentNotConfirmed) reasons.push('confirmedWriteBaseUrl deve ser igual a baseUrl');",
+                      "  console.warn(`Request ignorada: ${reasons.join('; ')}.`);",
+                      "  pm.execution.skipRequest();",
+                      "}"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "let body;",
+                      "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                      "pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/auth/auth/validate-token?token={{inviteToken}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "auth",
+                    "auth",
+                    "validate-token"
+                  ],
+                  "query": [
+                    {
+                      "key": "token",
+                      "value": "{{inviteToken}}"
+                    }
+                  ]
+                },
+                "description": "Usa o path realmente montado, com o prefixo auth duplicado no código atual.",
+                "auth": {
+                  "type": "noauth"
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Definir senha no primeiro acesso",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const requiredFlags = [\"allowWrites\",\"allowIdentityWrites\"];",
+                      "const requiredVariables = [\"inviteToken\",\"newPassword\"];",
+                      "const missingFlags = requiredFlags.filter((flag) => pm.environment.get(flag) !== 'true');",
+                      "const missingVariables = requiredVariables.filter((variable) => !String(pm.environment.get(variable) || '').trim());",
+                      "const baseUrl = (pm.environment.get('baseUrl') || '').replace(/[/]$/, '');",
+                      "const confirmedWriteBaseUrl = (pm.environment.get('confirmedWriteBaseUrl') || '').replace(/[/]$/, '');",
+                      "const environmentNotConfirmed = !baseUrl || confirmedWriteBaseUrl !== baseUrl;",
+                      "if (missingFlags.length || missingVariables.length || environmentNotConfirmed) {",
+                      "  const reasons = [];",
+                      "  if (missingFlags.length) reasons.push(`flags ausentes: ${missingFlags.join(', ')}`);",
+                      "  if (missingVariables.length) reasons.push(`variáveis ausentes: ${missingVariables.join(', ')}`);",
+                      "  if (environmentNotConfirmed) reasons.push('confirmedWriteBaseUrl deve ser igual a baseUrl');",
+                      "  console.warn(`Request ignorada: ${reasons.join('; ')}.`);",
+                      "  pm.execution.skipRequest();",
+                      "}"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "let body;",
+                      "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                      "pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/auth/auth/first-access",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "auth",
+                    "auth",
+                    "first-access"
+                  ]
+                },
+                "description": "Ativa uma conta convidada e define sua primeira senha.",
+                "auth": {
+                  "type": "noauth"
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"token\": \"{{inviteToken}}\",\n  \"password\": \"{{newPassword}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Reenviar convite",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const requiredFlags = [\"allowWrites\",\"allowEmails\"];",
+                      "const requiredVariables = [\"inviteEmail\"];",
+                      "const missingFlags = requiredFlags.filter((flag) => pm.environment.get(flag) !== 'true');",
+                      "const missingVariables = requiredVariables.filter((variable) => !String(pm.environment.get(variable) || '').trim());",
+                      "const baseUrl = (pm.environment.get('baseUrl') || '').replace(/[/]$/, '');",
+                      "const confirmedWriteBaseUrl = (pm.environment.get('confirmedWriteBaseUrl') || '').replace(/[/]$/, '');",
+                      "const environmentNotConfirmed = !baseUrl || confirmedWriteBaseUrl !== baseUrl;",
+                      "if (missingFlags.length || missingVariables.length || environmentNotConfirmed) {",
+                      "  const reasons = [];",
+                      "  if (missingFlags.length) reasons.push(`flags ausentes: ${missingFlags.join(', ')}`);",
+                      "  if (missingVariables.length) reasons.push(`variáveis ausentes: ${missingVariables.join(', ')}`);",
+                      "  if (environmentNotConfirmed) reasons.push('confirmedWriteBaseUrl deve ser igual a baseUrl');",
+                      "  console.warn(`Request ignorada: ${reasons.join('; ')}.`);",
+                      "  pm.execution.skipRequest();",
+                      "}"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "let body;",
+                      "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                      "pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/auth/auth/resend-invite-email",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "auth",
+                    "auth",
+                    "resend-invite-email"
+                  ]
+                },
+                "description": "Resposta neutra; pode disparar e-mail. Usa o path realmente montado.",
+                "auth": {
+                  "type": "noauth"
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"{{inviteEmail}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ],
+      "auth": {
+        "type": "noauth"
+      }
+    },
+    {
+      "name": "20 - Catálogo público",
+      "description": "Consultas públicas de planos e empresas.",
+      "item": [
+        {
+          "name": "plans",
+          "description": "",
+          "item": [
+            {
+              "name": "Listar planos ativos",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "let body;",
+                      "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                      "pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/plans",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "plans"
+                  ]
+                },
+                "description": "Lista os planos disponíveis no catálogo. Copie conscientemente o ID desejado para planId.",
+                "auth": {
+                  "type": "noauth"
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "companies",
+          "description": "",
+          "item": [
+            {
+              "name": "Listar empresas públicas",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "let body;",
+                      "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                      "pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/empresas",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "empresas"
+                  ]
+                },
+                "description": "Lista empresas disponíveis publicamente.",
+                "auth": {
+                  "type": "noauth"
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Listar empresas verificadas",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "let body;",
+                      "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                      "pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/empresas/verificadas/todas",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "empresas",
+                    "verificadas",
+                    "todas"
+                  ]
+                },
+                "description": "Lista somente empresas verificadas e publicamente disponíveis.",
+                "auth": {
+                  "type": "noauth"
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Buscar empresas",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "let body;",
+                      "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                      "pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/empresas/buscar?q={{searchTerm}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "empresas",
+                    "buscar"
+                  ],
+                  "query": [
+                    {
+                      "key": "q",
+                      "value": "{{searchTerm}}"
+                    }
+                  ]
+                },
+                "description": "Busca empresas pelo termo obrigatório q.",
+                "auth": {
+                  "type": "noauth"
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Filtrar empresas por categoria",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const requiredFlags = [];",
+                      "const requiredVariables = [\"category\"];",
+                      "const missingFlags = requiredFlags.filter((flag) => pm.environment.get(flag) !== 'true');",
+                      "const missingVariables = requiredVariables.filter((variable) => !String(pm.environment.get(variable) || '').trim());",
+                      "const environmentNotConfirmed = false;",
+                      "if (missingFlags.length || missingVariables.length || environmentNotConfirmed) {",
+                      "  const reasons = [];",
+                      "  if (missingFlags.length) reasons.push(`flags ausentes: ${missingFlags.join(', ')}`);",
+                      "  if (missingVariables.length) reasons.push(`variáveis ausentes: ${missingVariables.join(', ')}`);",
+                      "  if (environmentNotConfirmed) reasons.push('confirmedWriteBaseUrl deve ser igual a baseUrl');",
+                      "  console.warn(`Request ignorada: ${reasons.join('; ')}.`);",
+                      "  pm.execution.skipRequest();",
+                      "}"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "let body;",
+                      "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                      "pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/empresas/categoria/{{category}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "empresas",
+                    "categoria",
+                    "{{category}}"
+                  ]
+                },
+                "description": "Filtra empresas públicas por categoria.",
+                "auth": {
+                  "type": "noauth"
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Filtrar empresas por estado",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const requiredFlags = [];",
+                      "const requiredVariables = [\"state\"];",
+                      "const missingFlags = requiredFlags.filter((flag) => pm.environment.get(flag) !== 'true');",
+                      "const missingVariables = requiredVariables.filter((variable) => !String(pm.environment.get(variable) || '').trim());",
+                      "const environmentNotConfirmed = false;",
+                      "if (missingFlags.length || missingVariables.length || environmentNotConfirmed) {",
+                      "  const reasons = [];",
+                      "  if (missingFlags.length) reasons.push(`flags ausentes: ${missingFlags.join(', ')}`);",
+                      "  if (missingVariables.length) reasons.push(`variáveis ausentes: ${missingVariables.join(', ')}`);",
+                      "  if (environmentNotConfirmed) reasons.push('confirmedWriteBaseUrl deve ser igual a baseUrl');",
+                      "  console.warn(`Request ignorada: ${reasons.join('; ')}.`);",
+                      "  pm.execution.skipRequest();",
+                      "}"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "let body;",
+                      "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                      "pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/empresas/estado/{{state}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "empresas",
+                    "estado",
+                    "{{state}}"
+                  ]
+                },
+                "description": "Filtra empresas públicas por estado.",
+                "auth": {
+                  "type": "noauth"
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Filtrar empresas por tamanho",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const requiredFlags = [];",
+                      "const requiredVariables = [\"companySize\"];",
+                      "const missingFlags = requiredFlags.filter((flag) => pm.environment.get(flag) !== 'true');",
+                      "const missingVariables = requiredVariables.filter((variable) => !String(pm.environment.get(variable) || '').trim());",
+                      "const environmentNotConfirmed = false;",
+                      "if (missingFlags.length || missingVariables.length || environmentNotConfirmed) {",
+                      "  const reasons = [];",
+                      "  if (missingFlags.length) reasons.push(`flags ausentes: ${missingFlags.join(', ')}`);",
+                      "  if (missingVariables.length) reasons.push(`variáveis ausentes: ${missingVariables.join(', ')}`);",
+                      "  if (environmentNotConfirmed) reasons.push('confirmedWriteBaseUrl deve ser igual a baseUrl');",
+                      "  console.warn(`Request ignorada: ${reasons.join('; ')}.`);",
+                      "  pm.execution.skipRequest();",
+                      "}"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "let body;",
+                      "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                      "pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/empresas/tamanho/{{companySize}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "empresas",
+                    "tamanho",
+                    "{{companySize}}"
+                  ]
+                },
+                "description": "Aceita pequena, media ou grande.",
+                "auth": {
+                  "type": "noauth"
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Consultar empresa pública",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const requiredFlags = [];",
+                      "const requiredVariables = [\"companyId\"];",
+                      "const missingFlags = requiredFlags.filter((flag) => pm.environment.get(flag) !== 'true');",
+                      "const missingVariables = requiredVariables.filter((variable) => !String(pm.environment.get(variable) || '').trim());",
+                      "const environmentNotConfirmed = false;",
+                      "if (missingFlags.length || missingVariables.length || environmentNotConfirmed) {",
+                      "  const reasons = [];",
+                      "  if (missingFlags.length) reasons.push(`flags ausentes: ${missingFlags.join(', ')}`);",
+                      "  if (missingVariables.length) reasons.push(`variáveis ausentes: ${missingVariables.join(', ')}`);",
+                      "  if (environmentNotConfirmed) reasons.push('confirmedWriteBaseUrl deve ser igual a baseUrl');",
+                      "  console.warn(`Request ignorada: ${reasons.join('; ')}.`);",
+                      "  pm.execution.skipRequest();",
+                      "}"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "let body;",
+                      "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                      "pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/empresas/{{companyId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "empresas",
+                    "{{companyId}}"
+                  ]
+                },
+                "description": "Consulta uma empresa ativa e não arquivada.",
+                "auth": {
+                  "type": "noauth"
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ],
+      "auth": {
+        "type": "noauth"
+      }
+    },
+    {
+      "name": "30 - Conta autenticada",
+      "description": "Perfil, vínculo de plano e cadastro autenticado.",
+      "item": [
+        {
+          "name": "profile",
+          "description": "",
+          "item": [
+            {
+              "name": "Consultar perfil",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "let body;",
+                      "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                      "pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/users/profile",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "users",
+                    "profile"
+                  ]
+                },
+                "description": "Retorna o usuário autenticado e suas permissões atuais."
+              },
+              "response": []
+            },
+            {
+              "name": "Validar acesso autenticado",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "let body;",
+                      "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                      "pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/users/home",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "users",
+                    "home"
+                  ]
+                },
+                "description": "Retorna o ID e o papel reconhecidos pelo middleware de autenticação."
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "companies",
+          "description": "",
+          "item": [
+            {
+              "name": "Cadastrar empresa pelo prefixo empresas",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const requiredFlags = [\"allowWrites\",\"allowAdministrativeWrites\"];",
+                      "const requiredVariables = [\"planId\"];",
+                      "const missingFlags = requiredFlags.filter((flag) => pm.environment.get(flag) !== 'true');",
+                      "const missingVariables = requiredVariables.filter((variable) => !String(pm.environment.get(variable) || '').trim());",
+                      "const baseUrl = (pm.environment.get('baseUrl') || '').replace(/[/]$/, '');",
+                      "const confirmedWriteBaseUrl = (pm.environment.get('confirmedWriteBaseUrl') || '').replace(/[/]$/, '');",
+                      "const environmentNotConfirmed = !baseUrl || confirmedWriteBaseUrl !== baseUrl;",
+                      "if (missingFlags.length || missingVariables.length || environmentNotConfirmed) {",
+                      "  const reasons = [];",
+                      "  if (missingFlags.length) reasons.push(`flags ausentes: ${missingFlags.join(', ')}`);",
+                      "  if (missingVariables.length) reasons.push(`variáveis ausentes: ${missingVariables.join(', ')}`);",
+                      "  if (environmentNotConfirmed) reasons.push('confirmedWriteBaseUrl deve ser igual a baseUrl');",
+                      "  console.warn(`Request ignorada: ${reasons.join('; ')}.`);",
+                      "  pm.execution.skipRequest();",
+                      "}",
+                      "const suffix = Date.now().toString();",
+                      "if (!pm.environment.get('companyOperationId')) pm.environment.set('companyOperationId', pm.variables.replaceIn('{{$guid}}'));",
+                      "if (!pm.environment.get('companyName')) pm.environment.set('companyName', `Empresa Postman ${suffix}`);",
+                      "if (!pm.environment.get('companyCnpj')) pm.environment.set('companyCnpj', `postman-${suffix}`);",
+                      "if (!pm.environment.get('companyEmail')) pm.environment.set('companyEmail', `empresa-${suffix}@example.test`);"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                      "let body;",
+                      "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                      "pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));",
+                      "const companyIdValue = \"data.company.id\".split('.').reduce((value, key) => value?.[key], body);",
+                      "if (companyIdValue !== undefined && companyIdValue !== null && companyIdValue !== '') pm.environment.set(\"companyId\", String(companyIdValue));",
+                      "const initialSaleIdValue = \"data.sale.id\".split('.').reduce((value, key) => value?.[key], body);",
+                      "if (initialSaleIdValue !== undefined && initialSaleIdValue !== null && initialSaleIdValue !== '') pm.environment.set(\"initialSaleId\", String(initialSaleIdValue));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/empresas",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "empresas"
+                  ]
+                },
+                "description": "Apesar do prefixo público, exige superadmin e cria uma venda inicial.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nome\": \"{{companyName}}\",\n  \"cnpj\": \"{{companyCnpj}}\",\n  \"descricao\": \"Empresa criada pelo fluxo do Postman.\",\n  \"descricao_detalhada\": \"Cadastro de validação compartilhado pela equipe Civix.\",\n  \"categoria\": \"{{category}}\",\n  \"cidade\": \"Fortaleza\",\n  \"estado\": \"{{state}}\",\n  \"tamanho\": \"{{companySize}}\",\n  \"email\": \"{{companyEmail}}\",\n  \"endereco\": null,\n  \"telefone\": null,\n  \"website\": null,\n  \"whatsapp\": null,\n  \"logo\": null,\n  \"descritivo\": null,\n  \"tone\": \"blue\",\n  \"planId\": \"{{planId}}\",\n  \"operationId\": \"{{companyOperationId}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "40 - Storage",
+      "description": "Upload autenticado e visualização pública da capa.",
+      "item": [
+        {
+          "name": "Enviar capa da empresa",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const requiredFlags = [\"allowWrites\",\"allowStorage\"];",
+                  "const requiredVariables = [\"companyId\",\"imageFilePath\"];",
+                  "const missingFlags = requiredFlags.filter((flag) => pm.environment.get(flag) !== 'true');",
+                  "const missingVariables = requiredVariables.filter((variable) => !String(pm.environment.get(variable) || '').trim());",
+                  "const baseUrl = (pm.environment.get('baseUrl') || '').replace(/[/]$/, '');",
+                  "const confirmedWriteBaseUrl = (pm.environment.get('confirmedWriteBaseUrl') || '').replace(/[/]$/, '');",
+                  "const environmentNotConfirmed = !baseUrl || confirmedWriteBaseUrl !== baseUrl;",
+                  "if (missingFlags.length || missingVariables.length || environmentNotConfirmed) {",
+                  "  const reasons = [];",
+                  "  if (missingFlags.length) reasons.push(`flags ausentes: ${missingFlags.join(', ')}`);",
+                  "  if (missingVariables.length) reasons.push(`variáveis ausentes: ${missingVariables.join(', ')}`);",
+                  "  if (environmentNotConfirmed) reasons.push('confirmedWriteBaseUrl deve ser igual a baseUrl');",
+                  "  console.warn(`Request ignorada: ${reasons.join('; ')}.`);",
+                  "  pm.execution.skipRequest();",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "let body;",
+                  "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                  "pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));",
+                  "const imageIdValue = \"data.imageId\".split('.').reduce((value, key) => value?.[key], body);",
+                  "if (imageIdValue !== undefined && imageIdValue !== null && imageIdValue !== '') pm.environment.set(\"imageId\", String(imageIdValue));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/storage/images",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "storage",
+                "images"
+              ]
+            },
+            "description": "Aceita PNG, JPG ou WEBP real, com no máximo 10 MB.",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "{{imageFilePath}}",
+                  "contentType": "image/png"
+                },
+                {
+                  "key": "module",
+                  "type": "text",
+                  "value": "companies"
+                },
+                {
+                  "key": "resourceId",
+                  "type": "text",
+                  "value": "{{companyId}}"
+                },
+                {
+                  "key": "purpose",
+                  "type": "text",
+                  "value": "cover"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Gerar URL assinada da capa",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const requiredFlags = [];",
+                  "const requiredVariables = [\"imageId\"];",
+                  "const missingFlags = requiredFlags.filter((flag) => pm.environment.get(flag) !== 'true');",
+                  "const missingVariables = requiredVariables.filter((variable) => !String(pm.environment.get(variable) || '').trim());",
+                  "const environmentNotConfirmed = false;",
+                  "if (missingFlags.length || missingVariables.length || environmentNotConfirmed) {",
+                  "  const reasons = [];",
+                  "  if (missingFlags.length) reasons.push(`flags ausentes: ${missingFlags.join(', ')}`);",
+                  "  if (missingVariables.length) reasons.push(`variáveis ausentes: ${missingVariables.join(', ')}`);",
+                  "  if (environmentNotConfirmed) reasons.push('confirmedWriteBaseUrl deve ser igual a baseUrl');",
+                  "  console.warn(`Request ignorada: ${reasons.join('; ')}.`);",
+                  "  pm.execution.skipRequest();",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "let body;",
+                  "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                  "pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/storage/images/{{imageId}}/url",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "storage",
+                "images",
+                "{{imageId}}",
+                "url"
+              ]
+            },
+            "description": "Retorna uma URL pública válida por 300 segundos para a capa vigente.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "50 - Plataforma superadmin",
+      "description": "Administração de empresas, usuários, planos e vendas.",
+      "item": [
+        {
+          "name": "plans",
+          "description": "",
+          "item": [
+            {
+              "name": "Listar todos os planos administrativos",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "let body;",
+                      "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                      "pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/platform/plans",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "platform",
+                    "plans"
+                  ]
+                },
+                "description": "Lista planos ativos e inativos para o superadmin."
+              },
+              "response": []
+            },
+            {
+              "name": "Consultar plano administrativo",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const requiredFlags = [];",
+                      "const requiredVariables = [\"planId\"];",
+                      "const missingFlags = requiredFlags.filter((flag) => pm.environment.get(flag) !== 'true');",
+                      "const missingVariables = requiredVariables.filter((variable) => !String(pm.environment.get(variable) || '').trim());",
+                      "const environmentNotConfirmed = false;",
+                      "if (missingFlags.length || missingVariables.length || environmentNotConfirmed) {",
+                      "  const reasons = [];",
+                      "  if (missingFlags.length) reasons.push(`flags ausentes: ${missingFlags.join(', ')}`);",
+                      "  if (missingVariables.length) reasons.push(`variáveis ausentes: ${missingVariables.join(', ')}`);",
+                      "  if (environmentNotConfirmed) reasons.push('confirmedWriteBaseUrl deve ser igual a baseUrl');",
+                      "  console.warn(`Request ignorada: ${reasons.join('; ')}.`);",
+                      "  pm.execution.skipRequest();",
+                      "}"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "let body;",
+                      "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                      "pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/platform/plans/{{planId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "platform",
+                    "plans",
+                    "{{planId}}"
+                  ]
+                },
+                "description": "Consulta um plano pelo identificador."
+              },
+              "response": []
+            },
+            {
+              "name": "Criar plano",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const requiredFlags = [\"allowWrites\",\"allowAdministrativeWrites\"];",
+                      "const requiredVariables = [];",
+                      "const missingFlags = requiredFlags.filter((flag) => pm.environment.get(flag) !== 'true');",
+                      "const missingVariables = requiredVariables.filter((variable) => !String(pm.environment.get(variable) || '').trim());",
+                      "const baseUrl = (pm.environment.get('baseUrl') || '').replace(/[/]$/, '');",
+                      "const confirmedWriteBaseUrl = (pm.environment.get('confirmedWriteBaseUrl') || '').replace(/[/]$/, '');",
+                      "const environmentNotConfirmed = !baseUrl || confirmedWriteBaseUrl !== baseUrl;",
+                      "if (missingFlags.length || missingVariables.length || environmentNotConfirmed) {",
+                      "  const reasons = [];",
+                      "  if (missingFlags.length) reasons.push(`flags ausentes: ${missingFlags.join(', ')}`);",
+                      "  if (missingVariables.length) reasons.push(`variáveis ausentes: ${missingVariables.join(', ')}`);",
+                      "  if (environmentNotConfirmed) reasons.push('confirmedWriteBaseUrl deve ser igual a baseUrl');",
+                      "  console.warn(`Request ignorada: ${reasons.join('; ')}.`);",
+                      "  pm.execution.skipRequest();",
+                      "}",
+                      "const suffix = Date.now().toString();",
+                      "if (!pm.environment.get('planName')) pm.environment.set('planName', `Plano Postman ${suffix}`);",
+                      "if (!pm.environment.get('planSlug')) pm.environment.set('planSlug', `plano-postman-${suffix}`);"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                      "let body;",
+                      "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                      "pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));",
+                      "const planIdValue = \"data.id\".split('.').reduce((value, key) => value?.[key], body);",
+                      "if (planIdValue !== undefined && planIdValue !== null && planIdValue !== '') pm.environment.set(\"planId\", String(planIdValue));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/platform/plans",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "platform",
+                    "plans"
+                  ]
+                },
+                "description": "Cria um plano com preço positivo em BRL.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"{{planName}}\",\n  \"slug\": \"{{planSlug}}\",\n  \"description\": \"Plano criado pelo fluxo do Postman.\",\n  \"price\": \"39.90\",\n  \"billingPeriod\": \"monthly\",\n  \"features\": [\n    \"Recurso de validação\"\n  ],\n  \"limits\": {\n    \"teamMembers\": 5,\n    \"automationEnabled\": true\n  },\n  \"isFeatured\": false,\n  \"isActive\": true,\n  \"displayOrder\": 100\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Editar plano",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const requiredFlags = [\"allowWrites\",\"allowAdministrativeWrites\"];",
+                      "const requiredVariables = [\"planId\"];",
+                      "const missingFlags = requiredFlags.filter((flag) => pm.environment.get(flag) !== 'true');",
+                      "const missingVariables = requiredVariables.filter((variable) => !String(pm.environment.get(variable) || '').trim());",
+                      "const baseUrl = (pm.environment.get('baseUrl') || '').replace(/[/]$/, '');",
+                      "const confirmedWriteBaseUrl = (pm.environment.get('confirmedWriteBaseUrl') || '').replace(/[/]$/, '');",
+                      "const environmentNotConfirmed = !baseUrl || confirmedWriteBaseUrl !== baseUrl;",
+                      "if (missingFlags.length || missingVariables.length || environmentNotConfirmed) {",
+                      "  const reasons = [];",
+                      "  if (missingFlags.length) reasons.push(`flags ausentes: ${missingFlags.join(', ')}`);",
+                      "  if (missingVariables.length) reasons.push(`variáveis ausentes: ${missingVariables.join(', ')}`);",
+                      "  if (environmentNotConfirmed) reasons.push('confirmedWriteBaseUrl deve ser igual a baseUrl');",
+                      "  console.warn(`Request ignorada: ${reasons.join('; ')}.`);",
+                      "  pm.execution.skipRequest();",
+                      "}",
+                      "const suffix = Date.now().toString();",
+                      "if (!pm.environment.get('planName')) pm.environment.set('planName', `Plano Postman ${suffix}`);",
+                      "if (!pm.environment.get('planSlug')) pm.environment.set('planSlug', `plano-postman-${suffix}`);"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "let body;",
+                      "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                      "pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/platform/plans/{{planId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "platform",
+                    "plans",
+                    "{{planId}}"
+                  ]
+                },
+                "description": "Substitui os campos editáveis do plano.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"{{planName}}\",\n  \"slug\": \"{{planSlug}}\",\n  \"description\": \"Plano criado pelo fluxo do Postman.\",\n  \"price\": \"39.90\",\n  \"billingPeriod\": \"monthly\",\n  \"features\": [\n    \"Recurso de validação\"\n  ],\n  \"limits\": {\n    \"teamMembers\": 5,\n    \"automationEnabled\": true\n  },\n  \"isFeatured\": false,\n  \"isActive\": true,\n  \"displayOrder\": 100\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Ativar ou desativar plano",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const requiredFlags = [\"allowWrites\",\"allowAdministrativeWrites\"];",
+                      "const requiredVariables = [\"planId\"];",
+                      "const missingFlags = requiredFlags.filter((flag) => pm.environment.get(flag) !== 'true');",
+                      "const missingVariables = requiredVariables.filter((variable) => !String(pm.environment.get(variable) || '').trim());",
+                      "const baseUrl = (pm.environment.get('baseUrl') || '').replace(/[/]$/, '');",
+                      "const confirmedWriteBaseUrl = (pm.environment.get('confirmedWriteBaseUrl') || '').replace(/[/]$/, '');",
+                      "const environmentNotConfirmed = !baseUrl || confirmedWriteBaseUrl !== baseUrl;",
+                      "if (missingFlags.length || missingVariables.length || environmentNotConfirmed) {",
+                      "  const reasons = [];",
+                      "  if (missingFlags.length) reasons.push(`flags ausentes: ${missingFlags.join(', ')}`);",
+                      "  if (missingVariables.length) reasons.push(`variáveis ausentes: ${missingVariables.join(', ')}`);",
+                      "  if (environmentNotConfirmed) reasons.push('confirmedWriteBaseUrl deve ser igual a baseUrl');",
+                      "  console.warn(`Request ignorada: ${reasons.join('; ')}.`);",
+                      "  pm.execution.skipRequest();",
+                      "}"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "let body;",
+                      "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                      "pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/platform/plans/{{planId}}/activation",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "platform",
+                    "plans",
+                    "{{planId}}",
+                    "activation"
+                  ]
+                },
+                "description": "Altere active para false para desativar o plano.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"active\": true\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "companies",
+          "description": "",
+          "item": [
+            {
+              "name": "Listar empresas administrativas",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "let body;",
+                      "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                      "pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/platform/companies?page={{page}}&limit={{limit}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "platform",
+                    "companies"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "{{page}}"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "{{limit}}"
+                    }
+                  ]
+                },
+                "description": "Filtros opcionais: q, status e planId. Retorna paginação em meta."
+              },
+              "response": []
+            },
+            {
+              "name": "Consultar empresa administrativa",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const requiredFlags = [];",
+                      "const requiredVariables = [\"companyId\"];",
+                      "const missingFlags = requiredFlags.filter((flag) => pm.environment.get(flag) !== 'true');",
+                      "const missingVariables = requiredVariables.filter((variable) => !String(pm.environment.get(variable) || '').trim());",
+                      "const environmentNotConfirmed = false;",
+                      "if (missingFlags.length || missingVariables.length || environmentNotConfirmed) {",
+                      "  const reasons = [];",
+                      "  if (missingFlags.length) reasons.push(`flags ausentes: ${missingFlags.join(', ')}`);",
+                      "  if (missingVariables.length) reasons.push(`variáveis ausentes: ${missingVariables.join(', ')}`);",
+                      "  if (environmentNotConfirmed) reasons.push('confirmedWriteBaseUrl deve ser igual a baseUrl');",
+                      "  console.warn(`Request ignorada: ${reasons.join('; ')}.`);",
+                      "  pm.execution.skipRequest();",
+                      "}"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "let body;",
+                      "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                      "pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/platform/companies/{{companyId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "platform",
+                    "companies",
+                    "{{companyId}}"
+                  ]
+                },
+                "description": "Consulta empresa ativa, inativa ou arquivada."
+              },
+              "response": []
+            },
+            {
+              "name": "Criar empresa e venda inicial",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const requiredFlags = [\"allowWrites\",\"allowAdministrativeWrites\"];",
+                      "const requiredVariables = [\"planId\"];",
+                      "const missingFlags = requiredFlags.filter((flag) => pm.environment.get(flag) !== 'true');",
+                      "const missingVariables = requiredVariables.filter((variable) => !String(pm.environment.get(variable) || '').trim());",
+                      "const baseUrl = (pm.environment.get('baseUrl') || '').replace(/[/]$/, '');",
+                      "const confirmedWriteBaseUrl = (pm.environment.get('confirmedWriteBaseUrl') || '').replace(/[/]$/, '');",
+                      "const environmentNotConfirmed = !baseUrl || confirmedWriteBaseUrl !== baseUrl;",
+                      "if (missingFlags.length || missingVariables.length || environmentNotConfirmed) {",
+                      "  const reasons = [];",
+                      "  if (missingFlags.length) reasons.push(`flags ausentes: ${missingFlags.join(', ')}`);",
+                      "  if (missingVariables.length) reasons.push(`variáveis ausentes: ${missingVariables.join(', ')}`);",
+                      "  if (environmentNotConfirmed) reasons.push('confirmedWriteBaseUrl deve ser igual a baseUrl');",
+                      "  console.warn(`Request ignorada: ${reasons.join('; ')}.`);",
+                      "  pm.execution.skipRequest();",
+                      "}",
+                      "const suffix = Date.now().toString();",
+                      "if (!pm.environment.get('companyOperationId')) pm.environment.set('companyOperationId', pm.variables.replaceIn('{{$guid}}'));",
+                      "if (!pm.environment.get('companyName')) pm.environment.set('companyName', `Empresa Postman ${suffix}`);",
+                      "if (!pm.environment.get('companyCnpj')) pm.environment.set('companyCnpj', `postman-${suffix}`);",
+                      "if (!pm.environment.get('companyEmail')) pm.environment.set('companyEmail', `empresa-${suffix}@example.test`);"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                      "let body;",
+                      "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                      "pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));",
+                      "const companyIdValue = \"data.company.id\".split('.').reduce((value, key) => value?.[key], body);",
+                      "if (companyIdValue !== undefined && companyIdValue !== null && companyIdValue !== '') pm.environment.set(\"companyId\", String(companyIdValue));",
+                      "const initialSaleIdValue = \"data.sale.id\".split('.').reduce((value, key) => value?.[key], body);",
+                      "if (initialSaleIdValue !== undefined && initialSaleIdValue !== null && initialSaleIdValue !== '') pm.environment.set(\"initialSaleId\", String(initialSaleIdValue));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/platform/companies",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "platform",
+                    "companies"
+                  ]
+                },
+                "description": "Cria a empresa e registra a venda automática do plano.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nome\": \"{{companyName}}\",\n  \"cnpj\": \"{{companyCnpj}}\",\n  \"descricao\": \"Empresa criada pelo fluxo do Postman.\",\n  \"descricao_detalhada\": \"Cadastro de validação compartilhado pela equipe Civix.\",\n  \"categoria\": \"{{category}}\",\n  \"cidade\": \"Fortaleza\",\n  \"estado\": \"{{state}}\",\n  \"tamanho\": \"{{companySize}}\",\n  \"email\": \"{{companyEmail}}\",\n  \"endereco\": null,\n  \"telefone\": null,\n  \"website\": null,\n  \"whatsapp\": null,\n  \"logo\": null,\n  \"descritivo\": null,\n  \"tone\": \"blue\",\n  \"planId\": \"{{planId}}\",\n  \"operationId\": \"{{companyOperationId}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Editar empresa",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const requiredFlags = [\"allowWrites\",\"allowAdministrativeWrites\"];",
+                      "const requiredVariables = [\"companyId\"];",
+                      "const missingFlags = requiredFlags.filter((flag) => pm.environment.get(flag) !== 'true');",
+                      "const missingVariables = requiredVariables.filter((variable) => !String(pm.environment.get(variable) || '').trim());",
+                      "const baseUrl = (pm.environment.get('baseUrl') || '').replace(/[/]$/, '');",
+                      "const confirmedWriteBaseUrl = (pm.environment.get('confirmedWriteBaseUrl') || '').replace(/[/]$/, '');",
+                      "const environmentNotConfirmed = !baseUrl || confirmedWriteBaseUrl !== baseUrl;",
+                      "if (missingFlags.length || missingVariables.length || environmentNotConfirmed) {",
+                      "  const reasons = [];",
+                      "  if (missingFlags.length) reasons.push(`flags ausentes: ${missingFlags.join(', ')}`);",
+                      "  if (missingVariables.length) reasons.push(`variáveis ausentes: ${missingVariables.join(', ')}`);",
+                      "  if (environmentNotConfirmed) reasons.push('confirmedWriteBaseUrl deve ser igual a baseUrl');",
+                      "  console.warn(`Request ignorada: ${reasons.join('; ')}.`);",
+                      "  pm.execution.skipRequest();",
+                      "}"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "let body;",
+                      "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                      "pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/platform/companies/{{companyId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "platform",
+                    "companies",
+                    "{{companyId}}"
+                  ]
+                },
+                "description": "A troca de plano não cria venda automática.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nome\": \"{{companyName}}\",\n  \"cnpj\": \"{{companyCnpj}}\",\n  \"descricao\": \"Empresa criada pelo fluxo do Postman.\",\n  \"descricao_detalhada\": \"Cadastro de validação compartilhado pela equipe Civix.\",\n  \"categoria\": \"{{category}}\",\n  \"cidade\": \"Fortaleza\",\n  \"estado\": \"{{state}}\",\n  \"tamanho\": \"{{companySize}}\",\n  \"email\": \"{{companyEmail}}\",\n  \"endereco\": null,\n  \"telefone\": null,\n  \"website\": null,\n  \"whatsapp\": null,\n  \"logo\": null,\n  \"descritivo\": null,\n  \"tone\": \"blue\",\n  \"planId\": \"{{planId}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "company users",
+          "description": "",
+          "item": [
+            {
+              "name": "Listar usuários da empresa",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const requiredFlags = [];",
+                      "const requiredVariables = [\"companyId\"];",
+                      "const missingFlags = requiredFlags.filter((flag) => pm.environment.get(flag) !== 'true');",
+                      "const missingVariables = requiredVariables.filter((variable) => !String(pm.environment.get(variable) || '').trim());",
+                      "const environmentNotConfirmed = false;",
+                      "if (missingFlags.length || missingVariables.length || environmentNotConfirmed) {",
+                      "  const reasons = [];",
+                      "  if (missingFlags.length) reasons.push(`flags ausentes: ${missingFlags.join(', ')}`);",
+                      "  if (missingVariables.length) reasons.push(`variáveis ausentes: ${missingVariables.join(', ')}`);",
+                      "  if (environmentNotConfirmed) reasons.push('confirmedWriteBaseUrl deve ser igual a baseUrl');",
+                      "  console.warn(`Request ignorada: ${reasons.join('; ')}.`);",
+                      "  pm.execution.skipRequest();",
+                      "}"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "let body;",
+                      "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                      "pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/platform/companies/{{companyId}}/users?page={{page}}&limit={{limit}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "platform",
+                    "companies",
+                    "{{companyId}}",
+                    "users"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "{{page}}"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "{{limit}}"
+                    }
+                  ]
+                },
+                "description": "Filtros opcionais: q, role e status. Retorna paginação em meta."
+              },
+              "response": []
+            },
+            {
+              "name": "Convidar usuário da empresa",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const requiredFlags = [\"allowWrites\",\"allowAdministrativeWrites\",\"allowEmails\"];",
+                      "const requiredVariables = [\"companyId\"];",
+                      "const missingFlags = requiredFlags.filter((flag) => pm.environment.get(flag) !== 'true');",
+                      "const missingVariables = requiredVariables.filter((variable) => !String(pm.environment.get(variable) || '').trim());",
+                      "const baseUrl = (pm.environment.get('baseUrl') || '').replace(/[/]$/, '');",
+                      "const confirmedWriteBaseUrl = (pm.environment.get('confirmedWriteBaseUrl') || '').replace(/[/]$/, '');",
+                      "const environmentNotConfirmed = !baseUrl || confirmedWriteBaseUrl !== baseUrl;",
+                      "if (missingFlags.length || missingVariables.length || environmentNotConfirmed) {",
+                      "  const reasons = [];",
+                      "  if (missingFlags.length) reasons.push(`flags ausentes: ${missingFlags.join(', ')}`);",
+                      "  if (missingVariables.length) reasons.push(`variáveis ausentes: ${missingVariables.join(', ')}`);",
+                      "  if (environmentNotConfirmed) reasons.push('confirmedWriteBaseUrl deve ser igual a baseUrl');",
+                      "  console.warn(`Request ignorada: ${reasons.join('; ')}.`);",
+                      "  pm.execution.skipRequest();",
+                      "}",
+                      "const suffix = Date.now().toString();",
+                      "if (!pm.environment.get('managedUserEmail')) pm.environment.set('managedUserEmail', `atendente-${suffix}@example.test`);"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                      "let body;",
+                      "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                      "pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));",
+                      "const companyUserIdValue = \"data.user.id\".split('.').reduce((value, key) => value?.[key], body);",
+                      "if (companyUserIdValue !== undefined && companyUserIdValue !== null && companyUserIdValue !== '') pm.environment.set(\"companyUserId\", String(companyUserIdValue));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/platform/companies/{{companyId}}/users/invitations",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "platform",
+                    "companies",
+                    "{{companyId}}",
+                    "users",
+                    "invitations"
+                  ]
+                },
+                "description": "Cria convite de admin_empresa ou atendente e pode disparar e-mail.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"{{managedUserEmail}}\",\n  \"name\": \"{{managedUserName}}\",\n  \"role\": \"atendente\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Editar usuário da empresa",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const requiredFlags = [\"allowWrites\",\"allowAdministrativeWrites\"];",
+                      "const requiredVariables = [\"companyId\",\"companyUserId\"];",
+                      "const missingFlags = requiredFlags.filter((flag) => pm.environment.get(flag) !== 'true');",
+                      "const missingVariables = requiredVariables.filter((variable) => !String(pm.environment.get(variable) || '').trim());",
+                      "const baseUrl = (pm.environment.get('baseUrl') || '').replace(/[/]$/, '');",
+                      "const confirmedWriteBaseUrl = (pm.environment.get('confirmedWriteBaseUrl') || '').replace(/[/]$/, '');",
+                      "const environmentNotConfirmed = !baseUrl || confirmedWriteBaseUrl !== baseUrl;",
+                      "if (missingFlags.length || missingVariables.length || environmentNotConfirmed) {",
+                      "  const reasons = [];",
+                      "  if (missingFlags.length) reasons.push(`flags ausentes: ${missingFlags.join(', ')}`);",
+                      "  if (missingVariables.length) reasons.push(`variáveis ausentes: ${missingVariables.join(', ')}`);",
+                      "  if (environmentNotConfirmed) reasons.push('confirmedWriteBaseUrl deve ser igual a baseUrl');",
+                      "  console.warn(`Request ignorada: ${reasons.join('; ')}.`);",
+                      "  pm.execution.skipRequest();",
+                      "}"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "let body;",
+                      "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                      "pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/platform/companies/{{companyId}}/users/{{companyUserId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "platform",
+                    "companies",
+                    "{{companyId}}",
+                    "users",
+                    "{{companyUserId}}"
+                  ]
+                },
+                "description": "Atualiza nome, e-mail e papel dentro da empresa.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"{{managedUserEmail}}\",\n  \"name\": \"{{managedUserName}}\",\n  \"role\": \"atendente\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Suspender usuário da empresa",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const requiredFlags = [\"allowWrites\",\"allowDestructive\",\"allowAdministrativeWrites\"];",
+                      "const requiredVariables = [\"companyId\",\"companyUserId\"];",
+                      "const missingFlags = requiredFlags.filter((flag) => pm.environment.get(flag) !== 'true');",
+                      "const missingVariables = requiredVariables.filter((variable) => !String(pm.environment.get(variable) || '').trim());",
+                      "const baseUrl = (pm.environment.get('baseUrl') || '').replace(/[/]$/, '');",
+                      "const confirmedWriteBaseUrl = (pm.environment.get('confirmedWriteBaseUrl') || '').replace(/[/]$/, '');",
+                      "const environmentNotConfirmed = !baseUrl || confirmedWriteBaseUrl !== baseUrl;",
+                      "if (missingFlags.length || missingVariables.length || environmentNotConfirmed) {",
+                      "  const reasons = [];",
+                      "  if (missingFlags.length) reasons.push(`flags ausentes: ${missingFlags.join(', ')}`);",
+                      "  if (missingVariables.length) reasons.push(`variáveis ausentes: ${missingVariables.join(', ')}`);",
+                      "  if (environmentNotConfirmed) reasons.push('confirmedWriteBaseUrl deve ser igual a baseUrl');",
+                      "  console.warn(`Request ignorada: ${reasons.join('; ')}.`);",
+                      "  pm.execution.skipRequest();",
+                      "}"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "let body;",
+                      "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                      "pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/platform/companies/{{companyId}}/users/{{companyUserId}}/suspension",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "platform",
+                    "companies",
+                    "{{companyId}}",
+                    "users",
+                    "{{companyUserId}}",
+                    "suspension"
+                  ]
+                },
+                "description": "Revoga as sessões e bloqueia o usuário.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"{{deactivationReason}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Reativar usuário da empresa",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const requiredFlags = [\"allowWrites\",\"allowAdministrativeWrites\"];",
+                      "const requiredVariables = [\"companyId\",\"companyUserId\"];",
+                      "const missingFlags = requiredFlags.filter((flag) => pm.environment.get(flag) !== 'true');",
+                      "const missingVariables = requiredVariables.filter((variable) => !String(pm.environment.get(variable) || '').trim());",
+                      "const baseUrl = (pm.environment.get('baseUrl') || '').replace(/[/]$/, '');",
+                      "const confirmedWriteBaseUrl = (pm.environment.get('confirmedWriteBaseUrl') || '').replace(/[/]$/, '');",
+                      "const environmentNotConfirmed = !baseUrl || confirmedWriteBaseUrl !== baseUrl;",
+                      "if (missingFlags.length || missingVariables.length || environmentNotConfirmed) {",
+                      "  const reasons = [];",
+                      "  if (missingFlags.length) reasons.push(`flags ausentes: ${missingFlags.join(', ')}`);",
+                      "  if (missingVariables.length) reasons.push(`variáveis ausentes: ${missingVariables.join(', ')}`);",
+                      "  if (environmentNotConfirmed) reasons.push('confirmedWriteBaseUrl deve ser igual a baseUrl');",
+                      "  console.warn(`Request ignorada: ${reasons.join('; ')}.`);",
+                      "  pm.execution.skipRequest();",
+                      "}"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "let body;",
+                      "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                      "pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/platform/companies/{{companyId}}/users/{{companyUserId}}/reactivation",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "platform",
+                    "companies",
+                    "{{companyId}}",
+                    "users",
+                    "{{companyUserId}}",
+                    "reactivation"
+                  ]
+                },
+                "description": "Reativa o usuário; ele precisa realizar novo login.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Excluir atendente da empresa",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const requiredFlags = [\"allowWrites\",\"allowDestructive\",\"allowAdministrativeWrites\"];",
+                      "const requiredVariables = [\"companyId\",\"companyUserId\"];",
+                      "const missingFlags = requiredFlags.filter((flag) => pm.environment.get(flag) !== 'true');",
+                      "const missingVariables = requiredVariables.filter((variable) => !String(pm.environment.get(variable) || '').trim());",
+                      "const baseUrl = (pm.environment.get('baseUrl') || '').replace(/[/]$/, '');",
+                      "const confirmedWriteBaseUrl = (pm.environment.get('confirmedWriteBaseUrl') || '').replace(/[/]$/, '');",
+                      "const environmentNotConfirmed = !baseUrl || confirmedWriteBaseUrl !== baseUrl;",
+                      "if (missingFlags.length || missingVariables.length || environmentNotConfirmed) {",
+                      "  const reasons = [];",
+                      "  if (missingFlags.length) reasons.push(`flags ausentes: ${missingFlags.join(', ')}`);",
+                      "  if (missingVariables.length) reasons.push(`variáveis ausentes: ${missingVariables.join(', ')}`);",
+                      "  if (environmentNotConfirmed) reasons.push('confirmedWriteBaseUrl deve ser igual a baseUrl');",
+                      "  console.warn(`Request ignorada: ${reasons.join('; ')}.`);",
+                      "  pm.execution.skipRequest();",
+                      "}"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 204', () => pm.response.to.have.status(204));",
+                      "pm.test('Resposta sem corpo', () => pm.expect(pm.response.text()).to.equal(''));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/platform/companies/{{companyId}}/users/{{companyUserId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "platform",
+                    "companies",
+                    "{{companyId}}",
+                    "users",
+                    "{{companyUserId}}"
+                  ]
+                },
+                "description": "Exclusão lógica permitida somente para atendente.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"{{deactivationReason}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true
+              }
+            }
+          ]
+        },
+        {
+          "name": "administrators",
+          "description": "",
+          "item": [
+            {
+              "name": "Listar superadmins",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "let body;",
+                      "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                      "pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/platform/administrators?page={{page}}&limit={{limit}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "platform",
+                    "administrators"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "{{page}}"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "{{limit}}"
+                    }
+                  ]
+                },
+                "description": "Filtros opcionais: q e status. Retorna paginação em meta."
+              },
+              "response": []
+            },
+            {
+              "name": "Convidar superadmin",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const requiredFlags = [\"allowWrites\",\"allowAdministrativeWrites\",\"allowEmails\"];",
+                      "const requiredVariables = [];",
+                      "const missingFlags = requiredFlags.filter((flag) => pm.environment.get(flag) !== 'true');",
+                      "const missingVariables = requiredVariables.filter((variable) => !String(pm.environment.get(variable) || '').trim());",
+                      "const baseUrl = (pm.environment.get('baseUrl') || '').replace(/[/]$/, '');",
+                      "const confirmedWriteBaseUrl = (pm.environment.get('confirmedWriteBaseUrl') || '').replace(/[/]$/, '');",
+                      "const environmentNotConfirmed = !baseUrl || confirmedWriteBaseUrl !== baseUrl;",
+                      "if (missingFlags.length || missingVariables.length || environmentNotConfirmed) {",
+                      "  const reasons = [];",
+                      "  if (missingFlags.length) reasons.push(`flags ausentes: ${missingFlags.join(', ')}`);",
+                      "  if (missingVariables.length) reasons.push(`variáveis ausentes: ${missingVariables.join(', ')}`);",
+                      "  if (environmentNotConfirmed) reasons.push('confirmedWriteBaseUrl deve ser igual a baseUrl');",
+                      "  console.warn(`Request ignorada: ${reasons.join('; ')}.`);",
+                      "  pm.execution.skipRequest();",
+                      "}",
+                      "const suffix = Date.now().toString();",
+                      "if (!pm.environment.get('administratorEmail')) pm.environment.set('administratorEmail', `superadmin-${suffix}@example.test`);"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                      "let body;",
+                      "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                      "pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));",
+                      "const administratorIdValue = \"data.user.id\".split('.').reduce((value, key) => value?.[key], body);",
+                      "if (administratorIdValue !== undefined && administratorIdValue !== null && administratorIdValue !== '') pm.environment.set(\"administratorId\", String(administratorIdValue));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/platform/administrators/invitations",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "platform",
+                    "administrators",
+                    "invitations"
+                  ]
+                },
+                "description": "Cria outro superadmin com os mesmos poderes e pode disparar e-mail.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"{{administratorEmail}}\",\n  \"name\": \"{{administratorName}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Editar superadmin",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const requiredFlags = [\"allowWrites\",\"allowAdministrativeWrites\"];",
+                      "const requiredVariables = [\"administratorId\"];",
+                      "const missingFlags = requiredFlags.filter((flag) => pm.environment.get(flag) !== 'true');",
+                      "const missingVariables = requiredVariables.filter((variable) => !String(pm.environment.get(variable) || '').trim());",
+                      "const baseUrl = (pm.environment.get('baseUrl') || '').replace(/[/]$/, '');",
+                      "const confirmedWriteBaseUrl = (pm.environment.get('confirmedWriteBaseUrl') || '').replace(/[/]$/, '');",
+                      "const environmentNotConfirmed = !baseUrl || confirmedWriteBaseUrl !== baseUrl;",
+                      "if (missingFlags.length || missingVariables.length || environmentNotConfirmed) {",
+                      "  const reasons = [];",
+                      "  if (missingFlags.length) reasons.push(`flags ausentes: ${missingFlags.join(', ')}`);",
+                      "  if (missingVariables.length) reasons.push(`variáveis ausentes: ${missingVariables.join(', ')}`);",
+                      "  if (environmentNotConfirmed) reasons.push('confirmedWriteBaseUrl deve ser igual a baseUrl');",
+                      "  console.warn(`Request ignorada: ${reasons.join('; ')}.`);",
+                      "  pm.execution.skipRequest();",
+                      "}"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "let body;",
+                      "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                      "pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/platform/administrators/{{administratorId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "platform",
+                    "administrators",
+                    "{{administratorId}}"
+                  ]
+                },
+                "description": "Atualiza nome e e-mail do superadmin alvo.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"{{administratorEmail}}\",\n  \"name\": \"{{administratorName}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Suspender superadmin",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const requiredFlags = [\"allowWrites\",\"allowDestructive\",\"allowAdministrativeWrites\"];",
+                      "const requiredVariables = [\"administratorId\"];",
+                      "const missingFlags = requiredFlags.filter((flag) => pm.environment.get(flag) !== 'true');",
+                      "const missingVariables = requiredVariables.filter((variable) => !String(pm.environment.get(variable) || '').trim());",
+                      "const baseUrl = (pm.environment.get('baseUrl') || '').replace(/[/]$/, '');",
+                      "const confirmedWriteBaseUrl = (pm.environment.get('confirmedWriteBaseUrl') || '').replace(/[/]$/, '');",
+                      "const environmentNotConfirmed = !baseUrl || confirmedWriteBaseUrl !== baseUrl;",
+                      "if (missingFlags.length || missingVariables.length || environmentNotConfirmed) {",
+                      "  const reasons = [];",
+                      "  if (missingFlags.length) reasons.push(`flags ausentes: ${missingFlags.join(', ')}`);",
+                      "  if (missingVariables.length) reasons.push(`variáveis ausentes: ${missingVariables.join(', ')}`);",
+                      "  if (environmentNotConfirmed) reasons.push('confirmedWriteBaseUrl deve ser igual a baseUrl');",
+                      "  console.warn(`Request ignorada: ${reasons.join('; ')}.`);",
+                      "  pm.execution.skipRequest();",
+                      "}"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "let body;",
+                      "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                      "pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/platform/administrators/{{administratorId}}/suspension",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "platform",
+                    "administrators",
+                    "{{administratorId}}",
+                    "suspension"
+                  ]
+                },
+                "description": "Impede auto-suspensão e suspensão do último superadmin ativo.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"{{deactivationReason}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Reativar superadmin",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const requiredFlags = [\"allowWrites\",\"allowAdministrativeWrites\"];",
+                      "const requiredVariables = [\"administratorId\"];",
+                      "const missingFlags = requiredFlags.filter((flag) => pm.environment.get(flag) !== 'true');",
+                      "const missingVariables = requiredVariables.filter((variable) => !String(pm.environment.get(variable) || '').trim());",
+                      "const baseUrl = (pm.environment.get('baseUrl') || '').replace(/[/]$/, '');",
+                      "const confirmedWriteBaseUrl = (pm.environment.get('confirmedWriteBaseUrl') || '').replace(/[/]$/, '');",
+                      "const environmentNotConfirmed = !baseUrl || confirmedWriteBaseUrl !== baseUrl;",
+                      "if (missingFlags.length || missingVariables.length || environmentNotConfirmed) {",
+                      "  const reasons = [];",
+                      "  if (missingFlags.length) reasons.push(`flags ausentes: ${missingFlags.join(', ')}`);",
+                      "  if (missingVariables.length) reasons.push(`variáveis ausentes: ${missingVariables.join(', ')}`);",
+                      "  if (environmentNotConfirmed) reasons.push('confirmedWriteBaseUrl deve ser igual a baseUrl');",
+                      "  console.warn(`Request ignorada: ${reasons.join('; ')}.`);",
+                      "  pm.execution.skipRequest();",
+                      "}"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "let body;",
+                      "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                      "pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/platform/administrators/{{administratorId}}/reactivation",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "platform",
+                    "administrators",
+                    "{{administratorId}}",
+                    "reactivation"
+                  ]
+                },
+                "description": "Reativa outro superadmin; auto-reativação por esta rota é bloqueada.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "sales",
+          "description": "",
+          "item": [
+            {
+              "name": "Listar vendas",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "let body;",
+                      "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                      "pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/platform/sales?page={{page}}&limit={{limit}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "platform",
+                    "sales"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "{{page}}"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "{{limit}}"
+                    }
+                  ]
+                },
+                "description": "Filtros opcionais: companyId, planId, origin, from e to."
+              },
+              "response": []
+            },
+            {
+              "name": "Consultar venda",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const requiredFlags = [];",
+                      "const requiredVariables = [\"saleId\"];",
+                      "const missingFlags = requiredFlags.filter((flag) => pm.environment.get(flag) !== 'true');",
+                      "const missingVariables = requiredVariables.filter((variable) => !String(pm.environment.get(variable) || '').trim());",
+                      "const environmentNotConfirmed = false;",
+                      "if (missingFlags.length || missingVariables.length || environmentNotConfirmed) {",
+                      "  const reasons = [];",
+                      "  if (missingFlags.length) reasons.push(`flags ausentes: ${missingFlags.join(', ')}`);",
+                      "  if (missingVariables.length) reasons.push(`variáveis ausentes: ${missingVariables.join(', ')}`);",
+                      "  if (environmentNotConfirmed) reasons.push('confirmedWriteBaseUrl deve ser igual a baseUrl');",
+                      "  console.warn(`Request ignorada: ${reasons.join('; ')}.`);",
+                      "  pm.execution.skipRequest();",
+                      "}"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "let body;",
+                      "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                      "pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/platform/sales/{{saleId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "platform",
+                    "sales",
+                    "{{saleId}}"
+                  ]
+                },
+                "description": "Consulta uma venda existente pelo UUID."
+              },
+              "response": []
+            },
+            {
+              "name": "Criar venda manual pelo plano atual",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const requiredFlags = [\"allowWrites\",\"allowAdministrativeWrites\"];",
+                      "const requiredVariables = [\"companyId\"];",
+                      "const missingFlags = requiredFlags.filter((flag) => pm.environment.get(flag) !== 'true');",
+                      "const missingVariables = requiredVariables.filter((variable) => !String(pm.environment.get(variable) || '').trim());",
+                      "const baseUrl = (pm.environment.get('baseUrl') || '').replace(/[/]$/, '');",
+                      "const confirmedWriteBaseUrl = (pm.environment.get('confirmedWriteBaseUrl') || '').replace(/[/]$/, '');",
+                      "const environmentNotConfirmed = !baseUrl || confirmedWriteBaseUrl !== baseUrl;",
+                      "if (missingFlags.length || missingVariables.length || environmentNotConfirmed) {",
+                      "  const reasons = [];",
+                      "  if (missingFlags.length) reasons.push(`flags ausentes: ${missingFlags.join(', ')}`);",
+                      "  if (missingVariables.length) reasons.push(`variáveis ausentes: ${missingVariables.join(', ')}`);",
+                      "  if (environmentNotConfirmed) reasons.push('confirmedWriteBaseUrl deve ser igual a baseUrl');",
+                      "  console.warn(`Request ignorada: ${reasons.join('; ')}.`);",
+                      "  pm.execution.skipRequest();",
+                      "}",
+                      "if (!pm.environment.get('salePlanOperationId')) pm.environment.set('salePlanOperationId', pm.variables.replaceIn('{{$guid}}'));",
+                      "if (!pm.environment.get('soldAt')) pm.environment.set('soldAt', new Date().toISOString());"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                      "let body;",
+                      "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                      "pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));",
+                      "const saleIdValue = \"data.sale.id\".split('.').reduce((value, key) => value?.[key], body);",
+                      "if (saleIdValue !== undefined && saleIdValue !== null && saleIdValue !== '') pm.environment.set(\"saleId\", String(saleIdValue));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/platform/sales",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "platform",
+                    "sales"
+                  ]
+                },
+                "description": "Usa o preço do plano vigente da empresa.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"companyId\": \"{{companyId}}\",\n  \"operationId\": \"{{salePlanOperationId}}\",\n  \"soldAt\": \"{{soldAt}}\",\n  \"pricingMode\": \"company_plan\",\n  \"description\": \"Venda pelo preço do plano atual.\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Criar venda manual por valor informado",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const requiredFlags = [\"allowWrites\",\"allowAdministrativeWrites\"];",
+                      "const requiredVariables = [\"companyId\"];",
+                      "const missingFlags = requiredFlags.filter((flag) => pm.environment.get(flag) !== 'true');",
+                      "const missingVariables = requiredVariables.filter((variable) => !String(pm.environment.get(variable) || '').trim());",
+                      "const baseUrl = (pm.environment.get('baseUrl') || '').replace(/[/]$/, '');",
+                      "const confirmedWriteBaseUrl = (pm.environment.get('confirmedWriteBaseUrl') || '').replace(/[/]$/, '');",
+                      "const environmentNotConfirmed = !baseUrl || confirmedWriteBaseUrl !== baseUrl;",
+                      "if (missingFlags.length || missingVariables.length || environmentNotConfirmed) {",
+                      "  const reasons = [];",
+                      "  if (missingFlags.length) reasons.push(`flags ausentes: ${missingFlags.join(', ')}`);",
+                      "  if (missingVariables.length) reasons.push(`variáveis ausentes: ${missingVariables.join(', ')}`);",
+                      "  if (environmentNotConfirmed) reasons.push('confirmedWriteBaseUrl deve ser igual a baseUrl');",
+                      "  console.warn(`Request ignorada: ${reasons.join('; ')}.`);",
+                      "  pm.execution.skipRequest();",
+                      "}",
+                      "if (!pm.environment.get('saleAmountOperationId')) pm.environment.set('saleAmountOperationId', pm.variables.replaceIn('{{$guid}}'));",
+                      "if (!pm.environment.get('soldAt')) pm.environment.set('soldAt', new Date().toISOString());"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                      "let body;",
+                      "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                      "pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));",
+                      "const saleIdValue = \"data.sale.id\".split('.').reduce((value, key) => value?.[key], body);",
+                      "if (saleIdValue !== undefined && saleIdValue !== null && saleIdValue !== '') pm.environment.set(\"saleId\", String(saleIdValue));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/platform/sales",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "platform",
+                    "sales"
+                  ]
+                },
+                "description": "Exige valor positivo e descrição/motivo.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"companyId\": \"{{companyId}}\",\n  \"operationId\": \"{{saleAmountOperationId}}\",\n  \"soldAt\": \"{{soldAt}}\",\n  \"pricingMode\": \"manual_amount\",\n  \"amount\": \"125.50\",\n  \"description\": \"Valor manual informado para validação.\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Excluir venda",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const requiredFlags = [\"allowWrites\",\"allowDestructive\",\"allowAdministrativeWrites\"];",
+                      "const requiredVariables = [\"saleId\"];",
+                      "const missingFlags = requiredFlags.filter((flag) => pm.environment.get(flag) !== 'true');",
+                      "const missingVariables = requiredVariables.filter((variable) => !String(pm.environment.get(variable) || '').trim());",
+                      "const baseUrl = (pm.environment.get('baseUrl') || '').replace(/[/]$/, '');",
+                      "const confirmedWriteBaseUrl = (pm.environment.get('confirmedWriteBaseUrl') || '').replace(/[/]$/, '');",
+                      "const environmentNotConfirmed = !baseUrl || confirmedWriteBaseUrl !== baseUrl;",
+                      "if (missingFlags.length || missingVariables.length || environmentNotConfirmed) {",
+                      "  const reasons = [];",
+                      "  if (missingFlags.length) reasons.push(`flags ausentes: ${missingFlags.join(', ')}`);",
+                      "  if (missingVariables.length) reasons.push(`variáveis ausentes: ${missingVariables.join(', ')}`);",
+                      "  if (environmentNotConfirmed) reasons.push('confirmedWriteBaseUrl deve ser igual a baseUrl');",
+                      "  console.warn(`Request ignorada: ${reasons.join('; ')}.`);",
+                      "  pm.execution.skipRequest();",
+                      "}"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 204', () => pm.response.to.have.status(204));",
+                      "pm.test('Resposta sem corpo', () => pm.expect(pm.response.text()).to.equal(''));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/platform/sales/{{saleId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "platform",
+                    "sales",
+                    "{{saleId}}"
+                  ]
+                },
+                "description": "Exclusão definitiva; vendas são imutáveis e não possuem edição."
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "55 - Operações destrutivas",
+      "description": "Operações administrativas de empresa executadas após os fluxos superadmin dependentes.",
+      "item": [
+        {
+          "name": "companies",
+          "description": "",
+          "item": [
+            {
+              "name": "Suspender empresa",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const requiredFlags = [\"allowWrites\",\"allowDestructive\",\"allowAdministrativeWrites\"];",
+                      "const requiredVariables = [\"companyId\"];",
+                      "const missingFlags = requiredFlags.filter((flag) => pm.environment.get(flag) !== 'true');",
+                      "const missingVariables = requiredVariables.filter((variable) => !String(pm.environment.get(variable) || '').trim());",
+                      "const baseUrl = (pm.environment.get('baseUrl') || '').replace(/[/]$/, '');",
+                      "const confirmedWriteBaseUrl = (pm.environment.get('confirmedWriteBaseUrl') || '').replace(/[/]$/, '');",
+                      "const environmentNotConfirmed = !baseUrl || confirmedWriteBaseUrl !== baseUrl;",
+                      "if (missingFlags.length || missingVariables.length || environmentNotConfirmed) {",
+                      "  const reasons = [];",
+                      "  if (missingFlags.length) reasons.push(`flags ausentes: ${missingFlags.join(', ')}`);",
+                      "  if (missingVariables.length) reasons.push(`variáveis ausentes: ${missingVariables.join(', ')}`);",
+                      "  if (environmentNotConfirmed) reasons.push('confirmedWriteBaseUrl deve ser igual a baseUrl');",
+                      "  console.warn(`Request ignorada: ${reasons.join('; ')}.`);",
+                      "  pm.execution.skipRequest();",
+                      "}"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "let body;",
+                      "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                      "pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/platform/companies/{{companyId}}/suspension",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "platform",
+                    "companies",
+                    "{{companyId}}",
+                    "suspension"
+                  ]
+                },
+                "description": "Bloqueia a empresa e seus usuários até reativação explícita.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"{{deactivationReason}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Reativar empresa",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const requiredFlags = [\"allowWrites\",\"allowAdministrativeWrites\"];",
+                      "const requiredVariables = [\"companyId\"];",
+                      "const missingFlags = requiredFlags.filter((flag) => pm.environment.get(flag) !== 'true');",
+                      "const missingVariables = requiredVariables.filter((variable) => !String(pm.environment.get(variable) || '').trim());",
+                      "const baseUrl = (pm.environment.get('baseUrl') || '').replace(/[/]$/, '');",
+                      "const confirmedWriteBaseUrl = (pm.environment.get('confirmedWriteBaseUrl') || '').replace(/[/]$/, '');",
+                      "const environmentNotConfirmed = !baseUrl || confirmedWriteBaseUrl !== baseUrl;",
+                      "if (missingFlags.length || missingVariables.length || environmentNotConfirmed) {",
+                      "  const reasons = [];",
+                      "  if (missingFlags.length) reasons.push(`flags ausentes: ${missingFlags.join(', ')}`);",
+                      "  if (missingVariables.length) reasons.push(`variáveis ausentes: ${missingVariables.join(', ')}`);",
+                      "  if (environmentNotConfirmed) reasons.push('confirmedWriteBaseUrl deve ser igual a baseUrl');",
+                      "  console.warn(`Request ignorada: ${reasons.join('; ')}.`);",
+                      "  pm.execution.skipRequest();",
+                      "}"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "let body;",
+                      "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                      "pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/platform/companies/{{companyId}}/reactivation",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "platform",
+                    "companies",
+                    "{{companyId}}",
+                    "reactivation"
+                  ]
+                },
+                "description": "Reativa uma empresa suspensa.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Arquivar empresa",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const requiredFlags = [\"allowWrites\",\"allowDestructive\",\"allowAdministrativeWrites\"];",
+                      "const requiredVariables = [\"companyId\"];",
+                      "const missingFlags = requiredFlags.filter((flag) => pm.environment.get(flag) !== 'true');",
+                      "const missingVariables = requiredVariables.filter((variable) => !String(pm.environment.get(variable) || '').trim());",
+                      "const baseUrl = (pm.environment.get('baseUrl') || '').replace(/[/]$/, '');",
+                      "const confirmedWriteBaseUrl = (pm.environment.get('confirmedWriteBaseUrl') || '').replace(/[/]$/, '');",
+                      "const environmentNotConfirmed = !baseUrl || confirmedWriteBaseUrl !== baseUrl;",
+                      "if (missingFlags.length || missingVariables.length || environmentNotConfirmed) {",
+                      "  const reasons = [];",
+                      "  if (missingFlags.length) reasons.push(`flags ausentes: ${missingFlags.join(', ')}`);",
+                      "  if (missingVariables.length) reasons.push(`variáveis ausentes: ${missingVariables.join(', ')}`);",
+                      "  if (environmentNotConfirmed) reasons.push('confirmedWriteBaseUrl deve ser igual a baseUrl');",
+                      "  console.warn(`Request ignorada: ${reasons.join('; ')}.`);",
+                      "  pm.execution.skipRequest();",
+                      "}"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 204', () => pm.response.to.have.status(204));",
+                      "pm.test('Resposta sem corpo', () => pm.expect(pm.response.text()).to.equal(''));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/platform/companies/{{companyId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "platform",
+                    "companies",
+                    "{{companyId}}"
+                  ]
+                },
+                "description": "Realiza exclusão lógica e preserva o histórico.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"{{deactivationReason}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true
+              }
+            },
+            {
+              "name": "Restaurar empresa arquivada",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const requiredFlags = [\"allowWrites\",\"allowDestructive\",\"allowAdministrativeWrites\"];",
+                      "const requiredVariables = [\"companyId\"];",
+                      "const missingFlags = requiredFlags.filter((flag) => pm.environment.get(flag) !== 'true');",
+                      "const missingVariables = requiredVariables.filter((variable) => !String(pm.environment.get(variable) || '').trim());",
+                      "const baseUrl = (pm.environment.get('baseUrl') || '').replace(/[/]$/, '');",
+                      "const confirmedWriteBaseUrl = (pm.environment.get('confirmedWriteBaseUrl') || '').replace(/[/]$/, '');",
+                      "const environmentNotConfirmed = !baseUrl || confirmedWriteBaseUrl !== baseUrl;",
+                      "if (missingFlags.length || missingVariables.length || environmentNotConfirmed) {",
+                      "  const reasons = [];",
+                      "  if (missingFlags.length) reasons.push(`flags ausentes: ${missingFlags.join(', ')}`);",
+                      "  if (missingVariables.length) reasons.push(`variáveis ausentes: ${missingVariables.join(', ')}`);",
+                      "  if (environmentNotConfirmed) reasons.push('confirmedWriteBaseUrl deve ser igual a baseUrl');",
+                      "  console.warn(`Request ignorada: ${reasons.join('; ')}.`);",
+                      "  pm.execution.skipRequest();",
+                      "}"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "let body;",
+                      "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                      "pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/platform/companies/{{companyId}}/restoration",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "platform",
+                    "companies",
+                    "{{companyId}}",
+                    "restoration"
+                  ]
+                },
+                "description": "Restaura o registro; a reativação continua explícita.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "60 - Fluxo admin da empresa",
+      "description": "Troca controlada de sessão e seleção de plano como admin_empresa.",
+      "item": [
+        {
+          "name": "Login admin da empresa",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const requiredFlags = [\"allowRoleSwitch\"];",
+                  "const requiredVariables = [\"companyAdminEmail\",\"companyAdminPassword\"];",
+                  "const missingFlags = requiredFlags.filter((flag) => pm.environment.get(flag) !== 'true');",
+                  "const missingVariables = requiredVariables.filter((variable) => !String(pm.environment.get(variable) || '').trim());",
+                  "const environmentNotConfirmed = false;",
+                  "if (missingFlags.length || missingVariables.length || environmentNotConfirmed) {",
+                  "  const reasons = [];",
+                  "  if (missingFlags.length) reasons.push(`flags ausentes: ${missingFlags.join(', ')}`);",
+                  "  if (missingVariables.length) reasons.push(`variáveis ausentes: ${missingVariables.join(', ')}`);",
+                  "  if (environmentNotConfirmed) reasons.push('confirmedWriteBaseUrl deve ser igual a baseUrl');",
+                  "  console.warn(`Request ignorada: ${reasons.join('; ')}.`);",
+                  "  pm.execution.skipRequest();",
+                  "}",
+                  "pm.environment.unset('accessToken');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "let body;",
+                  "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                  "pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));",
+                  "const sessionHeader = pm.response.headers.get('Set-Cookie') || '';",
+                  "pm.test('Cookie de sessão emitido', () => pm.expect(sessionHeader).to.include('sessao='));",
+                  "const token = body?.data?.token;",
+                  "if (typeof token === 'string' && token) pm.environment.set('accessToken', token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "login"
+              ]
+            },
+            "description": "Cria uma sessão de admin_empresa para testar seleção de plano e upload da própria empresa.",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{companyAdminEmail}}\",\n  \"password\": \"{{companyAdminPassword}}\",\n  \"role\": \"admin_empresa\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Selecionar plano da empresa",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const requiredFlags = [\"allowWrites\",\"allowAdministrativeWrites\",\"allowRoleSwitch\"];",
+                  "const requiredVariables = [\"planId\"];",
+                  "const missingFlags = requiredFlags.filter((flag) => pm.environment.get(flag) !== 'true');",
+                  "const missingVariables = requiredVariables.filter((variable) => !String(pm.environment.get(variable) || '').trim());",
+                  "const baseUrl = (pm.environment.get('baseUrl') || '').replace(/[/]$/, '');",
+                  "const confirmedWriteBaseUrl = (pm.environment.get('confirmedWriteBaseUrl') || '').replace(/[/]$/, '');",
+                  "const environmentNotConfirmed = !baseUrl || confirmedWriteBaseUrl !== baseUrl;",
+                  "if (missingFlags.length || missingVariables.length || environmentNotConfirmed) {",
+                  "  const reasons = [];",
+                  "  if (missingFlags.length) reasons.push(`flags ausentes: ${missingFlags.join(', ')}`);",
+                  "  if (missingVariables.length) reasons.push(`variáveis ausentes: ${missingVariables.join(', ')}`);",
+                  "  if (environmentNotConfirmed) reasons.push('confirmedWriteBaseUrl deve ser igual a baseUrl');",
+                  "  console.warn(`Request ignorada: ${reasons.join('; ')}.`);",
+                  "  pm.execution.skipRequest();",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "let body;",
+                  "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                  "pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/plans/selection",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "plans",
+                "selection"
+              ]
+            },
+            "description": "Exige uma sessão admin_empresa.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"planId\": \"{{planId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "65 - Fluxo atendente",
+      "description": "Troca controlada para validar a sessão de atendente.",
+      "item": [
+        {
+          "name": "Login atendente",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const requiredFlags = [\"allowRoleSwitch\"];",
+                  "const requiredVariables = [\"attendantEmail\",\"attendantPassword\"];",
+                  "const missingFlags = requiredFlags.filter((flag) => pm.environment.get(flag) !== 'true');",
+                  "const missingVariables = requiredVariables.filter((variable) => !String(pm.environment.get(variable) || '').trim());",
+                  "const environmentNotConfirmed = false;",
+                  "if (missingFlags.length || missingVariables.length || environmentNotConfirmed) {",
+                  "  const reasons = [];",
+                  "  if (missingFlags.length) reasons.push(`flags ausentes: ${missingFlags.join(', ')}`);",
+                  "  if (missingVariables.length) reasons.push(`variáveis ausentes: ${missingVariables.join(', ')}`);",
+                  "  if (environmentNotConfirmed) reasons.push('confirmedWriteBaseUrl deve ser igual a baseUrl');",
+                  "  console.warn(`Request ignorada: ${reasons.join('; ')}.`);",
+                  "  pm.execution.skipRequest();",
+                  "}",
+                  "pm.environment.unset('accessToken');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "let body;",
+                  "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                  "pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));",
+                  "const sessionHeader = pm.response.headers.get('Set-Cookie') || '';",
+                  "pm.test('Cookie de sessão emitido', () => pm.expect(sessionHeader).to.include('sessao='));",
+                  "const token = body?.data?.token;",
+                  "if (typeof token === 'string' && token) pm.environment.set('accessToken', token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "login"
+              ]
+            },
+            "description": "Cria uma sessão de atendente.",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{attendantEmail}}\",\n  \"password\": \"{{attendantPassword}}\",\n  \"role\": \"atendente\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "80 - Finalização da conta",
+      "description": "Operações que podem invalidar a sessão e devem ocorrer no fim.",
+      "item": [
+        {
+          "name": "Atualizar perfil",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const requiredFlags = [\"allowWrites\",\"allowProfileUpdate\"];",
+                  "const requiredVariables = [\"profileName\",\"profileEmail\"];",
+                  "const missingFlags = requiredFlags.filter((flag) => pm.environment.get(flag) !== 'true');",
+                  "const missingVariables = requiredVariables.filter((variable) => !String(pm.environment.get(variable) || '').trim());",
+                  "const baseUrl = (pm.environment.get('baseUrl') || '').replace(/[/]$/, '');",
+                  "const confirmedWriteBaseUrl = (pm.environment.get('confirmedWriteBaseUrl') || '').replace(/[/]$/, '');",
+                  "const environmentNotConfirmed = !baseUrl || confirmedWriteBaseUrl !== baseUrl;",
+                  "if (missingFlags.length || missingVariables.length || environmentNotConfirmed) {",
+                  "  const reasons = [];",
+                  "  if (missingFlags.length) reasons.push(`flags ausentes: ${missingFlags.join(', ')}`);",
+                  "  if (missingVariables.length) reasons.push(`variáveis ausentes: ${missingVariables.join(', ')}`);",
+                  "  if (environmentNotConfirmed) reasons.push('confirmedWriteBaseUrl deve ser igual a baseUrl');",
+                  "  console.warn(`Request ignorada: ${reasons.join('; ')}.`);",
+                  "  pm.execution.skipRequest();",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "let body;",
+                  "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                  "pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "profile"
+              ]
+            },
+            "description": "Alterar o e-mail exige novo login; execute ao final do fluxo autenticado.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{profileName}}\",\n  \"email\": \"{{profileEmail}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "90 - Casos de validação",
+      "description": "Erros representativos sem mutação persistente.",
+      "item": [
+        {
+          "name": "Erro - login sem e-mail",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));",
+                  "let body;",
+                  "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                  "pm.test('Contrato de erro', () => {",
+                  "  pm.expect(body).to.have.property('status', pm.response.code);",
+                  "  pm.expect(body).to.have.property('message').that.is.a('string');",
+                  "  pm.expect(body).to.have.property('code').that.is.a('string');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "login"
+              ]
+            },
+            "description": "Valida o contrato de erro para entrada obrigatória ausente.",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"password\": \"senha-invalida\",\n  \"role\": \"super_admin\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Erro - cliente sem área logada",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 403', () => pm.response.to.have.status(403));",
+                  "let body;",
+                  "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                  "pm.test('Contrato de erro', () => {",
+                  "  pm.expect(body).to.have.property('status', pm.response.code);",
+                  "  pm.expect(body).to.have.property('message').that.is.a('string');",
+                  "  pm.expect(body).to.have.property('code').that.is.a('string');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "login"
+              ]
+            },
+            "description": "Valida a regra de negócio que impede sessão para o papel cliente.",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"cliente@example.test\",\n  \"role\": \"cliente\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Erro - perfil sem sessão",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 401', () => pm.response.to.have.status(401));",
+                  "let body;",
+                  "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                  "pm.test('Contrato de erro', () => {",
+                  "  pm.expect(body).to.have.property('status', pm.response.code);",
+                  "  pm.expect(body).to.have.property('message').that.is.a('string');",
+                  "  pm.expect(body).to.have.property('code').that.is.a('string');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "profile"
+              ]
+            },
+            "description": "Valida a proteção de uma rota autenticada.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Erro - busca sem termo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));",
+                  "let body;",
+                  "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                  "pm.test('Contrato de erro', () => {",
+                  "  pm.expect(body).to.have.property('status', pm.response.code);",
+                  "  pm.expect(body).to.have.property('message').that.is.a('string');",
+                  "  pm.expect(body).to.have.property('code').that.is.a('string');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/empresas/buscar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "empresas",
+                "buscar"
+              ]
+            },
+            "description": "Valida a obrigatoriedade da query q.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Erro - tamanho de empresa inválido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));",
+                  "let body;",
+                  "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                  "pm.test('Contrato de erro', () => {",
+                  "  pm.expect(body).to.have.property('status', pm.response.code);",
+                  "  pm.expect(body).to.have.property('message').that.is.a('string');",
+                  "  pm.expect(body).to.have.property('code').that.is.a('string');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/empresas/tamanho/invalido",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "empresas",
+                "tamanho",
+                "invalido"
+              ]
+            },
+            "description": "Valida o enum pequena, media ou grande.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Erro - ID de imagem inválido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));",
+                  "let body;",
+                  "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                  "pm.test('Contrato de erro', () => {",
+                  "  pm.expect(body).to.have.property('status', pm.response.code);",
+                  "  pm.expect(body).to.have.property('message').that.is.a('string');",
+                  "  pm.expect(body).to.have.property('code').that.is.a('string');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/storage/images/id-invalido/url",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "storage",
+                "images",
+                "id-invalido",
+                "url"
+              ]
+            },
+            "description": "Valida o UUID obrigatório para imagens.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Erro - plataforma sem sessão",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 401', () => pm.response.to.have.status(401));",
+                  "let body;",
+                  "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                  "pm.test('Contrato de erro', () => {",
+                  "  pm.expect(body).to.have.property('status', pm.response.code);",
+                  "  pm.expect(body).to.have.property('message').that.is.a('string');",
+                  "  pm.expect(body).to.have.property('code').that.is.a('string');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/platform/companies",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "platform",
+                "companies"
+              ]
+            },
+            "description": "Valida que a plataforma administrativa não é pública.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        }
+      ],
+      "auth": {
+        "type": "noauth"
+      }
+    },
+    {
+      "name": "99 - Encerrar sessão",
+      "description": "Limpeza da autenticação ao final do fluxo.",
+      "item": [
+        {
+          "name": "Logout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "let body;",
+                  "pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });",
+                  "pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));",
+                  "pm.environment.unset('accessToken');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "logout"
+              ]
+            },
+            "description": "Limpa o cookie e a variável Bearer. Execute ao final do fluxo.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        }
+      ],
+      "auth": {
+        "type": "noauth"
+      }
+    }
+  ]
+}

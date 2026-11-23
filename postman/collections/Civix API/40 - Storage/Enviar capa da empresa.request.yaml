@@ -1,0 +1,50 @@
+$kind: http-request
+description: Aceita PNG, JPG ou WEBP real, com no máximo 10 MB.
+url: "{{baseUrl}}/api/v1/storage/images"
+method: POST
+body:
+  type: formdata
+  content:
+    - type: file
+      key: file
+      src:
+        - "{{imageFilePath}}"
+      contentType: image/png
+    - type: text
+      key: module
+      value: companies
+    - type: text
+      key: resourceId
+      value: "{{companyId}}"
+    - type: text
+      key: purpose
+      value: cover
+scripts:
+  - type: beforeRequest
+    code: |-
+      const requiredFlags = ["allowWrites","allowStorage"];
+      const requiredVariables = ["companyId","imageFilePath"];
+      const missingFlags = requiredFlags.filter((flag) => pm.environment.get(flag) !== 'true');
+      const missingVariables = requiredVariables.filter((variable) => !String(pm.environment.get(variable) || '').trim());
+      const baseUrl = (pm.environment.get('baseUrl') || '').replace(/[/]$/, '');
+      const confirmedWriteBaseUrl = (pm.environment.get('confirmedWriteBaseUrl') || '').replace(/[/]$/, '');
+      const environmentNotConfirmed = !baseUrl || confirmedWriteBaseUrl !== baseUrl;
+      if (missingFlags.length || missingVariables.length || environmentNotConfirmed) {
+        const reasons = [];
+        if (missingFlags.length) reasons.push(`flags ausentes: ${missingFlags.join(', ')}`);
+        if (missingVariables.length) reasons.push(`variáveis ausentes: ${missingVariables.join(', ')}`);
+        if (environmentNotConfirmed) reasons.push('confirmedWriteBaseUrl deve ser igual a baseUrl');
+        console.warn(`Request ignorada: ${reasons.join('; ')}.`);
+        pm.execution.skipRequest();
+      }
+    language: text/javascript
+  - type: afterResponse
+    code: |-
+      pm.test('Status 201', () => pm.response.to.have.status(201));
+      let body;
+      pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });
+      pm.test('Envelope de sucesso', () => pm.expect(body).to.have.property('data'));
+      const imageIdValue = "data.imageId".split('.').reduce((value, key) => value?.[key], body);
+      if (imageIdValue !== undefined && imageIdValue !== null && imageIdValue !== '') pm.environment.set("imageId", String(imageIdValue));
+    language: text/javascript
+order: 1000

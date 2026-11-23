@@ -1,0 +1,184 @@
+generator client {
+  provider        = "prisma-client"
+  output          = "../src/generated/prisma"
+  previewFeatures = ["partialIndexes"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
+model companies {
+  id                                    String                            @id @db.Uuid
+  name                                  String
+  cnpj                                  String                            @unique
+  description                           String
+  detailed_description                  String
+  category                              String
+  city                                  String
+  state                                 String
+  status                                company_status                    @default(ATIVO)
+  size                                  String
+  createdAt                             DateTime                          @default(now()) @map("created_at") @db.Timestamptz(6)
+  logo                                  String?
+  cover_key                             String?
+  logo_key                              String?
+  address                               String?
+  phone                                 String?
+  email                                 String?
+  website                               String?
+  whatsapp                              String?
+  additional_description                String?
+  tone                                  String?
+  plan_id                               BigInt?
+  deleted_at                            DateTime?                         @db.Timestamptz(6)
+  deactivation_reason                   String?
+  deactivated_at                        DateTime?                         @db.Timestamptz(6)
+  deactivated_by                        String?                           @db.Uuid
+  price_range                           Unsupported("numrange")?
+  updatedAt                             DateTime                          @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  images_companies_cover_keyToimages    images?                           @relation("companies_cover_keyToimages", fields: [cover_key], references: [object_key], onDelete: NoAction, onUpdate: NoAction)
+  users_companies_deactivated_byTousers users?                            @relation("companies_deactivated_byTousers", fields: [deactivated_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  images_companies_logo_keyToimages     images?                           @relation("companies_logo_keyToimages", fields: [logo_key], references: [object_key], onDelete: NoAction, onUpdate: NoAction)
+  plans                                 plans?                            @relation(fields: [plan_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  company_registration_operations       company_registration_operations[]
+  sales                                 sales?
+  users                                 users[]
+
+  @@index([plan_id])
+  @@index([price_range], map: "companies_price_range_gist_idx", type: Gist)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model images {
+  id                                    String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  object_key                            String      @unique
+  original_name                         String
+  mime_type                             String
+  size_bytes                            Int
+  module                                String
+  resource_id                           String      @db.Uuid
+  purpose                               String
+  uploaded_by                           String      @db.Uuid
+  created_at                            DateTime    @default(now()) @db.Timestamptz(6)
+  companies_companies_cover_keyToimages companies[] @relation("companies_cover_keyToimages")
+  companies_companies_logo_keyToimages  companies[] @relation("companies_logo_keyToimages")
+  users                                 users       @relation(fields: [uploaded_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([module, resource_id, purpose], map: "images_resource_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model plans {
+  id             BigInt      @id @default(autoincrement())
+  name           String      @db.VarChar(120)
+  slug           String      @unique @db.VarChar(120)
+  description    String      @default("")
+  price          Decimal     @default(0) @db.Decimal(12, 2)
+  billing_period String      @default("monthly") @db.VarChar(20)
+  features       Json        @default("[]")
+  limits         Json        @default("{}")
+  is_featured    Boolean     @default(false)
+  is_active      Boolean     @default(true)
+  display_order  Int         @default(0)
+  created_at     DateTime    @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime    @default(now()) @db.Timestamptz(6)
+  companies      companies[]
+  sales          sales[]
+  users          users[]
+
+  @@index([is_active, display_order, id], map: "plans_active_order_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
+model users {
+  id                                        String                            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                                      String?
+  email                                     String
+  role                                      user_role
+  password_hash                             String?
+  status                                    user_status                       @default(ACTIVE)
+  invite_token                              String?
+  reset_password_token                      String?
+  reset_password_expires                    DateTime?                         @db.Timestamptz(6)
+  plan_id                                   BigInt?
+  company_id                                String?                           @db.Uuid
+  deleted_at                                DateTime?                         @db.Timestamptz(6)
+  deactivation_reason                       String?
+  tokens_revoked_at                         DateTime?                         @db.Timestamptz(6)
+  createdAt                                 DateTime                          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                                 DateTime                          @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  companies_companies_deactivated_byTousers companies[]                       @relation("companies_deactivated_byTousers")
+  company_registration_operations           company_registration_operations[]
+  images                                    images[]
+  sales                                     sales[]
+  companies                                 companies?                        @relation(fields: [company_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  plans                                     plans?                            @relation(fields: [plan_id], references: [id], onUpdate: NoAction)
+
+  @@index([company_id])
+  @@index([plan_id])
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model company_registration_operations {
+  actor_id     String    @db.Uuid
+  operation_id String    @db.Uuid
+  fingerprint  String
+  company_id   String    @db.Uuid
+  sale_id      String?   @db.Uuid
+  created_at   DateTime  @default(now()) @db.Timestamptz(6)
+  users        users     @relation(fields: [actor_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  companies    companies @relation(fields: [company_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  sales        sales?    @relation(fields: [sale_id], references: [id], onUpdate: NoAction)
+
+  @@id([actor_id, operation_id])
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model sales {
+  id                              String                            @id @db.Uuid
+  company_id                      String                            @unique(map: "sales_initial_company_key", where: raw("(origin = 'company_creation'::text)")) @db.Uuid
+  plan_id                         BigInt?
+  origin                          String
+  pricing_mode                    String
+  plan_name                       String?
+  plan_price                      Decimal?                          @db.Decimal(10, 2)
+  plan_billing_period             String?
+  amount                          Decimal                           @db.Decimal(10, 2)
+  currency                        String                            @default("BRL")
+  description                     String?
+  sold_at                         DateTime                          @db.Timestamptz(6)
+  created_at                      DateTime                          @default(now()) @db.Timestamptz(6)
+  created_by                      String                            @db.Uuid
+  operation_id                    String?                           @db.Uuid
+  fingerprint                     String?
+  company_registration_operations company_registration_operations[]
+  companies                       companies                         @relation(fields: [company_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users                           users                             @relation(fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  plans                           plans?                            @relation(fields: [plan_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([created_by, operation_id], map: "sales_manual_operation_key", where: raw("(operation_id IS NOT NULL)"))
+  @@index([company_id])
+}
+
+enum user_role {
+  ADMIN_EMPRESA
+  SUPER_ADMIN
+  CLIENTE
+  ATENDENTE
+}
+
+enum user_status {
+  ACTIVE
+  PENDING
+  BLOCKED
+}
+
+enum company_status {
+  ATIVO
+  INATIVO
+  VERIFICADO
+}

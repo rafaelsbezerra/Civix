@@ -1,0 +1,471 @@
+import { logger } from '../shared/logging/log.context.js';
+import { USE_MOCK_DATA } from '../shared/config/data.js';
+import type { Company } from '../entities/company.entity.js';
+import { randomUUID } from 'node:crypto';
+import {
+  companyCreateSchema,
+  publicCompanySearchQuerySchema,
+  type PublicCompanySearchFilters,
+} from '../dtos/company.create.dto.js';
+import { companyRepository } from '../persistence/index.js';
+import { AppError } from '../shared/errors/app.error.js';
+import { ErrorCode } from '../shared/errors/error.code.js';
+import { getPresignedImageUrl } from './storage.service.js';
+import { storageRepository } from '../persistence/index.js';
+import { z } from 'zod';
+import { createHash } from 'node:crypto';
+import type { UserId } from '../entities/user.entity.js';
+import { getAuthenticatedUser } from './user.service.js';
+import { validatePlanId } from './plan.service.js';
+import { requireSuperAdminActor } from './user.service.js';
+import {
+  parsePagination,
+  createPaginationMeta,
+} from '../shared/contracts/pagination.contract.js';
+import type { CompanyAdministrationChange } from '../dtos/company.create.dto.js';
+import { presentSale } from './sale.service.js';
+
+function presentPlatformCompany(company: Company) {
+  const { cover_key: _cover, logo_key: _logo, ...result } = company;
+  return result;
+}
+export async function listPlatformCompanies(actorId: UserId, input: unknown) {
+  await requireSuperAdminActor(actorId);
+  const parsed = z
+    .object({
+      q: z.string().trim().max(200).optional(),
+      status: z.enum(['ativo', 'inativo', 'archived']).optional(),
+      planId: z.string().optional(),
+      page: z.unknown().optional(),
+      limit: z.unknown().optional(),
+    })
+    .strict()
+    .safeParse(input);
+  if (!parsed.success) {
+    throw new AppError({
+      status: 400,
+      code: ErrorCode.VALIDATION_ERROR,
+      message: 'Filtros de empresa inválidos.',
+    });
+  }
+  if (parsed.data.planId !== undefined) {
+    validatePlanId(parsed.data.planId);
+  }
+  const pagination = parsePagination({
+    page: parsed.data.page,
+    pageSize: parsed.data.limit,
+  });
+  const { items, total } = await companyRepository.listPlatformCompanies({
+    ...parsed.data,
+    ...pagination,
+  });
+  return {
+    data: items.map(presentPlatformCompany),
+    meta: createPaginationMeta(pagination, total),
+  };
+}
+export async function getPlatformCompany(actorId: UserId, companyId: string) {
+  await requireSuperAdminActor(actorId);
+  if (!z.string().uuid().safeParse(companyId).success) {
+    throw new AppError({
+      status: 400,
+      code: ErrorCode.VALIDATION_ERROR,
+      message: 'ID da empresa inválido.',
+    });
+  }
+  const company = await companyRepository.getById(companyId);
+  if (!company) {
+    throw new AppError({
+      status: 404,
+      code: ErrorCode.NOT_FOUND,
+      message: 'Empresa não encontrada.',
+    });
+  }
+  return presentPlatformCompany(company);
+}
+export async function changeCompanyAdministration(
+  actorId: UserId,
+  companyId: string,
+  action: CompanyAdministrationChange['action'],
+  input: unknown,
+) {
+  await requireSuperAdminActor(actorId);
+  if (!z.string().uuid().safeParse(companyId).success) {
+    throw new AppError({
+      status: 400,
+      code: ErrorCode.VALIDATION_ERROR,
+      message: 'ID da empresa inválido.',
+    });
+  }
+  const schema =
+    action === 'update'
+      ? companyCreateSchema.extend({ planId: z.string() })
+      : action === 'suspend' || action === 'archive'
+        ? z.object({ reason: z.string().trim().min(1).max(2000) }).strict()
+        : z.object({}).strict();
+  const parsed = schema.safeParse(input ?? {});
+  if (!parsed.success) {
+    throw new AppError({
+      status: 400,
+      code: ErrorCode.VALIDATION_ERROR,
+      message:
+        'Dados da alteração inválidos; desativação e arquivamento exigem motivo.',
+    });
+  }
+  const fields =
+    action === 'update'
+      ? (parsed.data as unknown as CompanyAdministrationChange['fields'])
+      : undefined;
+  if (fields) {
+    validatePlanId(fields.planId);
+  }
+  const reason = 'reason' in parsed.data ? String(parsed.data.reason) : undefined;
+  return presentPlatformCompany(
+    await companyRepository.changeCompanyAdministration({
+      actorId,
+      companyId,
+      action,
+      fields,
+      reason,
+      changedAt: new Date().toISOString(),
+    }),
+  );
+}
+
+const registrationSchema = companyCreateSchema
+  .extend({
+    planId: z.string().trim().min(1).max(128),
+    operationId: z
+      .string()
+      .uuid()
+      .transform((value) => value.toLowerCase()),
+  })
+  .strict();
+
+export async function createCompanyWithInitialSale(input: unknown, actorId: UserId) {
+  const actor = await getAuthenticatedUser(actorId);
+  if (actor.role !== 'super_admin') {
+    throw new AppError({
+      status: 403,
+      code: ErrorCode.FORBIDDEN,
+      message: 'Acesso exclusivo da administração da Civix.',
+    });
+  }
+  const parsed = registrationSchema.safeParse(input);
+  if (!parsed.success) {
+    throw new AppError({
+      status: 400,
+      code: ErrorCode.VALIDATION_ERROR,
+      message: 'Dados da empresa, plano ou operação inválidos.',
+    });
+  }
+  const { planId, operationId, ...fields } = parsed.data;
+  validatePlanId(planId);
+  const fingerprint = createHash('sha256')
+    .update(JSON.stringify({ ...fields, planId }))
+    .digest('hex');
+  const now = new Date().toISOString();
+  const company: Company = {
+    ...fields,
+    id: randomUUID(),
+    data_cadastro: now,
+    createdAt: now,
+    updatedAt: now,
+    status: 'ativo',
+    verificado: true,
+  };
+  const result = await companyRepository.createCompanyWithInitialSale({
+    company,
+    planId,
+    operationId,
+    fingerprint,
+    actorId,
+  });
+  return { ...result, sale: presentSale(result.sale) };
+}
+
+export async function updateCompanyCoverKey(
+  companyId: string,
+  key: string | null,
+  expectedKey: string | null,
+): Promise<void> {
+  if (!(await companyRepository.updateCoverKey(companyId, key, expectedKey))) {
+    throw new AppError({
+      status: 409,
+      code: ErrorCode.CONFLICT,
+      message: 'A capa foi alterada por outra operação. Atualize e tente novamente.',
+    });
+  }
+}
+
+export async function updateCompanyLogoKey(
+  companyId: string,
+  key: string | null,
+  expectedKey: string | null,
+): Promise<void> {
+  if (!(await companyRepository.updateLogoKey(companyId, key, expectedKey))) {
+    throw new AppError({
+      status: 409,
+      code: ErrorCode.CONFLICT,
+      message: 'A logo foi alterada por outra operação.',
+    });
+  }
+}
+
+export async function createCompany(input: unknown): Promise<Company> {
+  const parsed = companyCreateSchema.safeParse(input, {
+    error: () => 'Valor inválido para este campo.',
+  });
+
+  if (!parsed.success) {
+    throw new AppError({
+      status: 400,
+      code: ErrorCode.VALIDATION_ERROR,
+      message: 'Dados da empresa inválidos.',
+      details: parsed.error.issues.map((issue) => ({
+        field: issue.path.join('.'),
+        message: issue.message,
+      })),
+    });
+  }
+
+  const now = new Date().toISOString();
+  const company: Company = {
+    ...parsed.data,
+    id: randomUUID(),
+    data_cadastro: now,
+    createdAt: now,
+    updatedAt: now,
+    status: 'ativo',
+    verificado: true,
+  };
+
+  const created = await companyRepository.create(company);
+
+  logger().info({
+    event: 'company.created',
+    module: 'companies',
+    message: 'Empresa cadastrada com sucesso',
+    context: {
+      companyId: created.id,
+      persistenceMode: USE_MOCK_DATA ? 'json' : 'postgres',
+    },
+  });
+
+  return created;
+}
+
+export async function getCompanies(): Promise<Company[]> {
+  const companies = (await companyRepository.getAll()).filter(
+    (company) => company.status !== 'inativo' && !company.deleted_at,
+  );
+
+  logger().debug({
+    event: 'company.queried',
+    module: 'companies',
+    message: 'Consulta de empresas concluída',
+    context: {
+      operation: 'all',
+      count: companies.length,
+      persistenceMode: USE_MOCK_DATA ? 'json' : 'postgres',
+    },
+  });
+
+  return companies;
+}
+
+export async function getCompaniesByCategory(category: string): Promise<Company[]> {
+  const companies = (await companyRepository.getByCategory(category)).filter(
+    (company) => company.status !== 'inativo' && !company.deleted_at,
+  );
+
+  logger().debug({
+    event: 'company.queried',
+    module: 'companies',
+    message: 'Consulta de empresas concluída',
+    context: {
+      operation: 'category',
+      count: companies.length,
+      persistenceMode: USE_MOCK_DATA ? 'json' : 'postgres',
+    },
+  });
+
+  return companies;
+}
+
+export async function getCompaniesByState(state: string): Promise<Company[]> {
+  const companies = (await companyRepository.getByState(state)).filter(
+    (company) => company.status !== 'inativo' && !company.deleted_at,
+  );
+
+  logger().debug({
+    event: 'company.queried',
+    module: 'companies',
+    message: 'Consulta de empresas concluída',
+    context: {
+      operation: 'state',
+      count: companies.length,
+      persistenceMode: USE_MOCK_DATA ? 'json' : 'postgres',
+    },
+  });
+
+  return companies;
+}
+
+export async function getCompaniesBySize(
+  size: 'pequena' | 'media' | 'grande',
+): Promise<Company[]> {
+  const companies = (await companyRepository.getBySize(size)).filter(
+    (company) => company.status !== 'inativo' && !company.deleted_at,
+  );
+
+  logger().debug({
+    event: 'company.queried',
+    module: 'companies',
+    message: 'Consulta de empresas concluída',
+    context: {
+      operation: 'size',
+      count: companies.length,
+      persistenceMode: USE_MOCK_DATA ? 'json' : 'postgres',
+    },
+  });
+
+  return companies;
+}
+
+export async function searchCompanies(name: string): Promise<Company[]> {
+  return searchPublicCompanies({ q: name });
+}
+
+export async function searchPublicCompanies(input: unknown): Promise<Company[]> {
+  const raw =
+    typeof input === 'object' && input !== null
+      ? (input as Record<string, unknown>)
+      : {};
+  const normalized: Record<string, unknown> = {};
+
+  for (const key of ['q', 'uf', 'priceRange'] as const) {
+    const value = raw[key];
+    if (value === undefined) {
+      continue;
+    }
+    if (typeof value !== 'string') {
+      throw new AppError({
+        status: 400,
+        code: ErrorCode.VALIDATION_ERROR,
+        message:
+          key === 'q'
+            ? 'Termo de busca é obrigatório'
+            : 'Parâmetros de busca inválidos.',
+      });
+    }
+    if (value.trim() !== '') {
+      normalized[key] = value;
+    }
+  }
+
+  for (const key of Object.keys(raw)) {
+    if (!['q', 'uf', 'priceRange'].includes(key)) {
+      if (key.startsWith('q[')) {
+        throw new AppError({
+          status: 400,
+          code: ErrorCode.VALIDATION_ERROR,
+          message: 'Termo de busca é obrigatório',
+        });
+      }
+      throw new AppError({
+        status: 400,
+        code: ErrorCode.VALIDATION_ERROR,
+        message: 'Parâmetros de busca inválidos.',
+      });
+    }
+  }
+
+  const parsed = publicCompanySearchQuerySchema.safeParse(normalized);
+  if (!parsed.success) {
+    const firstIssue = parsed.error.issues[0];
+    throw new AppError({
+      status: 400,
+      code: ErrorCode.VALIDATION_ERROR,
+      message: firstIssue?.message ?? 'Parâmetros de busca inválidos.',
+    });
+  }
+
+  const filters: PublicCompanySearchFilters = parsed.data;
+  const companies = (await companyRepository.searchPublicCompanies(filters)).filter(
+    (company) => company.status !== 'inativo' && !company.deleted_at,
+  );
+
+  logger().debug({
+    event: 'company.queried',
+    module: 'companies',
+    message: 'Consulta de empresas concluída',
+    context: {
+      operation: 'search',
+      count: companies.length,
+      persistenceMode: USE_MOCK_DATA ? 'json' : 'postgres',
+    },
+  });
+
+  return companies;
+}
+
+export async function getCompanyById(id: string): Promise<Company> {
+  const company = await companyRepository.getById(id);
+
+  if (!company || company.status === 'inativo' || company.deleted_at) {
+    throw new AppError({
+      status: 404,
+      code: ErrorCode.NOT_FOUND,
+      message: `Empresa com ID ${id} não encontrada`,
+    });
+  }
+
+  logger().debug({
+    event: 'company.queried',
+    module: 'companies',
+    message: 'Consulta de empresa concluída',
+    context: {
+      operation: 'get-by-id',
+      companyId: company.id,
+      persistenceMode: USE_MOCK_DATA ? 'json' : 'postgres',
+    },
+  });
+
+  return company;
+}
+
+export async function presentCompany(company: Company) {
+  const {
+    cover_key,
+    logo_key: _logoKey,
+    plan_id: _planId,
+    deleted_at: _deletedAt,
+    deactivation_reason: _reason,
+    deactivated_at: _deactivatedAt,
+    deactivated_by: _actor,
+    ...publicCompany
+  } = company;
+  if (!cover_key || company.status === 'inativo' || company.deleted_at) {
+    return { ...publicCompany, cover_image_url: null };
+  }
+  const image = await storageRepository.getByObjectKey(cover_key);
+  if (
+    !image ||
+    image.resource_id !== company.id ||
+    image.module !== 'companies' ||
+    image.purpose !== 'cover'
+  ) {
+    return { ...publicCompany, cover_image_url: null };
+  }
+  try {
+    const signed = await getPresignedImageUrl(image.id);
+    return { ...publicCompany, cover_image_url: signed.url };
+  } catch (error) {
+    // Uma troca concorrente pode invalidar a imagem, mas não a empresa consultada.
+    if (error instanceof AppError && error.status === 404) {
+      return { ...publicCompany, cover_image_url: null };
+    }
+    throw error;
+  }
+}

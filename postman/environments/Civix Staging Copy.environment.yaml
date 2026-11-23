@@ -1,0 +1,106 @@
+name: Civix Staging Copy
+values:
+  - key: baseUrl
+    value: 'https://staging.example.invalid'
+  - key: confirmedWriteBaseUrl
+    value: ''
+  - key: accessToken
+    value: ''
+  - key: allowWrites
+    value: 'false'
+  - key: allowDestructive
+    value: 'false'
+  - key: allowAdministrativeWrites
+    value: 'false'
+  - key: allowEmails
+    value: 'false'
+  - key: allowIdentityWrites
+    value: 'false'
+  - key: allowStorage
+    value: 'false'
+  - key: allowProfileUpdate
+    value: 'false'
+  - key: allowRoleSwitch
+    value: 'false'
+  - key: superAdminEmail
+    value: ''
+  - key: superAdminPassword
+    value: ''
+  - key: companyAdminEmail
+    value: ''
+  - key: companyAdminPassword
+    value: ''
+  - key: attendantEmail
+    value: ''
+  - key: attendantPassword
+    value: ''
+  - key: newPassword
+    value: ''
+  - key: resetToken
+    value: ''
+  - key: inviteToken
+    value: ''
+  - key: inviteEmail
+    value: ''
+  - key: passwordRecoveryEmail
+    value: ''
+  - key: profileName
+    value: ''
+  - key: profileEmail
+    value: ''
+  - key: companyId
+    value: ''
+  - key: companyUserId
+    value: ''
+  - key: administratorId
+    value: ''
+  - key: planId
+    value: ''
+  - key: saleId
+    value: ''
+  - key: initialSaleId
+    value: ''
+  - key: imageId
+    value: ''
+  - key: companyOperationId
+    value: ''
+  - key: salePlanOperationId
+    value: ''
+  - key: saleAmountOperationId
+    value: ''
+  - key: imageFilePath
+    value: postman/fixtures/company-cover.png
+  - key: searchTerm
+    value: Civix
+  - key: category
+    value: Serviços
+  - key: state
+    value: CE
+  - key: companySize
+    value: pequena
+  - key: page
+    value: '1'
+  - key: limit
+    value: '20'
+  - key: companyName
+    value: ''
+  - key: companyCnpj
+    value: ''
+  - key: companyEmail
+    value: ''
+  - key: planName
+    value: ''
+  - key: planSlug
+    value: ''
+  - key: managedUserName
+    value: Atendente Postman
+  - key: managedUserEmail
+    value: ''
+  - key: administratorName
+    value: Superadmin Postman
+  - key: administratorEmail
+    value: ''
+  - key: deactivationReason
+    value: Validação administrativa via Postman.
+  - key: soldAt
+    value: ''

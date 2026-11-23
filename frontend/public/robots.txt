@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+Allow: /catalogo
+Allow: /sobre
+Allow: /politica-de-privacidade
+Allow: /termos-de-uso
+Allow: /central-de-ajuda
+Allow: /llms.txt
+Allow: /llms-full.txt
+Disallow: /dashboard/
+Disallow: /api/
+Disallow: /login
+Disallow: /super-admin/login
+
+Sitemap: https://civix.com.br/sitemap.xml

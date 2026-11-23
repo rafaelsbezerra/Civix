@@ -1,0 +1,21 @@
+# Civix
+
+> A plataforma inteligente que conecta empresas, serviços e oportunidades para transformar o mercado da construção civil com praticidade e confiança.
+
+## Informações Gerais
+- Nome: Civix
+- Website: https://civix.com.br
+- Descrição: Plataforma híbrida de descoberta de construtoras, prestadores de serviços, planos de assinatura e automação de atendimento comercial para o setor da construção civil.
+- Idioma: pt-BR
+- Localização: Aracaju - SE, Brasil
+- Contato: contato@civix.com.br
+
+## Páginas e Recursos Principais
+- [Página Inicial](https://civix.com.br/): Apresentação institucional, busca rápida no Hero, parceiros em destaque, comparação de planos e FAQ.
+- [Catálogo de Empresas](https://civix.com.br/catalogo): Filtros por estado (UF), porte e faixa de preço de empresas qualificadas.
+- [Planos Civix](https://civix.com.br/#planos): Modalidades de adesão comercial para empresas e prestadores ampliarem sua presença regional.
+- [Sobre Nós](https://civix.com.br/#sobre): Missão, tecnologia de atendimento e princípios da Civix.
+- [Central de Ajuda](https://civix.com.br/central-de-ajuda): Dúvidas frequentes e suporte ao usuário.
+
+## Para Desenvolvedores e Modelos de IA
+- Documentação expandida: [llms-full.txt](https://civix.com.br/llms-full.txt)

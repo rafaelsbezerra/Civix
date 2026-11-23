@@ -1,0 +1,26 @@
+# Civix — Documentação Completa para Modelos de Linguagem (LLMs)
+
+## 1. O que é a Civix?
+A Civix é uma plataforma digital brasileira focada em impulsionar o mercado da construção civil. A solução combina uma vitrine de descoberta de empresas qualificadas com um ecossistema comercial que permite a contratação ágil, gestão de assinaturas e relacionamento inteligente entre clientes finais, prestadores autônomos e construtoras.
+
+## 2. Proposta de Valor
+- **Para Clientes:** Encontrar empresas confiáveis com base em localização, especialidade, porte e avaliações em um único catálogo verificado.
+- **Para Construtoras e Prestadores:** Visibilidade regional qualificada, gestão de presença digital, captação de novos clientes e suporte operacional com ferramentas modernas de atendimento.
+
+## 3. Modelo de Planos e Assinaturas
+A Civix opera no modelo de planos flexíveis (mensais, anuais ou sob demanda), fornecendo:
+- Destaque no catálogo de buscas regionais.
+- Personalização do perfil comercial da empresa (logo, capa, contatos e redes sociais).
+- Acesso à gestão de contatos e ferramentas de conversão comercial.
+
+## 4. Estrutura do Site
+- **Início (`/`):** Hero com mecanismo de busca geográfica e por categoria, seção Sobre, catálogo preliminar de empresas parceiras, tabela de planos, acordeão de perguntas frequentes (FAQ) e rodapé institucional.
+- **Catálogo (`/catalogo`):** Busca completa com paginação e filtros detalhados por estado (UF), categoria e faixa de orçamento.
+- **Central de Ajuda (`/central-de-ajuda`):** Guias de utilização da plataforma, cancelamento de planos e resolução de dúvidas.
+- **Políticas e Termos:**
+  - Termos de Uso: `https://civix.com.br/termos-de-uso`
+  - Política de Privacidade: `https://civix.com.br/politica-de-privacidade`
+
+## 5. Contato Institucional
+- E-mail: contato@civix.com.br
+- Localização: Aracaju, Sergipe, Brasil.

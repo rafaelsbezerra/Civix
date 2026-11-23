@@ -1,0 +1,7 @@
+$kind: collection
+description: Limpeza da autenticação ao final do fluxo.
+auth:
+  - id: ""
+    type: noauth
+    name: No Auth
+order: 12000

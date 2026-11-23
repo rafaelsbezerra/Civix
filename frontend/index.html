@@ -2,9 +2,152 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Civix</title>
+    <meta name="theme-color" content="#071b2b" />
+
+    <!-- Título Primário e SEO Básico -->
+    <title>Civix | Plataforma de Conexão e Gestão Comercial para a Construção Civil</title>
+    <meta
+      name="description"
+      content="A Civix conecta construtoras, prestadores e clientes em uma plataforma inteligente de contratação, gestão de planos e fechamento de novos negócios."
+    />
+    <link rel="canonical" href="https://civix.com.br/" />
+
+    <!-- Ícones e Favicons -->
+    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <!-- Open Graph (Facebook, WhatsApp, LinkedIn, Slack) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://civix.com.br/" />
+    <meta property="og:title" content="Civix | Conexões que Constroem o Futuro" />
+    <meta
+      property="og:description"
+      content="A plataforma inteligente que conecta empresas, serviços e oportunidades na construção civil."
+    />
+    <meta property="og:image" content="https://civix.com.br/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="pt_BR" />
+    <meta property="og:site_name" content="Civix" />
+
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://civix.com.br/" />
+    <meta name="twitter:title" content="Civix | Conexões que Constroem o Futuro" />
+    <meta
+      name="twitter:description"
+      content="A plataforma inteligente que conecta empresas, serviços e oportunidades na construção civil."
+    />
+    <meta name="twitter:image" content="https://civix.com.br/og-image.png" />
+
+    <!-- Dados Estruturados Schema.org (JSON-LD) -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://civix.com.br/#organization",
+            "name": "Civix",
+            "url": "https://civix.com.br",
+            "logo": "https://civix.com.br/icon.svg",
+            "description": "Plataforma híbrida de descoberta e automação comercial para o setor da construção civil.",
+            "contactPoint": {
+              "@type": "ContactPoint",
+              "email": "contato@civix.com.br",
+              "contactType": "customer service",
+              "areaServed": "BR",
+              "availableLanguage": "Portuguese"
+            }
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://civix.com.br/#website",
+            "url": "https://civix.com.br",
+            "name": "Civix",
+            "publisher": { "@id": "https://civix.com.br/#organization" },
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": "https://civix.com.br/catalogo?q={search_term_string}",
+              "query-input": "required name=search_term_string"
+            }
+          },
+          {
+            "@type": "FAQPage",
+            "@id": "https://civix.com.br/#faq",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "Como funciona a CIVIX?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "A CIVIX é uma plataforma inteligente que conecta prestadores de serviços, construtores e clientes finais no mercado da construção civil. Facilitamos a descoberta de parceiros qualificados, contratação segura, gestão de planos e fechamento de novos negócios em um único ambiente moderno e integrado."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Como cadastrar minha empresa?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Para cadastrar sua empresa, basta clicar no botão de cadastro no topo da página, escolher o plano ideal para o seu perfil e preencher os dados organizacionais solicitados."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Como os clientes encontram minha empresa?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Sua empresa é exibida no catálogo da CIVIX de acordo com suas especialidades, localização e avaliações, permitindo que clientes qualificados encontrem seus serviços diretamente."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Posso cancelar meu plano a qualquer momento?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Sim, você pode gerenciar ou cancelar sua assinatura a qualquer momento através do seu painel administrativo sem multa de fidelidade."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Quais formas de pagamento são aceitas?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Aceitamos cartão de crédito, PIX e boleto bancário para os planos de assinatura e serviços da plataforma."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Como entrar em contato com o suporte?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Nosso time de suporte está disponível via chat diretamente na plataforma ou através do canal de atendimento via e-mail e WhatsApp comercial."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Quanto tempo leva para minha empresa aparecer na plataforma?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Logo após a validação dos dados cadastrais e a escolha do plano, seu perfil é ativado e fica visível imediatamente."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "A CIVIX oferece suporte para marketing?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Sim! Dependendo do seu plano, auxiliamos na otimização da vitrine do seu negócio para impulsionar sua visibilidade na região."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    </script>
   </head>
 
   <body>

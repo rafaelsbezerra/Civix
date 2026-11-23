@@ -1,0 +1,28 @@
+$kind: http-request
+description: Valida o contrato de erro para entrada obrigatória ausente.
+url: "{{baseUrl}}/api/v1/users/login"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "password": "senha-invalida",
+      "role": "super_admin"
+    }
+auth:
+  type: noauth
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Status 400', () => pm.response.to.have.status(400));
+      let body;
+      pm.test('Resposta JSON válida', () => { body = pm.response.json(); pm.expect(body).to.be.an('object'); });
+      pm.test('Contrato de erro', () => {
+        pm.expect(body).to.have.property('status', pm.response.code);
+        pm.expect(body).to.have.property('message').that.is.a('string');
+        pm.expect(body).to.have.property('code').that.is.a('string');
+      });
+    language: text/javascript
+order: 1000
