@@ -1,5 +1,13 @@
 # Central de Atendimento — demonstração frontend
 
+> **Estado em 2026-11-23:** esta entrega demonstrativa foi encerrada como
+> experiência pública. A rota `/demo/atendimento` e os dados fictícios serão
+> removidos; a interface visual passa a integrar a área autenticada
+> `/dashboard-atendente/conversas`, com dados consumidos do backend. Os requisitos
+> abaixo registram o escopo histórico da demo e não autorizam manter mocks na tela
+> real. A especificação ativa é
+> [Atendimentos atribuídos e mensagens](../../drafts/assigned-attendance/spec.md).
+
 ## Objetivo
 
 Criar uma demonstração visual e interativa da futura central de atendimento,

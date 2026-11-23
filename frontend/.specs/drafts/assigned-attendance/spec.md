@@ -1,7 +1,8 @@
 # Atendimentos atribuídos e mensagens
 
-**Estado:** shell visual e entrada de login separados implementados; operações
-de atendimento, histórico e perfil continuam não implementadas.
+**Estado:** shell visual e entrada de login separados implementados; a tela de
+conversas está em implementação frontend. Backend, histórico e perfil continuam
+não implementados.
 **Ordem:** 07. Tarefas novas permanecem abertas.
 
 ## Baseline observada
@@ -35,12 +36,54 @@ Fontes: [rotas](../../../src/routes/AppRoute.tsx), [API](../../../src/lib/api.ts
 Propostas: /api/v1/company/conversations, /:id, /:id/messages e
 /:id/assignment sob esse recurso. Métodos/payloads/estados dependem
 de CT-07-ATTENDANCE; paginação só se necessária.
-Quem pode atribuir/transferir ainda não foi definido; rota proposta não
-autoriza habilitar essa ação.
+A matriz de acesso foi confirmada em DASH-D13/D14; esta etapa limita a interface
+às ações existentes na demonstração: assumir, devolver ao bot, finalizar e
+reabrir. A transferência entre atendentes não faz parte desta tela.
 Sucesso usa { data, meta? }; erro público em produção usa status/message.
 Não depender de code/stack/details em produção nem exibi-los ao usuário.
 Paginação só quando necessária; caminhos/identificadores/DTOs novos
 são propostas, **Aguardando resposta**, até sua aprovação canônica.
+
+## Contrato esperado pelo frontend — aguardando alinhamento do backend
+
+Por orientação do usuário, esta etapa implementa somente a interface e o
+consumo HTTP. O outro integrante da equipe ajustará o backend para atender a
+este contrato; ele não existe no servidor atual e não deve ser tratado como
+contrato já implantado. A base de rotas é a proposta acima:
+
+- `GET /api/v1/company/conversations?status=&q=` lista apenas conversas
+  autorizadas para a sessão e retorna `data: ConversationSummary[]` e
+  `meta: { total, statusCounts }`.
+- `GET /api/v1/company/conversations/:id` retorna os dados da conversa.
+- `GET /api/v1/company/conversations/:id/messages` retorna as mensagens
+  persistidas em ordem cronológica.
+- `POST /api/v1/company/conversations/:id/messages` recebe `{ text }` e retorna
+  a mensagem aceita pelo backend.
+- `POST /api/v1/company/conversations/:id/assignment` recebe
+  `{ action: "assume" | "return_to_bot" }` e retorna a atribuição atualizada.
+- `PATCH /api/v1/company/conversations/:id` recebe
+  `{ status: "pending" | "completed" }` para reabrir ou finalizar e retorna a
+  conversa atualizada.
+
+Os tipos de frontend esperados são:
+
+- `ConversationStatus`: `pending | in_progress | completed`.
+- `ConversationAssignee`: `{ type: "bot" | "none" }` ou
+  `{ type: "agent", id, name }`.
+- `ConversationSummary`: `id`, `customer` (`name`, `phone`, `location`),
+  `company` (`name`), `status`, `assignee`, `attention`, `unreadCount`,
+  `updatedAt` ISO-8601 e `lastMessage` (`id`, `sender`, `text`, `createdAt`).
+- `ConversationDetail`: resumo mais `messages`; cada mensagem contém `id`,
+  `sender` (`customer | bot | agent | system`), `text` e `createdAt` ISO-8601.
+
+As respostas seguem `{ data, meta? }`; os erros exibidos ao usuário usam apenas
+status e message. A interface não usa dados locais de exemplo, não confirma
+entrega de mensagem sem resposta de sucesso e apresenta falhas de rede/API
+explicitamente. A autorização e o escopo por empresa/atendente permanecem
+exclusivamente sob responsabilidade do backend.
+
+Este contrato é uma proposta de integração para o outro integrante confirmar
+ou ajustar. Não cria rotas no backend nem autoriza migrations nesta etapa.
 
 ## Fluxo e provas E2E
 
